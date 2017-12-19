@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper">
+
+    <sql id="commonSearchColumns">
+        /* commonSearchColumns */
+        `no` AS "no",
+        title AS title,
+        important AS important,
+        classification AS classification,
+        use_yn AS useYn,
+        content AS content,
+        file_name as fileName,
+        file_path as filePath,
+        file_size as fileSize,
+        start_date as startDate,
+        end_date as endDate,
+        created AS created,
+        lastmodified AS lastModified
+    </sql>
+
+
+    <sql id="procSearch">
+        /* procSearch */
+        <if test="searchKeyword != '' and searchKeyword != null">
+            <if test="searchTypeColumn != '' and searchTypeColumn != null">
+                <choose>
+                    <when test = 'searchTypeColumn == "classification"'>
+                        AND (SELECT value FROM portaldb.code_detail cd WHERE cd.key = classification AND cd.group_id = 'SUPPORT_NOTICE') LIKE concat('%', #{searchKeyword},'%')
+                    </when>
+                    <when test = 'searchTypeColumn == "title"'>
+                        AND title LIKE concat('%', #{searchKeyword},'%')
+                    </when>
+                    <when test = "searchTypeColumn == 'ALL'">
+                        AND (title LIKE concat('%', #{searchKeyword},'%')
+                          OR (SELECT value FROM portaldb.code_detail cd WHERE cd.key = cd.classification AND cd.group_id = 'SUPPORT_NOTICE') LIKE concat('%', #{searchKeyword},'%'))
+                    </when>
+                    <otherwise>
+                        AND 1=1
+                    </otherwise>
+                </choose>
+            </if>
+        </if>
+
+        <if test="searchTypeUseYn != '' and searchTypeUseYn != null">
+            <choose>
+                <when test = 'searchTypeUseYn == "Y" or searchTypeUseYn == "N"'>
+                    AND use_yn = #{searchTypeUseYn}
+                </when>
+                <otherwise>
+                    AND 1=1
+                </otherwise>
+            </choose>
+        </if>
+
+        <if test="searchStartDate != '' and searchStartDate != null">
+            <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.procSearchDateAdmin"/>
+        </if>
+        <if test="searchStartDate == '' or searchStartDate == null">
+            <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.procSearchDateUser"/>
+        </if>
+
+        <if test="important != '' and important != null">
+            AND important = #{important}
+        </if>
+    </sql>
+
+
+    <sql id="procSearchDateAdmin">
+        /* procSearchDateAdmin */
+
+        <if test="searchStartDate != '' and searchStartDate != null">
+            AND end_date >= #{searchStartDate}
+        </if>
+        <if test="searchEndDate != '' and searchEndDate != null">
+            AND #{searchEndDate} >= start_date
+        </if>
+    </sql>
+
+
+    <sql id="procSearchDateUser">
+        /* procSearchDateUser */
+        AND use_yn = 'Y'
+
+        <if test="searchStartDate == '' or searchStartDate == null">
+            AND now() between STR_TO_DATE(start_date, '%Y/%m/%d %h:%i:%s') and STR_TO_DATE(end_date, '%Y/%m/%d %h:%i:%s')
+        </if>
+        <!--<if test="searchEndDate == '' or searchEndDate == null">
+            AND now() >= STR_TO_DATE(start_date, '%Y/%m/%d %h:%i:%s')
+        </if>-->
+    </sql>
+
+
+    <select id="getNoticeList" resultType="org.openpaas.paasta.portal.api.model.Support">
+        /* SupportNotice.getNoticeList */
+
+        SELECT
+
+            NO, classification, title, start_date AS startDate, end_date AS endDate, use_yn AS useYn, important AS important,
+            file_name as fileName, file_path as filePath, file_size as fileSize,
+
+            (SELECT `value` FROM portaldb.code_detail cd WHERE cd.key = classification AND cd.group_id = 'SUPPORT_NOTICE') as classificationValue
+
+
+        FROM portaldb.notice
+        WHERE 1=1
+
+        <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.procSearch"/>
+
+
+        ORDER BY created DESC
+        <if test="searchStartDate == '' or searchStartDate == null">
+            <if test="important == '' or important == null">
+              LIMIT 10 OFFSET #{pageOffset}
+            </if>
+        </if>
+    </select>
+
+
+    <select id="getNotice" resultType="org.openpaas.paasta.portal.api.model.Support">
+        /* SupportNotice.getNotice */
+        SELECT
+        <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.commonSearchColumns"/>,
+        (SELECT `value` FROM portaldb.code_detail cd WHERE cd.key = classification AND cd.group_id = 'SUPPORT_NOTICE') as classificationValue
+
+        FROM portaldb.notice
+        WHERE 1=1
+         AND NO = #{no}
+    </select>
+
+
+    <insert id="insertNotice">
+        /* SupportNotice.insertNotice */
+        INSERT INTO portaldb.notice (title, important, classification, use_yn, content, file_name, file_path, file_size, start_date, end_date, created, lastmodified)
+        values(
+            #{title},
+            #{important},
+            #{classification},
+            #{useYn},
+            #{content},
+            #{fileName},
+            #{filePath},
+            #{fileSize},
+            #{startDate},
+            #{endDate},
+            now(),
+            now()
+          );
+    </insert>
+
+
+    <update id="updateNotice" >
+        /* SupportNotice.updateNotice */
+        UPDATE portaldb.notice SET
+        <if test="title != '' and title != null">
+            title = #{title},
+        </if>
+        <if test="important != '' and important != null">
+            important = #{important},
+        </if>
+        <if test="classification != '' and classification != null">
+            classification = #{classification},
+        </if>
+        <if test="useYn != '' and useYn != null">
+            use_yn = #{useYn},
+        </if>
+        <if test="content != '' and content != null">
+            content = #{content},
+        </if>
+
+            file_name = #{fileName},
+            file_path = #{filePath},
+            file_size = #{fileSize},
+
+        <if test="startDate != '' and startDate != null">
+            start_date = #{startDate},
+        </if>
+        <if test="endDate != '' and endDate != null">
+            end_date = #{endDate},
+        </if>
+        lastModified = now()
+        WHERE 1=1
+        <if test="no != '' and no != null">
+            AND no = #{no}
+        </if>
+    </update>
+
+
+    <delete id="deleteNotice">
+        /* SupportNotice.deleteNotice */
+        DELETE FROM portaldb.notice
+        WHERE no = #{no}
+    </delete>
+
+</mapper>

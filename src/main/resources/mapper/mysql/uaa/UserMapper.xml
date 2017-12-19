@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.uaa.UserMapper">
+    <!-- parameter 정의는 Mapper 클레스에서 @Param 을 이용해서 정의함.-->
+    <!-- lastmodified 컬럼 업데이트 해야함. 수정 필요.-->
+    <update id="updateUserNameAndEmail" >
+        UPDATE users SET
+        username = #{username},
+        email = #{username}
+        WHERE username = #{oldUsername}
+    </update>
+
+    <select id="isExist" resultType="Integer">
+        SELECT count(*)
+        FROM users
+        WHERE username = #{username}
+    </select>
+
+
+    <select id="getUserGuid" resultType="String">
+        /* User.getUserGuid */
+        SELECT id AS userGuid
+        FROM users
+        WHERE username = #{username}
+    </select>
+
+    <select id="getUserInfo" resultType="java.util.HashMap">
+        SELECT
+        userName AS userName,
+        id AS userGuid
+        FROM users
+    </select>
+</mapper>
+

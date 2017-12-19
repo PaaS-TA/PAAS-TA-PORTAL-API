@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.cc.AdminMainCcMapper">
+
+    <select id="getTotalCountList" resultType="org.openpaas.paasta.portal.api.model.AdminMain">
+        /* AdminMain.getTotalCountList */
+        SELECT
+            (SELECT COUNT(o.id) FROM organizations o) AS organizationCount,
+            SUM(COALESCE((SELECT COUNT(s.organization_id) FROM spaces s WHERE s.organization_id = org.id GROUP BY s.organization_id), 0)) AS spaceCount,
+            SUM(COALESCE((SELECT COUNT(a.id) FROM apps a WHERE a.space_guid IN (SELECT s.guid FROM spaces s WHERE s.organization_id = org.id)), 0)) AS applicationCount,
+            SUM(COALESCE((SELECT COUNT(*) FROM organizations_users ou WHERE ou.organization_id = org.id GROUP BY ou.organization_id), 0)) AS userCount
+        FROM organizations org
+    </select>
+
+
+    <select id="getTotalOrganizationList" resultType="org.openpaas.paasta.portal.api.model.AdminMain">
+        /* AdminMain.getTotalOrganizationList */
+        SELECT
+            org.id AS organizationId,
+            org.name AS organizationName,
+            COALESCE((SELECT COUNT(s.organization_id) FROM spaces s WHERE s.organization_id = org.id GROUP BY s.organization_id), 0) AS spaceCount,
+            COALESCE((SELECT COUNT(a.id) FROM apps a WHERE a.space_guid IN (SELECT s.guid FROM spaces s WHERE s.organization_id = org.id)), 0) AS applicationCount,
+            COALESCE((SELECT COUNT(*) FROM organizations_users ou WHERE ou.organization_id = org.id GROUP BY ou.organization_id), 0) AS userCount
+        FROM organizations org
+        WHERE 1=1
+        <if test="organizationId != '' and organizationId != null">
+            AND org.id = #{organizationId}
+        </if>
+        ORDER BY org.id ASC
+    </select>
+
+
+    <select id="getTotalSpaceList" resultType="org.openpaas.paasta.portal.api.model.AdminMain">
+        /* AdminMain.getTotalSpaceList */
+        SELECT
+            space_1.id AS spaceId,
+            space_2.applicationCount AS applicationCount,
+            space_1.name AS spaceName
+        FROM
+            (SELECT * FROM spaces s1 WHERE 1=1
+                <if test="organizationId != '' and organizationId != null">
+                  AND s1.organization_id = #{organizationId}
+                </if>
+            ) space_1
+        LEFT OUTER JOIN
+            (SELECT
+                DISTINCT (space_all.space_id) AS spaceId,
+                (SELECT COUNT(a.id) FROM apps a WHERE a.id = space_all.space_id) AS applicationCount,
+                (SELECT s2.name FROM spaces s2 WHERE s2.id = space_all.space_id) AS spaceName
+            FROM
+            (SELECT * FROM spaces_auditors
+                UNION ALL
+            SELECT * FROM spaces_developers
+                UNION ALL
+            SELECT * FROM spaces_managers) space_all
+            WHERE 1=1
+            <if test="organizationId != '' and organizationId != null">
+                AND EXISTS
+                (SELECT s.id FROM spaces s WHERE s.id = space_all.space_id AND s.organization_id = #{organizationId})
+                GROUP BY space_all.space_id
+            </if>
+            ) space_2
+        ON space_1.id = space_2.spaceId
+        ORDER BY spaceId ASC
+    </select>
+
+</mapper>
+

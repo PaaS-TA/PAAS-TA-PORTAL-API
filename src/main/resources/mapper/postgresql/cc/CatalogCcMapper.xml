@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper">
+
+    <select id="getDomainId" resultType="int">
+        /* CatalogCc.getDomainId */
+        SELECT
+            d.id AS domainId
+        FROM domains d
+        WHERE d.name = #{domainName}
+    </select>
+
+
+    <select id="getRouteHostNameList" resultType="java.util.HashMap">
+        /* CatalogCc.getRouteHostNameList */
+        SELECT
+            r.host AS hostName
+        FROM routes r
+        WHERE r.domain_id = #{domainId}
+    </select>
+
+</mapper>
+

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.UserDetailMapper">
+
+    <select id="selectOne" resultType="org.openpaas.paasta.portal.api.model.UserDetail" parameterType="String">
+        SELECT
+            user_id AS userId,
+            user_name AS userName,
+            status AS status,
+            tell_phone AS tellPhone,
+            zip_code AS zipCode,
+            address AS address,
+            address_detail AS addressDetail,
+            admin_yn AS adminYn,
+            img_path AS imgPath
+        FROM user_detail
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- parameter 정의는 Mapper 클레스에서 @Param 을 이용해서 정의함.-->
+    <update id="update" >
+        UPDATE user_detail SET
+        user_id = #{userDetail.userId},
+        user_name = #{userDetail.userName},
+        status = #{userDetail.status},
+        admin_yn = #{userDetail.adminYn},
+        tell_phone = #{userDetail.tellPhone},
+        zip_code = #{userDetail.zipCode},
+        address = #{userDetail.address},
+        address_detail = #{userDetail.addressDetail},
+        img_path = #{userDetail.imgPath}
+        WHERE user_detail.user_id = #{userId}
+    </update>
+
+    <!-- parameter 정의는 Mapper 클레스에서 @Param 을 이용해서 정의함.-->
+    <update id="updateUserId" >
+        UPDATE user_detail SET
+        user_id = #{newUserId}
+        WHERE user_id = #{oldUserId}
+    </update>
+
+    <insert id="insert">
+      INSERT INTO user_detail (
+      user_id,
+      user_name,
+      <if test="adminYn != null">
+        admin_yn,
+      </if>
+      status,
+      tell_phone,
+      zip_code,
+      address,
+      address_detail
+      )
+      VALUES (
+      #{userId},
+      #{userName},
+      <if test="adminYn != null">
+        #{adminYn},
+      </if>
+      #{status},
+      #{tellPhone},
+      #{zipCode},
+      #{address},
+      #{addressDetail}
+      );
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM user_detail
+        WHERE user_id = #{userId}
+    </delete>
+
+    <select id="getUserDetailCount" resultType="Integer">
+        SELECT count(*)
+        FROM user_detail
+    </select>
+
+    <insert id="createRequestUser">
+        INSERT INTO user_detail(
+          user_id
+        , status
+        , refresh_token
+        , auth_access_cnt
+        , auth_access_time)
+        VALUES (
+            #{userId}
+          , 0
+          , #{refreshToken}
+          , 0
+          , #{authAccessTime}
+        )
+    </insert>
+    <select id="getUserDetailInfo" resultType="org.openpaas.paasta.portal.api.model.UserDetail" parameterType="map">
+        SELECT
+            user_id     "userId"
+          , status      "status"
+          , tell_phone  "tellPhone"
+          , zip_code    "zipCode"
+          , address     "address"
+          , address_detail  "adressDetail"
+          , user_name   "userName"
+          , admin_yn    "adminYn"
+          , refresh_token "refreshToken"
+          , auth_access_time "authAccessTime"
+          , auth_access_cnt "authAccessCnt"
+        FROM user_detail
+        WHERE
+          1=1
+        <if test="userId != null">
+           AND user_id = #{userId}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        <if test="tellPhone != null">
+            AND tell_phone = #{tellPhone}
+        </if>
+        <if test="zipCode != null">
+            AND zip_code = #{zipCode}
+        </if>
+        <if test="address != null">
+            AND address = #{address}
+        </if>
+        <if test="addressDetail != null">
+            AND address_detail = #{addressDetail}
+        </if>
+        <if test="userName != null">
+            AND user_name = #{userName}
+        </if>
+        <if test="adminYn != null">
+            AND admin_yn = #{adminYn}
+        </if>
+        <if test="refreshToken != null">
+            AND refresh_token = #{refreshToken}
+        </if>
+    </select>
+
+    <update id="upadteUserParam" >
+        /** org.openpaas.paasta.portal.api.mapper.UserDetailMapper.upadteUserParam */
+        <selectKey keyProperty="status" resultType="String" order="BEFORE">
+            select status as no from user_detail where user_id = #{searchUserId}
+        </selectKey>
+        UPDATE user_detail
+        SET
+            status = #{status}          /**필수로 있어야 하는 값*/
+        <if test="userId != null">
+            ,  user_id = #{userId}
+        </if>
+        <if test="username != null">
+            ,  user_name = #{username}
+        </if>
+        <if test="tellPhone != null">
+            , tell_phone = #{tellPhone}
+        </if>
+        <if test="zipCode != null">
+            , zip_code = #{zipCode}
+        </if>
+        <if test="address != null">
+            AND address = #{address}
+        </if>
+        <if test="addressDetail != null">
+            , address_detail = #{addressDetail}
+        </if>
+        <if test="adminYn != null">
+            , admin_yn = #{adminYn}
+        </if>
+        <if test="refreshToken != null">
+            , refresh_token = #{refreshToken}
+        </if>
+        <if test="authAccessTime != null">
+            , auth_access_time = #{authAccessTime}
+        </if>
+        <if test="authAccessCnt != null">
+            , auth_access_cnt = #{authAccessCnt}
+        </if>
+        WHERE
+        1=1
+        <if test="searchUserId != null">
+         AND  user_id = #{searchUserId} /**필수로 있어야 하는 값*/
+        </if>
+    </update>
+</mapper>
+
+

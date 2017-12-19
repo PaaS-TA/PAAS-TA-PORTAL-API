@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper">
+    <insert id="insertInviteOrgSpace">
+        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.InviteOrgSpaceMapper */
+        INSERT INTO invite_org_space (
+        token,
+        gubun,
+        invite_id,
+        invite_name,
+        role_name,
+        invite_user_id,
+        user_id,
+        create_time
+        )
+        VALUES (
+        #{token},
+        #{gubun},
+        #{inviteId},
+        #{inviteName},
+        #{roleName},
+        #{inviteUserId},
+        #{userId},
+        #{createTime}
+        )
+    </insert>
+    <select id="selectOrgSpaceUser" resultType="org.openpaas.paasta.portal.api.model.InviteOrgSpace" parameterType="org.openpaas.paasta.portal.api.model.InviteOrgSpace" >
+        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.selectOrgSpaceUser */
+        SELECT
+        id
+        , token
+        , gubun
+        , invite_id       "inviteId"
+        , role_name       "roleName"
+        , invite_user_id  "inviteUserId"
+        , user_id         "userId"
+        , invite_name     "inviteName"
+        FROM  invite_org_space
+        WHERE 1=1
+        <if test="token != null">
+            AND token = #{token}
+        </if>
+        <if test="gubun != null and gubun != -1">
+            AND gubun = #{gubun}
+        </if>
+        <if test="inviteId != null and inviteId != -1">
+            AND invite_id = #{inviteId}
+        </if>
+        <if test="inviteName != null">
+            AND invite_name = #{inviteName}
+        </if>
+        <if test="roleName != null">
+            AND role_name = #{roleName}
+        </if>
+        <if test="inviteUserId != null">
+            AND invite_user_id = #{inviteUserId}
+        </if>
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+    </select>
+    <update id="updateOrgSpaceUser">
+        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateOrgSpaceUser */
+        UPDATE invite_org_space SET
+          token = #{token},
+          create_time = #{createTime},
+          access_cnt = 0
+        WHERE 1=1
+        <if test="id != null">
+            AND id = #{id}
+        </if>
+    </update>
+
+    <update id="updateInviteY" >
+    /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateInviteY */
+    UPDATE invite_org_space SET
+      setyn = 'Y'
+    WHERE token = #{token}
+    </update>
+
+    <select id="selectInviteInfo" resultType="java.util.HashMap" parameterType="String">
+            /* selectInviteInfo */
+      SELECT
+        id
+        , token
+        , gubun
+        , invite_id "inviteId"
+        , role_name "roleName"
+        , invite_user_id "inviteUserId"
+        , user_id "userId"
+        , create_time "createTime"
+        , access_cnt "accessCnt"
+        , invite_name "inviteName"
+        , setyn
+      FROM invite_org_space
+       WHERE token = #{token}
+     </select>
+    <select id="getUsersByInvite" resultType="org.openpaas.paasta.portal.api.model.InviteOrgSpace" parameterType="org.openpaas.paasta.portal.api.model.InviteOrgSpace" >
+        SELECT
+               id
+                , token
+                , gubun
+                , invite_id "inviteId"
+                , role_name "roleName"
+                , invite_user_id "inviteUserId"
+                , user_id "userId"
+                , create_time "createTime"
+                , access_cnt "accessCnt"
+                , invite_name "inviteName"
+                , setyn
+        FROM invite_org_space
+        WHERE user_id = #{userId}
+          and invite_name = #{inviteName}
+          and gubun = #{gubun}
+          and setyn='N'
+    </select>
+    <update id="updateOrgSpaceUserToken">
+        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateOrgSpaceUserToken */
+        UPDATE invite_org_space SET
+        token = #{retoken},
+        create_time = #{createTime},
+        access_cnt = 0
+        WHERE 1=1
+        <if test="token != null">
+            AND token = #{token}
+        </if>
+    </update>
+    <delete id="deleteOrgSpaceUserToken">
+        DELETE FROM invite_org_space
+        WHERE token = #{token}
+    </delete>
+
+    <update id="updateAccessCnt">
+        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateAccessCnt */
+        UPDATE invite_org_space SET
+        access_cnt = #{accessCnt}
+        WHERE 1=1
+        <if test="token != null">
+            AND token = #{token}
+        </if>
+    </update>
+</mapper>
+
+

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.CommonCodeMapper">
+
+    <sql id="procSearch">
+        /* procSearch */
+        <if test="id != '' and id != null">
+            AND cg.id = #{id}
+        </if>
+
+        <if test="useYn != '' and useYn != null">
+            <choose>
+                <when test='useYn == "Y" or useYn == "N"'>
+                    AND EXISTS (SELECT cd.group_id FROM code_detail cd WHERE cd.use_yn = #{useYn} AND cg.id = cd.group_id)
+                </when>
+                <when test="useYn == 'ALL'">
+                    AND 1=1
+                </when>
+                <otherwise>
+                    AND 1=1
+                </otherwise>
+            </choose>
+        </if>
+
+        <if test="searchKeyword != '' and searchKeyword != null">
+            <if test="searchType != '' and searchType != null">
+                <choose>
+                    <when test="searchType == 'name'">
+                        <![CDATA[
+                        AND LOWER(cg.name) LIKE concat('%', #{searchKeyword},'%')
+                        ]]>
+                    </when>
+                    <when test="searchType == 'value'">
+                        <![CDATA[
+                        AND EXISTS (SELECT cd.group_id FROM code_detail cd WHERE LOWER(cd.value) LIKE concat('%', #{searchKeyword},'%') AND cg.id = cd.group_id)
+                        ]]>
+                    </when>
+                    <when test="searchType == 'ALL'">
+                        <![CDATA[
+                        AND ((LOWER(cg.name) LIKE concat('%', #{searchKeyword},'%'))
+                        OR (EXISTS (SELECT cd.group_id FROM code_detail cd WHERE LOWER(cd.value) LIKE concat('%', #{searchKeyword},'%') AND cg.id = cd.group_id)))
+                        ]]>
+                    </when>
+                    <otherwise>
+                        AND 1=1
+                    </otherwise>
+                </choose>
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getCommonCodeById" resultType="org.openpaas.paasta.portal.api.model.CommonCode">
+        /* CommonCode.getCommonCodeById */
+        SELECT
+            cd.key AS "key",
+            cd.value AS "value",
+            cd.summary AS summary
+        FROM code_detail cd
+        WHERE 1=1
+        <if test="id != '' and id != null">
+            AND cd.group_id = #{id}
+        </if>
+        ORDER BY cd.order ASC
+    </select>
+
+
+    <select id="getCommonCodeGroup" resultType="org.openpaas.paasta.portal.api.model.CommonCode">
+        /* CommonCode.getCommonCodeGroup */
+        SELECT
+            cg.id AS id,
+            cg.id AS orgId,
+            cg.name AS "name",
+            cg.created AS created,
+            cg.lastModified AS lastModified,
+            cg.user_id AS userId,
+            #{pageNo} AS pageNo,
+            #{pageSize} AS pageSize,
+            #{procType} AS procType
+        FROM code_group cg
+        WHERE 1=1
+        <include refid="org.openpaas.paasta.portal.api.mapper.CommonCodeMapper.procSearch"/>
+        ORDER BY created DESC
+        LIMIT #{pageSize} OFFSET #{pageNo}
+    </select>
+
+
+    <select id="getCommonCodeGroupCount" resultType="int">
+        /* CommonCode.getCommonCodeGroupCount */
+        SELECT
+            COUNT(*)
+        FROM code_group cg
+        WHERE 1=1
+        <include refid="org.openpaas.paasta.portal.api.mapper.CommonCodeMapper.procSearch"/>
+    </select>
+
+
+    <select id="getCommonCodeDetail" resultType="org.openpaas.paasta.portal.api.model.CommonCode" parameterType="String">
+        /* CommonCode.getCommonCodeDetail */
+        SELECT
+            cd.key AS "key",
+            cd.key AS orgKey,
+            cd.value AS "value",
+            cd.summary AS summary,
+            cd.group_id AS groupId,
+            cd.use_yn AS useYn,
+            cd.order AS "order",
+            cd.created AS created,
+            cd.lastModified AS lastModified,
+            cd.user_id AS userId,
+            #{pageNo} AS pageNo,
+            #{pageSize} AS pageSize,
+            #{procType} AS procType
+        FROM code_detail cd
+        WHERE 1=1
+        <if test="key != '' and key != null">
+            AND cd.key = #{key}
+        </if>
+        <if test="groupId != '' and groupId != null">
+            AND cd.group_id = #{groupId}
+        </if>
+        ORDER BY cd.order ASC
+        LIMIT #{pageSize} OFFSET #{pageNo}
+    </select>
+
+
+    <select id="getCommonCodeDetailCount" resultType="int">
+        /* CommonCode.getCommonCodeDetailCount */
+        SELECT
+            COUNT(*)
+        FROM code_detail cd
+        WHERE 1=1
+        <if test="key != '' and key != null">
+            AND cd.key = #{key}
+        </if>
+        <if test="id != '' and id != null">
+            AND cd.group_id = #{id}
+        </if>
+        <if test="groupId != '' and groupId != null">
+            AND cd.group_id = #{groupId}
+        </if>
+    </select>
+
+
+    <insert id="insertCommonCodeGroup">
+        /* CommonCode.insertCommonCodeGroup */
+        INSERT INTO code_group (
+            "id",
+            "name",
+            created,
+            lastModified,
+            user_id)
+        VALUES (
+            #{id},
+            #{name},
+            now(),
+            now(),
+            #{userId});
+    </insert>
+
+
+    <insert id="insertCommonCodeDetail">
+        /* CommonCode.insertCommonCodeDetail */
+        INSERT INTO code_detail (
+            "key",
+            "value",
+            summary,
+            group_id,
+            use_yn,
+            "order",
+            created,
+            lastModified,
+            user_id)
+        VALUES (
+            #{key},
+            #{value},
+            #{summary},
+            #{groupId},
+            #{useYn},
+            (SELECT COUNT(*) + 1 FROM code_detail cd2 WHERE cd2.group_id = #{groupId}),
+            now(),
+            now(),
+            #{userId});
+    </insert>
+
+
+    <update id="updateCommonCodeGroup" >
+        /* CommonCode.updateCommonCodeGroup */
+        UPDATE code_group SET
+            <if test="id != '' and id != null">
+                "id" = #{id},
+            </if>
+            <if test="name != '' and name != null">
+                "name" = #{name},
+            </if>
+            <if test="userId != '' and userId != null">
+                user_id = #{userId},
+            </if>
+            lastModified = now()
+        WHERE "id" = #{orgId}
+    </update>
+
+
+    <update id="updateCommonCodeDetail" >
+        /* CommonCode.updateCommonCodeDetail */
+        UPDATE code_detail SET
+            <if test="key != '' and key != null">
+                "key" = #{key},
+            </if>
+            <if test="value != '' and value != null">
+                "value" = #{value},
+            </if>
+            summary = #{summary},
+            <if test="groupId != '' and groupId != null">
+                group_id = #{groupId},
+            </if>
+            <if test="useYn != '' and useYn != null">
+                use_yn = #{useYn},
+            </if>
+            <if test="order != '' and order != null">
+                "order" = #{order},
+            </if>
+            <if test="userId != '' and userId != null">
+                user_id = #{userId},
+            </if>
+            lastModified = now()
+        WHERE 1=1
+        <if test="orgKey != '' and orgKey != null">
+            AND "key" = #{orgKey}
+        </if>
+        <if test="orgId != '' and orgId != null">
+            AND group_id = #{orgId}
+        </if>
+        <if test="groupId != '' and groupId != null">
+            AND group_id = #{groupId}
+        </if>
+    </update>
+
+
+    <delete id="deleteCommonCodeGroup">
+        /* CommonCode.deleteCommonCodeGroup */
+        DELETE FROM code_group
+        WHERE "id" = #{id}
+    </delete>
+
+
+    <delete id="deleteCommonCodeDetail">
+        /* CommonCode.deleteCommonCodeDetail */
+        DELETE FROM code_detail
+        WHERE 1=1
+        <if test="key != '' and key != null">
+            /* CommonCode.deleteCommonCodeDetail.key */
+            AND "key" = #{key}
+        </if>
+        <if test="id != '' and id != null">
+            /* CommonCode.deleteCommonCodeDetail.id */
+            AND group_id = #{id}
+        </if>
+        <if test="groupId != '' and groupId != null">
+            /* CommonCode.deleteCommonCodeDetail.groupId */
+            AND group_id = #{groupId}
+        </if>
+    </delete>
+
+</mapper>
+

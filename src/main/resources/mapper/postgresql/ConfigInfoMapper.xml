@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.ConfigInfoMapper">
+
+    <select id="getValue" resultType="org.openpaas.paasta.portal.api.model.ConfigInfo">
+        SELECT
+              name                 "name"
+            , value                "value"
+            , created_at            "createdAt"
+            , updated_at            "updatedAt"
+        FROM config_info
+        WHERE 1=1
+            <if test="name != '' and name != name">
+                and name = #{name}
+            </if>
+    </select>
+
+
+    <update id="updateValue" >
+        UPDATE config_info
+        SET updated_at = now()
+            <if test=" value != null">
+                ,value = #{value}
+            </if>
+        WHERE name = #{name}
+    </update>
+
+</mapper>
+
