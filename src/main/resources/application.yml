@@ -1,112 +1,15 @@
-# Spring properties
 spring:
   application:
-     name: portal-api  # Service registers under this name
-# jdbc 종류 (postgresql, mysql)
-  jdbc: postgresql
-#  jdbc: mysql
+      name: PortalApi
+  cloud:
+    config:
+      uri: http://localhost:10001
 
-# HTTP Server
 server:
-  port: ${PORT:2222}   # HTTP (Tomcat) port
+  port: ${PORT:8080}
 
-# CloudFoundry API Url
-cloudfoundry:
-  cc:
-    api:
-      url: YOUR_CF_API_URL
-      uaaUrl: YOUR_UAA_URL
-  # CloudFoundry Login information
-  user:
-    admin:
-      username:  YOUR_CF_ADMIN_ID
-      password: YOUR_CF_ADMIN_PASSWORD
-    uaaClient:
-      clientId: login
-      clientSecret: YOUR_UAA_LOGIN_ACCOUNT_SECRET
-      adminClientId: admin
-      adminClientSecret: YOUR_UAA_ADMIN_ACCOUT_SECRET
-      loginClientId: login
-      loginClientSecret: YOUR_UAA_LOGIN_ACCOUNT_SECRET
-      skipSSLValidation: true
-  authorization: cf-Authorization
 
-abacus:
-  url: YOUR_REPORTING_SERVER_URL
 
-# 포탈 상세 모니터링
-monitoring:
-  api:
-    url: YOUR_MONITORING_SERVER_URL
----
-spring:
-  profiles: local
-  security:
-    username: admin
-    password: openpaasta
-  datasource:
-    mysql:
-      driverClassName: com.mysql.jdbc.Driver
-    postgresql:
-      driverClassName: org.postgresql.Driver
-    cc:
-      jdbc:  #설정을 하면 드라이버를 우선적으로 적용된다.설정없을경우 spring.jdbc를 따른다.
-      url: jdbc:postgresql://localhost:5524/ccdb
-      username: YOUR_CCDB_ID
-      password: YOUR_CCDB_PASSWORD
-    portal:
-      jdbc:  #설정을 하면 드라이버를 우선적으로 적용된다.설정없을경우 spring.jdbc를 따른다.
-      url: jdbc:postgresql://localhost:5524/portaldb
-      username: YOUR_PORTAL_ID
-      password: YOUR_PORTAL_PASSWORD
-    uaa:
-      jdbc:  #설정을 하면 드라이버를 우선적으로 적용된다.설정없을경우 spring.jdbc를 따른다.
-      url: jdbc:postgresql://localhost:5524/uaadb
-      username: YOUR_UAADB_ID
-      password: YOUR_UAADB_PASSWORD
-    autoScailing:
-      jdbc: mysql  #설정을 하면 드라이버를 우선적으로 적용된다.설정없을경우 spring.jdbc를 따른다.
-      url: jdbc:mysql://localhost:3306/portaldb
-      username: YOUR_MONITORING_ID
-      password: YOUR_MONITORING_PASSWORD
-  objectStorage:
-    tenantName: YOUR_OBJECT_STORAGE_TENANTNAME
-    username: YOUR_OBJECT_STORAGE_ID
-    password: YOUR_OBJECT_STORAGE_PASSWORD
-    authUrl: YOUR_OBJECT_STORAGE_AUTH_URL
-    container: YOUR_OBJECT_STORAGE_CONTAINER
-  autoScailing:
-      jdbc: mysql  #설정을 하면 드라이버를 우선적으로 적용된다.설정없을경우 spring.jdbc를 따른다.
-      url: jdbc:mysql://localhost:3306/portaldb
-      username: YOUR_PORTAL_ID
-      password: YOUR_PORTAL_PASSWORD
-  mail:
-    smtp:
-      host: YOUR_SMTP_SERVER
-      port: YOUR_SMTP_PORT
-      username: YOUR_SMTP_NAME
-      password: YOUR_SMTP_PASSWORD
-      userEmail: YOUR_SMTP_EMAILADDRESS
-      properties:
-        auth: true
-        starttls:
-          enable: true
-          required: true
-        maximumTotalQps: 90
-        authUrl: http://localhost:8080
-        imgUrl: YOUR_SMTP_IMG_URL
-        sFile: YOUR_EMAIL_TEMP_FILE
-        subject: YOUR_EMAIL_SUBJECT
-        contextUrl: user/authUser
-multipart:
-  maxFileSize: 1000Mb
-  maxRequestSize: 1000Mb
-eureka:
-  instance:
-    hostname: localhost
-  client:
-    serviceUrl:
-      defaultZone: http://127.0.0.1:2221/eureka/
-logging:
-  level:
-    org.openpaas.paasta.portal.api.mapper: DEBUG
+
+
+
