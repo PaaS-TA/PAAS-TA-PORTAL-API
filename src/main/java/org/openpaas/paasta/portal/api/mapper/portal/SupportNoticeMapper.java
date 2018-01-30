@@ -1,4 +1,4 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
 
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
 import org.openpaas.paasta.portal.api.model.Support;
@@ -6,14 +6,8 @@ import org.openpaas.paasta.portal.api.model.Support;
 import java.util.List;
 
 /**
- * SupportNoticeMapper.java
- * Mybatis Mapper Inteface 클래스로 공지사항 관련 메소드 정의만 한다
- *
- * @author yjkim
- * @version 1.0
- * @since 2016.07.28
+ * Created by YJKim on 2016-07-28.
  */
-
 @Portal
 public interface SupportNoticeMapper {
 

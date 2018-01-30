@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper">
 
     <sql id="commonSearchColumns">
         /* commonSearchColumns */
@@ -71,7 +71,7 @@
             (SELECT cd.value FROM portaldb.code_detail cd WHERE cd.key = q.status AND cd.group_id = 'QUESTION_STATUS') AS statusValue
         FROM portaldb.question q
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper.procSearch"/>
         ORDER BY q.created DESC
     </select>
 
@@ -79,7 +79,7 @@
     <select id="getQuestion" resultType="org.openpaas.paasta.portal.api.model.Support">
         /* SupportQnA.getQuestion */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper.commonSearchColumns"/>,
             qa.title AS title,
             (SELECT cd.value FROM portaldb.code_detail cd WHERE cd.key = qa.classification AND cd.group_id = 'QUESTION_CLASSIFICATION') AS classificationValue,
             qa.classification AS classification,
@@ -94,7 +94,7 @@
     <select id="getAnswer" resultType="org.openpaas.paasta.portal.api.model.Support">
         /* SupportQnA.getAnswer */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper.commonSearchColumns"/>,
             qa.question_no AS questionNo,
             qa.answerer AS answerer
         FROM portaldb.answer qa

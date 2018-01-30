@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper">
 
     <sql id="commonSearchColumns">
         /* commonSearchColumns */
@@ -55,10 +55,10 @@
         </if>
 
         <if test="searchStartDate != '' and searchStartDate != null">
-            <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.procSearchDateAdmin"/>
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper.procSearchDateAdmin"/>
         </if>
         <if test="searchStartDate == '' or searchStartDate == null">
-            <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.procSearchDateUser"/>
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper.procSearchDateUser"/>
         </if>
 
         <if test="important != '' and important != null">
@@ -106,7 +106,7 @@
         FROM portaldb.notice
         WHERE 1=1
 
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper.procSearch"/>
 
 
         ORDER BY created DESC
@@ -121,7 +121,7 @@
     <select id="getNotice" resultType="org.openpaas.paasta.portal.api.model.Support">
         /* SupportNotice.getNotice */
         SELECT
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper.commonSearchColumns"/>,
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper.commonSearchColumns"/>,
         (SELECT `value` FROM portaldb.code_detail cd WHERE cd.key = classification AND cd.group_id = 'SUPPORT_NOTICE') as classificationValue
 
         FROM portaldb.notice

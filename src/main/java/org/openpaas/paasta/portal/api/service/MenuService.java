@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.MenuMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.MenuMapper;
 import org.openpaas.paasta.portal.api.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

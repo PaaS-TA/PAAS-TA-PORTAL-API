@@ -8,7 +8,7 @@ import org.cloudfoundry.identity.uaa.scim.ScimUser;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.UserDetailMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.UserDetailMapper;
 import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
 import org.openpaas.paasta.portal.api.model.UserDetail;
 import org.slf4j.Logger;
@@ -41,6 +41,7 @@ public class UserService extends Common {
 //    Container container;
 //
     private final Logger LOGGER = getLogger(this.getClass());
+
     /**
      * Portal DB의 UserDetail table을 사용하는 Mapper
      */

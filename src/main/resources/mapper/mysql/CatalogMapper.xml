@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.CatalogMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper">
 
     <sql id="commonSearchColumns">
         /* commonSearchColumns */
@@ -57,7 +57,7 @@
                 </choose>
             </if>
         </if>
-        <if test="searchTypeUseYn != '' and searchTypeUseYn != null">
+        <if test="sorg.openpaas.paasta.portal.api.mapper.portal.earchTypeUseYn != '' and searchTypeUseYn != null">
             <choose>
                 <when test='searchTypeUseYn == "Y" or searchTypeUseYn == "N"'>
                     AND use_yn = #{searchTypeUseYn}
@@ -73,7 +73,7 @@
     <select id="getBuildPackCatalogList" resultType="org.openpaas.paasta.portal.api.model.Catalog">
         /* Catalog.getBuildPackCatalogList */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonSearchColumns"/>,
             bc.buildpack_name AS buildPackName,
             (SELECT cd.value FROM code_detail cd WHERE cd.key = bc.classification AND cd.group_id = 'BUILD_PACK_CATALOG') AS classificationValue,
             (SELECT cd.summary FROM code_detail cd WHERE cd.key = bc.classification AND cd.group_id = 'BUILD_PACK_CATALOG') AS classificationSummary,
@@ -82,7 +82,7 @@
             bc.app_sample_file_size AS appSampleFileSize
         FROM buildpack_category bc
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.procSearch"/>
         <if test="buildPackName != '' and buildPackName != null">
             AND bc.buildpack_name = #{buildPackName} AND (bc.app_sample_file_path != null OR bc.app_sample_file_path != '')
         </if>
@@ -93,7 +93,7 @@
     <select id="getServicePackCatalogList" resultType="org.openpaas.paasta.portal.api.model.Catalog">
         /* Catalog.getServicePackCatalogList */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonSearchColumns"/>,
             sc.service_name AS servicePackName,
             (SELECT cd.value FROM code_detail cd WHERE cd.key = sc.classification AND cd.group_id = 'SERVICE_PACK_CATALOG') AS classificationValue,
             (SELECT cd.summary FROM code_detail cd WHERE cd.key = sc.classification AND cd.group_id = 'SERVICE_PACK_CATALOG') AS classificationSummary,
@@ -102,7 +102,7 @@
             sc.app_bind_yn AS appBindYn
         FROM servicepack_category sc
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.procSearch"/>
         ORDER BY sc.no DESC
     </select>
 
@@ -128,7 +128,7 @@
     <insert id="insertBuildPackCatalog">
         /* Catalog.insertBuildPackCatalog */
         INSERT INTO buildpack_category (
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonInsertColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonInsertColumns"/>,
             app_sample_file_name,
             app_sample_file_path,
             app_sample_file_size,
@@ -154,7 +154,7 @@
     <insert id="insertServicePackCatalog">
         /* Catalog.insertServicePackCatalog */
         INSERT INTO servicepack_category (
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonInsertColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonInsertColumns"/>,
         service_name, parameter
         <if test="app_bind_parameter != '' and app_bind_parameter != null">
             ,app_bind_parameter
@@ -329,7 +329,7 @@
             (SELECT cd.summary FROM code_detail cd WHERE cd.key = sc.classification AND cd.group_id = 'STARTER_CATALOG') AS classificationSummary
         FROM starter_category sc
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.procSearch"/>
         ORDER BY sc.no DESC
     </select>
 
@@ -365,7 +365,7 @@
     <select id="getOneStarterCatalog" resultType="org.openpaas.paasta.portal.api.model.Catalog">
         /* Catalog.getOneStarterCatalog */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonSearchColumns"/>,
             (SELECT sbr.buildpack_category_no FROM starter_buildpack_relation sbr WHERE sbr.starter_category_no = #{no}) AS buildPackCategoryNo,
             sc.no AS starterCategoryNo
         FROM starter_category sc
@@ -587,7 +587,7 @@
     <select id="getCatalogStarterRelationBuildPackList" resultType="org.openpaas.paasta.portal.api.model.Catalog">
         /* Catalog.getCatalogStarterRelationBuildPackList */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonSearchColumns"/>,
             bc.buildpack_name AS buildPackName,
             (SELECT cd.value FROM code_detail cd WHERE cd.key = bc.classification AND cd.group_id = 'BUILD_PACK_CATALOG') AS classificationValue,
             (SELECT cd.summary FROM code_detail cd WHERE cd.key = bc.classification AND cd.group_id = 'BUILD_PACK_CATALOG') AS classificationSummary,
@@ -606,7 +606,7 @@
     <select id="getCatalogStarterRelationServicePackList" resultType="org.openpaas.paasta.portal.api.model.Catalog">
         /* Catalog.getCatalogStarterRelationServicePackList */
         SELECT
-            <include refid="org.openpaas.paasta.portal.api.mapper.CatalogMapper.commonSearchColumns"/>,
+            <include refid="org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper.commonSearchColumns"/>,
             sc.service_name AS servicePackName,
             (SELECT cd.value FROM code_detail cd WHERE cd.key = sc.classification AND cd.group_id = 'SERVICE_PACK_CATALOG') AS classificationValue,
             (SELECT cd.summary FROM code_detail cd WHERE cd.key = sc.classification AND cd.group_id = 'SERVICE_PACK_CATALOG') AS classificationSummary,

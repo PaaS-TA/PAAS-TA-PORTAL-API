@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper">
 
     <sql id="commonSearchColumns">
         /* commonSearchColumns */
@@ -73,14 +73,14 @@
         FROM question
         WHERE 1=1
 
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper.procSearch"/>
 
         ORDER BY created DESC
     </select>
 
     <select id="getQuestion" resultType="org.openpaas.paasta.portal.api.model.Support">
         SELECT
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper.commonSearchColumns"/>,
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper.commonSearchColumns"/>,
         "title" AS "title",
         (SELECT value FROM code_detail WHERE key = classification AND group_id = 'QUESTION_CLASSIFICATION') as classificationValue,
         "classification" AS "classification",
@@ -96,7 +96,7 @@
     <select id="getAnswer" resultType="org.openpaas.paasta.portal.api.model.Support">
         SELECT
 
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportQnAMapper.commonSearchColumns"/>,
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper.commonSearchColumns"/>,
         "question_no" AS "questionNo",
         answerer as answerer
 

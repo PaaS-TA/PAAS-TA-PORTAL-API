@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.mapper.WebIdeUserMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.WebIdeUserMapper;
 import org.openpaas.paasta.portal.api.model.WebIdeUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

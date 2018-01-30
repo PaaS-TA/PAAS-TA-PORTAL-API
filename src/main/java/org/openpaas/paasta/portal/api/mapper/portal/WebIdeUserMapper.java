@@ -1,10 +1,9 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
+
 
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
-import org.openpaas.paasta.portal.api.model.ConfigInfo;
 import org.openpaas.paasta.portal.api.model.WebIdeUser;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Portal

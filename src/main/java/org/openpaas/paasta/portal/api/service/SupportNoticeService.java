@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.SupportNoticeMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper;
 import org.openpaas.paasta.portal.api.model.Support;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +25,7 @@ public class SupportNoticeService extends Common{
 
     @Autowired
     private SupportNoticeMapper supportNoticeMapper;
+
 
     /**
      * 공지 목록 조회

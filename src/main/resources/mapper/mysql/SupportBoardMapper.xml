@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.SupportBoardMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.SupportBoardMapper">
 
     <sql id="procSearch">
         /* procSearch */
@@ -54,11 +54,11 @@
             CREATED,
             LASTMODIFIED as lastModified,
             (select count(*) from portaldb.board_comment bc where b.no=bc.board_no) as commentNum,
-            (select count(*) from portaldb.board WHERE 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.SupportBoardMapper.procSearch"/>) as listLength,
+            (select count(*) from portaldb.board WHERE 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportBoardMapper.procSearch"/>) as listLength,
             portaldb.GetParent(no), portaldb.GetAncestry(no) as path, portaldb.GetLevel(no) as level
         FROM portaldb.board b
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.SupportBoardMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.SupportBoardMapper.procSearch"/>
         order by group_no desc, path
 
         LIMIT #{pageLimit} offset #{pageOffset}

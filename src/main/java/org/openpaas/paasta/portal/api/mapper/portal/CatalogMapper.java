@@ -1,4 +1,4 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
 
 import org.apache.ibatis.annotations.Param;
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
@@ -7,11 +7,11 @@ import org.openpaas.paasta.portal.api.model.Catalog;
 import java.util.List;
 
 /**
- * Mybatis Mapper Interface 클래스로 category 관련 메소드 정의만 한다.
+ * org.openpaas.paasta.portal.api.mapper
  *
  * @author 김도준
  * @version 1.0
- * @since 2016.07.04 최초작성
+ * @since 2016.07.04
  */
 @Portal
 public interface CatalogMapper {
@@ -246,4 +246,6 @@ public interface CatalogMapper {
      * @return List(자바클래스)
      */
     List<Catalog> getCatalogStarterRelationServicePackList(Catalog param);
+
+
 }

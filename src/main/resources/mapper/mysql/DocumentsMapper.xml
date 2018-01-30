@@ -72,13 +72,13 @@
         /* Documents.getDocumentsList */
         SELECT
 
-        (select count(*) from documents where 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.procSearch"/> ) as listLength,
+        (select count(*) from documents where 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.procSearch"/> ) as listLength,
         no, classification, title, user_id AS userId, use_yn AS useYn, file_name as fileName, file_path as filePath, file_size as fileSize, created,
         (SELECT value FROM portaldb.code_detail cd WHERE cd.key = classification AND cd.group_id = 'DOCUMENTS_CLASSIFICATION') as classificationValue
         FROM documents
         WHERE 1=1
 
-        <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.procSearch"/>
 
          ORDER BY created DESC
          LIMIT 10 offset #{pageOffset}
@@ -89,7 +89,7 @@
     <select id="getDocument" resultType="org.openpaas.paasta.portal.api.model.Support">
         /* Documents.getDocument */
         SELECT
-        <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.commonSearchColumns"/>,
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.commonSearchColumns"/>,
         (SELECT value FROM portaldb.code_detail cd WHERE cd.key = classification AND cd.group_id = 'DOCUMENTS_CLASSIFICATION') as classificationValue
 
         FROM documents

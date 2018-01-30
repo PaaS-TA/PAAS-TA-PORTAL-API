@@ -9,7 +9,7 @@ import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.ServiceMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

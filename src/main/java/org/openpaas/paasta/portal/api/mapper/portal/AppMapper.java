@@ -1,4 +1,4 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
 
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.CommonCodeMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.CommonCodeMapper">
 
     <sql id="procSearch">
         /* procSearch */
@@ -80,7 +80,7 @@
             #{procType} AS procType
         FROM code_group cg
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.CommonCodeMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.CommonCodeMapper.procSearch"/>
         ORDER BY created DESC
         LIMIT #{pageSize} OFFSET #{pageNo}
     </select>
@@ -92,7 +92,7 @@
           COUNT(*)
         FROM code_group cg
         WHERE 1=1
-        <include refid="org.openpaas.paasta.portal.api.mapper.CommonCodeMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.CommonCodeMapper.procSearch"/>
     </select>
 
 

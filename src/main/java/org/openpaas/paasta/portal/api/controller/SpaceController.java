@@ -64,6 +64,11 @@ public class SpaceController extends Common {
     }
 
 
+
+
+
+
+
     /**
      * 공간명을 변경한다.
      *

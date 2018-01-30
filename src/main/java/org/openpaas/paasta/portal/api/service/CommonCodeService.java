@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.CommonCodeMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.CommonCodeMapper;
 import org.openpaas.paasta.portal.api.model.CommonCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

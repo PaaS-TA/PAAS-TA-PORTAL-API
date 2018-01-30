@@ -1,4 +1,4 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
 
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
 import org.openpaas.paasta.portal.api.model.UserManagement;
@@ -6,11 +6,11 @@ import org.openpaas.paasta.portal.api.model.UserManagement;
 import java.util.List;
 
 /**
- * Mybatis Mapper Interface 클래스로 관리자가 사용자를 관리하는 관련 메소드 정의만 한다.
+ * org.openpaas.paasta.portal.api.mapper
  *
  * @author 김도준
  * @version 1.0
- * @since 2016.08.31 최초작성
+ * @since 2016.08.31
  */
 @Portal
 public interface UserManagementMapper {

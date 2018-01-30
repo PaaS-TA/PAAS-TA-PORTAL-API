@@ -3,11 +3,17 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
+
+import org.cloudfoundry.doppler.Envelope;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.service.AppService;
+import org.openpaas.paasta.portal.api.util.CfUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * 앱 컨트롤러 - 애플리케이션 정보 조회, 구동, 정지 등의 API 를 호출 하는 컨트롤러이다.
@@ -479,5 +486,40 @@ public class AppController extends Common {
         return resultMap;
     }
 
+
+
+    /**
+     * 앱 최근 로그
+     *
+     * @param app     the app
+     * @param request the request
+     * @return Space respSpace
+     * @throws Exception the exception
+     */
+    @RequestMapping(value = {"/getRecentLogs"}, method = RequestMethod.POST)
+    public Map getSpaceSummary(@RequestBody App app, HttpServletRequest request) throws Exception {
+//
+//        LOGGER.info("getRecentLog Start : appGuid={}", app.getGuid().toString());
+//
+//        // Get CloudFoundry class
+//
+//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+//
+//        ConnectionContext connectionContext =
+//
+//
+//        Map mapLog = new HashMap();
+//        try {
+//            Stream<Envelope> list = appService.getRecentLog(reactorDopplerClient, app.getGuid().toString()).toStream();
+//
+//            mapLog.put("log", list.toArray());
+//
+//        } catch (Exception e) {
+//            mapLog.put("log", "");
+//        }
+//
+//        return mapLog;
+        return null;
+    }
 
 }

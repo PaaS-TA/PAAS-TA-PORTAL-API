@@ -1,4 +1,4 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
 
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
 import org.openpaas.paasta.portal.api.model.CommonCode;
@@ -6,11 +6,11 @@ import org.openpaas.paasta.portal.api.model.CommonCode;
 import java.util.List;
 
 /**
- * Mybatis Mapper Interface 클래스로 공통코드 관련 메소드 정의만 한다.
+ * org.openpaas.paasta.portal.api.mapper
  *
  * @author 김도준
  * @version 1.0
- * @since 2016.06.15 최초작성
+ * @since 2016.06.15
  */
 @Portal
 public interface CommonCodeMapper {

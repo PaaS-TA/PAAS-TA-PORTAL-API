@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.DocumentsMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper">
 
     <sql id="commonSearchColumns">
         /* commonSearchColumns */
@@ -81,13 +81,13 @@
     <select id="getDocumentsList" resultType="org.openpaas.paasta.portal.api.model.Support">
         SELECT
       /*  (row_number() over(order by created )) as rowNum,*/
-        (select count(*) from documents where 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.procSearch"/> ) as listLength,
+        (select count(*) from documents where 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.procSearch"/> ) as listLength,
         no, classification, title, user_id AS userId, use_yn AS useYn, file_name as fileName, file_path as filePath, file_size as fileSize, created,
         (SELECT value FROM code_detail WHERE key = classification AND group_id = 'DOCUMENTS_CLASSIFICATION') as classificationValue
         FROM DOCUMENTS
         WHERE 1=1
 
-        <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.procSearch"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.procSearch"/>
 
         ORDER BY created DESC
         LIMIT 10 offset #{pageOffset}
@@ -97,13 +97,13 @@
   <!--  <select id="getDocumentsListUser" resultType="org.openpaas.paasta.portal.api.model.Support">
         SELECT
         (row_number() over(order by created )) as rowNum,
-        (select count(*) from documents where 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.procSearchUser"/> ) as listLength,
+        (select count(*) from documents where 1=1 <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.procSearchUser"/> ) as listLength,
         no, classification, title, file_name as fileName, file_path as filePath, file_size as fileSize, created,
         (SELECT value FROM code_detail WHERE key = classification AND group_id = 'DOCUMENTS_CLASSIFICATION') as classificationValue
         FROM DOCUMENTS
         WHERE 1=1
 
-        <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.procSearchUser"/>
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.procSearchUser"/>
 
         ORDER BY created DESC
         LIMIT 10 offset #{pageOffset}
@@ -113,7 +113,7 @@
 
     <select id="getDocument" resultType="org.openpaas.paasta.portal.api.model.Support">
         SELECT
-        <include refid="org.openpaas.paasta.portal.api.mapper.DocumentsMapper.commonSearchColumns"/>,
+        <include refid="org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper.commonSearchColumns"/>,
         (SELECT value FROM code_detail WHERE key = classification AND group_id = 'DOCUMENTS_CLASSIFICATION') as classificationValue
 
         FROM DOCUMENTS

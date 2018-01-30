@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper">
+<mapper namespace="org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper">
     <insert id="insertInviteOrgSpace">
-        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.InviteOrgSpaceMapper */
+        /*org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper */
         INSERT INTO invite_org_space (
         token,
         gubun,
@@ -26,7 +26,7 @@
         )
     </insert>
     <select id="selectOrgSpaceUser" resultType="org.openpaas.paasta.portal.api.model.InviteOrgSpace" parameterType="org.openpaas.paasta.portal.api.model.InviteOrgSpace" >
-        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.selectOrgSpaceUser */
+        /*org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper.selectOrgSpaceUser */
         SELECT
         id
         , token
@@ -61,7 +61,7 @@
         </if>
     </select>
     <update id="updateOrgSpaceUser">
-        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateOrgSpaceUser */
+        /*org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper.updateOrgSpaceUser */
         UPDATE invite_org_space SET
           token = #{token},
           create_time = #{createTime},
@@ -73,7 +73,7 @@
     </update>
 
     <update id="updateInviteY" >
-    /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateInviteY */
+    /*org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper.updateInviteY */
     UPDATE invite_org_space SET
       setyn = 'Y'
     WHERE token = #{token}
@@ -116,7 +116,7 @@
           and setyn='N'
     </select>
     <update id="updateOrgSpaceUserToken">
-        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateOrgSpaceUserToken */
+        /*org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper.updateOrgSpaceUserToken */
         UPDATE invite_org_space SET
         token = #{retoken},
         create_time = #{createTime},
@@ -132,7 +132,7 @@
     </delete>
 
     <update id="updateAccessCnt">
-        /*org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper.updateAccessCnt */
+        /*org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper.updateAccessCnt */
         UPDATE invite_org_space SET
         access_cnt = #{accessCnt}
         WHERE 1=1

@@ -3,8 +3,8 @@ package org.openpaas.paasta.portal.api.service;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.UserDetailMapper;
-import org.openpaas.paasta.portal.api.mapper.UserManagementMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.UserDetailMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.UserManagementMapper;
 import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
 import org.openpaas.paasta.portal.api.model.UserManagement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import java.util.Map;
 @Transactional
 @Service
 public class UserManagementService extends Common {
+
 
     private final UserManagementMapper userManagementMapper;
     private final UserMapper userMapper;

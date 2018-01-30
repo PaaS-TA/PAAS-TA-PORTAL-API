@@ -106,10 +106,11 @@ public class FileController {
      */
     @RequestMapping(value = {"/getImage"}, method = RequestMethod.POST)
     public byte[] getImageByte(@RequestBody Map<String, String> param) throws Exception {
-        String imgPath = param.get("imgPath");
-        LOGGER.info("imgPath : " + imgPath.trim());
-        byte[] imgByte = glusterfsService.getImageByte(imgPath.trim());
-        return imgByte;
+//        String imgPath = param.get("imgPath");
+//        LOGGER.info("imgPath : " + imgPath.trim());
+//        byte[] imgByte = glusterfsService.getImageByte(imgPath.trim());
+//        return imgByte;
+        return null;
     }
 
 }

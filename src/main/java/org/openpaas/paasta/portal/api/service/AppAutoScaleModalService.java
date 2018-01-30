@@ -1,7 +1,8 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.mapper.autoscail.AppAutoScaleModalMapper;
+
+import org.openpaas.paasta.portal.api.mapper.portal.AppAutoScaleModalMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

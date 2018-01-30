@@ -2,19 +2,30 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.domain.ApplicationLog;
+import org.cloudfoundry.doppler.Envelope;
+import org.cloudfoundry.doppler.RecentLogsRequest;
+import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationSummary;
+import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.AppMapper;
 import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -418,6 +429,29 @@ public class AppService extends Common {
 
         return appImageUrl;
 
+    }
+
+
+    public List<ApplicationSummary> getAppSummery(DefaultCloudFoundryOperations cloudFoundryOperations) {
+        return cloudFoundryOperations.applications().list().collectList().block();
+    }
+
+    public ApplicationDetail getAppDetail(DefaultCloudFoundryOperations cloudFoundryOperations, String appName) {
+        return cloudFoundryOperations.applications().get(
+                GetApplicationRequest.builder()
+                        .name(appName).build())
+                .block();
+    }
+
+    public Flux<Envelope> getRecentLog(ReactorDopplerClient reactorDopplerClient, String appId) {
+
+        RecentLogsRequest recentLogsRequest = RecentLogsRequest.builder()
+                .applicationId(appId)
+                .build();
+
+        Flux<Envelope> getRecentLog = reactorDopplerClient.recentLogs(recentLogsRequest);
+
+        return getRecentLog;
     }
 
 }

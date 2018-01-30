@@ -1,4 +1,4 @@
-package org.openpaas.paasta.portal.api.mapper;
+package org.openpaas.paasta.portal.api.mapper.portal;
 
 import org.openpaas.paasta.portal.api.config.service.surport.Portal;
 import org.openpaas.paasta.portal.api.model.Menu;
@@ -6,11 +6,11 @@ import org.openpaas.paasta.portal.api.model.Menu;
 import java.util.List;
 
 /**
- * Mybatis Mapper Interface 클래스로 메뉴 관련 메소드 정의만 한다.
+ * org.openpaas.paasta.portal.api.mapper
  *
  * @author 김도준
  * @version 1.0
- * @since 2016.09.29 최초작성
+ * @since 2016.09.29
  */
 @Portal
 public interface MenuMapper {

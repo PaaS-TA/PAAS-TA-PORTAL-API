@@ -9,9 +9,8 @@ import org.cloudfoundry.client.lib.util.JsonUtil;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.controller.CatalogController;
-import org.openpaas.paasta.portal.api.mapper.CatalogMapper;
 import org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper;
+import org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.model.Org;
@@ -28,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Logger;
 
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.*;
@@ -45,6 +43,7 @@ import static java.util.stream.Collectors.*;
 public class CatalogService extends Common {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CatalogService.class);
+
 
     private final CatalogMapper catalogMapper;
     private final CatalogCcMapper catalogCcMapper;
