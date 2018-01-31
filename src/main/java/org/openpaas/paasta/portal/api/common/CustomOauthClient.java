@@ -1,9 +1,6 @@
 package org.openpaas.paasta.portal.api.common;
 
 
-//import org.json.simple.JSONObject;
-//import org.json.simple.JSONArray;
-
 import org.apache.commons.codec.binary.Base64;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryException;

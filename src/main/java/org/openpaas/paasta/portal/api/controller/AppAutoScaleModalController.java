@@ -1,21 +1,15 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.service.AppAutoScaleModalService;
 import org.openpaas.paasta.portal.api.service.AppService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;

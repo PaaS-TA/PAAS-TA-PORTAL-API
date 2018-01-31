@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.service.DomainService;
@@ -41,7 +42,7 @@ public class DomainController extends Common {
     @RequestMapping(value = {"/getDomains/{status}"}, method = RequestMethod.POST)
     public List getDomains(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                            @PathVariable String status) throws Exception {
-        
+
         List<CloudDomain> domains = domainService.getDomains(token, status);
 
         return domains;

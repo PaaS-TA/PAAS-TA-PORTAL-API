@@ -2,7 +2,6 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.ApplicationLog;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

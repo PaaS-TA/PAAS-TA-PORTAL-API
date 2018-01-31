@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.common;
 
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.identity.uaa.api.UaaConnectionFactory;
 import org.cloudfoundry.identity.uaa.api.client.UaaClientOperations;
@@ -112,22 +112,10 @@ public class Common {
      */
     public CloudFoundryClient getCloudFoundryClient(String token) throws MalformedURLException, URISyntaxException {
 
-        return new CloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), true);
+        return cloudFoundryClient(connectionContext(),tokenProvider(token));
     }
 
-    /**
-     * get CloudFoundryClinet Object from token String
-     * with organization, space
-     *
-     * @param token
-     * @param organization
-     * @param space
-     * @return CloudFoundryClinet
-     */
-    public CloudFoundryClient getCloudFoundryClient(String token, String organization, String space) throws MalformedURLException, URISyntaxException {
 
-        return new CloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), organization, space, true);
-    }
 
     /**
      * get CloudFoundryClinet Object from id, password
@@ -137,23 +125,9 @@ public class Common {
      * @return CloudFoundryClinet
      */
     public CloudFoundryClient getCloudFoundryClient(String id, String password) throws MalformedURLException, URISyntaxException {
-        return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), true);
+        return cloudFoundryClient(connectionContext(),tokenProvider(id,password));
     }
 
-    /**
-     * get CloudFoundryClinet Object from token String
-     * with organization, space
-     *
-     * @param id
-     * @param password
-     * @param organization
-     * @param space
-     * @return CloudFoundryClinet
-     */
-    public CloudFoundryClient getCloudFoundryClient(String id, String password, String organization, String space) throws MalformedURLException, URISyntaxException {
-
-        return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), organization, space, true);
-    }
 
     /**
      * get CloudFoundryClinet Object from token String

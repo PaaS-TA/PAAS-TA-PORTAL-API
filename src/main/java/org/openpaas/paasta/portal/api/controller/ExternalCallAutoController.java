@@ -1,27 +1,21 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.ExternalAppService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 앱 컨트롤러 - 외부에서 호출해오는 API를 컨트롤
