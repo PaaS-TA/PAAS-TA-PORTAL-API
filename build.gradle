@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.9.RELEASE'
+        springBootVersion = '1.5.10.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -41,8 +41,8 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     //Eureka
     compile ('org.springframework.cloud:spring-cloud-starter-eureka')
-    //UAA
 
+    compile ('de.codecentric:spring-boot-admin-starter-client:1.5.7')
 
     //DB
     compile ('org.springframework.boot:spring-boot-starter-jdbc')
