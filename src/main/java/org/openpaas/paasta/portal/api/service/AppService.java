@@ -1,14 +1,18 @@
 package org.openpaas.paasta.portal.api.service;
 
-import org.cloudfoundry.client.lib.CloudFoundryClient;
+
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.doppler.Envelope;
-import org.cloudfoundry.doppler.RecentLogsRequest;
+import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
+import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
+import org.cloudfoundry.client.v3.applications.GetApplicationEnvironmentResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.applications.ApplicationDetail;
-import org.cloudfoundry.operations.applications.ApplicationSummary;
-import org.cloudfoundry.operations.applications.GetApplicationRequest;
-import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.operations.applications.*;
+import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
+import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
@@ -20,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -48,48 +51,44 @@ public class AppService extends Common {
     @Autowired
     private AppAutoScaleModalService appAutoScaleModalService;
 
-    /**
-     * 앱 요약 정보를 조회한다.
-     *
-     * @param app    the app
-     * @param client the client
-     * @return the app summary
-     */
-    public String getAppSummary(App app,  CustomCloudFoundryClient client) {
+    @Autowired
+    ReactorCloudFoundryClient reactorCloudFoundryClient;
 
-        String respApp = client.getAppSummary(app.getGuid());
+    //ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+    //DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
+    //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
 
-        return respApp;
+    public String getAppSummary(App app, String token) {
 
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+        return summaryApplicationResponse.toString();
     }
 
 
     /**
      * 앱 실시간 상태를 조회한다.
      *
-     * @param app    the app
-     * @param client the client
+     * @param app   the app
+     * @param token the client
      * @return the app stats
      */
-    public String getAppStats(App app,    CustomCloudFoundryClient client) {
-
-        String respAppStats = client.getAppStats(app.getGuid());
-
-        return respAppStats;
+    public String getAppStats(App app, String token) {
+        CloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        return null;
     }
 
 
     /**
      * 앱을 변경한다.
      *
-     * @param app    the app
-     * @param client the client
+     * @param app   the app
+     * @param token the client
      * @throws Exception the exception
      */
-    public void renameApp(App app, CloudFoundryClient client) throws Exception {
-
-            client.rename(app.getName(), app.getNewName());
-
+    public void renameApp(App app, String token) throws Exception {
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.applications().rename(RenameApplicationRequest.builder().name(app.getName()).newName(app.getNewName()).build());
     }
 
 
@@ -97,13 +96,12 @@ public class AppService extends Common {
      * 앱을 실행한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void startApp(App app,  CloudFoundryClient client) throws Exception {
-
-            client.startApplication(app.getName());
-
+    public void startApp(App app, String token) throws Exception {
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build());
     }
 
 
@@ -111,12 +109,12 @@ public class AppService extends Common {
      * 앱을 중지한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void stopApp(App app,  CloudFoundryClient client) throws Exception {
-
-        client.stopApplication(app.getName());
+    public void stopApp(App app, String token) throws Exception {
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.applications().stop(StopApplicationRequest.builder().name(app.getName()).build());
     }
 
 
@@ -124,14 +122,14 @@ public class AppService extends Common {
      * 앱을 삭제한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void deleteApp(App app,  CloudFoundryClient client) throws Exception {
+    public void deleteApp(App app, String token) throws Exception {
 
         //앱 삭제
-        client.deleteApplication(app.getName());
-
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.applications().delete(DeleteApplicationRequest.builder().name(app.getName()).build());
         //AutoScale 설정 삭제
         try {
             HashMap map = new HashMap();
@@ -139,7 +137,7 @@ public class AppService extends Common {
             if (null != appAutoScaleModalService.getAppAutoScaleInfo(map).get("list")) {
                 appAutoScaleModalService.deleteAppAutoScale(String.valueOf(app.getGuid()));
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -149,45 +147,44 @@ public class AppService extends Common {
      * 앱을 리스테이징한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void restageApp(App app,  CustomCloudFoundryClient client) throws Exception {
-
-        client.restageApp(app.getGuid());
-
+    public void restageApp(App app, String token) throws Exception {
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.applications().restage(RestageApplicationRequest.builder().name(app.getName()).build());
     }
 
     /**
      * 앱 인스턴스를 변경한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void updateApp(App app,  CloudFoundryClient client) throws Exception {
-
-            if(app.getInstances() > 0) {
-                client.updateApplicationInstances(app.getName(), app.getInstances());
-            }
-            if(app.getMemory() > 0) {
-                client.updateApplicationMemory(app.getName(), app.getMemory());
-            }
-            if(app.getDiskQuota() > 0) {
-                client.updateApplicationDiskQuota(app.getName(), app.getDiskQuota());
-            }
+    public void updateApp(App app, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        if (app.getInstances() > 0) {
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build());
+        }
+        if (app.getMemory() > 0) {
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).memory(app.getMemory()).build());
+        }
+        if (app.getDiskQuota() > 0) {
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build());
+        }
     }
 
     /**
      * 앱-서비스를 바인드한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void bindService(App app,  CloudFoundryClient client) throws Exception {
-
-            client.bindService(app.getName(), app.getServiceName());
+    public void bindService(App app, String token) throws Exception {
+        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.services().bind(BindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
 
     }
 
@@ -196,28 +193,31 @@ public class AppService extends Common {
      * 앱-서비스를 언바인드한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @throws Exception the exception
      */
-    public void unbindService(App app,  CloudFoundryClient client) throws Exception {
-
-            client.unbindService(app.getName(), app.getServiceName());
-
+    public void unbindService(App app, String token) throws Exception {
+        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.services().unbind(UnbindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
     }
 
     /**
      * 앱 이벤트를 조회한다.
      *
      * @param app    the app
-     * @param client the client
+     * @param token the client
      * @return the app events
      * @throws Exception the exception
      */
-    public String getAppEvents(App app,  CustomCloudFoundryClient client) throws Exception {
+    public String getAppEvents(App app, String token) throws Exception {
 
-        String respAppEvents =  client.getAppEvents(app.getGuid());
+        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
 
-        return respAppEvents;
+//        List<> = cloudFoundryOperations.applications().getEvents(GetApplicationEventsRequest.builder().name(app.getName()).build()).buffer();
+//
+//        String respAppEvents = client.getAppEvents(app.getGuid());
+
+        return null;
     }
 
     /**
@@ -231,21 +231,21 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    public Map getApplicationEnv(App app, String token) throws Exception {
+    public String getApplicationEnv(App app, String token) throws Exception {
 
         String orgName = app.getOrgName();
         String spaceName = app.getSpaceName();
         String appName = app.getName();
 
-        if (!stringNullCheck(orgName,spaceName,appName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+        if (!stringNullCheck(orgName, spaceName, appName)) {
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
         }
 
-        CloudFoundryClient client = getCloudFoundryClient(token, orgName, spaceName);
+        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        ApplicationEnvironments resp = cloudFoundryOperations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder().name(appName).build()).block();
 
-        Map appEnv = client.getApplicationEnvironment(appName);
 
-        return appEnv;
+        return resp.toString();
 
     }
 
@@ -263,23 +263,22 @@ public class AppService extends Common {
     public boolean updateApplicationEnv(App app, String token) throws Exception {
 
 
-        String orgName = app.getOrgName();
-        String spaceName = app.getSpaceName();
-        String appName = app.getName();
-        Map<String, String> appEnvironment = app.getEnvironment();
-
-        if (!stringNullCheck(orgName,spaceName,appName) || appEnvironment == null) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        CloudFoundryClient client = getCloudFoundryClient(token, orgName, spaceName);
-
-        client.updateApplicationEnv(appName, appEnvironment);
+//        String orgName = app.getOrgName();
+//        String spaceName = app.getSpaceName();
+//        String appName = app.getName();
+//        Map<String, String> appEnvironment = app.getEnvironment();
+//
+//        if (!stringNullCheck(orgName, spaceName, appName) || appEnvironment == null) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        CloudFoundryClient client = getCloudFoundryClient(token, orgName, spaceName);
+//
+//        client.updateApplicationEnv(appName, appEnvironment);
 
         return true;
 
     }
-
 
 
     /**
@@ -320,13 +319,13 @@ public class AppService extends Common {
         String host = app.getHost();
         String domainName = app.getDomainName();
 
-        if (!stringNullCheck(orgName,spaceName,appName,host,domainName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
         }
 
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token,orgName, spaceName);
+        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
 
-        client.bindRoute(host,domainName,appName);
+        client.bindRoute(host, domainName, appName);
 
         return true;
     }
@@ -351,14 +350,14 @@ public class AppService extends Common {
         String host = app.getHost();
         String domainName = app.getDomainName();
 
-        if (!stringNullCheck(orgName,spaceName,appName,host,domainName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
         }
 
         CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
 
-        client.unbindRoute(host,domainName,appName);
-        client.deleteRoute(host,domainName);
+        client.unbindRoute(host, domainName, appName);
+        client.deleteRoute(host, domainName);
 
         return true;
     }
@@ -375,19 +374,19 @@ public class AppService extends Common {
      */
     public boolean deleteRoute(String orgName, String spaceName, List<String> urls, String token) throws Exception {
 
-        if (!stringNullCheck(orgName,spaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+        if (!stringNullCheck(orgName, spaceName)) {
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
         }
 
         if (urls == null) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
         }
 
         CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
 
-        for(String url : urls){
-            String[] array = url.split("\\.",2);
-            client.deleteRoute(array[0],array[1]);
+        for (String url : urls) {
+            String[] array = url.split("\\.", 2);
+            client.deleteRoute(array[0], array[1]);
         }
 
 
@@ -408,7 +407,9 @@ public class AppService extends Common {
         CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(AUTHORIZATION_HEADER_KEY), param.getOrgName(), param.getSpaceName());
         customCloudFoundryClient.terminateAppInstanceByIndex(param.getGuid(), param.getAppInstanceIndex(), param.getOrgName(), param.getSpaceName());
 
-        return new HashMap<String, Object>(){{put("RESULT", Constants.RESULT_STATUS_SUCCESS);}};
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
     }
 
 
@@ -429,26 +430,21 @@ public class AppService extends Common {
     }
 
 
-    public List<ApplicationSummary> getAppSummery(DefaultCloudFoundryOperations cloudFoundryOperations) {
-        return cloudFoundryOperations.applications().list().collectList().block();
-    }
-
-    public ApplicationDetail getAppDetail(DefaultCloudFoundryOperations cloudFoundryOperations, String appName) {
-        return cloudFoundryOperations.applications().get(
-                GetApplicationRequest.builder()
-                        .name(appName).build())
-                .block();
-    }
-
-    public Flux<Envelope> getRecentLog(ReactorDopplerClient reactorDopplerClient, String appId) {
-
-        RecentLogsRequest recentLogsRequest = RecentLogsRequest.builder()
-                .applicationId(appId)
-                .build();
-
-        Flux<Envelope> getRecentLog = reactorDopplerClient.recentLogs(recentLogsRequest);
-
-        return getRecentLog;
-    }
+//    public List<ApplicationSummary> getAppSummery(DefaultCloudFoundryOperations cloudFoundryOperations) {
+//        return cloudFoundryOperations.applications().list().collectList().block();
+//    }
+//
+//    public ApplicationDetail getAppDetail(DefaultCloudFoundryOperations cloudFoundryOperations, String appName) {
+//        return cloudFoundryOperations.applications().get(GetApplicationRequest.builder().name(appName).build()).block();
+//    }
+//
+//    public Flux<Envelope> getRecentLog(ReactorDopplerClient reactorDopplerClient, String appId) {
+//
+//        RecentLogsRequest recentLogsRequest = RecentLogsRequest.builder().applicationId(appId).build();
+//
+//        Flux<Envelope> getRecentLog = reactorDopplerClient.recentLogs(recentLogsRequest);
+//
+//        return getRecentLog;
+//    }
 
 }

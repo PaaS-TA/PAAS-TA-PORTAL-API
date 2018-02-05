@@ -61,10 +61,10 @@ public class AppController extends Common {
         LOGGER.info("getAppSummary Start : " + app.getGuid());
 
         //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        respApp = appService.getAppSummary(app, client);
+        respApp = appService.getAppSummary(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("getAppSummary End ");
 
@@ -502,15 +502,15 @@ public class AppController extends Common {
         LOGGER.info("getRecentLog Start : appGuid={}", app.getGuid().toString());
 
         // Get CloudFoundry class
-        TokenProvider tokenProvider = tokenProvider(request.getHeader(AUTHORIZATION_HEADER_KEY));
-        org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider);
-        ReactorDopplerClient reactorDopplerClient = dopplerClient(connectionContext(), tokenProvider);
+//        TokenProvider tokenProvider = tokenProvider(request.getHeader(AUTHORIZATION_HEADER_KEY));
+//        org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider);
+//        ReactorDopplerClient reactorDopplerClient = dopplerClient(connectionContext(), tokenProvider);
 
         Map mapLog = new HashMap();
         try {
-            Stream<Envelope> list = appService.getRecentLog(reactorDopplerClient, app.getGuid().toString()).toStream();
-
-            mapLog.put("log", list.toArray());
+//            Stream<Envelope> list = appService.getRecentLog(reactorDopplerClient, app.getGuid().toString()).toStream();
+//
+//            mapLog.put("log", list.toArray());
 
         } catch (Exception e) {
             mapLog.put("log", "");

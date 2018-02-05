@@ -1,7 +1,8 @@
 package org.openpaas.paasta.portal.api.common;
 
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudCredentials;
+import org.cloudfoundry.client.lib.CloudFoundryClient;
+
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.identity.uaa.api.UaaConnectionFactory;
 import org.cloudfoundry.identity.uaa.api.client.UaaClientOperations;
@@ -83,13 +84,6 @@ public class Common {
     @Value("${cloudfoundry.user.uaaClient.skipSSLValidation}")
     public boolean skipSSLValidation;
 
-
-    @Value("${cloudfoundry.user.uaaClient.skipSSLValidation}")
-    public boolean uaaskipSSLValidation;
-
-
-
-
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
 
@@ -112,10 +106,22 @@ public class Common {
      */
     public CloudFoundryClient getCloudFoundryClient(String token) throws MalformedURLException, URISyntaxException {
 
-        return cloudFoundryClient(connectionContext(),tokenProvider(token));
+        return new CloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), true);
     }
 
+    /**
+     * get CloudFoundryClinet Object from token String
+     * with organization, space
+     *
+     * @param token
+     * @param organization
+     * @param space
+     * @return CloudFoundryClinet
+     */
+    public CloudFoundryClient getCloudFoundryClient(String token, String organization, String space) throws MalformedURLException, URISyntaxException {
 
+        return new CloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), organization, space, true);
+    }
 
     /**
      * get CloudFoundryClinet Object from id, password
@@ -125,9 +131,23 @@ public class Common {
      * @return CloudFoundryClinet
      */
     public CloudFoundryClient getCloudFoundryClient(String id, String password) throws MalformedURLException, URISyntaxException {
-        return cloudFoundryClient(connectionContext(),tokenProvider(id,password));
+        return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), true);
     }
 
+    /**
+     * get CloudFoundryClinet Object from token String
+     * with organization, space
+     *
+     * @param id
+     * @param password
+     * @param organization
+     * @param space
+     * @return CloudFoundryClinet
+     */
+    public CloudFoundryClient getCloudFoundryClient(String id, String password, String organization, String space) throws MalformedURLException, URISyntaxException {
+
+        return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), organization, space, true);
+    }
 
     /**
      * get CloudFoundryClinet Object from token String
@@ -221,8 +241,8 @@ public class Common {
         return connection.groupOperations();
     }
 
-    public UaaClientOperations getUaaClientOperations(String uaaClientId) throws Exception{
-        UaaConnection connection= getUaaConnection(uaaClientId);
+    public UaaClientOperations getUaaClientOperations(String uaaClientId) throws Exception {
+        UaaConnection connection = getUaaConnection(uaaClientId);
         return connection.clientOperations();
     }
 
@@ -233,25 +253,25 @@ public class Common {
         URL uaaHost = new URL(uaaTarget);
 
         //ssl 유효성 체크 비활성
-        if(uaaskipSSLValidation){
+        if (skipSSLValidation) {
             SSLUtils.turnOffSslChecking();
         }
 
-        UaaConnection connection =  UaaConnectionFactory.getConnection(uaaHost, credentials);
+        UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
         return connection;
     }
 
     //credentials 세팅
-    private ResourceOwnerPasswordResourceDetails getCredentials(String uaaClientId){
+    private ResourceOwnerPasswordResourceDetails getCredentials(String uaaClientId) {
         ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
-        credentials.setAccessTokenUri(uaaTarget+"/oauth/token?grant_type=client_credentials&response_type=token");
+        credentials.setAccessTokenUri(uaaTarget + "/oauth/token?grant_type=client_credentials&response_type=token");
         credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
 
         credentials.setClientId(uaaClientId);
 
-        if(uaaClientId.equals(uaaAdminClientId)){
+        if (uaaClientId.equals(uaaAdminClientId)) {
             credentials.setClientSecret(uaaAdminClientSecret);
-        } else if(uaaClientId.equals(uaaLoginClientId)){
+        } else if (uaaClientId.equals(uaaLoginClientId)) {
             credentials.setClientSecret(uaaLoginClientSecret);
         }
 
@@ -290,19 +310,6 @@ public class Common {
 
 
     /**
-     * Gets property value.
-     *
-     * @param key            the key
-     * @param configFileName the config file name
-     * @return property value
-     * @throws Exception the exception
-     */
-    public static String getPropertyValue(String key, String configFileName) throws Exception {
-        return getProcPropertyValue(key, Optional.ofNullable(configFileName).orElse(Constants.NONE_VALUE));
-    }
-
-
-    /**
      * Gets process property value.
      *
      * @param key            the key
@@ -324,6 +331,19 @@ public class Common {
         return prop.getProperty(key);
     }
 
+    /**
+     * Gets property value.
+     *
+     * @param key            the key
+     * @param configFileName the config file name
+     * @return property value
+     * @throws Exception the exception
+     */
+    public static String getPropertyValue(String key, String configFileName) throws Exception {
+        return getProcPropertyValue(key, Optional.ofNullable(configFileName).orElse(Constants.NONE_VALUE));
+    }
+
+
     public static int diffDay(Date d, Date accessDate) {
         /**
          * 날짜 계산
@@ -344,9 +364,6 @@ public class Common {
         System.out.println(accessC.compareTo(curC));
         return diffCnt;
     }
-
-
-
 
 
     /**
@@ -416,228 +433,155 @@ public class Common {
         return bRtn;
 
     }
+    /**
+     * 사용자 Uaa 등록
+     * @param scimUser
+     * @throws MalformedURLException
+     */
+    /**
+     * public void register(ScimUser scimUser) throws MalformedURLException {
+     * <p>
+     * <p>
+     * ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
+     * credentials.setAccessTokenUri("https://uaa.115.68.46.29.xip.io/oauth/token/61a208dd-6e56-4afe-8f0e-9b6a9b0492ef?grant_type=client_credentials&response_type=token");
+     * <p>
+     * credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+     * <p>
+     * credentials.setClientId("admin");
+     * credentials.setClientSecret("admin");
+     * <p>
+     * URL uaaHost = new URL("http://uaa.115.68.46.29.xip.io");
+     * UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+     * UaaUserOperations uaaUserOperations = connection.userOperations();
+     * uaaUserOperations.createUser(scimUser);
+     * <p>
+     * }
+     *
+     * @SuppressWarnings({"rawtypes", "unchecked"})
+     * public void resetPassword(String userId, String newPassword, String type) throws MalformedURLException {
+     * ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
+     * credentials.setAccessTokenUri(uaaTarget + "/oauth/token?grant_type=client_credentials&response_type=token");
+     * <p>
+     * credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+     * <p>
+     * credentials.setClientId("admin");
+     * credentials.setClientSecret("admin");
+     * <p>
+     * <p>
+     * URL uaaHost = new URL(uaaTarget);
+     * UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+     * //        connection.userOperations().changeUserPassword();createUser(scimUser);
+     * }
+     */
+
+    public static String convertApiUrl(String url) {
+        return url.replace("https://", "").replace("http://", "");
+    }
+
 
 
     /**
-     * 기본적인 연결에 대한 설정값을 갖는 클레스
+     * DefaultCloudFoundryOperations을 생성하여, 반환한다.
      *
-     * @return
+     *
+     * @param connectionContext
+     * @param tokenProvider
+     * @return DefaultCloudFoundryOperations
      */
-    public DefaultConnectionContext connectionContext() {
-        return DefaultConnectionContext.builder()
-                .apiHost(apiTarget)
-                .skipSslValidation(cfskipSSLValidation)
-                .build();
+    public static DefaultCloudFoundryOperations cloudFoundryOperations(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return cloudFoundryOperations(cloudFoundryClient(connectionContext, tokenProvider), dopplerClient(connectionContext, tokenProvider), uaaClient(connectionContext, tokenProvider));
     }
 
     /**
-     * token을 제공하는 클레스 기본적으로 'cloudfoundry' client를 사용하며
-     * user token을 얻는 것을 주 목적으로 사용한다.
+     * DefaultCloudFoundryOperations을 생성하여, 반환한다.
      *
-     * @param username
-     * @param password
-     * @return
+     *
+     * @param cloudFoundryClient
+     * @param dopplerClient
+     * @param uaaClient
+     * @return DefaultCloudFoundryOperations
      */
-    public static PasswordGrantTokenProvider tokenProvider(String username,
-                                                           String password) {
-        return PasswordGrantTokenProvider.builder()
-                .clientId("cf")
-                .clientSecret("")
-                .password(password)
-                .username(username)
-                .build();
+    public static DefaultCloudFoundryOperations cloudFoundryOperations(org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient, DopplerClient dopplerClient, UaaClient uaaClient) {
+        return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient).dopplerClient(dopplerClient).uaaClient(uaaClient).build();
+    }
+
+    /**
+     * DefaultCloudFoundryOperations을 생성하여, 반환한다.
+     *
+     *
+     * @param connectionContext
+     * @param tokenProvider
+     * @param org
+     * @param space
+     * @return DefaultCloudFoundryOperations
+     */
+    public static DefaultCloudFoundryOperations cloudFoundryOperations(ConnectionContext connectionContext, TokenProvider tokenProvider, String org, String space) {
+        return cloudFoundryOperations(cloudFoundryClient(connectionContext, tokenProvider), dopplerClient(connectionContext, tokenProvider), uaaClient(connectionContext, tokenProvider), org, space);
+    }
+
+    /**
+     * DefaultCloudFoundryOperations을 생성하여, 반환한다.
+     *
+     *
+     * @param cloudFoundryClient
+     * @param dopplerClient
+     * @param uaaClient
+     * @param org
+     * @param space
+     * @return DefaultCloudFoundryOperations
+     */
+    public static DefaultCloudFoundryOperations cloudFoundryOperations(org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient, DopplerClient dopplerClient, UaaClient uaaClient, String org, String space) {
+        return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient).dopplerClient(dopplerClient).uaaClient(uaaClient).organization(org).space(space).build();
+    }
+
+    /**
+     * ReactorCloudFoundryClient 생성하여, 반환한다.
+     *
+     *
+     * @param connectionContext
+     * @param tokenProvider
+     * @return DefaultCloudFoundryOperations
+     */
+    public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
+    }
+
+
+
+    public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorDopplerClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
+    }
+
+    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
+    }
+
+    public DefaultConnectionContext connectionContext() {
+        return DefaultConnectionContext.builder().apiHost(convertApiUrl(apiTarget)).skipSslValidation(cfskipSSLValidation).build();
+    }
+
+
+    public static DefaultConnectionContext connectionContext(String apiUrl, boolean skipSSLValidation) {
+        return DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).build();
+    }
+
+    public static TokenGrantTokenProvider tokenProvider(String token) {
+        if (token.indexOf("bearer") < 0) {
+            token = "bearer " + token;
+        }
+        return new TokenGrantTokenProvider(token);
     }
 
     /**
      * token을 제공하는 클레스 사용자 임의의 clientId를 사용하며,
      * user token, client token을 모두 얻을 수 있다.
      *
-     * @param clientId
-     * @param clientSecret
      * @param username
      * @param password
      * @return
      */
-    public static PasswordGrantTokenProvider tokenProvider(String username,
-                                                           String password,
-                                                           String clientId,
-                                                           String clientSecret) {
-        return PasswordGrantTokenProvider.builder()
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .password(password)
-                .username(username)
-                .build();
+    public static PasswordGrantTokenProvider tokenProvider(String username, String password) {
+        return PasswordGrantTokenProvider.builder().password(password).username(username).build();
     }
-
-    /**
-     * 이미 가지고 있는 token을 CF client에 제공하는 클래스
-     *
-     * @param token
-     * @return
-     */
-
-    public static TokenGrantTokenProvider tokenProvider(String token) {
-        return new TokenGrantTokenProvider(token);
-    }
-
-    /**
-     * CloudFoudry의 기능을 제공한다.
-     *
-     * @param connectionContext
-     * @param tokenProvider
-     * @return
-     */
-    public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return ReactorCloudFoundryClient.builder()
-                .connectionContext(connectionContext)
-                .tokenProvider(tokenProvider)
-                .build();
-    }
-    public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, String username, String password, String clientId, String clientSecret) {
-        return cloudFoundryClient(connectionContext, tokenProvider(username, password, clientId, clientSecret));
-    }
-    public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, String username, String password) {
-        return cloudFoundryClient(connectionContext, tokenProvider(username, password));
-    }
-    public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, String token) {
-        return cloudFoundryClient(connectionContext, tokenProvider(token));
-    }
-
-    /**
-     * Dropper의 기능을 제공한다.
-     *
-     * @param connectionContext
-     * @param tokenProvider
-     * @return
-     */
-    public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return ReactorDopplerClient.builder()
-                .connectionContext(connectionContext)
-                .tokenProvider(tokenProvider)
-                .build();
-    }
-    public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, String username, String password, String clientId, String clientSecret) {
-        return dopplerClient(connectionContext, tokenProvider(username, password, clientId, clientSecret));
-    }
-    public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, String username, String password) {
-        return dopplerClient(connectionContext, tokenProvider(username, password));
-    }
-    public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, String token) {
-        return dopplerClient(connectionContext, tokenProvider(token));
-    }
-
-    /**
-     * Uaa 의 기능을 제공한다.
-     *
-     * @param connectionContext
-     * @param tokenProvider
-     * @return
-     */
-    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return ReactorUaaClient.builder()
-                .connectionContext(connectionContext)
-                .tokenProvider(tokenProvider)
-                .build();
-    }
-    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, String username, String password, String clientId, String clientSecret) {
-        return uaaClient(connectionContext, tokenProvider(username, password, clientId, clientSecret));
-    }
-    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, String username, String password) {
-        return uaaClient(connectionContext, tokenProvider(username, password));
-    }
-    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, String token) {
-        return uaaClient(connectionContext, tokenProvider(token));
-    }
-
-    /**
-     * CloudFoundry, Dropper, Uaa 의 기능을 함께 사용하여 구현가능한 기능을 제공한다.
-     *
-     * @param cloudFoundryClient
-     * @param dopplerClient
-     * @param uaaClient
-     * @param organization
-     * @param space
-     * @return
-     */
-    public static DefaultCloudFoundryOperations cloudFoundryOperations(org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient,
-                                                                       DopplerClient dopplerClient,
-                                                                       UaaClient uaaClient,
-                                                                       String organization,
-                                                                       String space) {
-        return DefaultCloudFoundryOperations.builder()
-                .cloudFoundryClient(cloudFoundryClient)
-                .dopplerClient(dopplerClient)
-                .uaaClient(uaaClient)
-                .organization(organization)
-                .space(space)
-                .build();
-    }
-    public static DefaultCloudFoundryOperations cloudFoundryOperations(ConnectionContext connectionContext,
-                                                                       TokenProvider tokenProvider,
-                                                                       String organization,
-                                                                       String space) {
-        return cloudFoundryOperations(cloudFoundryClient(connectionContext, tokenProvider),
-                dopplerClient(connectionContext, tokenProvider),
-                uaaClient(connectionContext, tokenProvider),
-                organization,
-                space);
-    }
-    public static DefaultCloudFoundryOperations cloudFoundryOperations(org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient,
-                                                                       DopplerClient dopplerClient,
-                                                                       UaaClient uaaClient) {
-        return DefaultCloudFoundryOperations.builder()
-                .cloudFoundryClient(cloudFoundryClient)
-                .dopplerClient(dopplerClient)
-                .uaaClient(uaaClient)
-                .build();
-    }
-    public static DefaultCloudFoundryOperations cloudFoundryOperations(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return cloudFoundryOperations(cloudFoundryClient(connectionContext, tokenProvider),
-                dopplerClient(connectionContext, tokenProvider),
-                uaaClient(connectionContext, tokenProvider));
-    }
-
-
-    /**
-     * 사용자 Uaa 등록
-     * @param scimUser
-     * @throws MalformedURLException
-     */
-/**
- public void register(ScimUser scimUser) throws MalformedURLException {
-
-
- ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
- credentials.setAccessTokenUri("https://uaa.115.68.46.29.xip.io/oauth/token/61a208dd-6e56-4afe-8f0e-9b6a9b0492ef?grant_type=client_credentials&response_type=token");
-
- credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
-
- credentials.setClientId("admin");
- credentials.setClientSecret("admin");
-
- URL uaaHost = new URL("http://uaa.115.68.46.29.xip.io");
- UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
- UaaUserOperations uaaUserOperations = connection.userOperations();
- uaaUserOperations.createUser(scimUser);
-
- }
-
- @SuppressWarnings({"rawtypes", "unchecked"})
- public void resetPassword(String userId, String newPassword, String type) throws MalformedURLException {
- ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
- credentials.setAccessTokenUri(uaaTarget + "/oauth/token?grant_type=client_credentials&response_type=token");
-
- credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
-
- credentials.setClientId("admin");
- credentials.setClientSecret("admin");
-
-
- URL uaaHost = new URL(uaaTarget);
- UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
- //        connection.userOperations().changeUserPassword();createUser(scimUser);
- }
- */
 
 }

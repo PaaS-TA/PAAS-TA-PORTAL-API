@@ -14,8 +14,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
+import org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper;
 import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
-import org.openpaas.paasta.portal.api.mapper.portal.InviteOrgSpaceMapper;
+
 import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;

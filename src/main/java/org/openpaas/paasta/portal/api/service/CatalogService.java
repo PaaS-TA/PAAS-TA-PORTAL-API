@@ -1052,19 +1052,19 @@ public class CatalogService extends Common {
         CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
         String appName = param.getName();
 
-        // START APPLICATION
-        appService.startApp(new App() {{
-            setName(appName);
-        }}, cloudFoundryClient);
-
-        // GET APP GUID (FOR TEST CASE)
-        CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
-        UUID resultAppGuid = cloudApplication.getMeta().getGuid();
-
-        return new HashMap<String, Object>() {{
-            put("APP_GUID", resultAppGuid);
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
+//        // START APPLICATION
+//        appService.startApp(new App() {{
+//            setName(appName);
+//        }}, cloudFoundryClient);
+//
+//        // GET APP GUID (FOR TEST CASE)
+//        CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
+//        UUID resultAppGuid = cloudApplication.getMeta().getGuid();
+//
+//        return new HashMap<String, Object>() {{
+//            put("APP_GUID", resultAppGuid);
+//            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+//        }};
     }
 
 
