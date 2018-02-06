@@ -15,12 +15,11 @@ ext {
 }
 
 apply plugin: 'java'
-apply plugin: 'war'
 apply plugin: 'spring-boot'
 apply plugin: "io.spring.dependency-management"
 
 
-war {
+jar {
     baseName = 'paas-ta-portal-api'
 }
 
