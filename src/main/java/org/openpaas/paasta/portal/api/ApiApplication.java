@@ -1,15 +1,9 @@
-package org.openpaas.paasta.portal.api.config;
+package org.openpaas.paasta.portal.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.client.RestTemplate;
-
-import javax.net.ssl.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 /**
  * All you need to run a Eureka registration server.
