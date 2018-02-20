@@ -15,9 +15,11 @@ import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.*;
@@ -25,9 +27,8 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OrgServiceTest extends CommonTest {
 

@@ -8,8 +8,10 @@ import org.openpaas.paasta.portal.api.common.CommonTest;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.ConfigInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.List;
@@ -17,9 +19,8 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConfigInfoServiceTest extends CommonTest {
 

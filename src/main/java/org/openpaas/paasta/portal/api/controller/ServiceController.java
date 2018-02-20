@@ -134,7 +134,7 @@ public class ServiceController extends Common {
         CustomCloudFoundryClient customClient = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
 
         // UNBIND SERVICE
-        appService.unbindService(new App(){{setName(service.getName()); setServiceName(service.getServiceName());}}, client);
+        //CISS appService.unbindService(new App(){{setName(service.getName()); setServiceName(service.getServiceName());}}, client);
 
         // DELETE SERVICE INSTANCE
         serviceService.deleteInstanceService(service, customClient);

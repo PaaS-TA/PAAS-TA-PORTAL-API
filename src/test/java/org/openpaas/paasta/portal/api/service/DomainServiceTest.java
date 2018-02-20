@@ -14,9 +14,11 @@ import org.openpaas.paasta.portal.api.common.CommonTest;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.net.URL;
@@ -27,9 +29,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Dojun on 2016-07-25.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class DomainServiceTest extends CommonTest {
 
     private static CustomCloudFoundryClient admin;

@@ -11,7 +11,7 @@ import org.openpaas.paasta.portal.api.util.SSLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;

@@ -9,7 +9,7 @@ import org.junit.runners.MethodSorters;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.AppAutoScale;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Created by ijlee on 2016-07-18.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
+//@SpringApplicationConfiguration(classes = {ApiApplication.class})
 @WebAppConfiguration
 @TransactionConfiguration(defaultRollback = true)
 @Transactional("portalTransactionManager")

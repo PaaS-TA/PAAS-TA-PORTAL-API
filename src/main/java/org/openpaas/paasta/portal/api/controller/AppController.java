@@ -93,7 +93,7 @@ public class AppController extends Common {
         CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        respAppStats = appService.getAppStats(app, client);
+        respAppStats = appService.getAppStats(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("stopApp End ");
 
@@ -120,7 +120,7 @@ public class AppController extends Common {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.renameApp(app, client);
+        appService.renameApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Rename App End ");
 
@@ -146,7 +146,7 @@ public class AppController extends Common {
         //token setting
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
-        appService.deleteApp(app, client);
+        appService.deleteApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
 
         LOGGER.info("delete App End ");
@@ -174,7 +174,7 @@ public class AppController extends Common {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.startApp(app, client);
+        appService.startApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("startApp End ");
 
@@ -200,7 +200,7 @@ public class AppController extends Common {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.stopApp(app, client);
+        appService.stopApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("stopApp End ");
 
@@ -226,7 +226,7 @@ public class AppController extends Common {
         CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.restageApp(app, client);
+        appService.restageApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("restageApp End ");
 
@@ -254,7 +254,7 @@ public class AppController extends Common {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.updateApp(app, client);
+        appService.updateApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("updateApp End ");
 
@@ -278,7 +278,7 @@ public class AppController extends Common {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.bindService(app, client);
+        appService.bindService(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("bindService End ");
 
@@ -303,7 +303,7 @@ public class AppController extends Common {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.unbindService(app, client);
+        appService.unbindService(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("unbindService End ");
 
@@ -330,7 +330,7 @@ public class AppController extends Common {
         CustomCloudFoundryClient client = new CustomCloudFoundryClient(credentials, getTargetURL(apiTarget), true);
         client.login();
 
-        respAppEvents = appService.getAppEvents(app, client);
+        respAppEvents = appService.getAppEvents(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("getAppEvents End ");
 
@@ -353,7 +353,8 @@ public class AppController extends Common {
     public Map getApplicationEnv(@RequestBody App app, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getApplicationEnv Start : " + app.getName());
-        Map<String,String> appEnv = appService.getApplicationEnv(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        //Map<String,String> appEnv = appService.getApplicationEnv(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        Map<String,String> appEnv = null;
         LOGGER.info("getApplicationEnv End ");
 
         return appEnv;

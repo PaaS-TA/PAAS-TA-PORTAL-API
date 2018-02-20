@@ -1061,10 +1061,10 @@ public class CatalogService extends Common {
 //        CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
 //        UUID resultAppGuid = cloudApplication.getMeta().getGuid();
 //
-//        return new HashMap<String, Object>() {{
-//            put("APP_GUID", resultAppGuid);
-//            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-//        }};
+        return new HashMap<String, Object>() {{
+            //put("APP_GUID", resultAppGuid);
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
     }
 
 

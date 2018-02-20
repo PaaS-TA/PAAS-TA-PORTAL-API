@@ -14,10 +14,14 @@ import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.App;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.HashMap;
@@ -27,9 +31,8 @@ import java.util.UUID;
 import static org.junit.Assert.assertTrue;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AppServiceTest extends CommonTest {
 
@@ -121,7 +124,7 @@ public class AppServiceTest extends CommonTest {
         app.setGuid(testAppGuid);
         String result;
 
-        result = appService.getAppSummary(app, clientAdminCustom);
+        result = appService.getAppSummary(app, token);
 
         assertTrue(result != null);
 
@@ -136,7 +139,7 @@ public class AppServiceTest extends CommonTest {
         app.setGuid(testAppGuid);
         String result;
 
-        result = appService.getAppStats(app, clientAdminCustom);
+        result = appService.getAppStats(app, token);
 
         assertTrue(result != null);
     }
@@ -149,7 +152,7 @@ public class AppServiceTest extends CommonTest {
         app.setGuid(testAppGuid);
         String result;
 
-        result = appService.getAppEvents(app, clientAdminCustom);
+        result = appService.getAppEvents(app, token);
 
         assertTrue(result != null);
     }
@@ -164,7 +167,7 @@ public class AppServiceTest extends CommonTest {
         app.setName(testApp);
         app.setNewName(testApp);
 
-        appService.renameApp(app, clientAdmin);
+        appService.renameApp(app, token);
 
     }
 
@@ -177,7 +180,7 @@ public class AppServiceTest extends CommonTest {
         app.setSpaceName(appTestSpace);
         app.setName(testApp);
 
-        appService.stopApp(app, clientAdmin);
+        appService.stopApp(app, token);
     }
 
     @Test
@@ -188,7 +191,7 @@ public class AppServiceTest extends CommonTest {
         app.setSpaceName(appTestSpace);
         app.setName(testApp);
 
-        appService.startApp(app, clientAdmin);
+        appService.startApp(app, token);
     }
 
 
@@ -201,14 +204,14 @@ public class AppServiceTest extends CommonTest {
         app.setName(testApp);
 
         app.setInstances(1);
-        appService.updateApp(app, clientAdmin);
+        appService.updateApp(app, token);
 
         app.setInstances(0);
         app.setMemory(512);
-        appService.updateApp(app, clientAdmin);
+        appService.updateApp(app, token);
 
         app.setDiskQuota(1024);
-        appService.updateApp(app, clientAdmin);
+        appService.updateApp(app, token);
     }
 
 
@@ -218,7 +221,7 @@ public class AppServiceTest extends CommonTest {
         App app = new App();
         app.setGuid(testAppGuid);
 
-        appService.restageApp(app, clientAdminCustom);
+        appService.restageApp(app, token);
 
     }
 
@@ -231,7 +234,7 @@ public class AppServiceTest extends CommonTest {
         app.setSpaceName(appTestSpace);
         app.setName(testApp);
 
-        Map result = appService.getApplicationEnv(app, clientToken);
+        Map result = new HashMap<>(); //appService.getApplicationEnv(app, clientToken);
 
         assertTrue(result.size() == 5);
     }

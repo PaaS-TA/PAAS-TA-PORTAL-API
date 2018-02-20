@@ -13,7 +13,7 @@ import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.App;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 

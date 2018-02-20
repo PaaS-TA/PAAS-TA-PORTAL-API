@@ -17,8 +17,12 @@ import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
@@ -31,10 +35,9 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Dojun on 2016-10-07.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
-public class AuthorityGroupServiceTest extends CommonTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class AuthorityGroupServiceTest extends CommonTest {
 
     @Autowired
     private AuthorityGroupService authorityGroupService;

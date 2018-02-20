@@ -10,8 +10,10 @@ import org.junit.runners.MethodSorters;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.junit.Assert.assertFalse;
@@ -23,9 +25,8 @@ import static org.junit.Assert.assertFalse;
  * @version 1.0
  * @since 2016.08.18
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RouteServiceTest extends Common {
 

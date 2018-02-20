@@ -7,9 +7,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.File;
@@ -19,10 +21,9 @@ import java.net.URISyntaxException;
 /**
  * Created by mg on 2016-07-05.
  */
-@WebAppConfiguration
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
 public class GlusterfsServiceTest {
 
     @Autowired

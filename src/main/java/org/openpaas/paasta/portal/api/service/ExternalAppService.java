@@ -123,7 +123,7 @@ public class ExternalAppService extends Common {
             }
             LOGGER.info("updateApp :: " + sAction + ":::" + instanceCnt);
             //service call
-            appService.updateApp(app, cloudFoundryClient);
+            //CISS appService.updateApp(app, cloudFoundryClient);
             LOGGER.info("updateApp End ");
         }catch (Exception e){
             e.printStackTrace();

@@ -18,12 +18,14 @@ import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,8 +34,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpUpgradeHandler;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -49,9 +54,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @version 1.0
  * @since 2016.07.19
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @TransactionConfiguration()
 @Transactional("portalTransactionManager")
@@ -792,7 +796,7 @@ public class CatalogServiceTest extends CommonTest {
         unbindServiceParam.setName(testUpdateCatalog.getAppName());
         unbindServiceParam.setServiceName(testServicePlan.getServiceInstanceName());
 
-        appService.unbindService(unbindServiceParam, TEST_ADMIN_CLIENT);
+        appService.unbindService(unbindServiceParam, TEST_ADMIN_TOKEN);
 
         List<Catalog> resultList = (List<Catalog>) resultMap.get("SERVICE_INSTANCE_GUID_LIST");
 
@@ -810,7 +814,7 @@ public class CatalogServiceTest extends CommonTest {
         deleteAppParam.setOrgName(testUpdateCatalog.getOrgName());
         deleteAppParam.setSpaceName(testUpdateCatalog.getSpaceName());
 
-        appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+        appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
         // DELETE ROUTE
         List<String> tempList = new ArrayList<>();
@@ -860,7 +864,7 @@ public class CatalogServiceTest extends CommonTest {
         unbindServiceParam.setName(testUpdateCatalog.getAppName());
         unbindServiceParam.setServiceName(testServicePlan.getServiceInstanceName());
 
-        appService.unbindService(unbindServiceParam, TEST_ADMIN_CLIENT);
+        appService.unbindService(unbindServiceParam, TEST_ADMIN_TOKEN);
 
         List<Catalog> resultList = (List<Catalog>) resultMap.get("SERVICE_INSTANCE_GUID_LIST");
 
@@ -878,7 +882,7 @@ public class CatalogServiceTest extends CommonTest {
         deleteAppParam.setOrgName(testUpdateCatalog.getOrgName());
         deleteAppParam.setSpaceName(testUpdateCatalog.getSpaceName());
 
-        appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+        appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
         // DELETE ROUTE
         List<String> tempList = new ArrayList<>();
@@ -936,7 +940,7 @@ public class CatalogServiceTest extends CommonTest {
         deleteAppParam.setOrgName(testUpdateCatalog.getOrgName());
         deleteAppParam.setSpaceName(testUpdateCatalog.getSpaceName());
 
-        appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+        appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
         // DELETE ROUTE
         List<String> tempList = new ArrayList<>();
@@ -994,7 +998,7 @@ public class CatalogServiceTest extends CommonTest {
         deleteAppParam.setOrgName(testUpdateCatalog.getOrgName());
         deleteAppParam.setSpaceName(testUpdateCatalog.getSpaceName());
 
-        appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+        appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
         // DELETE ROUTE
         List<String> tempList = new ArrayList<>();
@@ -1038,7 +1042,7 @@ public class CatalogServiceTest extends CommonTest {
         deleteAppParam.setOrgName(testInsertCatalog.getOrgName());
         deleteAppParam.setSpaceName(testInsertCatalog.getSpaceName());
 
-        appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+        appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
         // DELETE ROUTE
         List<String> tempList = new ArrayList<>();
@@ -1112,7 +1116,7 @@ public class CatalogServiceTest extends CommonTest {
         deleteAppParam.setOrgName(testInsertCatalog.getOrgName());
         deleteAppParam.setSpaceName(testInsertCatalog.getSpaceName());
 
-        appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+        appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
         // DELETE ROUTE
         List<String> tempList = new ArrayList<>();
@@ -1177,7 +1181,7 @@ public class CatalogServiceTest extends CommonTest {
         unbindServiceParam.setName(testUpdateCatalog.getAppName());
         unbindServiceParam.setServiceName(testUpdateCatalog.getServiceInstanceName());
 
-        appService.unbindService(unbindServiceParam, TEST_ADMIN_CLIENT);
+        appService.unbindService(unbindServiceParam, TEST_ADMIN_TOKEN);
 
         Service deleteInstanceServiceParam = new Service();
         deleteInstanceServiceParam.setGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
@@ -1247,7 +1251,13 @@ public class CatalogServiceTest extends CommonTest {
             setOrgName(testOrg);
             setSpaceName(testSpace);
             setServicePlan(servicePlanGuid);
-        }}, new MockHttpServletRequest() {{
+        }}, new MockHttpServletRequest() {
+            @Override
+            public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+                return null;
+            }
+
+            {
             addHeader(cfAuthorization, TEST_ADMIN_TOKEN);
         }});
 
@@ -1259,7 +1269,13 @@ public class CatalogServiceTest extends CommonTest {
             setHostName(TEST_APP_NAME + "." + testDomainUrl);
             setAppSampleFilePath(Constants.USE_YN_N);
             setAppSampleStartYn(Constants.USE_YN_N);
-        }}, new MockHttpServletRequest() {{
+        }}, new MockHttpServletRequest() {
+            @Override
+            public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+                return null;
+            }
+
+            {
             addHeader(cfAuthorization, TEST_ADMIN_TOKEN);
         }});
     }
@@ -1290,7 +1306,7 @@ public class CatalogServiceTest extends CommonTest {
             deleteAppParam.setOrgName(reqOrgName);
             deleteAppParam.setSpaceName(reqSpaceName);
 
-            appService.deleteApp(deleteAppParam, TEST_ADMIN_CLIENT);
+            appService.deleteApp(deleteAppParam, TEST_ADMIN_TOKEN);
 
             // DELETE ROUTE
             List<String> reqHostNameList = new ArrayList<>();

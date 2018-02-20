@@ -72,6 +72,7 @@ dependencies {
     compile ('org.cloudfoundry:cloudfoundry-operations:3.3.0.RELEASE')
     compile ('io.projectreactor:reactor-core:3.1.2.RELEASE')
     compile ('io.projectreactor.ipc:reactor-netty:0.7.2.RELEASE')
+    compile group: 'org.cloudfoundry', name: 'cloudfoundry-client', version: '3.3.0.RELEASE' //추가
     //cloud foundry uaa
     compile files('libs/uaa-java-client-1.0.2-SNAPSHOT.jar')
     compile ('org.cloudfoundry.identity:cloudfoundry-identity-scim:2.7.4'){

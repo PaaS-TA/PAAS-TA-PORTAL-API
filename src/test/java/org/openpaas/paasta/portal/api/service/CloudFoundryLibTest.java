@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.amazonaws.util.json.JSONArray;
+//import com.amazonaws.util.json.JSONArray;
+import org.codehaus.jettison.json.JSONArray;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudService;

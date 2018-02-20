@@ -10,9 +10,13 @@ import org.openpaas.paasta.portal.api.common.CommonTest;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.AppAutoScale;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,9 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Created by ijlee on 2016-07-20.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TransactionConfiguration(defaultRollback = true)
 @Transactional("portalTransactionManager")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

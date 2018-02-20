@@ -12,12 +12,18 @@ import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.model.Usage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+//import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpUpgradeHandler;
+import java.io.IOException;
 
 /**
  * org.openpaas.paasta.portal.api.service
@@ -26,9 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @version 1.0
  * @since 2016.09.22
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {ApiApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @TransactionConfiguration()
 @Transactional("portalTransactionManager")
@@ -84,7 +89,13 @@ public class UsageServiceTest extends CommonTest {
 
         usageService.getUsageSpaceList(new Usage() {{
             setOrgName(testOrg);
-        }}, new MockHttpServletRequest() {{
+        }}, new MockHttpServletRequest() {
+            @Override
+            public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+                return null;
+            }
+
+            {
             addHeader(cfAuthorization, TEST_ADMIN_TOKEN);
         }});
 
