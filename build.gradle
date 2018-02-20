@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.9.RELEASE'
+        springBootVersion = '1.5.10.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -15,12 +15,11 @@ ext {
 }
 
 apply plugin: 'java'
-apply plugin: 'war'
 apply plugin: 'spring-boot'
 apply plugin: "io.spring.dependency-management"
 
 
-war {
+jar {
     baseName = 'paas-ta-portal-api'
 }
 
@@ -41,8 +40,8 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     //Eureka
     compile ('org.springframework.cloud:spring-cloud-starter-eureka')
-    //UAA
 
+    compile ('de.codecentric:spring-boot-admin-starter-client:1.5.7')
 
     //DB
     compile ('org.springframework.boot:spring-boot-starter-jdbc')
