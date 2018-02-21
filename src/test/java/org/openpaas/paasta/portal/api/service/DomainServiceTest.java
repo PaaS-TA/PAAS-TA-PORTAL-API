@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.openpaas.paasta.portal.api.common.CloudFoundryExceptionMatcher;
 import org.openpaas.paasta.portal.api.common.CommonTest;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.config.ApiApplication;
+//import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;

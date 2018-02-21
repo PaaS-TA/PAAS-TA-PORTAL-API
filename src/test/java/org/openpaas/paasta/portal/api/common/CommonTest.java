@@ -6,7 +6,7 @@ import org.cloudfoundry.identity.uaa.api.common.UaaConnection;
 import org.cloudfoundry.identity.uaa.api.group.UaaGroupOperations;
 import org.cloudfoundry.identity.uaa.api.user.UaaUserOperations;
 import org.junit.runner.RunWith;
-import org.openpaas.paasta.portal.api.config.ApiApplication;
+//import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -7,7 +7,7 @@ import org.junit.runners.MethodSorters;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CommonTest;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.config.ApiApplication;
+//import org.openpaas.paasta.portal.api.config.ApiApplication;
 import org.openpaas.paasta.portal.api.controller.CommonCodeController;
 import org.openpaas.paasta.portal.api.model.CommonCode;
 import org.springframework.beans.factory.annotation.Autowired;
