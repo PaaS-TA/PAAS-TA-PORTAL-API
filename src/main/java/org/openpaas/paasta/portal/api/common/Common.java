@@ -23,6 +23,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.config.service.EmailConfig;
+import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,6 +90,13 @@ public class Common {
 
     @Autowired
     public EmailConfig emailConfig;
+
+    @Autowired
+    private LoginService loginService;
+
+    public String getToken() throws MalformedURLException, URISyntaxException {
+        return loginService.login("yschoi", "1qaz@WSX").getValue();
+    }
 
     public URL getTargetURL(String target) throws MalformedURLException, URISyntaxException {
         return getTargetURI(target).toURL();
