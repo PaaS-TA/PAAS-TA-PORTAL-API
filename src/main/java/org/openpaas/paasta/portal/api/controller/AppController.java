@@ -60,7 +60,6 @@ public class AppController extends Common {
 //        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        //String token = loginService.login("yschoi", "1qaz@WSX").getValue();
         respApp = appService.getAppSummary(app, getToken());
 
         LOGGER.info("getAppSummary End ");
