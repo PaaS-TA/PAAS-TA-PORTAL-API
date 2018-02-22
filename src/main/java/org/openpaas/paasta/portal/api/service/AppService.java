@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
@@ -26,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,11 +60,17 @@ public class AppService extends Common {
     //DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
     //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
 
-    public String getAppSummary(App app, String token) {
+    public String getAppSummary(App app, String token) throws IOException{
 
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
-        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
-        return summaryApplicationResponse.toString();
+
+        //SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+        // 로그 추가(이후 .log() 제거)
+        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).log().block();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        //return summaryApplicationResponse.toString();
+        return objectMapper.writeValueAsString(summaryApplicationResponse);
     }
 
 

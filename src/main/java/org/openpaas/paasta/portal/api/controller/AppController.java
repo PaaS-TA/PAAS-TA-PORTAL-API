@@ -14,6 +14,7 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.service.AppService;
+import org.openpaas.paasta.portal.api.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,9 @@ public class AppController extends Common {
     @Autowired
     private AppService appService;
 
+    @Autowired
+    private LoginService loginService;
+
     /**
      * 앱 요약 정보를 조회한다.
      *
@@ -64,7 +70,7 @@ public class AppController extends Common {
 //        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        respApp = appService.getAppSummary(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        respApp = appService.getAppSummary(app, getToken());
 
         LOGGER.info("getAppSummary End ");
 
@@ -520,4 +526,8 @@ public class AppController extends Common {
         return mapLog;
     }
 
+    // Get Token (for test)
+    private String getToken() throws MalformedURLException, URISyntaxException{
+        return loginService.login("yschoi", "1qaz@WSX").getValue();
+    }
 }
