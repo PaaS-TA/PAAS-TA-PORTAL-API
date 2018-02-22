@@ -95,7 +95,7 @@ public class Common {
     private LoginService loginService;
 
     public String getToken() throws MalformedURLException, URISyntaxException {
-        return loginService.login("yschoi", "1qaz@WSX").getValue();
+        return loginService.login(adminUserName, adminPassword).getValue();
     }
 
     public URL getTargetURL(String target) throws MalformedURLException, URISyntaxException {
