@@ -12,8 +12,8 @@ import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
-import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -41,10 +41,10 @@ public class SpaceService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceService.class);
     @Autowired
     private AsyncUtilService asyncUtilService;
-    @Autowired
-    private SpaceMapper spaceMapper;
-    @Autowired
-    private OrgMapper orgMapper;
+//    @Autowired
+//    private SpaceMapper spaceMapper;
+//    @Autowired
+//    private OrgMapper orgMapper;
 
     /**
      * 공간(스페이스) 목록 조회한다.
@@ -399,10 +399,12 @@ public class SpaceService extends Common {
      */
     public List<Object> getSpacesForAdmin(String orgName) throws Exception{
 
-        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
+//        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
+        Map<String, Object> selectedOrg = null;
         int orgId = (int)selectedOrg.get("orgId");
 
-        return spaceMapper.getSpacesForAdmin(orgId);
+//        return spaceMapper.getSpacesForAdmin(orgId);
+        return null;
     }
 
     /**
@@ -417,7 +419,8 @@ public class SpaceService extends Common {
         Map map = new HashMap();
         map.put("spaceName" , spaceName);
         map.put("orgId" , orgId);
-        List selectSpace = spaceMapper.getSpacesInfo(map);
+//        List selectSpace = spaceMapper.getSpacesInfo(map);
+        List selectSpace = null;
         return selectSpace;
     }
 
@@ -431,7 +434,8 @@ public class SpaceService extends Common {
     public List<Space> getSpacesInfoById(int spaceId) throws Exception{
         Map map = new HashMap();
         map.put("spaceId" , spaceId);
-        List selectSpace = spaceMapper.getSpacesInfoById(map);
+//        List selectSpace = spaceMapper.getSpacesInfoById(map);
+        List selectSpace = null;
         return selectSpace;
     }
 

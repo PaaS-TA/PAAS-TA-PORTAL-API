@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.portal.SupportBoardMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.SupportBoardMapper;
 import org.openpaas.paasta.portal.api.model.Support;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ import java.util.Map;
 @Service
 public class SupportBoardService extends Common{
 
-    @Autowired
-    private SupportBoardMapper supportBoardMapper;
+//    @Autowired
+//    private SupportBoardMapper supportBoardMapper;
 
     /**
      * 게시판 게시글 목록 조회
@@ -36,7 +36,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> getBoardList(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", supportBoardMapper.getBoardList(param));
+//        resultMap.put("list", supportBoardMapper.getBoardList(param));
+        resultMap.put("info", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -52,7 +53,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> getBoard(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", supportBoardMapper.getBoard(param));
+//        resultMap.put("info", supportBoardMapper.getBoard(param));
+        resultMap.put("info", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -68,7 +70,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> getBoardCommentList(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", supportBoardMapper.getBoardCommentList(param));
+//        resultMap.put("list", supportBoardMapper.getBoardCommentList(param));
+        resultMap.put("info", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -84,8 +87,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> insertBoard(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportBoardMapper.insertBoard(param);
-        supportBoardMapper.setGroupNo(param);
+//        supportBoardMapper.insertBoard(param);
+//        supportBoardMapper.setGroupNo(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -102,7 +105,7 @@ public class SupportBoardService extends Common{
     public Map<String, Object> updateBoard(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportBoardMapper.updateBoard(param);
+//        supportBoardMapper.updateBoard(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -119,8 +122,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> deleteBoard(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportBoardMapper.deleteBoard(param);
-        supportBoardMapper.deleteAllComments(param);
+//        supportBoardMapper.deleteBoard(param);
+//        supportBoardMapper.deleteAllComments(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -137,7 +140,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> getReplyNum(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", supportBoardMapper.getReplyNum(param));
+//        resultMap.put("info", supportBoardMapper.getReplyNum(param));
+        resultMap.put("info", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -153,7 +157,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> getCommentReplyNum(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", supportBoardMapper.getCommentReplyNum(param));
+//        resultMap.put("info", supportBoardMapper.getCommentReplyNum(param));
+        resultMap.put("info", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -169,8 +174,8 @@ public class SupportBoardService extends Common{
     public Map<String, Object> insertBoardComment(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportBoardMapper.insertBoardComment(param);
-        supportBoardMapper.setCommentGroupNo(param);
+//        supportBoardMapper.insertBoardComment(param);
+//        supportBoardMapper.setCommentGroupNo(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -187,7 +192,7 @@ public class SupportBoardService extends Common{
     public Map<String, Object> updateBoardComment(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportBoardMapper.updateBoardComment(param);
+//        supportBoardMapper.updateBoardComment(param);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -203,7 +208,7 @@ public class SupportBoardService extends Common{
     public Map<String, Object> deleteBoardComment(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportBoardMapper.deleteBoardComment(param);
+//        supportBoardMapper.deleteBoardComment(param);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;

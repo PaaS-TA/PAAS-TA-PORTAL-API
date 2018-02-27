@@ -8,16 +8,20 @@ import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.lib.util.JsonUtil;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsRequest;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
+import org.cloudfoundry.operations.organizations.OrganizationSummary;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper;
-import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
+//import org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
 
-import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
+//import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
@@ -60,12 +64,12 @@ public class OrgService extends Common {
     private SpaceService spaceService;
     @Autowired
     private AsyncUtilService asyncUtilService;
-    @Autowired
-    private OrgMapper orgMapper;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private InviteOrgSpaceMapper inviteOrgSpaceMapper;
+//    @Autowired
+//    private OrgMapper orgMapper;
+//    @Autowired
+//    private UserMapper userMapper;
+//    @Autowired
+//    private InviteOrgSpaceMapper inviteOrgSpaceMapper;
 
 
     /**
@@ -131,6 +135,26 @@ public class OrgService extends Common {
         CloudOrganization cloudOrg = new CloudOrganization(null,null);
 
         cloudOrg = admin.getOrgByName(org.getOrgName(), true);
+
+
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        //
+        /*
+        cloudFoundryOperations.organizations()
+                .list()
+                .map(OrganizationSummary::getName)
+                .subscribe(System.out::println);
+        */
+        //
+        cloudFoundryClient.organizations()
+                .list(ListOrganizationsRequest.builder()
+                        .page(1)
+                        .build())
+                .flatMapIterable(ListOrganizationsResponse::getResources)
+                .map(resource -> OrganizationSummary.builder()
+                        .id(resource.getMetadata().getId())
+                        .name(resource.getEntity().getName())
+                        .build());
 
         return cloudOrg;
     }
@@ -499,7 +523,8 @@ public class OrgService extends Common {
      */
     public List<Object> getOrgsForAdmin() throws Exception{
 
-        return orgMapper.getOrgsForAdmin();
+        //return orgMapper.getOrgsForAdmin();
+        return null;
     }
 
     /**
@@ -525,7 +550,8 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public int insertOrgSpaceUser(HashMap map) throws Exception{
-       int cnt = inviteOrgSpaceMapper.insertInviteOrgSpace(map);
+       //int cnt = inviteOrgSpaceMapper.insertInviteOrgSpace(map);
+        int cnt = 0;
         return cnt;
     }
 
@@ -537,7 +563,8 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public int updateOrgSpaceUser(HashMap map) throws Exception{
-       int cnt = inviteOrgSpaceMapper.updateOrgSpaceUser(map);
+//       int cnt = inviteOrgSpaceMapper.updateOrgSpaceUser(map);
+        int cnt = 0;
         return cnt;
     }
 
@@ -549,8 +576,9 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public List<InviteOrgSpace> selectOrgSpaceUser (InviteOrgSpace inviteOrgSpace) throws Exception{
-        List<InviteOrgSpace> list = inviteOrgSpaceMapper.selectOrgSpaceUser(inviteOrgSpace);
-        return list;
+//        List<InviteOrgSpace> list = inviteOrgSpaceMapper.selectOrgSpaceUser(inviteOrgSpace);
+//        return list;
+        return null;
     }
 
     /**
@@ -768,7 +796,8 @@ public class OrgService extends Common {
      */
     public int getOrgId(String orgName) throws Exception{
 
-        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
+//        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
+        Map<String, Object> selectedOrg = null;
         int orgId = (int)selectedOrg.get("orgId");
 
         return orgId;
@@ -783,7 +812,8 @@ public class OrgService extends Common {
     public int updateInviteY(String code){
         Map map = new HashMap();
         map.put("token",code);
-        int cnt = inviteOrgSpaceMapper.updateInviteY(map);
+//        int cnt = inviteOrgSpaceMapper.updateInviteY(map);
+        int cnt = 0;
         return cnt;
     }
 
@@ -798,7 +828,8 @@ public class OrgService extends Common {
         Map map = new HashMap();
         map.put("token",code);
         map.put("accessCnt",accessCnt);
-        int cnt = inviteOrgSpaceMapper.updateAccessCnt(map);
+//        int cnt = inviteOrgSpaceMapper.updateAccessCnt(map);
+        int cnt =0;
         return cnt;
     }
 
@@ -811,7 +842,8 @@ public class OrgService extends Common {
     public List selectInviteInfo(String code){
         Map map = new HashMap();
         map.put("token",code);
-        List list = inviteOrgSpaceMapper.selectInviteInfo(map);
+//        List list = inviteOrgSpaceMapper.selectInviteInfo(map);
+        List list = null;
         return list;
     }
 
@@ -867,7 +899,8 @@ public class OrgService extends Common {
         inviteOrgSpace.setGubun(gubun);
         inviteOrgSpace.setUserId(userId);
         inviteOrgSpace.setInviteName(orgName);
-        List<InviteOrgSpace> orgInviteList = inviteOrgSpaceMapper.getUsersByInvite(inviteOrgSpace);
+        //List<InviteOrgSpace> orgInviteList = inviteOrgSpaceMapper.getUsersByInvite(inviteOrgSpace);
+        List<InviteOrgSpace> orgInviteList = null;
         List<Map<String, Object>>orgUserList = new ArrayList<>();
         String voUserId = "";
         for (int i = 0; i < orgInviteList.size(); i++){
@@ -875,7 +908,8 @@ public class OrgService extends Common {
             if (!vo.getInviteUserId().equals(voUserId)) {
                 Map voMap = new HashMap<>();
                 voUserId = vo.getInviteUserId();
-                String voUserGuid = userMapper.getUserGuid(voUserId) == null ? "" : userMapper.getUserGuid(voUserId);
+                //String voUserGuid = userMapper.getUserGuid(voUserId) == null ? "" : userMapper.getUserGuid(voUserId);
+                String voUserGuid = "";
                 voMap.put("userName", voUserId);
                 voMap.put("orgName", vo.getInviteName());
                 voMap.put("userGuid", voUserGuid);
@@ -950,7 +984,7 @@ public class OrgService extends Common {
         updateTokenMap.put("createTime",new Date());
         updateTokenMap.put("retoken",reToken);
         updateTokenMap.put("token",inviteOrgSpace.getToken());
-        inviteOrgSpaceMapper.updateOrgSpaceUserToken(updateTokenMap);
+//        inviteOrgSpaceMapper.updateOrgSpaceUserToken(updateTokenMap);
         Boolean bRtn = sendInviteEmail(map);
         return updateTokenMap;
     }
@@ -963,7 +997,8 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public int cancelInvite(Map map) throws Exception {
-        return inviteOrgSpaceMapper.deleteOrgSpaceUserToken(map);
+//        return inviteOrgSpaceMapper.deleteOrgSpaceUserToken(map);
+        return 0;
     }
 
     /**

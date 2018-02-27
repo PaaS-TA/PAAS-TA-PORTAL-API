@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.portal.MenuMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.MenuMapper;
 import org.openpaas.paasta.portal.api.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +20,12 @@ import java.util.*;
 @Service
 public class MenuService {
 
-    private final MenuMapper menuMapper;
+//    private final MenuMapper menuMapper;
 
-    @Autowired
-    public MenuService(MenuMapper menuMapper) {
-        this.menuMapper = menuMapper;
-    }
+//    @Autowired
+//    public MenuService(MenuMapper menuMapper) {
+//        this.menuMapper = menuMapper;
+//    }
 
 
     /**
@@ -36,7 +36,8 @@ public class MenuService {
      */
     public Map<String, Object> getMenuMaxNoList(Menu param) {
         return new HashMap<String, Object>() {{
-            put("MAX_NO", menuMapper.getMenuMaxNoList(param));
+//            put("MAX_NO", menuMapper.getMenuMaxNoList(param));
+            put("MAX_NO","");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
@@ -81,9 +82,11 @@ public class MenuService {
         List<HashMap<String, Object>> resultList = new ArrayList<>();
 
         // GET ROOT NODE
-        List<Menu> menuList = menuMapper.getMenuList(new Menu() {{
-            setParentNo((null != param) ? param.getNo() : 0);
-        }});
+//        List<Menu> menuList = menuMapper.getMenuList(new Menu() {{
+//            setParentNo((null != param) ? param.getNo() : 0);
+//        }});
+
+        List<Menu> menuList = null;
 
         for (Menu menuModel : menuList) {
             HashMap<String, Object> menuItemMap = new HashMap<String, Object>() {{
@@ -113,7 +116,8 @@ public class MenuService {
      */
     public Map<String, Object> getMenuDetail(Menu param) {
         return new HashMap<String, Object>() {{
-            put("RESULT_DATA", menuMapper.getMenuDetail(param));
+//            put("RESULT_DATA", menuMapper.getMenuDetail(param));
+            put("RESULT_DATA", "");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
@@ -126,7 +130,7 @@ public class MenuService {
      * @return Map(자바클래스)
      */
     public Map<String, Object> insertMenu(Menu param) {
-        menuMapper.insertMenu(param);
+//        menuMapper.insertMenu(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -141,7 +145,7 @@ public class MenuService {
      * @return Map(자바클래스)
      */
     public Map<String, Object> updateMenu(Menu param) {
-        menuMapper.updateMenu(param);
+//        menuMapper.updateMenu(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -156,7 +160,7 @@ public class MenuService {
      * @return Map(자바클래스)
      */
     public Map<String, Object> deleteMenu(Menu param) {
-        menuMapper.deleteMenu(param);
+//        menuMapper.deleteMenu(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -171,10 +175,11 @@ public class MenuService {
      */
     public Map<String, Object> getUserMenuList() {
         return new HashMap<String, Object>() {{
-            put("list", menuMapper.getMenuList(new Menu() {{
-                setParentNo(0);
-                setUseYn(Constants.USE_YN_Y);
-            }}));
+//            put("list", menuMapper.getMenuList(new Menu() {{
+//                setParentNo(0);
+//                setUseYn(Constants.USE_YN_Y);
+//            }}));
+            put("list", "");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
 

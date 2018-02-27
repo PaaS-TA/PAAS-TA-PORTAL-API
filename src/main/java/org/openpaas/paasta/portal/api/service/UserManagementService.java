@@ -26,20 +26,25 @@ import java.util.Map;
 public class UserManagementService extends Common {
 
 
-    private final UserManagementMapper userManagementMapper;
-    private final UserMapper userMapper;
-    private final UserDetailMapper userDetailMapper;
+//    private final UserManagementMapper userManagementMapper;
+//    private final UserMapper userMapper;
+//    private final UserDetailMapper userDetailMapper;
     private final UserService userService;
 
 
+//    @Autowired
+//    public UserManagementService(UserManagementMapper userManagementMapper,
+//                                 UserMapper userMapper,
+//                                 UserDetailMapper userDetailMapper,
+//                                 UserService userService) {
+//        this.userManagementMapper = userManagementMapper;
+//        this.userMapper = userMapper;
+//        this.userDetailMapper = userDetailMapper;
+//        this.userService = userService;
+//    }
+
     @Autowired
-    public UserManagementService(UserManagementMapper userManagementMapper,
-                                 UserMapper userMapper,
-                                 UserDetailMapper userDetailMapper,
-                                 UserService userService) {
-        this.userManagementMapper = userManagementMapper;
-        this.userMapper = userMapper;
-        this.userDetailMapper = userDetailMapper;
+    public UserManagementService(UserService userService) {
         this.userService = userService;
     }
 
@@ -61,7 +66,8 @@ public class UserManagementService extends Common {
         param.setPageNo((int) ((pageSize * (pageNo - 1))));
 
         return new HashMap<String, Object>() {{
-            put("list", userManagementMapper.getUserInfoList(param));
+//            put("list", userManagementMapper.getUserInfoList(param));
+            put("list","");
         }};
     }
 
@@ -94,9 +100,9 @@ public class UserManagementService extends Common {
     public Map<String, Object> updateOperatingAuthority(UserManagement param) {
         param.setPageSize(1);
         param.setPageNo(0);
-        param.setAdminYn(Constants.USE_YN_Y.equals(userManagementMapper.getUserInfoList(param).get(0).getAdminYn()) ? Constants.USE_YN_N : Constants.USE_YN_Y);
-
-        userManagementMapper.updateOperatingAuthority(param);
+//        param.setAdminYn(Constants.USE_YN_Y.equals(userManagementMapper.getUserInfoList(param).get(0).getAdminYn()) ? Constants.USE_YN_N : Constants.USE_YN_Y);
+        param.setAdminYn("Y");
+//        userManagementMapper.updateOperatingAuthority(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -114,13 +120,13 @@ public class UserManagementService extends Common {
     public Map<String, Object> deleteUserAccount(UserManagement param) throws Exception {
         CustomCloudFoundryClient adminCustomCloudFoundryClient = getCustomCloudFoundryClient(adminUserName, adminPassword);
         String userId = param.getUserId();
-        String resultUserGuid = userMapper.getUserGuid(userId);
-
+//        String resultUserGuid = userMapper.getUserGuid(userId);
+        String resultUserGuid = "";
         if (null != resultUserGuid) {
             adminCustomCloudFoundryClient.deleteUser(resultUserGuid);
         }
 
-        userDetailMapper.delete(userId);
+//        userDetailMapper.delete(userId);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);

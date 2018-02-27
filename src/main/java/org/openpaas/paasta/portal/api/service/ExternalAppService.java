@@ -5,7 +5,7 @@ import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +31,8 @@ public class ExternalAppService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalAppService.class);
 
-    @Autowired
-    private AppCcMapper appCcMapper;
+//    @Autowired
+//    private AppCcMapper appCcMapper;
     @Autowired
     private AppService appService;
     @Autowired
@@ -51,7 +51,8 @@ public class ExternalAppService extends Common {
         App newApp = new App();
         try {
 
-            HashMap hashMap = appCcMapper.getAppInfo(appGuid);
+            //HashMap hashMap = appCcMapper.getAppInfo(appGuid);
+            HashMap hashMap = new HashMap();
             if(null==hashMap) {
                 String orgName = String.valueOf(hashMap.get("orgName"));
                 String spaceName = String.valueOf(hashMap.get("spaceName"));

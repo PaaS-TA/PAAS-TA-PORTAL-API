@@ -1,6 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
-import org.openpaas.paasta.portal.api.mapper.cc.AdminMainCcMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.AdminMainCcMapper;
 import org.openpaas.paasta.portal.api.model.AdminMain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +20,12 @@ import java.util.Map;
 @Service
 public class AdminMainService {
 
-    private final AdminMainCcMapper adminMainCcMapper;
+//    private final AdminMainCcMapper adminMainCcMapper;
 
-    @Autowired
-    public AdminMainService(AdminMainCcMapper adminMainCcMapper) {
-        this.adminMainCcMapper = adminMainCcMapper;
-    }
+//    @Autowired
+//    public AdminMainService(AdminMainCcMapper adminMainCcMapper) {
+//        this.adminMainCcMapper = adminMainCcMapper;
+//    }
 
 
     /**
@@ -36,7 +36,8 @@ public class AdminMainService {
      */
     public Map<String, Object> getTotalCountList(AdminMain param) {
         return new HashMap<String, Object>() {{
-            put("list", adminMainCcMapper.getTotalCountList(param));
+//            put("list", adminMainCcMapper.getTotalCountList(param));
+            put("list","");
         }};
     }
 
@@ -49,7 +50,8 @@ public class AdminMainService {
      */
     public Map<String, Object> getTotalOrganizationList(AdminMain param) {
         return new HashMap<String, Object>() {{
-            put("list", adminMainCcMapper.getTotalOrganizationList(param));
+//            put("list", adminMainCcMapper.getTotalOrganizationList(param));
+            put("list","");
         }};
     }
 
@@ -62,7 +64,8 @@ public class AdminMainService {
      */
     public Map<String, Object> getTotalSpaceList(AdminMain param) {
         return new HashMap<String, Object>() {{
-            put("list", adminMainCcMapper.getTotalSpaceList(param));
+//            put("list", adminMainCcMapper.getTotalSpaceList(param));
+            put("list","");
         }};
     }
 }

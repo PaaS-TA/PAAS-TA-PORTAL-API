@@ -16,8 +16,8 @@ import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
-import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +43,11 @@ public class AppService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
 
-    @Autowired
-    private AppCcMapper appCcMapper;
+//    @Autowired
+//    private AppCcMapper appCcMapper;
 
-    @Autowired
-    private AppMapper appMapper;
+//    @Autowired
+//    private AppMapper appMapper;
 
     @Autowired
     private AppAutoScaleModalService appAutoScaleModalService;
@@ -82,8 +82,18 @@ public class AppService extends Common {
      */
     public String getAppStats(App app, String token) {
         ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
-        ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(app.getGuid().toString()).build()).block();
-        return applicationStatisticsResponse.toString();
+        //ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+
+                cloudFoundryClient.applicationsV2()
+                .statistics(ApplicationStatisticsRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .build())
+                .map(resource -> ApplicationStatisticsRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .build());
+
+        //return applicationStatisticsResponse.toString();
+        return "test";
     }
 
 
@@ -429,10 +439,10 @@ public class AppService extends Common {
      */
     public String getAppImageUrl(App app) {
 
-        String buildPack = appCcMapper.getAppBuildPack(String.valueOf(app.getGuid()));
-
-        String appImageUrl = appMapper.getAppImageUrl(buildPack);
-
+//        String buildPack = appCcMapper.getAppBuildPack(String.valueOf(app.getGuid()));
+        String buildPack = "";
+//        String appImageUrl = appMapper.getAppImageUrl(buildPack);
+        String appImageUrl = "";
         return appImageUrl;
 
     }

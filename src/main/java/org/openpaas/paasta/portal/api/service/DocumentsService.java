@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.DocumentsMapper;
 import org.openpaas.paasta.portal.api.model.Support;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,8 @@ import java.util.Map;
 public class DocumentsService extends Common{
 
 
-    @Autowired
-    private DocumentsMapper documentsMapper;
+//    @Autowired
+//    private DocumentsMapper documentsMapper;
 
     /**
      * 문서 목록 조회
@@ -37,7 +37,8 @@ public class DocumentsService extends Common{
     public Map<String, Object> getDocumentsList(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", documentsMapper.getDocumentsList(param));
+//        resultMap.put("list", documentsMapper.getDocumentsList(param));
+        resultMap.put("list","");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -53,7 +54,8 @@ public class DocumentsService extends Common{
     public Map<String, Object> getDocument(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", documentsMapper.getDocument(param));
+//        resultMap.put("info", documentsMapper.getDocument(param));
+        resultMap.put("info","");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -69,7 +71,7 @@ public class DocumentsService extends Common{
     public Map<String, Object> insertDocument(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        documentsMapper.insertDocument(param);
+//        documentsMapper.insertDocument(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -86,7 +88,7 @@ public class DocumentsService extends Common{
     public Map<String, Object> updateDocument(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        documentsMapper.updateDocument(param);
+//        documentsMapper.updateDocument(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -103,7 +105,7 @@ public class DocumentsService extends Common{
     public Map<String, Object> deleteDocument(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        documentsMapper.deleteDocument(param);
+//        documentsMapper.deleteDocument(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 

@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.portal.CommonCodeMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.CommonCodeMapper;
 import org.openpaas.paasta.portal.api.model.CommonCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,14 +22,14 @@ import java.util.*;
 @Service
 public class CommonCodeService {
 
-    private final CommonCodeMapper commonCodeMapper;
-    private final CommonService commonService;
+//    private final CommonCodeMapper commonCodeMapper;
+//    private final CommonService commonService;
 
-    @Autowired
-    public CommonCodeService(CommonCodeMapper commonCodeMapper, CommonService commonService) {
-        this.commonCodeMapper = commonCodeMapper;
-        this.commonService = commonService;
-    }
+//    @Autowired
+//    public CommonCodeService(CommonCodeMapper commonCodeMapper, CommonService commonService) {
+//        this.commonCodeMapper = commonCodeMapper;
+//        this.commonService = commonService;
+//    }
 
 
     /**
@@ -40,9 +40,10 @@ public class CommonCodeService {
      */
     public Map<String, Object> getCommonCodeById(String codeId) {
         return new HashMap<String, Object>() {{
-            put("list", commonCodeMapper.getCommonCodeById(new CommonCode() {{
-                setId(Optional.ofNullable(codeId).orElse(Constants.STARTER_CATALOG_ID));
-            }}));
+//            put("list", commonCodeMapper.getCommonCodeById(new CommonCode() {{
+//                setId(Optional.ofNullable(codeId).orElse(Constants.STARTER_CATALOG_ID));
+//            }}));
+            put("list","");
         }};
     }
 
@@ -75,14 +76,14 @@ public class CommonCodeService {
 
         // COMMON CODE DETAIL
         if (Constants.PROC_NAME_COMMON_CODE_DETAIL.equals(param.getProcType())) {
-            tempList = commonCodeMapper.getCommonCodeDetail(param);
-            resultListCount = commonCodeMapper.getCommonCodeDetailCount(param);
+//            tempList = commonCodeMapper.getCommonCodeDetail(param);
+//            resultListCount = commonCodeMapper.getCommonCodeDetailCount(param);
         }
 
         // COMMON CODE GROUP
         if (Constants.PROC_NAME_COMMON_CODE_GROUP.equals(param.getProcType())) {
-            tempList = commonCodeMapper.getCommonCodeGroup(param);
-            resultListCount = commonCodeMapper.getCommonCodeGroupCount(param);
+//            tempList = commonCodeMapper.getCommonCodeGroup(param);
+//            resultListCount = commonCodeMapper.getCommonCodeGroupCount(param);
         }
 
         // SET PAGING VALUE
@@ -114,7 +115,7 @@ public class CommonCodeService {
         Map<String, Object> resultMap = this.checkRequestParam(param);
 
         if (Constants.RESULT_STATUS_FAIL.equals(resultMap.get("RESULT"))) {
-            commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.empty.req.data");
+//            commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.empty.req.data");
             return resultMap;
         }
 
@@ -122,8 +123,8 @@ public class CommonCodeService {
         resultMap = this.checkDuplicated(param);
 
         if (Constants.RESULT_STATUS_FAIL_DUPLICATED.equals(resultMap.get("RESULT"))) {
-            commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated"
-                    + Constants.DUPLICATION_SEPARATOR + resultMap.get("DUPLICATED_VALUE"));
+//            commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated"
+//                    + Constants.DUPLICATION_SEPARATOR + resultMap.get("DUPLICATED_VALUE"));
 
             return resultMap;
         }
@@ -206,7 +207,7 @@ public class CommonCodeService {
      * @param param CommonCode(모델클래스)
      */
     private void insertCommonCodeGroup(CommonCode param) {
-        commonCodeMapper.insertCommonCodeGroup(param);
+//        commonCodeMapper.insertCommonCodeGroup(param);
     }
 
 
@@ -216,7 +217,7 @@ public class CommonCodeService {
      * @param param CommonCode(모델클래스)
      */
     private void insertCommonCodeDetail(CommonCode param) {
-        commonCodeMapper.insertCommonCodeDetail(param);
+//        commonCodeMapper.insertCommonCodeDetail(param);
     }
 
 
@@ -256,20 +257,20 @@ public class CommonCodeService {
     private void updateCommonCodeGroup(CommonCode param, HttpServletResponse res) throws Exception {
         // CHECK ORIGINAL ID
         if (param.getId().equals(param.getOrgId())) {
-            commonCodeMapper.updateCommonCodeGroup(param);
+//            commonCodeMapper.updateCommonCodeGroup(param);
 
         } else {
             String orgUseYn = param.getUseYn();
             param.setUseYn(null);
 
             // CHECK ID EXIST
-            if (commonCodeMapper.getCommonCodeGroupCount(param) > 0) {
-                commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
-
-            } else {
-                param.setUseYn(orgUseYn);
-                commonCodeMapper.updateCommonCodeGroup(param);
-            }
+//            if (commonCodeMapper.getCommonCodeGroupCount(param) > 0) {
+//                commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
+//
+//            } else {
+//                param.setUseYn(orgUseYn);
+//                commonCodeMapper.updateCommonCodeGroup(param);
+//            }
         }
     }
 
@@ -287,27 +288,27 @@ public class CommonCodeService {
 
             // CHECK NULL
             if (null == param.getKey()) {
-                throw new Exception(commonService.getCustomMessage("common.info.result.fail"));
+//                throw new Exception(commonService.getCustomMessage("common.info.result.fail"));
             }
 
             if (null == param.getOrgKey()) {
-                throw new Exception(commonService.getCustomMessage("common.info.result.fail"));
+//                throw new Exception(commonService.getCustomMessage("common.info.result.fail"));
             }
 
             if (param.getKey().equals(param.getOrgKey())) {
-                commonCodeMapper.updateCommonCodeDetail(param);
+//                commonCodeMapper.updateCommonCodeDetail(param);
 
             } else {
                 // CHECK KEY EXIST
-                if (commonCodeMapper.getCommonCodeDetailCount(param) > 0) {
-                    commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
-
-                } else {
-                    commonCodeMapper.updateCommonCodeDetail(param);
-                }
+//                if (commonCodeMapper.getCommonCodeDetailCount(param) > 0) {
+//                    commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
+//
+//                } else {
+//                    commonCodeMapper.updateCommonCodeDetail(param);
+//                }
             }
         } else {
-            commonCodeMapper.updateCommonCodeDetail(param);
+//            commonCodeMapper.updateCommonCodeDetail(param);
         }
     }
 
@@ -326,13 +327,13 @@ public class CommonCodeService {
         } else {
             // COMMON CODE DETAIL
             if (Constants.PROC_NAME_COMMON_CODE_DETAIL.equals(param.getProcType())) {
-                commonCodeMapper.deleteCommonCodeDetail(param);
+//                commonCodeMapper.deleteCommonCodeDetail(param);
             }
 
             // COMMON CODE GROUP
             if (Constants.PROC_NAME_COMMON_CODE_GROUP.equals(param.getProcType())) {
-                commonCodeMapper.deleteCommonCodeGroup(param);
-                commonCodeMapper.deleteCommonCodeDetail(param);
+//                commonCodeMapper.deleteCommonCodeGroup(param);
+//                commonCodeMapper.deleteCommonCodeDetail(param);
             }
         }
 
@@ -348,7 +349,7 @@ public class CommonCodeService {
      * @param param CommonCode(모델클래스)
      */
     private void deleteCommonCodeList(CommonCode param) {
-        param.getCommonCodeList().forEach(commonCodeMapper::deleteCommonCodeDetail);
+//        param.getCommonCodeList().forEach(commonCodeMapper::deleteCommonCodeDetail);
     }
 
 
@@ -406,12 +407,14 @@ public class CommonCodeService {
         if (Constants.PROC_NAME_COMMON_CODE_DETAIL.equals(param.getProcType())) {
             if ("".equals(Optional.of(param).map(CommonCode::getKey).orElse(""))) {
                 tempMap.put("RESULT", Constants.RESULT_STATUS_FAIL);
-                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+//                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+                tempMap.put("RESULT_MESSAGE","");
             }
 
             if ("".equals(Optional.of(param).map(CommonCode::getValue).orElse(""))) {
                 tempMap.put("RESULT", Constants.RESULT_STATUS_FAIL);
-                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+//                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+                tempMap.put("RESULT_MESSAGE","");
             }
         }
 
@@ -419,12 +422,14 @@ public class CommonCodeService {
         if (Constants.PROC_NAME_COMMON_CODE_GROUP.equals(param.getProcType())) {
             if ("".equals(Optional.of(param).map(CommonCode::getId).orElse(""))) {
                 tempMap.put("RESULT", Constants.RESULT_STATUS_FAIL);
-                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+//                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+                tempMap.put("RESULT_MESSAGE","");
             }
 
             if ("".equals(Optional.of(param).map(CommonCode::getName).orElse(""))) {
                 tempMap.put("RESULT", Constants.RESULT_STATUS_FAIL);
-                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+//                tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.empty.req.data"));
+                tempMap.put("RESULT_MESSAGE","");
             }
         }
 
@@ -510,20 +515,22 @@ public class CommonCodeService {
         tempMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         // COMMON CODE DETAIL
-        if (Constants.PROC_NAME_COMMON_CODE_DETAIL.equals(param.getProcType())
-                && commonCodeMapper.getCommonCodeDetailCount(param) > 0) {
+//        if (Constants.PROC_NAME_COMMON_CODE_DETAIL.equals(param.getProcType())
+//                && commonCodeMapper.getCommonCodeDetailCount(param) > 0) {
             tempMap.put("RESULT", Constants.RESULT_STATUS_FAIL_DUPLICATED);
             tempMap.put("DUPLICATED_VALUE", param.getKey());
-            tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.result.fail.duplicated"));
-        }
+//            tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.result.fail.duplicated"));
+            tempMap.put("RESULT_MESSAGE","");
+//        }
 
         // COMMON CODE GROUP
-        if (Constants.PROC_NAME_COMMON_CODE_GROUP.equals(param.getProcType())
-                && commonCodeMapper.getCommonCodeGroupCount(param) > 0) {
+//        if (Constants.PROC_NAME_COMMON_CODE_GROUP.equals(param.getProcType())
+//                && commonCodeMapper.getCommonCodeGroupCount(param) > 0) {
             tempMap.put("RESULT", Constants.RESULT_STATUS_FAIL_DUPLICATED);
             tempMap.put("DUPLICATED_VALUE", param.getId());
-            tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.result.fail.duplicated"));
-        }
+//            tempMap.put("RESULT_MESSAGE", commonService.getCustomMessage("common.info.result.fail.duplicated"));
+            tempMap.put("RESULT_MESSAGE","");
+//        }
 
         return tempMap;
     }

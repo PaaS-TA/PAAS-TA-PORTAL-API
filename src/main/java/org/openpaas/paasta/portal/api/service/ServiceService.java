@@ -9,7 +9,7 @@ import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public class ServiceService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceService.class);
 
-    @Autowired
-    private ServiceMapper serviceMapper;
+//    @Autowired
+//    private ServiceMapper serviceMapper;
 
 
     /**
@@ -292,8 +292,8 @@ public class ServiceService extends Common {
      */
     public String getServiceImageUrl(String serviceName) {
 
-        String appImageUrl = serviceMapper.getServiceImageUrl(serviceName);
-
+//        String appImageUrl = serviceMapper.getServiceImageUrl(serviceName);
+        String appImageUrl = "";
         return appImageUrl;
 
     }

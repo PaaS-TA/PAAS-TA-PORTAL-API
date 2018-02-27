@@ -9,8 +9,8 @@ import org.cloudfoundry.client.lib.util.JsonUtil;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper;
-import org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.model.Org;
@@ -45,8 +45,8 @@ public class CatalogService extends Common {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CatalogService.class);
 
 
-    private final CatalogMapper catalogMapper;
-    private final CatalogCcMapper catalogCcMapper;
+//    private final CatalogMapper catalogMapper;
+//    private final CatalogCcMapper catalogCcMapper;
     private final CommonService commonService;
     private final GlusterfsServiceImpl glusterfsService;
     private final CommonCodeService commonCodeService;
@@ -58,16 +58,17 @@ public class CatalogService extends Common {
     private String cfAuthorizationHeaderKey;
 
     @Autowired
-    public CatalogService(CatalogMapper catalogMapper,
-                          CatalogCcMapper catalogCcMapper,
+    public CatalogService(
+//            CatalogMapper catalogMapper,
+//                          CatalogCcMapper catalogCcMapper,
                           CommonCodeService commonCodeService,
                           SpaceService spaceService,
                           GlusterfsServiceImpl glusterfsService,
                           DomainService domainService,
                           AppService appService,
                           CommonService commonService) throws Exception {
-        this.catalogMapper = catalogMapper;
-        this.catalogCcMapper = catalogCcMapper;
+//        this.catalogMapper = catalogMapper;
+//        this.catalogCcMapper = catalogCcMapper;
         this.commonCodeService = commonCodeService;
         this.spaceService = spaceService;
         this.glusterfsService = glusterfsService;
@@ -143,7 +144,8 @@ public class CatalogService extends Common {
      */
     public Map<String, Object> getBuildPackCatalogList(Catalog param) {
         return new HashMap<String, Object>() {{
-            put("list", catalogMapper.getBuildPackCatalogList(param));
+//            put("list", catalogMapper.getBuildPackCatalogList(param));
+            put("list", "");
         }};
     }
 
@@ -156,7 +158,8 @@ public class CatalogService extends Common {
      */
     public Map<String, Object> getServicePackCatalogList(Catalog param) {
         return new HashMap<String, Object>() {{
-            put("list", catalogMapper.getServicePackCatalogList(param));
+//            put("list", catalogMapper.getServicePackCatalogList(param));
+            put("list", "");
         }};
     }
 
@@ -170,9 +173,9 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public Map<String, Object> getBuildPackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
-        if (catalogMapper.getBuildPackCatalogCount(param) > 0) {
+//        if (catalogMapper.getBuildPackCatalogCount(param) > 0) {
             commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
-        }
+//        }
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -189,9 +192,9 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public Map<String, Object> getServicePackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
-        if (catalogMapper.getServicePackCatalogCount(param) > 0) {
+//        if (catalogMapper.getServicePackCatalogCount(param) > 0) {
             commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
-        }
+//        }
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -206,7 +209,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> insertBuildPackCatalog(Catalog param) {
-        catalogMapper.insertBuildPackCatalog(param);
+//        catalogMapper.insertBuildPackCatalog(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -221,7 +224,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> insertServicePackCatalog(Catalog param) {
-        catalogMapper.insertServicePackCatalog(param);
+//        catalogMapper.insertServicePackCatalog(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -236,7 +239,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> updateBuildPackCatalog(Catalog param) {
-        catalogMapper.updateBuildPackCatalog(param);
+//        catalogMapper.updateBuildPackCatalog(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -251,7 +254,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> updateServicePackCatalog(Catalog param) {
-        catalogMapper.updateServicePackCatalog(param);
+//        catalogMapper.updateServicePackCatalog(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -266,7 +269,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> deleteBuildPackCatalog(Catalog param) {
-        catalogMapper.deleteBuildPackCatalog(param);
+//        catalogMapper.deleteBuildPackCatalog(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -281,7 +284,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> deleteServicePackCatalog(Catalog param) {
-        catalogMapper.deleteServicePackCatalog(param);
+//        catalogMapper.deleteServicePackCatalog(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -298,9 +301,9 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public Map<String, Object> getCheckDeleteBuildPackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
-        if (catalogMapper.getCheckDeleteBuildPackCatalogCount(param) > 0) {
+//        if (catalogMapper.getCheckDeleteBuildPackCatalogCount(param) > 0) {
             commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.starter.delete");
-        }
+//        }
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -317,9 +320,9 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public Map<String, Object> getCheckDeleteServicePackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
-        if (catalogMapper.getCheckDeleteServicePackCatalogCount(param) > 0) {
+//        if (catalogMapper.getCheckDeleteServicePackCatalogCount(param) > 0) {
             commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.starter.delete");
-        }
+//        }
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -336,9 +339,9 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public Map<String, Object> getStarterCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
-        if (catalogMapper.getStarterCatalogCount(param) > 0) {
+//        if (catalogMapper.getStarterCatalogCount(param) > 0) {
             commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
-        }
+//        }
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -355,7 +358,8 @@ public class CatalogService extends Common {
     public Map<String, Object> getStarterNamesList(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", catalogMapper.getStarterNamesList(param));
+//        resultMap.put("list", catalogMapper.getStarterNamesList(param));
+        resultMap.put("list", "");
         return resultMap;
     }
 
@@ -369,7 +373,8 @@ public class CatalogService extends Common {
     public Map<String, Object> getBuildPackNamesList(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", catalogMapper.getBuildPackNamesList(param));
+//        resultMap.put("list", catalogMapper.getBuildPackNamesList(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -385,7 +390,8 @@ public class CatalogService extends Common {
     public Map<String, Object> getServicePackNamesList(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", catalogMapper.getServicePackNamesList(param));
+//        resultMap.put("list", catalogMapper.getServicePackNamesList(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -401,13 +407,14 @@ public class CatalogService extends Common {
     public Map<String, Object> getOneStarterCatalog(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        List<Integer> paramForServices = catalogMapper.getSelectedServicePackList(param);
-        Catalog paramForOneStarterCatalog = catalogMapper.getOneStarterCatalog(param);
+//        List<Integer> paramForServices = catalogMapper.getSelectedServicePackList(param);
+//        Catalog paramForOneStarterCatalog = catalogMapper.getOneStarterCatalog(param);
 
-        paramForOneStarterCatalog.setServicePackCategoryNoList(paramForServices);
-        paramForOneStarterCatalog.setStarterCategoryNo(paramForOneStarterCatalog.getNo());
+//        paramForOneStarterCatalog.setServicePackCategoryNoList(paramForServices);
+//        paramForOneStarterCatalog.setStarterCategoryNo(paramForOneStarterCatalog.getNo());
 
-        resultMap.put("info", paramForOneStarterCatalog);
+//        resultMap.put("info", paramForOneStarterCatalog);
+        resultMap.put("info", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -420,7 +427,8 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     int getStarterCatalogMaxNumber() {
-        return catalogMapper.getStarterCatalogMaxNumber();
+        //return catalogMapper.getStarterCatalogMaxNumber();
+        return 0;
     }
 
 
@@ -433,10 +441,10 @@ public class CatalogService extends Common {
     public Map<String, Object> insertStarterCatalog(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        catalogMapper.insertStarterCatalog(param);
+//        catalogMapper.insertStarterCatalog(param);
 
         for (int i = 0; i < param.getServicePackCategoryNoList().size(); i++) {
-            catalogMapper.insertSelectedServicePackList(param.getServicePackCategoryNoList().get(i));
+//            catalogMapper.insertSelectedServicePackList(param.getServicePackCategoryNoList().get(i));
         }
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -454,11 +462,11 @@ public class CatalogService extends Common {
     public Map<String, Object> updateStarterCatalog(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        catalogMapper.updateStarterCatalog(param);
-        catalogMapper.deleteSelectedServicePackList(param);
+//        catalogMapper.updateStarterCatalog(param);
+//        catalogMapper.deleteSelectedServicePackList(param);
 
         for (int i = 0; i < param.getServicePackCategoryNoList().size(); i++) {
-            catalogMapper.insertSelectedServicePackListForUpdate(param, param.getServicePackCategoryNoList().get(i));
+//            catalogMapper.insertSelectedServicePackListForUpdate(param, param.getServicePackCategoryNoList().get(i));
         }
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -476,8 +484,8 @@ public class CatalogService extends Common {
     public Map<String, Object> deleteStarterCatalog(Catalog param) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        catalogMapper.deleteSelectedServicePackList(param);
-        catalogMapper.deleteStarterCatalog(param);
+//        catalogMapper.deleteSelectedServicePackList(param);
+//        catalogMapper.deleteStarterCatalog(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -541,7 +549,8 @@ public class CatalogService extends Common {
         param.setLimitSize(Constants.CATALOG_HISTORY_LIMIT_SIZE);
 
         return new HashMap<String, Object>() {{
-            put("list", catalogMapper.getCatalogHistoryList(param));
+//            put("list", catalogMapper.getCatalogHistoryList(param));
+            put("list", "");
         }};
     }
 
@@ -741,8 +750,9 @@ public class CatalogService extends Common {
         int resultCount = 0;
         Map resultMap;
 
-        int domainId = catalogCcMapper.getDomainId(reqDomainName);
-        List resultList = catalogCcMapper.getRouteHostNameList(domainId);
+//        int domainId = catalogCcMapper.getDomainId(reqDomainName);
+//        List resultList = catalogCcMapper.getRouteHostNameList(domainId);
+        List resultList = new ArrayList<>();
 
         for (Object resultObject : resultList) {
             resultMap = (HashMap) resultObject;
@@ -767,10 +777,12 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> getCatalogStarterRelationList(Catalog param) {
-        List<Catalog> catalogs = catalogMapper.getCatalogStarterRelationServicePackList(param);
+//        List<Catalog> catalogs = catalogMapper.getCatalogStarterRelationServicePackList(param);
         return new HashMap<String, Object>() {{
-            put("buildPackList", catalogMapper.getCatalogStarterRelationBuildPackList(param));
-            put("servicePackList", catalogMapper.getCatalogStarterRelationServicePackList(param));
+//            put("buildPackList", catalogMapper.getCatalogStarterRelationBuildPackList(param));
+//            put("servicePackList", catalogMapper.getCatalogStarterRelationServicePackList(param));
+            put("buildPackList", "");
+            put("servicePackList", "");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
@@ -849,7 +861,7 @@ public class CatalogService extends Common {
      */
     public Map<String, Object> insertCatalogHistoryStarter(Catalog param) {
         param.setCatalogType(Constants.CATALOG_TYPE_STARTER);
-        catalogMapper.insertCatalogHistory(param);
+        //catalogMapper.insertCatalogHistory(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -896,7 +908,7 @@ public class CatalogService extends Common {
      */
     public Map<String, Object> insertCatalogHistoryBuildPack(Catalog param) {
         param.setCatalogType(Constants.CATALOG_TYPE_BUILD_PACK);
-        catalogMapper.insertCatalogHistory(param);
+        //catalogMapper.insertCatalogHistory(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -982,7 +994,7 @@ public class CatalogService extends Common {
      */
     public Map<String, Object> insertCatalogHistoryServicePack(Catalog param) {
         param.setCatalogType(Constants.CATALOG_TYPE_SERVICE_PACK);
-        catalogMapper.insertCatalogHistory(param);
+        //catalogMapper.insertCatalogHistory(param);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);

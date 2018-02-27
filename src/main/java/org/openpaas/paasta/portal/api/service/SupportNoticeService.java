@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.SupportNoticeMapper;
 import org.openpaas.paasta.portal.api.model.Support;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ import java.util.Map;
 @Service
 public class SupportNoticeService extends Common{
 
-    @Autowired
-    private SupportNoticeMapper supportNoticeMapper;
+//    @Autowired
+//    private SupportNoticeMapper supportNoticeMapper;
 
 
     /**
@@ -37,7 +37,8 @@ public class SupportNoticeService extends Common{
     public Map<String, Object> getNoticeList(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", supportNoticeMapper.getNoticeList(param));
+//        resultMap.put("list", supportNoticeMapper.getNoticeList(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -53,7 +54,8 @@ public class SupportNoticeService extends Common{
     public Map<String, Object> getNotice(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", supportNoticeMapper.getNotice(param));
+//        resultMap.put("info", supportNoticeMapper.getNotice(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -69,7 +71,7 @@ public class SupportNoticeService extends Common{
     public Map<String, Object> insertNotice(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportNoticeMapper.insertNotice(param);
+//        supportNoticeMapper.insertNotice(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -86,7 +88,7 @@ public class SupportNoticeService extends Common{
     public Map<String, Object> updateNotice(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportNoticeMapper.updateNotice(param);
+//        supportNoticeMapper.updateNotice(param);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -102,7 +104,7 @@ public class SupportNoticeService extends Common{
     public Map<String, Object> deleteNotice(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportNoticeMapper.deleteNotice(param);
+//        supportNoticeMapper.deleteNotice(param);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;

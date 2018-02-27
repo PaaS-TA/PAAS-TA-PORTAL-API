@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -37,7 +38,10 @@ public class AdminMainController {
      */
     @RequestMapping(value = {"/getTotalCountList"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> getTotalCountList(@RequestBody AdminMain param) {
-        return adminMainService.getTotalCountList(param);
+        //return adminMainService.getTotalCountList(param);
+        return new HashMap<String, Object>() {{
+            put("list", "");
+        }};
     }
 
 
@@ -49,7 +53,10 @@ public class AdminMainController {
      */
     @RequestMapping(value = {"/getTotalOrganizationList"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> getTotalOrganizationList(@RequestBody AdminMain param) {
-        return adminMainService.getTotalOrganizationList(param);
+        //return adminMainService.getTotalOrganizationList(param);
+        return new HashMap<String, Object>() {{
+            put("list", "");
+        }};
     }
 
 
@@ -61,6 +68,9 @@ public class AdminMainController {
      */
     @RequestMapping(value = {"/getTotalSpaceList"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> getTotalSpaceList(@RequestBody AdminMain param) {
-        return adminMainService.getTotalSpaceList(param);
+        //return adminMainService.getTotalSpaceList(param);
+        return new HashMap<String, Object>() {{
+            put("list", "");
+        }};
     }
 }

@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.mapper.portal.WebIdeUserMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.WebIdeUserMapper;
 import org.openpaas.paasta.portal.api.model.WebIdeUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +22,8 @@ public class WebIdeUserService extends Common {
 
  //   private  static final Logger LOGGER = LoggerFactory.getLogger(WebIdeUserService.class);
 
-    @Autowired
-    private WebIdeUserMapper webIdeUserMapper;
+//    @Autowired
+//    private WebIdeUserMapper webIdeUserMapper;
 
 
     /**
@@ -34,7 +34,8 @@ public class WebIdeUserService extends Common {
      */
     public WebIdeUser getUser(WebIdeUser webIdeUser)  {
 
-        return webIdeUserMapper.getUser(webIdeUser);
+//        return webIdeUserMapper.getUser(webIdeUser);
+        return null;
 
     }
 
@@ -46,7 +47,7 @@ public class WebIdeUserService extends Common {
      */
     public void insertUser(WebIdeUser webIdeUser) {
 
-        webIdeUserMapper.insertUser(webIdeUser);
+//        webIdeUserMapper.insertUser(webIdeUser);
 
     }
 
@@ -58,7 +59,7 @@ public class WebIdeUserService extends Common {
      */
     public void updateUser(WebIdeUser webIdeUser) {
 
-        webIdeUserMapper.updateUser(webIdeUser);
+//        webIdeUserMapper.updateUser(webIdeUser);
 
     }
 
@@ -70,7 +71,7 @@ public class WebIdeUserService extends Common {
      */
     public void deleteUser(WebIdeUser webIdeUser)  {
 
-       webIdeUserMapper.deleteUser(webIdeUser);
+//       webIdeUserMapper.deleteUser(webIdeUser);
 
     }
 
@@ -82,7 +83,8 @@ public class WebIdeUserService extends Common {
      */
     public List<WebIdeUser> getList(WebIdeUser webIdeUser)  {
 
-        return webIdeUserMapper.getList(webIdeUser);
+//        return webIdeUserMapper.getList(webIdeUser);
+        return null;
 
     }
 

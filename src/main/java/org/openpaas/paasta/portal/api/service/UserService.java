@@ -8,8 +8,8 @@ import org.cloudfoundry.identity.uaa.scim.ScimUser;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.mapper.portal.UserDetailMapper;
-import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.UserDetailMapper;
+//import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
 import org.openpaas.paasta.portal.api.model.UserDetail;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +45,13 @@ public class UserService extends Common {
     /**
      * Portal DB의 UserDetail table을 사용하는 Mapper
      */
-    @Autowired
-    private UserDetailMapper userDetailMapper;
+//    @Autowired
+//    private UserDetailMapper userDetailMapper;
     /**
      * CC DB의 User table을 사용하는 Mapper
      */
-    @Autowired
-    private UserMapper userMapper;
+//    @Autowired
+//    private UserMapper userMapper;
     @Autowired
     private GlusterfsServiceImpl glusterfsService;
 
@@ -63,8 +63,8 @@ public class UserService extends Common {
      */
     public int createUser(UserDetail userDetail) {
 
-        return userDetailMapper.insert(userDetail);
-
+        //return userDetailMapper.insert(userDetail);
+        return 0;
     }
 
     /**
@@ -76,7 +76,8 @@ public class UserService extends Common {
      * @return Int updateCount
      */
     public int updateUser(String userId, UserDetail userDetail) {
-        return userDetailMapper.update(userId, userDetail);
+//        return userDetailMapper.update(userId, userDetail);
+        return 0;
     }
 
     /**
@@ -89,21 +90,21 @@ public class UserService extends Common {
     @Transactional
     public int updateUserId(String oldUserId, String newUserId) {
         int cnt = 0;
-        if (isExist(newUserId) || userMapper.isExist(newUserId) > 0) {
-            cnt = -1;
-        } else {
-            HashMap hashMap = new HashMap();
-            HashMap srchMap = new HashMap();
-            hashMap.put("searchUserId", oldUserId);
-            hashMap.put("userId", newUserId);
-            srchMap.put("userId", oldUserId);
-
-            List list = userDetailMapper.getUserDetailInfo(srchMap);
-            if (list.size() > 0) {
-                cnt += userDetailMapper.upadteUserParam(hashMap);
-                if (list.size() > 0) userMapper.updateUserNameAndEmail(oldUserId, newUserId);
-            }
-        }
+//        if (isExist(newUserId) || userMapper.isExist(newUserId) > 0) {
+//            cnt = -1;
+//        } else {
+//            HashMap hashMap = new HashMap();
+//            HashMap srchMap = new HashMap();
+//            hashMap.put("searchUserId", oldUserId);
+//            hashMap.put("userId", newUserId);
+//            srchMap.put("userId", oldUserId);
+//
+//            List list = userDetailMapper.getUserDetailInfo(srchMap);
+//            if (list.size() > 0) {
+//                cnt += userDetailMapper.upadteUserParam(hashMap);
+//                if (list.size() > 0) userMapper.updateUserNameAndEmail(oldUserId, newUserId);
+//            }
+//        }
 
         return cnt;
     }
@@ -126,7 +127,8 @@ public class UserService extends Common {
      * @return UserDetail user
      */
     public UserDetail getUser(String userId) {
-        return userDetailMapper.selectOne(userId);
+//        return userDetailMapper.selectOne(userId);
+        return null;
     }
 
     /**
@@ -135,7 +137,8 @@ public class UserService extends Common {
      * @return int user count
      */
     public int getUserCount() {
-        return userDetailMapper.getUserDetailCount();
+//        return userDetailMapper.getUserDetailCount();
+        return 0;
     }
 
     /**
@@ -179,7 +182,8 @@ public class UserService extends Common {
      */
     public int deleteUser(String userId) {
 
-        return userDetailMapper.delete(userId);
+//        return userDetailMapper.delete(userId);
+        return 0;
     }
 
 
@@ -270,11 +274,11 @@ public class UserService extends Common {
         map.put("refreshToken", randomId);
         map.put("authAccessTime", new Date());
         if (listUser.size() < 1) {
-            userDetailMapper.createRequestUser(map);
+//            userDetailMapper.createRequestUser(map);
         } else {
             map.put("searchUserId", body.get("userId"));
             map.put("authAccessCnt", 0);
-            userDetailMapper.upadteUserParam(map);
+//            userDetailMapper.upadteUserParam(map);
         }
 
         Boolean resultSendEmail = sendEmail(map);
@@ -294,8 +298,9 @@ public class UserService extends Common {
      */
     public List<UserDetail> getUserDetailInfo(HashMap map) {
         LOGGER.info(this.getClass().getName() + ":" + "getUserDetailInfo  :: map :: " + map.isEmpty());
-        List<UserDetail> listRtn = userDetailMapper.getUserDetailInfo(map);
-        return listRtn;
+//        List<UserDetail> listRtn = userDetailMapper.getUserDetailInfo(map);
+//        return listRtn;
+        return null;
     }
 
 
@@ -315,7 +320,8 @@ public class UserService extends Common {
         map.put("authAccessCnt", 0);
         map.put("authAccessTime", new Date());
 
-        int resultCreateUser = userDetailMapper.upadteUserParam(map);
+//        int resultCreateUser = userDetailMapper.upadteUserParam(map);
+        int resultCreateUser = 0;
         if (resultCreateUser >= 1) {
             map.put("resetPassword", resultCreateUser);
             map.put("sFile", "resetPassword.html");
@@ -333,7 +339,8 @@ public class UserService extends Common {
      */
     public boolean authAddUser(HashMap map) {
         Boolean bRtn = false;
-        int rtn = userDetailMapper.upadteUserParam(map);
+//        int rtn = userDetailMapper.upadteUserParam(map);
+        int rtn = 0;
         if (rtn < 1) {
 
             bRtn = true;
@@ -358,7 +365,8 @@ public class UserService extends Common {
         requestBody.put("searchUserId",userId);
         requestBody.put("authAccessCnt",accessCnt);
 
-        int rtn = userDetailMapper.upadteUserParam(requestBody);
+//        int rtn = userDetailMapper.upadteUserParam(requestBody);
+        int rtn = 0;
         if (rtn < 1) {
 
             bRtn = true;
@@ -442,8 +450,9 @@ public class UserService extends Common {
      * @return userInfo list
      */
     public List<Map<String,String>> getUserInfo(){
-        List<Map<String,String>> userInfo = userMapper.getUserInfo();
-        return userInfo;
+//        List<Map<String,String>> userInfo = userMapper.getUserInfo();
+//        return userInfo;
+        return null;
     }
 
     /**
@@ -453,7 +462,8 @@ public class UserService extends Common {
      * @return the int
      */
     public int createUserAdd(Map createMap) {
-        return userDetailMapper.createRequestUser(createMap);
+//        return userDetailMapper.createRequestUser(createMap);
+        return 0;
     }
 //    Map<String, Object> allOrgOrSpace = admin.listAllOrgOrSpaceForTheUser(userGuid, keyOfRole);
 }

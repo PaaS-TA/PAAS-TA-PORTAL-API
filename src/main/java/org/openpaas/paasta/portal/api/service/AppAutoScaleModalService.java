@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
 
-import org.openpaas.paasta.portal.api.mapper.portal.AppAutoScaleModalMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.AppAutoScaleModalMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ public class AppAutoScaleModalService extends Common {
     /** 로그객체*/
     private  static final Logger LOGGER = LoggerFactory.getLogger(AppAutoScaleModalService.class);
 
-    @Autowired
-    private AppAutoScaleModalMapper appAutoScaleModalMapper;
+//    @Autowired
+//    private AppAutoScaleModalMapper appAutoScaleModalMapper;
     @Autowired
     private OrgService orgService;
     @Autowired
@@ -41,7 +41,8 @@ public class AppAutoScaleModalService extends Common {
     public HashMap<String, Object> getAppAutoScaleInfo(HashMap appAutoScale)  {
 
         HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put("list", appAutoScaleModalMapper.getAppAutoScaleInfo((String) appAutoScale.get("guid")));
+        //resultMap.put("list", appAutoScaleModalMapper.getAppAutoScaleInfo((String) appAutoScale.get("guid")));
+        resultMap.put("list", "");
         resultMap.put("mode", (String) appAutoScale.getOrDefault("mode",""));
 
         return resultMap;
@@ -58,7 +59,8 @@ public class AppAutoScaleModalService extends Common {
     public HashMap<String, Object> getAppAutoScaleList(HashMap appAutoScale) {
 
         HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put("list", appAutoScaleModalMapper.getAppAutoScaleList((String) appAutoScale.get("guid")));
+        //resultMap.put("list", appAutoScaleModalMapper.getAppAutoScaleList((String) appAutoScale.get("guid")));
+        resultMap.put("list", "");
         resultMap.put("mode", (String) appAutoScale.getOrDefault("mode",""));
 
         return resultMap;
@@ -84,8 +86,8 @@ public class AppAutoScaleModalService extends Common {
 //        orgService.setOrgRole(org, adminUserName, Constants.ORGMANAGER,token);
 //        spaceService.setSpaceRole(org, space,adminUserName,Constants.SPACEMANAGER,token);
 
-        int result = appAutoScaleModalMapper.insertAppAutoScale(appAutoScale);
-
+        //int result = appAutoScaleModalMapper.insertAppAutoScale(appAutoScale);
+        int result = 0 ;
         return result;
 
     }
@@ -101,7 +103,7 @@ public class AppAutoScaleModalService extends Common {
 
         LOGGER.info("SERVICE updateAppAutoScale  : ",  appAutoScale.toString());
         int result = 0;
-        result = appAutoScaleModalMapper.updateAppAutoScale(appAutoScale);
+        //result = appAutoScaleModalMapper.updateAppAutoScale(appAutoScale);
         return result;
 
 
@@ -129,7 +131,8 @@ public class AppAutoScaleModalService extends Common {
 //        orgService.unsetOrgRole(org, adminUserName, Constants.USERS, token);
 //        orgService.unsetOrgRole(org, adminUserName, Constants.ORGMANAGER,token);
 //        spaceService.setSpaceRole(org, space,adminUserName,Constants.SPACEMANAGER,token);
-        int resultMap = appAutoScaleModalMapper.deleteAppAutoScale(guid);
+        //int resultMap = appAutoScaleModalMapper.deleteAppAutoScale(guid);
+        int resultMap = 0;
         return resultMap;
 
     }

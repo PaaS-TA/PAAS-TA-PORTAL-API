@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.mapper.portal.ConfigInfoMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.ConfigInfoMapper;
 import org.openpaas.paasta.portal.api.model.ConfigInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +20,8 @@ import java.util.List;
 @Service
 public class ConfigInfoService extends Common {
 
-    @Autowired
-    private ConfigInfoMapper configInfoMapper;
+//    @Autowired
+//    private ConfigInfoMapper configInfoMapper;
 
     /**
      * 설정 정보 값을 조회한다.
@@ -32,8 +32,8 @@ public class ConfigInfoService extends Common {
      */
     public List<ConfigInfo> getValue(ConfigInfo configInfo)  {
 
-        return configInfoMapper.getValue(configInfo);
-
+//        return configInfoMapper.getValue(configInfo);
+        return null;
     }
 
     /**
@@ -45,8 +45,7 @@ public class ConfigInfoService extends Common {
      */
     public void updateValue(ConfigInfo configInfo) {
 
-        configInfoMapper.updateValue(configInfo);
-
+//        configInfoMapper.updateValue(configInfo);
     }
 
 }

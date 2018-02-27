@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.SupportQnAMapper;
 import org.openpaas.paasta.portal.api.model.Support;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,18 +25,20 @@ import java.util.Map;
 @Service
 public class SupportQnAService extends Common {
 
-    private final SupportQnAMapper supportQnAMapper;
+//    private final SupportQnAMapper supportQnAMapper;
     private final GlusterfsServiceImpl glusterfsService;
 
     /**
      * Instantiates a new Support qn a service.
      *
-     * @param supportQnAMapper the support qn a mapper
+     * //@param supportQnAMapper the support qn a mapper
      * @param glusterfsService the glusterfs service
      */
     @Autowired
-    public SupportQnAService(SupportQnAMapper supportQnAMapper, GlusterfsServiceImpl glusterfsService) {
-        this.supportQnAMapper = supportQnAMapper;
+    public SupportQnAService(
+//            SupportQnAMapper supportQnAMapper,
+            GlusterfsServiceImpl glusterfsService) {
+//        this.supportQnAMapper = supportQnAMapper;
         this.glusterfsService = glusterfsService;
     }
 
@@ -51,7 +53,8 @@ public class SupportQnAService extends Common {
     public Map<String, Object> getQnAList(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", supportQnAMapper.getQnAList(param));
+//        resultMap.put("list", supportQnAMapper.getQnAList(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -67,7 +70,8 @@ public class SupportQnAService extends Common {
     public Map<String, Object> getQuestion(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", supportQnAMapper.getQuestion(param));
+//        resultMap.put("info", supportQnAMapper.getQuestion(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -83,7 +87,8 @@ public class SupportQnAService extends Common {
     public Map<String, Object> getAnswer(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("info", supportQnAMapper.getAnswer(param));
+//        resultMap.put("info", supportQnAMapper.getAnswer(param));
+        resultMap.put("list", "");
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         return resultMap;
@@ -99,8 +104,8 @@ public class SupportQnAService extends Common {
     public Map<String, Object> insertAnswer(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportQnAMapper.insertAnswer(param);
-        supportQnAMapper.updateQuestionStatus(param);
+//        supportQnAMapper.insertAnswer(param);
+//        supportQnAMapper.updateQuestionStatus(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -117,7 +122,7 @@ public class SupportQnAService extends Common {
     public Map<String, Object> updateAnswer(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportQnAMapper.updateAnswer(param);
+//        supportQnAMapper.updateAnswer(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -134,8 +139,8 @@ public class SupportQnAService extends Common {
     public Map<String, Object> deleteAnswer(Support param) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
 
-        supportQnAMapper.deleteAnswer(param);
-        supportQnAMapper.updateQuestionStatus(param);
+//        supportQnAMapper.deleteAnswer(param);
+//        supportQnAMapper.updateQuestionStatus(param);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -151,7 +156,8 @@ public class SupportQnAService extends Common {
      * @throws Exception the exception
      */
     public List<Support> getMyQuestionsInMyAccount(String token) throws Exception {
-        return supportQnAMapper.getMyQuestionsInMyAccount(getCustomCloudFoundryClient(token).getCloudInfo().getUser());
+//        return supportQnAMapper.getMyQuestionsInMyAccount(getCustomCloudFoundryClient(token).getCloudInfo().getUser());
+        return null;
     }
 
 
@@ -170,7 +176,8 @@ public class SupportQnAService extends Common {
         if (param.getPageSize() > 0) pageSize = param.getPageSize();
 
         param.setPageNo((int) ((pageSize * (pageNo - 1))));
-        return new HashMap<String, Object>(){{put("list", supportQnAMapper.getMyQuestionList(param));}};
+//        return new HashMap<String, Object>(){{put("list", supportQnAMapper.getMyQuestionList(param));}};
+        return null;
     }
 
 
@@ -209,7 +216,7 @@ public class SupportQnAService extends Common {
      * @return map map
      */
     public Map<String, Object> insertMyQuestion(Support param) {
-        supportQnAMapper.insertMyQuestion(param);
+//        supportQnAMapper.insertMyQuestion(param);
 
         return new HashMap<String, Object>(){{put("RESULT", Constants.RESULT_STATUS_SUCCESS);}};
     }
@@ -222,7 +229,7 @@ public class SupportQnAService extends Common {
      * @return map map
      */
     public Map<String, Object> updateMyQuestion(Support param) {
-        supportQnAMapper.updateMyQuestion(param);
+//        supportQnAMapper.updateMyQuestion(param);
 
         return new HashMap<String, Object>(){{put("RESULT", Constants.RESULT_STATUS_SUCCESS);}};
     }
@@ -235,8 +242,8 @@ public class SupportQnAService extends Common {
      * @return map map
      */
     public Map<String, Object> deleteMyQuestion(Support param) {
-        supportQnAMapper.deleteMyQuestion(param);
-        supportQnAMapper.deleteAnswer(param);
+//        supportQnAMapper.deleteMyQuestion(param);
+//        supportQnAMapper.deleteAnswer(param);
 
 
         return new HashMap<String, Object>(){{put("RESULT", Constants.RESULT_STATUS_SUCCESS);}};
