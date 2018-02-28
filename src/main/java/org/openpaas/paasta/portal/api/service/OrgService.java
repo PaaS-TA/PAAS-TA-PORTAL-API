@@ -136,25 +136,14 @@ public class OrgService extends Common {
 
         cloudOrg = admin.getOrgByName(org.getOrgName(), true);
 
-
+/*
         ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
-        //
-        /*
-        cloudFoundryOperations.organizations()
-                .list()
-                .map(OrganizationSummary::getName)
-                .subscribe(System.out::println);
-        */
-        //
+
         cloudFoundryClient.organizations()
                 .list(ListOrganizationsRequest.builder()
                         .page(1)
-                        .build())
-                .flatMapIterable(ListOrganizationsResponse::getResources)
-                .map(resource -> OrganizationSummary.builder()
-                        .id(resource.getMetadata().getId())
-                        .name(resource.getEntity().getName())
-                        .build());
+                        .build()).block();
+*/
 
         return cloudOrg;
     }
