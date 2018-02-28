@@ -84,16 +84,14 @@ public class AppService extends Common {
         ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
         //ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(app.getGuid().toString()).build()).block();
 
+        ApplicationStatisticsResponse applicationStatisticsResponse =
                 cloudFoundryClient.applicationsV2()
                 .statistics(ApplicationStatisticsRequest.builder()
                         .applicationId(app.getGuid().toString())
-                        .build())
-                .map(resource -> ApplicationStatisticsRequest.builder()
-                        .applicationId(app.getGuid().toString())
-                        .build());
+                        .build()).block();
 
-        //return applicationStatisticsResponse.toString();
-        return "test";
+        return applicationStatisticsResponse.toString();
+        //return "test";
     }
 
 
