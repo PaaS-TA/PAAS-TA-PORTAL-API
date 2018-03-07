@@ -153,10 +153,11 @@ public class UserService extends Common {
         HashMap hashMap = new HashMap();
         hashMap.put("userId", userId);
         List listUser = getUserDetailInfo(hashMap);
-        if (listUser.size() > 0) {
-            flag = true;
-        }
-//        flag = true;  // JPA 연동이전 테스트용
+//        if (listUser.size() > 0) { // JPA 연동이전 테스트차 주석처리
+//             flag = true;
+//        }
+
+        flag = false;  // 현재 사용자 데이터를 가져오지 못하므로 user 생성을 위해 false
 
         return flag;
     }

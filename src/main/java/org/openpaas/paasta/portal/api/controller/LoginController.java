@@ -74,6 +74,7 @@ public class LoginController extends Common{
             userService.createUser(user);
         } else {
             user = userService.getUser(id);
+
             if (adminUserName.equals(id)){
                 user.setAdminYn("Y");
             }
@@ -84,6 +85,12 @@ public class LoginController extends Common{
 
         List auths = new ArrayList();
         auths.add("ROLE_USER");
+
+        //Start 테스트용(ASIS:DB조회 데이터) 임시 데이터 생성(아래 참조부분만 셋팅)
+        user = new UserDetail();
+        user.setUserName("yschoi");
+        //End 테스트용 임시 계정데이터 생성(아래 참조부분만 셋팅)
+
         if ("Y".equals(user.getAdminYn())) auths.add("ROLE_ADMIN");
 
         result.put("token", token.getValue());
