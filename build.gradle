@@ -38,8 +38,10 @@ dependencyManagement {
 dependencies {
     //Admin Server Setting
     compile ('de.codecentric:spring-boot-admin-starter-client:1.5.7')
+
     //Config Server Setting
     compile('org.springframework.cloud:spring-cloud-starter-config')
+
     //Eureka
     compile ('org.springframework.cloud:spring-cloud-starter-eureka')
 
