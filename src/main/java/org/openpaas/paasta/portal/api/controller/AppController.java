@@ -83,7 +83,8 @@ public class AppController extends Common {
         String respAppStats = null;
 
 
-        LOGGER.info("stopApp Start : " + app.getGuid());
+        //LOGGER.info("getAppStats Start : " + app.getGuid());
+        LOGGER.info("getAppStats Start : ");
 
         //token setting
         //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));

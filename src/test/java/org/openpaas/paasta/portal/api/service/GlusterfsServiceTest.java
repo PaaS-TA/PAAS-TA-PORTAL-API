@@ -26,8 +26,8 @@ import java.net.URISyntaxException;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GlusterfsServiceTest {
 
-    @Autowired
-    GlusterfsServiceImpl glusterfsService;
+//    @Autowired
+//    GlusterfsServiceImpl glusterfsService;
     private static String path = "";
     private static String path_c = "";
 
@@ -43,8 +43,9 @@ public class GlusterfsServiceTest {
                 file.getName(), "text/plain", IOUtils.toByteArray(input));
 
         if (file.exists()) {
-            path = glusterfsService.upload(multipartFile);
-            System.out.println("Public URL: " + glusterfsService.upload(multipartFile));
+            //path = glusterfsService.upload(multipartFile);
+            path = "";
+            //System.out.println("Public URL: " + glusterfsService.upload(multipartFile));
         } else {
             System.out.println("File not exists.");
         }
@@ -53,7 +54,7 @@ public class GlusterfsServiceTest {
     @Test
     public void b_deleteByURI() throws URISyntaxException {
 
-        glusterfsService.delete(path);
+//        glusterfsService.delete(path);
     }
 
     @Test
@@ -67,7 +68,7 @@ public class GlusterfsServiceTest {
                 file.getName(), "text/plain", IOUtils.toByteArray(input));
 
         if (file.exists()) {
-            path_c = glusterfsService.upload(multipartFile);
+//            path_c = glusterfsService.upload(multipartFile);
 
         } else {
             System.out.println("File not exists.");
@@ -78,7 +79,7 @@ public class GlusterfsServiceTest {
     public void delete() {
         String[] name = path_c.split("/");
         String objectName = name[name.length - 1];
-        glusterfsService.delete(objectName);
+//        glusterfsService.delete(objectName);
     }
 
 

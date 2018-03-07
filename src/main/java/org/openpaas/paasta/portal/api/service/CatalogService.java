@@ -48,7 +48,7 @@ public class CatalogService extends Common {
 //    private final CatalogMapper catalogMapper;
 //    private final CatalogCcMapper catalogCcMapper;
     private final CommonService commonService;
-    private final GlusterfsServiceImpl glusterfsService;
+//    private final GlusterfsServiceImpl glusterfsService;
     private final CommonCodeService commonCodeService;
     private final SpaceService spaceService;
     private final DomainService domainService;
@@ -63,7 +63,7 @@ public class CatalogService extends Common {
 //                          CatalogCcMapper catalogCcMapper,
                           CommonCodeService commonCodeService,
                           SpaceService spaceService,
-                          GlusterfsServiceImpl glusterfsService,
+                         // GlusterfsServiceImpl glusterfsService,
                           DomainService domainService,
                           AppService appService,
                           CommonService commonService) throws Exception {
@@ -71,7 +71,7 @@ public class CatalogService extends Common {
 //        this.catalogCcMapper = catalogCcMapper;
         this.commonCodeService = commonCodeService;
         this.spaceService = spaceService;
-        this.glusterfsService = glusterfsService;
+//        this.glusterfsService = glusterfsService;
         this.domainService = domainService;
         this.appService = appService;
         this.commonService = commonService;
@@ -502,7 +502,8 @@ public class CatalogService extends Common {
      */
     public Map<String, Object> uploadFile(MultipartFile multipartFile) throws Exception {
         return new HashMap<String, Object>() {{
-            put("path", glusterfsService.upload(multipartFile));
+//            put("path", glusterfsService.upload(multipartFile));
+            put("path", "");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
@@ -515,7 +516,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      */
     public Map<String, Object> deleteFile(String fileUriPath) {
-        glusterfsService.delete(fileUriPath);
+        //glusterfsService.delete(fileUriPath);
 
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);

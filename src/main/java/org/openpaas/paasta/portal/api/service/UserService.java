@@ -52,8 +52,9 @@ public class UserService extends Common {
      */
 //    @Autowired
 //    private UserMapper userMapper;
-    @Autowired
-    private GlusterfsServiceImpl glusterfsService;
+
+//    @Autowired
+//    private GlusterfsServiceImpl glusterfsService;
 
     /**
      * 사용자 자동생성
@@ -155,6 +156,8 @@ public class UserService extends Common {
         if (listUser.size() > 0) {
             flag = true;
         }
+//        flag = true;  // JPA 연동이전 테스트용
+
         return flag;
     }
 
@@ -439,7 +442,8 @@ public class UserService extends Common {
      */
     public Map<String, Object> uploadFile(MultipartFile multipartFile) throws Exception {
         return new HashMap<String, Object>() {{
-            put("path", glusterfsService.upload(multipartFile));
+            //put("path", glusterfsService.upload(multipartFile));
+            put("path", "");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }

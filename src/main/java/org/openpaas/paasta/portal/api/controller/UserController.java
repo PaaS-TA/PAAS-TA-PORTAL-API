@@ -8,7 +8,7 @@ import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.UserDetail;
-import org.openpaas.paasta.portal.api.service.GlusterfsServiceImpl;
+//import org.openpaas.paasta.portal.api.service.GlusterfsServiceImpl;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.service.UserService;
 import org.slf4j.Logger;
@@ -44,8 +44,8 @@ public class UserController extends Common {
     private UserService userService;
     @Autowired
     private LoginService loginService;
-    @Autowired
-    private GlusterfsServiceImpl glusterfsService;
+//    @Autowired
+//    private GlusterfsServiceImpl glusterfsService;
 
     /**
      * 사용자 총 명수
@@ -98,7 +98,9 @@ public class UserController extends Common {
             if ( body.containsKey("zipCode") )          user.setZipCode((String) body.get("zipCode"));
             if ( body.containsKey("adminYn") )          user.setAdminYn((String) body.get("adminYn"));
             if ( body.containsKey("imgPath") ) {
-                if (user.getImgPath() != null) glusterfsService.delete(user.getImgPath());
+                if (user.getImgPath() != null){
+                    //glusterfsService.delete(user.getImgPath());
+                }
                 user.setImgPath((String) body.get("imgPath"));
             }
 

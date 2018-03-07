@@ -53,8 +53,8 @@ public class UserServiceTest extends CommonTest {
     @Autowired
     private WebApplicationContext wac;
 
-    @Autowired
-    GlusterfsServiceImpl glusterfsService;
+//    @Autowired
+//    GlusterfsServiceImpl glusterfsService;
 
     private MockMvc mvc;
 
@@ -212,7 +212,7 @@ public class UserServiceTest extends CommonTest {
         Map<String, Object> map = userService.uploadFile(multipartFile);
         path = (String) map.getOrDefault("path", "");
         System.out.println("path:" + path);
-        glusterfsService.delete(path);
+//        glusterfsService.delete(path);
     }
 
     @Test

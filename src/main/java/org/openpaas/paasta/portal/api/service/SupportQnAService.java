@@ -26,20 +26,21 @@ import java.util.Map;
 public class SupportQnAService extends Common {
 
 //    private final SupportQnAMapper supportQnAMapper;
-    private final GlusterfsServiceImpl glusterfsService;
+//    private final GlusterfsServiceImpl glusterfsService;
 
     /**
      * Instantiates a new Support qn a service.
      *
      * //@param supportQnAMapper the support qn a mapper
-     * @param glusterfsService the glusterfs service
+     //* @param glusterfsService the glusterfs service
      */
     @Autowired
     public SupportQnAService(
 //            SupportQnAMapper supportQnAMapper,
-            GlusterfsServiceImpl glusterfsService) {
+            //GlusterfsServiceImpl glusterfsService
+     ) {
 //        this.supportQnAMapper = supportQnAMapper;
-        this.glusterfsService = glusterfsService;
+//        this.glusterfsService = glusterfsService;
     }
 
 
@@ -190,7 +191,8 @@ public class SupportQnAService extends Common {
      */
     public Map<String, Object> uploadFile(MultipartFile multipartFile) throws Exception {
         return new HashMap<String, Object>() {{
-            put("path", glusterfsService.upload(multipartFile));
+            //put("path", glusterfsService.upload(multipartFile));
+            put("path", "");
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
@@ -203,7 +205,7 @@ public class SupportQnAService extends Common {
      * @return Map map
      */
     public Map<String, Object> deleteFile(String fileUriPath) {
-        glusterfsService.delete(fileUriPath);
+        //glusterfsService.delete(fileUriPath);
 
         return new HashMap<String, Object>(){{put("RESULT", Constants.RESULT_STATUS_SUCCESS);}};
     }

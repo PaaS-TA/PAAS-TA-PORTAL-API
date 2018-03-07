@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Support;
-import org.openpaas.paasta.portal.api.service.GlusterfsServiceImpl;
+//import org.openpaas.paasta.portal.api.service.GlusterfsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +26,8 @@ import java.util.Map;
 public class FileController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
 
-    @Autowired
-    private GlusterfsServiceImpl glusterfsService;
+//    @Autowired
+//    private GlusterfsServiceImpl glusterfsService;
 
 
     /**
@@ -42,7 +42,8 @@ public class FileController {
     public Map<String, Object> uploadFile(@RequestParam(value="file", required=false) MultipartFile multipartFile, HttpServletResponse res) throws Exception {
 
         LOGGER.info("uploadFile :: param:: {}", multipartFile.toString());
-        String path = glusterfsService.upload(multipartFile);
+//        String path = glusterfsService.upload(multipartFile);
+        String path = "";
         LOGGER.info("path: " + path);
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -65,8 +66,9 @@ public class FileController {
     public Map<String, Object> downloadFile(@RequestParam(value="file", required=false) MultipartFile multipartFile, HttpServletResponse res) throws Exception {
 
         LOGGER.info("downloadFile :: param:: {}", multipartFile.toString());
-        String path = glusterfsService.upload(multipartFile);
-        LOGGER.info("path: " + path);
+        //String path = glusterfsService.upload(multipartFile);
+        String path = "";
+                LOGGER.info("path: " + path);
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("path", path);
@@ -90,7 +92,7 @@ public class FileController {
         LOGGER.info("deleteFile :: param:: {}", filePath);
 
         Map<String, Object> resultMap = new HashMap<>();
-        glusterfsService.delete(filePath);
+        //glusterfsService.delete(filePath);
 
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
@@ -108,7 +110,9 @@ public class FileController {
     public byte[] getImageByte(@RequestBody Map<String, String> param) throws Exception {
         String imgPath = param.get("imgPath");
         LOGGER.info("imgPath : " + imgPath.trim());
-        byte[] imgByte = glusterfsService.getImageByte(imgPath.trim());
+        //byte[] imgByte = glusterfsService.getImageByte(imgPath.trim());
+        byte[] imgByte = null;
+        LOGGER.info("imgByte Fixed null For Test."); // StorageAPI 사용구현시 제거 할것
         return imgByte;
     }
 
