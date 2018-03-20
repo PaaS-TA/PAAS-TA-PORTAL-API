@@ -90,6 +90,8 @@ public class AppService extends Common {
                         .applicationId(app.getGuid().toString())
                         .build()).block();
 
+        Map<String, InstanceStatistics> appEnvironment =applicationStatisticsResponse.getInstances();
+
         return applicationStatisticsResponse.toString();
         //return "test";
     }

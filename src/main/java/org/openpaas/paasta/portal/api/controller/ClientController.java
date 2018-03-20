@@ -2,13 +2,17 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
+import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.ClientService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -23,6 +27,8 @@ import java.util.Map;
 @RequestMapping(value = {"/client"})
 public class ClientController extends Common {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
+
     @Autowired
     private ClientService clientService;
 
@@ -34,9 +40,13 @@ public class ClientController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {"/getClientList"}, method = RequestMethod.POST)
-    public Map<String, Object> getClientList(@RequestBody Map<String, Object> param) throws Exception {
+    public Map<String, Object> getClientList(@RequestBody Map<String, Object> param, HttpServletRequest request) throws Exception {
         CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(adminUserName, adminPassword);
+
+        LOGGER.info("AUTHORIZATION_HEADER_KEY:::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
+
         return clientService.getClientList(adminCcfc, param);
+
     }
 
     /**

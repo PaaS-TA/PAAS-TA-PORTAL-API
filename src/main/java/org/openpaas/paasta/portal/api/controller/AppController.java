@@ -59,8 +59,13 @@ public class AppController extends Common {
         //token setting
 //        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
+        LOGGER.info("this.getToken()1:"+this.getToken());
+        LOGGER.info("this.getToken()2:"+this.getToken());
+        LOGGER.info("this.getToken()3:"+this.getToken());
+        LOGGER.info("getHeader::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
+
         //service call
-        respApp = appService.getAppSummary(app, getToken());
+        respApp = appService.getAppSummary(app, this.getToken()); //
 
         LOGGER.info("getAppSummary End ");
 
@@ -77,28 +82,60 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
+//    @RequestMapping(value = {"/app/getAppStats"}, method = RequestMethod.POST)
+//    public String getAppStats(@RequestBody App app, HttpServletRequest request) throws Exception {
+//
+//        String respAppStats = null;
+//
+//        //LOGGER.info("getAppStats Start : " + app.getGuid());
+//        LOGGER.info("getAppStats Start : ");
+//
+//        //token setting
+//        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+//
+//        //service call
+//        //String token = loginService.login("yschoi", "1qaz@WSX").getValue();
+//
+////        respAppStats = appService.getAppStats(app, this.getToken());
+//
+//
+//        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
+//        respAppStats = appService.getAppStats(app,client);
+//
+//
+//        LOGGER.info("stopApp End ");
+//
+//
+//        return respAppStats;
+//    }
+
+    /**
+     * 앱 실시간 상태를 조회한다.
+     *
+     * @param app     the app
+     * @param request the request
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
     @RequestMapping(value = {"/app/getAppStats"}, method = RequestMethod.POST)
     public String getAppStats(@RequestBody App app, HttpServletRequest request) throws Exception {
 
         String respAppStats = null;
 
 
-        //LOGGER.info("getAppStats Start : " + app.getGuid());
-        LOGGER.info("getAppStats Start : ");
+        LOGGER.info("stopApp Start : " + app.getGuid());
 
         //token setting
         //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        //String token = loginService.login("yschoi", "1qaz@WSX").getValue();
-        respAppStats = appService.getAppStats(app, getToken());
+        respAppStats = appService.getAppStats(app, this.getToken());
 
         LOGGER.info("stopApp End ");
 
 
         return respAppStats;
     }
-
 
     /**
      * 앱을 변경한다.
@@ -118,7 +155,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.renameApp(app, getToken());
+        appService.renameApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Rename App End ");
 
@@ -144,7 +181,7 @@ public class AppController extends Common {
         //token setting
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
-        appService.deleteApp(app, getToken());
+        appService.deleteApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
 
         LOGGER.info("delete App End ");
@@ -172,7 +209,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.startApp(app, getToken());
+        appService.startApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("startApp End ");
 
@@ -198,7 +235,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.stopApp(app, getToken());
+        appService.stopApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("stopApp End ");
 
@@ -224,7 +261,7 @@ public class AppController extends Common {
         //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.restageApp(app, getToken());
+        appService.restageApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("restageApp End ");
 
@@ -252,7 +289,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.updateApp(app, getToken());
+        appService.updateApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("updateApp End ");
 
@@ -276,7 +313,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.bindService(app, getToken());
+        appService.bindService(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("bindService End ");
 
@@ -301,7 +338,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.unbindService(app, getToken());
+        appService.unbindService(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("unbindService End ");
 
@@ -328,7 +365,7 @@ public class AppController extends Common {
         CustomCloudFoundryClient client = new CustomCloudFoundryClient(credentials, getTargetURL(apiTarget), true);
         client.login();
 
-        respAppEvents = appService.getAppEvents(app, getToken());
+        respAppEvents = appService.getAppEvents(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("getAppEvents End ");
 
@@ -374,7 +411,7 @@ public class AppController extends Common {
 
         LOGGER.info("updateApplicationEnv Start : " + app.getName());
 
-        appService.updateApplicationEnv(app, getToken());
+        appService.updateApplicationEnv(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("updateApplicationEnv End ");
 
@@ -403,7 +440,7 @@ public class AppController extends Common {
                     .filter(existingRoute -> existingRoute.getHost().equals(host)).findAny().orElse(null);
 */
 
-        appService.addApplicationRoute(app, getToken());
+        appService.addApplicationRoute(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("addApplicationRoute End ");
 
@@ -427,7 +464,7 @@ public class AppController extends Common {
 
         LOGGER.info("removeApplicationRoute Start : " + app.getName());
 
-        appService.removeApplicationRoute(app, getToken());
+        appService.removeApplicationRoute(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("removeApplicationRoute End ");
         return true;

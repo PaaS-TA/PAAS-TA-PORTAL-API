@@ -1,11 +1,18 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.cloudfoundry.uaa.clients.ListClientsRequest;
+import org.cloudfoundry.uaa.clients.ListClientsResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +33,7 @@ import java.util.Map;
 @Transactional
 public class ClientService extends Common {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
     /**
      * 클라이언트 목록 조회
      *
@@ -64,6 +72,50 @@ public class ClientService extends Common {
 
     }
 
+    //V2
+    public Map getClientList(Map<String, Object> param, String token) throws Exception {
+
+        //ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+
+        ReactorUaaClient uaaClient = uaaClient(connectionContext(), tokenProvider(token));
+
+
+LOGGER.info("::token:::::::"+token);
+        ListClientsResponse listClientsResponse = uaaClient.clients().list(ListClientsRequest.builder().build()).block();
+
+        //ListClientsRequest.builder()::filter
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        //String str = responseEntity.getBody();
+
+        String str = "";
+        JSONArray rtnArray = new JSONArray();
+
+        LOGGER.info("objectMapper.writeValueAsString(listClientsResponse)::::::::"+objectMapper.writeValueAsString(listClientsResponse));
+
+        try {
+
+            JSONParser jsonParser = new JSONParser();
+
+            //JSON데이터를 넣어 JSON Object 로 만들어 준다.
+            JSONObject stringToJson = (JSONObject) jsonParser.parse(objectMapper.writeValueAsString(listClientsResponse));
+
+            //배열을 추출
+            rtnArray = (JSONArray) stringToJson.get("resources");
+
+        } catch (Exception e) {
+            return null;
+        }
+
+        Map<String, Object> resultMap = new HashMap<>();
+
+        resultMap.put("list", rtnArray);
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+
+    }
 
     /**
      * 클라이언트 정보 조회
