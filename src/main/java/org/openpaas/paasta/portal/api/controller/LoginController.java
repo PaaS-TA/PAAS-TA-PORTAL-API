@@ -9,10 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
@@ -50,6 +47,7 @@ public class LoginController extends Common{
      * @return the map
      * @throws Exception the exception
      */
+    @CrossOrigin
     @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes="application/json")
     public Map login(@RequestBody Map<String, Object> body) throws Exception {
         String id = (String)body.get("id");
