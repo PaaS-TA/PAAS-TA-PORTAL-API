@@ -1,8 +1,13 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
+import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.BuildPack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.Map;
@@ -18,18 +23,33 @@ import java.util.Map;
 @org.springframework.stereotype.Service
 public class BuildPackService extends Common {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
+
     /**
      * 빌드팩 리스트 조회
      *
      * @param buildPack the buildPack
-     * @param client    the client
+     * @param reqToken    the reqToken
      * @return the boolean
      * @throws Exception the exception
      */
-    public Map<String, Object> getBuildPacks(BuildPack buildPack, CustomCloudFoundryClient client) throws Exception {
+    public Map<String, Object> getBuildPacks(BuildPack buildPack, String reqToken) throws Exception {
+        // Old CF API Version
+        //return client.getBuildPacks();
 
-        return client.getBuildPacks();
+        /*
+            Static메소드
+         */
 
+        LOGGER.info(":::reqToken::"+reqToken);
+        ListBuildpacksResponse listBuildpacksResponse =
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .buildpacks()
+                .list(ListBuildpacksRequest.builder().build())
+                .block();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
     /**
