@@ -2,14 +2,19 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
+import org.cloudfoundry.client.v2.domains.ListDomainsResponse;
+import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsRequest;
+import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsResponse;
+import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsRequest;
+import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsResponse;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import java.util.Map;
 
 /**
  * 도메인 컨트롤러 - 도메인 정보를 조회, 수정, 삭제한다.
@@ -34,33 +39,36 @@ public class DomainService extends Common {
      * @author kimdojun
      * @since 2016.7.25 최초작성
      */
-    public List<CloudDomain> getDomains(String token, String status) throws Exception {
+    public Map<String, Object> getDomains(String token, String status) throws Exception {
 
         LOGGER.info("Start getDomains service. status : "+status);
-        List<CloudDomain> domains;
-        CloudFoundryClient client = getCloudFoundryClient(token);
-
+        ObjectMapper objectMapper = new ObjectMapper();
         if(!stringNullCheck(status)){
             throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Invalid status");
         } else {
             switch (status){
                 case "all":
-                    domains = client.getDomains();
-                    break;
+                    ListDomainsResponse listDomainsResponse =
+                            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                                    .domains().list(ListDomainsRequest.builder().build()).block();
+                    return objectMapper.convertValue(listDomainsResponse, Map.class);
                 case "private":
-                    domains = client.getPrivateDomains();
-                    break;
+                    ListPrivateDomainsResponse ListPrivateDomainResponse =
+                            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                                    .privateDomains().list(ListPrivateDomainsRequest.builder().build()).block();
+                    return objectMapper.convertValue(ListPrivateDomainResponse, Map.class);
                 case "shared":
-                    domains = client.getSharedDomains();
-                    break;
+                    ListSharedDomainsResponse listSharedDomainsResponse =
+                            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                                    .sharedDomains().list(ListSharedDomainsRequest.builder().build()).block();
+                    return objectMapper.convertValue(listSharedDomainsResponse, Map.class);
                 default:
                     throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Invalid status");
             }
         }
 
-        LOGGER.info("End getDomains service. status : "+status);
 
-        return domains;
+
     }
 
     /**

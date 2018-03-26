@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,24 +46,30 @@ public class SpaceController extends Common {
     @Autowired
     OrgService orgService;
 
+    private String decodingString(String orgName)
+    {
+        try {
+            orgName = URLDecoder.decode(orgName,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        orgName = orgName.replace(" ", ".");
+        return orgName;
+    }
+
+
     /**
      * 공간 요약 정보를 조회한다.
      *
-     * @param space   the space
+     * @param spaceId  the spaceId
      * @param request the request
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/space/getSpaceSummary"}, method = RequestMethod.POST)
-    public Space getSpaceSummary(@RequestBody Space space, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("Get SpaceSummary Start : " + space.getSpaceName());
-
-        Space respSpace = spaceService.getSpaceSummary(space,request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        LOGGER.info("Get SpaceSummary End ");
-
-        return respSpace;
+    @RequestMapping(value = {"/space/SpaceSummary/{spaceId}"}, method = RequestMethod.GET)
+    public Map<String, Object> getSpaceSummary(@PathVariable String spaceId, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get SpaceSummary Start : " + spaceId);
+        return spaceService.getSpaceSummary(spaceId,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -114,7 +122,7 @@ public class SpaceController extends Common {
      * 공간 목록을 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
-     * @param org     the org
+     * @param orgName     the org
      * @param request the request
      * @return List<CloudSpace>     orgList
      * @throws Exception the exception
@@ -122,19 +130,16 @@ public class SpaceController extends Common {
      * @version 1.0
      * @since 2016.5.20 최초작성
      */
-    @RequestMapping(value = {"/space/getSpaces"}, method = RequestMethod.POST)
-    public List<CloudSpace> getSpaces(@RequestBody Org org, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("Get Spaces Start ");
-
-        List<CloudSpace> spaceList = spaceService.getSpaces(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
+    @RequestMapping(value = {"/space/{orgName}"}, method = RequestMethod.GET)
+    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgName, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get Spaces Start " + orgName);
+        //List<CloudSpace> spaceList = spaceService.getSpaces(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        Map<String,Map<String, Object>> maps = new HashMap<>();
+        maps.put("spaceList",spaceService.getSpacesForAdmin(orgName,request.getHeader(AUTHORIZATION_HEADER_KEY)));
         LOGGER.info("Get Spaces End ");
-        return spaceList;
+        return maps;
     }
-
-
-    /**
+     /**
      * 공간을 생성한다.
      *
      * @param space   the space
@@ -251,29 +256,26 @@ public class SpaceController extends Common {
 
         LOGGER.info("getSpacesForAdmin ::");
 
-        List<Object> spaceList = spaceService.getSpacesForAdmin(body.get("orgName"));
+        //List<Object> spaceList = spaceService.getSpacesForAdmin(body.get("orgName"));
 
-        return new HashMap<String, Object>(){{put("spaceList", spaceList );}};
+        //return new HashMap<String, Object>(){{put("spaceList", spaceList );}};
+        return null;
     }
 
 
     /**
      * 공간 쿼터를 조회한다.
      *
-     * @param space   the space
+     * @param spaceQuotaId  the spaceQuotaId
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/space/getSpaceQuota"}, method = RequestMethod.POST)
-    public Map<String, Object> getSpaceQuota(@RequestBody Space space, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {"/space/SpaceQuota/{spaceQuotaId}"}, method = RequestMethod.GET)
+    public Map<String, Object> getSpaceQuota(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceQuota Start ");
-
-        String spaceQuota = spaceService.getSpaceQuota(space, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        Map map = new HashMap();
-        map.put("spaceQuota", spaceQuota);
-        return map;
+        LOGGER.info(spaceQuotaId);
+        return spaceService.getSpaceQuota(spaceQuotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 }

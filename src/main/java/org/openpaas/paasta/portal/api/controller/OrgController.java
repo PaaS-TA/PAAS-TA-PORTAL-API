@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -59,45 +61,47 @@ public class OrgController extends Common {
     @Autowired
     UserService userService;
 
+    private String decodingString(String orgName)
+    {
+        try {
+            orgName = URLDecoder.decode(orgName,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        orgName = orgName.replace(" ", ".");
+        return orgName;
+    }
     /**
      * 조직 요약 정보를 조회한다.
      *
-     * @param org     the org
+     * @param orgName     the org
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/getOrgSummary"}, method = RequestMethod.POST)
-    public Org getOrgSummary(@RequestBody Org org, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("getOrgSummary Start : " + org.getOrgName());
-        if(org.getOrgName()==null){
+    @RequestMapping(value = {"/org/OrgSummary/{orgName}"}, method = RequestMethod.GET)
+    public Map<String, Object> getOrgSummary(@PathVariable String orgName, HttpServletRequest request) throws Exception {
+        LOGGER.info("getOrgSummary Start : " + orgName);
+        if(orgName==null){
             throw new Exception("조직정보를 가져오지 못하였습니다.");
         }
-        Org rspOrg = orgService.getOrgSummary(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        LOGGER.info("getOrgSummary End ");
-
-        return rspOrg;
+        return orgService.getOrgSummary(orgName, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
      * 조직 이름으로 조회한다.
      *
-     * @param org     the org
+     * @param orgName     the org
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/getOrgByName"}, method = RequestMethod.POST)
-    public CloudOrganization getOrgByName(@RequestBody Org org, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("getOrgByName Start : " + org.getOrgName());
-
-        CloudOrganization cloudOrg = new CloudOrganization(null, null);
+    @RequestMapping(value = {"/org/OrgByName/{orgName}"}, method = RequestMethod.GET)
+    public Map<String, Object> getOrgByName(@PathVariable String orgName, HttpServletRequest request) throws Exception {
+        LOGGER.info("getOrgByName Start : " + orgName);
+        Map<String, Object> cloudOrg = new HashMap<>();
         /* null로 초기화 할때, 에러시 응답하는 결과값에 content tpye이 세팅되지 않음. */
-
-        cloudOrg = orgService.getOrgByName(org , request.getHeader(AUTHORIZATION_HEADER_KEY));
+        cloudOrg = orgService.getOrgByName(orgName , request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("getOrgByName End ");
 
@@ -329,12 +333,12 @@ public class OrgController extends Common {
      * @return the orgs for admin
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/getOrgsForAdmin"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"/org/OrgAndSpace"}, method = RequestMethod.GET)
     public Map<String, Object> getOrgsForAdmin() throws Exception {
-        LOGGER.info("getOrgsForAdmin ::");
-        List<Object> orgList = orgService.getOrgsForAdmin();
-
-        return new HashMap<String, Object>(){{put("orgList", orgList);}};
+        LOGGER.info("OrgAndSpace ::");
+        //List<Object> orgList = orgService.getOrgsForAdmin();
+        return  orgService.getOrgsForAdmin();
+        //return new HashMap<String, Object>(){{put("orgList", orgList);}};
     }
 
     /**

@@ -5,10 +5,15 @@ import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
-import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryRequest;
-import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryResponse;
-import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
-import org.cloudfoundry.client.v2.spaces.SpaceResource;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsRequest;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
+import org.cloudfoundry.client.v2.organizations.SummaryOrganizationRequest;
+import org.cloudfoundry.client.v2.organizations.SummaryOrganizationResponse;
+import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionRequest;
+import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
+import org.cloudfoundry.client.v2.spaces.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
@@ -182,50 +187,52 @@ public class SpaceService extends Common {
     /**
      * 공간 요약 정보를 조회한다.
      *
-     * @param space the space
+     * @param spaceId the spaceId
      * @param token the token
      * @return space summary
      * @throws Exception the exception
      */
-    public Space getSpaceSummary(Space space, String token) throws Exception{
+    public Map<String,Object> getSpaceSummary(String spaceId, String token) throws Exception{
 
-        String orgName = space.getOrgName();
-        String spaceName = space.getSpaceName();
-
-        if(!stringNullCheck(orgName,spaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-
-        String spaceString = admin.getSpaceSummary(space.getOrgName(), space.getSpaceName());
-        Space respSpace = new ObjectMapper().readValue(spaceString, Space.class);
-
-        //LOGGER.info(spaceString);
-
-        int memTotal = 0;
-        int memUsageTotal = 0;
-
-        for (App app : respSpace.getApps()) {
-
-            memTotal += app.getMemory() * app.getInstances();
-
-            if (app.getState().equals("STARTED")) {
-                space.setAppCountStarted(space.getAppCountStarted() + 1);
-
-                memUsageTotal += app.getMemory() * app.getInstances();
-
-            } else if (app.getState().equals("STOPPED")) {
-                space.setAppCountStopped(space.getAppCountStopped() + 1);
-            } else {
-                space.setAppCountCrashed(space.getAppCountCrashed() + 1);
-            }
-        }
-
-        respSpace.setMemoryLimit(memTotal);
-        respSpace.setMemoryUsage(memUsageTotal);
-
-        return respSpace;
+//
+//        if(!stringNullCheck(orgName,spaceName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//
+//        String spaceString = admin.getSpaceSummary(orgName, spaceName);
+//        Space respSpace = new ObjectMapper().readValue(spaceString, Space.class);
+//
+//        //LOGGER.info(spaceString);
+//        int memTotal = 0;
+//        int memUsageTotal = 0;
+//
+//        for (App app : respSpace.getApps()) {
+//
+//            memTotal += app.getMemory() * app.getInstances();
+//
+//            if (app.getState().equals("STARTED")) {
+//               // space.setAppCountStarted(space.getAppCountStarted() + 1);
+//
+//                memUsageTotal += app.getMemory() * app.getInstances();
+//
+//            } else if (app.getState().equals("STOPPED")) {
+//                //space.setAppCountStopped(space.getAppCountStopped() + 1);
+//            } else {
+//                //space.setAppCountCrashed(space.getAppCountCrashed() + 1);
+//            }
+//        }
+//
+//        respSpace.setMemoryLimit(memTotal);
+//        respSpace.setMemoryUsage(memUsageTotal);
+//
+//        return respSpace;
+        GetSpaceSummaryResponse getSpaceSummaryResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
     }
 
     /**
@@ -397,15 +404,52 @@ public class SpaceService extends Common {
      * @version 1.0
      * @since 2016.9.12 최초작성
      */
-    public List<Object> getSpacesForAdmin(String orgName) throws Exception{
+    public Map<String, Object> getSpacesForAdmin(String orgName, String token) throws Exception{
 
 //        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
-        Map<String, Object> selectedOrg = null;
-        int orgId = (int)selectedOrg.get("orgId");
-
+//        Map<String, Object> selectedOrg = null;
+//        int orgId = (int)selectedOrg.get("orgId");
 //        return spaceMapper.getSpacesForAdmin(orgId);
-        return null;
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
+//
+//        List<CloudSpace> spaceList = client.getSpaces().stream()
+//                .filter(cloudSpace -> cloudSpace.getOrganization().getName().equals(orgName))
+//                .collect(Collectors.toList());
+//        if (spaceList.isEmpty()) {
+//            throw new CloudFoundryException(HttpStatus.NO_CONTENT,"No Content","Space not found");
+//        }
+//
+//        return spaceList;
+        ListSpacesResponse listBuildpacksResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .spaces().list(ListSpacesRequest.builder().organizationId(orgName).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
+//
+//    String orgName = org.getOrgName();
+//
+//        if (!stringNullCheck(orgName)) {
+//        throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+//    }
+//
+//    CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
+//
+//    //요청된 조직내에 있는 공간을 찾는다.
+//        /* java8 stream api 사용 */
+//    List<CloudSpace> spaceList = client.getSpaces().stream()
+//            .filter(cloudSpace -> cloudSpace.getOrganization().getName().equals(orgName))
+//            .collect(Collectors.toList());
+//
+//        if (spaceList.isEmpty()) {
+//        throw new CloudFoundryException(HttpStatus.NO_CONTENT,"No Content","Space not found");
+//    }
+//
+//        return spaceList;
+
+
+
+
 
     /**
      * 공간 정보를 조회한다.
@@ -443,7 +487,7 @@ public class SpaceService extends Common {
     /**
      * 공간 쿼터를 조회한다.
      *
-     * @param space the space
+     * @param spaceQuotaId the spaceQuotaId
      * @param token the token
      * @return boolean boolean
      * @throws Exception the exception
@@ -451,29 +495,30 @@ public class SpaceService extends Common {
      * @version 1.0
      * @since 2016.7.11 최초작성
      */
-    public String getSpaceQuota(Space space, String token) throws Exception {
+    public Map<String, Object> getSpaceQuota(String spaceQuotaId, String token) throws Exception {
+//        if (!stringNullCheck(orgName, spaceName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//
+//        String spaceInfo = admin.getSpace(orgName, spaceName);
+//
+//        LOGGER.info(spaceInfo);
+//
+//        Space respSpace = new ObjectMapper().readValue(spaceInfo, Space.class);
+//
+//        if (respSpace.getEntity().getSpaceQuotaDefinitionGuid() == null) {
+//            return null;
+//        } else {
+//            return admin.getSpaceQuota(respSpace.getEntity().getSpaceQuotaDefinitionGuid());
+//        }
+        GetSpaceQuotaDefinitionResponse listBuildpacksResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .spaceQuotaDefinitions().get(GetSpaceQuotaDefinitionRequest.builder().spaceQuotaDefinitionId(spaceQuotaId).build()).block();
 
-        String orgName = space.getOrgName();
-        String spaceName = space.getSpaceName();
-
-        if (!stringNullCheck(orgName, spaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-
-        String spaceInfo = admin.getSpace(orgName, spaceName);
-
-        LOGGER.info(spaceInfo);
-
-        Space respSpace = new ObjectMapper().readValue(spaceInfo, Space.class);
-
-        if (respSpace.getEntity().getSpaceQuotaDefinitionGuid() == null) {
-            return null;
-        } else {
-            return admin.getSpaceQuota(respSpace.getEntity().getSpaceQuotaDefinitionGuid());
-        }
-
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
 

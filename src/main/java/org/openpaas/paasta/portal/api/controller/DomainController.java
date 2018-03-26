@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,13 +40,10 @@ public class DomainController extends Common {
      * @return the domains
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/getDomains/{status}"}, method = RequestMethod.POST)
-    public List getDomains(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
+    @RequestMapping(value = {"/getDomains/{status}"}, method = RequestMethod.GET)
+    public Map<String, Object> getDomains(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                            @PathVariable String status) throws Exception {
-
-        List<CloudDomain> domains = domainService.getDomains(token, status);
-
-        return domains;
+        return domainService.getDomains(token, status);
     }
 
     /**
