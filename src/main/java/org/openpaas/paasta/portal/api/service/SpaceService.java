@@ -184,6 +184,47 @@ public class SpaceService extends Common {
         return true;
     }
 
+
+    public Space getSpaceSummary(Space space, String spaceName) throws Exception{
+
+        String orgName = space.getOrgName();
+        if(!stringNullCheck(orgName,spaceName)) {
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+        }
+
+        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+
+        String spaceString = admin.getSpaceSummary(orgName, spaceName);
+        Space respSpace = new ObjectMapper().readValue(spaceString, Space.class);
+
+        //LOGGER.info(spaceString);
+        int memTotal = 0;
+        int memUsageTotal = 0;
+
+        for (App app : respSpace.getApps()) {
+
+            memTotal += app.getMemory() * app.getInstances();
+
+            if (app.getState().equals("STARTED")) {
+                // space.setAppCountStarted(space.getAppCountStarted() + 1);
+
+                memUsageTotal += app.getMemory() * app.getInstances();
+
+            } else if (app.getState().equals("STOPPED")) {
+                //space.setAppCountStopped(space.getAppCountStopped() + 1);
+            } else {
+                //space.setAppCountCrashed(space.getAppCountCrashed() + 1);
+            }
+        }
+
+        respSpace.setMemoryLimit(memTotal);
+        respSpace.setMemoryUsage(memUsageTotal);
+
+        return respSpace;
+    }
+
+
+
     /**
      * 공간 요약 정보를 조회한다.
      *
@@ -368,9 +409,9 @@ public class SpaceService extends Common {
      */
     private List<Map<String, Object>> putUserList(String orgName, String spaceName,
                                                   List<Map<String, Object>> userList,
-                                                   Map<String, CloudUser> managers,
-                                                   Map<String, CloudUser> developers,
-                                                   Map<String, CloudUser> auditors) throws Exception
+                                                  Map<String, CloudUser> managers,
+                                                  Map<String, CloudUser> developers,
+                                                  Map<String, CloudUser> auditors) throws Exception
     {
         List<Map<String, Object>> spaceUserList = new ArrayList<>();
 
