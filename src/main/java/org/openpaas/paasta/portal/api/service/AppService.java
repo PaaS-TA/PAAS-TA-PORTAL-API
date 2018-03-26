@@ -61,11 +61,15 @@ public class AppService extends Common {
 
     public String getAppSummary(App app, String token) throws IOException{
 
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
-
         //SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
         // 로그 추가(이후 .log() 제거)
-        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).log().block();
+        SummaryApplicationResponse summaryApplicationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+                .applicationsV2()
+                .summary(SummaryApplicationRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .build())
+                .log()
+                .block();
 
         ObjectMapper objectMapper = new ObjectMapper();
         //return summaryApplicationResponse.toString();

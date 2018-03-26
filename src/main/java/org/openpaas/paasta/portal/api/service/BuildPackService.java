@@ -1,11 +1,12 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
+import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.BuildPack;
+import org.openpaas.paasta.portal.api.util.ConvertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -37,19 +38,13 @@ public class BuildPackService extends Common {
         // Old CF API Version
         //return client.getBuildPacks();
 
-        /*
-            Static메소드
-         */
-
-        LOGGER.info(":::reqToken::"+reqToken);
         ListBuildpacksResponse listBuildpacksResponse =
         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .buildpacks()
                 .list(ListBuildpacksRequest.builder().build())
                 .block();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+        return ConvertUtil.getObjectMapper().convertValue(listBuildpacksResponse, Map.class);
     }
 
     /**
@@ -62,7 +57,22 @@ public class BuildPackService extends Common {
      */
     public boolean updateBuildPack(BuildPack buildPack, CustomCloudFoundryClient client) throws Exception {
 
-        client.updateBuildPack(buildPack.getGuid(), buildPack.getPosition(), buildPack.getEnable(), buildPack.getLock());
+        //client.updateBuildPack(buildPack.getGuid(), buildPack.getPosition(), buildPack.getEnable(), buildPack.getLock());
+
+        //UpdateBuildpackResponse UpdateBuildpackResponse =
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .buildpacks()
+                .update(UpdateBuildpackRequest.builder()
+                        .buildpackId(buildPack.getGuid().toString())
+                        .position(buildPack.getPosition())
+                        .enabled(buildPack.getEnable())
+                        .locked(buildPack.getLock())
+                        .build())
+                .block();
+
+//        Map<String, Object> resultMap =
+//                ConvertUtil.getObjectMapper().convertValue(UpdateBuildpackResponse, Map.class);
+        //LOGGER.info("::::::INININININ:::::"+resultMap.toString());
 
         return true;
 
