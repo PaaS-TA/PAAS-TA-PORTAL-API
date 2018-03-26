@@ -8,21 +8,24 @@ import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.lib.util.JsonUtil;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsRequest;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
-import org.cloudfoundry.operations.organizations.OrganizationSummary;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+
+import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
+import org.cloudfoundry.client.v2.organizations.*;
+
+
+import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionSpacesRequest;
+import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryRequest;
+import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryResponse;
+import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
+import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-//import org.openpaas.paasta.portal.api.mapper.InviteOrgSpaceMapper;
-//import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
-
-//import org.openpaas.paasta.portal.api.mapper.uaa.UserMapper;
-import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -33,6 +36,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import sun.rmi.runtime.Log;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -43,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -75,77 +80,53 @@ public class OrgService extends Common {
     /**
      * 조직 요약 정보를 조회한다.
      *
-     * @param org   the org
+     * @param orgName   the org
      * @param token the token
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public Org getOrgSummary(@RequestBody Org org , String token) throws Exception {
+    public Map<String, Object> getOrgSummary(String orgName , String token) throws Exception {
 
-        //token setting
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-
-        Org rspOrg = new Org();
-
-        String orgString = admin.getOrgSummary(org.getOrgName());
-        rspOrg  = new ObjectMapper().readValue(orgString, Org.class);
-
-        int memTotal = 0;
-        for(Space space : rspOrg.getSpaces()){
-
-            memTotal += space.getMemDevTotal();
-
-            //apps state
-            String spaceString = admin.getSpaceSummary(org.getOrgName(), space.getName());
-            Space spaces  = new ObjectMapper().readValue(spaceString, Space.class);
-
-            for(App apps : spaces.getApps()){
-                if(apps.getState().equals("STARTED")){
-                    space.setAppCountStarted( space.getAppCountStarted()+1);
-                }else if(apps.getState().equals("STOPPED")){
-                    space.setAppCountStopped( space.getAppCountStopped()+1);
-                }else{
-                    space.setAppCountCrashed( space.getAppCountCrashed()+1);
-                }
-            }
-
-        }
-        rspOrg.setMemoryUsage(memTotal);
-
-        //memory quota
-        CloudOrganization cloudOrg = admin.getOrgByName(rspOrg.getName(), true);
-        rspOrg.setMemoryLimit((int)cloudOrg.getQuota().getMemoryLimit());
-
-        return rspOrg;
+    SummaryOrganizationResponse summaryOrganizationResponse =
+         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgName).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(summaryOrganizationResponse, Map.class);
     }
 
     /**
      * 조직 정보를 이름으로 조회한다.
      *
-     * @param org   the org
+     * @param orgName   the org
      * @param token the token
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public CloudOrganization getOrgByName(@RequestBody Org org ,  String token) throws Exception {
+    public Map<String, Object> getOrgByName(String orgName ,  String token) throws Exception {
 
-        //token setting
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//        //token setting
+//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//
+//        CloudOrganization cloudOrg = new CloudOrganization(null,null);
+//
+//        cloudOrg = admin.getOrgByName(orgName, true);
+//
+///*
+//        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+//
+//        cloudFoundryClient.organizations()
+//                .list(ListOrganizationsRequest.builder()
+//                        .page(1)
+//                        .build()).block();
+//*/
+//
+//        return cloudOrg;
+        GetOrganizationQuotaDefinitionResponse listBuildpacksResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(orgName).build()).block();
 
-        CloudOrganization cloudOrg = new CloudOrganization(null,null);
-
-        cloudOrg = admin.getOrgByName(org.getOrgName(), true);
-
-/*
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
-
-        cloudFoundryClient.organizations()
-                .list(ListOrganizationsRequest.builder()
-                        .page(1)
-                        .build()).block();
-*/
-
-        return cloudOrg;
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
     /**
@@ -510,10 +491,18 @@ public class OrgService extends Common {
      * @version 1.0
      * @since 2016.9.12 최초작성
      */
-    public List<Object> getOrgsForAdmin() throws Exception{
+    public Map<String, Object> getOrgsForAdmin() throws Exception{
 
-        //return orgMapper.getOrgsForAdmin();
-        return null;
+//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//        CloudInfo cloudInfos = admin.getCloudInfo();
+        //return admin.getOrganizations();
+
+        ListOrganizationsResponse listBuildpacksResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                       .organizations().list(ListOrganizationsRequest.builder().build()).block();
+       ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+
     }
 
     /**
