@@ -42,7 +42,7 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/buildpacks"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/buildPack/buildpacks"}, method = RequestMethod.GET)
     public Map<String, Object> getBuildPacks(@ModelAttribute BuildPack buildPack, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start : " + buildPack.getGuid());
@@ -71,7 +71,7 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/buildpacks/{guid}"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {"/buildPack/buildpacks/{guid}"}, method = RequestMethod.PUT)
     public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
 
         Map<String, Object> resultMap = new HashMap<>();
