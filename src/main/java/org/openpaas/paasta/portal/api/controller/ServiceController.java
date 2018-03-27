@@ -220,8 +220,8 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/getServiceBrokers"}, method = RequestMethod.POST)
-    public Map<String, Object> getServiceBrokers(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {"/service_brokers"}, method = RequestMethod.GET)
+    public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getServiceBrokers Start : " + serviceBroker.getName() );
 
@@ -249,13 +249,15 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/getServiceBroker"}, method = RequestMethod.POST)
-    public Map<String, Object> getServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {"/service_brokers/name={serviceName}"}, method = RequestMethod.GET)
+    public Map<String, Object> getServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String ServiceName,HttpServletRequest request) throws Exception {
 
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getName() );
 
         //token setting
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+
+        serviceBroker.setName(ServiceName);
 
         //service call
         CloudServiceBroker servicebroker = serviceService.getServiceBroker(serviceBroker, client);
