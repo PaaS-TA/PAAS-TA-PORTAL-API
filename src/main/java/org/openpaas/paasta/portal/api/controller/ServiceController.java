@@ -241,35 +241,47 @@ public class ServiceController extends Common {
     }
 
 
-    /**
-     * 서비스 브로커를 조회한다.
-     *
-     * @param serviceBroker the cloudServiceBroker
-     * @param request       the request
-     * @return CloudServiceInstance cloudServiceInstance
-     * @throws Exception the exception
-     */
-    @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.GET)
-    public Map<String, Object> getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @RequestParam("name") String ServiceName ,HttpServletRequest request) throws Exception {
-
-        LOGGER.info("getServiceBroker Start : " + serviceBroker.getName() );
-
-        //token setting
-        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        serviceBroker.setName(ServiceName);
-
-        //service call
-        CloudServiceBroker servicebroker = serviceService.getServiceBroker(serviceBroker, client);
-
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("servicebroker", servicebroker);
-
-        LOGGER.info("getServiceBroker End ");
-
-        return resultMap;
-    }
+//    /**
+//     * 서비스 브로커를 조회한다.
+//     *
+//     * @param serviceBroker the cloudServiceBroker
+//     * @param request       the request
+//     * @return CloudServiceInstance cloudServiceInstance
+//     * @throws Exception the exception
+//     */
+//    @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.GET)
+//    public Map<String, Object> getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
+//
+//        LOGGER.info("getServiceBroker Start : " + serviceBroker.getName() );
+//
+//        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+//
+//        Map<String, Object> resultMap = new HashMap<>();
+//
+//
+//        LOGGER.info("getServiceBroker End ");
+//
+//        List<CloudServiceBroker> list;
+////@RequestParam("name") String ServiceName ,
+////        if(!ServiceName.equals("")&& ServiceName.equals(null)){
+//            //service call
+//            list = serviceService.getServiceBrokers(serviceBroker, client);
+//            resultMap.put("list", list);
+////        }else{
+////            //token setting
+////            serviceBroker.setName(ServiceName);
+////
+////            //service call
+////            CloudServiceBroker servicebroker = serviceService.getServiceBroker(serviceBroker, client);
+////            resultMap.put("servicebroker", servicebroker);
+////        }
+//
+//        LOGGER.info("getServiceBrokers End ");
+//
+//
+//
+//        return resultMap;
+//    }
 
 
     /**
