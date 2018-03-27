@@ -250,7 +250,7 @@ public class ServiceController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.GET)
-    public Map<String, Object> getServiceBroker(@RequestBody ServiceBroker serviceBroker, @RequestParam("name") String ServiceName ,HttpServletRequest request) throws Exception {
+    public Map<String, Object> getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @RequestParam("name") String ServiceName ,HttpServletRequest request) throws Exception {
 
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getName() );
 
