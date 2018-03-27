@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -45,8 +42,8 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/buildPack/getBuildPacks"}, method = RequestMethod.POST)
-    public Map<String, Object> getBuildPacks(@RequestBody BuildPack buildPack, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {"/buildpacks"}, method = RequestMethod.GET)
+    public Map<String, Object> getBuildPacks(@ModelAttribute BuildPack buildPack, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start : " + buildPack.getGuid());
 
@@ -74,18 +71,18 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/buildPack/updateBuildPack"}, method = RequestMethod.POST)
-    public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {"/buildpacks/{guid}"}, method = RequestMethod.PUT)
+    public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
 
         Map<String, Object> resultMap = new HashMap<>();
 
         LOGGER.info("updateBuildPack Start : " + buildPack.getGuid());
 
         //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        buildPackService.updateBuildPack(buildPack, client);
+        buildPackService.updateBuildPack(buildPack, guid);
 
         LOGGER.info("updateBuildPack End ");
 
