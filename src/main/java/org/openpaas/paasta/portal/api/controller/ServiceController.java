@@ -249,8 +249,8 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service_brokers/name={serviceName}"}, method = RequestMethod.GET)
-    public Map<String, Object> getServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String ServiceName,HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.GET)
+    public Map<String, Object> getServiceBroker(@RequestBody ServiceBroker serviceBroker, @RequestParam("name") String ServiceName ,HttpServletRequest request) throws Exception {
 
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getName() );
 
