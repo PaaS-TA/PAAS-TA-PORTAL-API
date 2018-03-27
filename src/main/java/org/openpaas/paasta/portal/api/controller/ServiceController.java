@@ -221,21 +221,26 @@ public class ServiceController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.GET)
-    public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
+    public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, @RequestParam(value="name", required=false, defaultValue = "") String serviceName  ,HttpServletRequest request) throws Exception {
 
         LOGGER.info("getServiceBrokers Start : " + serviceBroker.getName() );
 
         //token setting
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        //service call
-        List<CloudServiceBroker> list = serviceService.getServiceBrokers(serviceBroker, client);
-
         Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("list", list);
+        if(!serviceName.equals("")){
+            serviceBroker.setName(serviceName);
+            CloudServiceBroker servicebroker = serviceService.getServiceBroker(serviceBroker, client);
+            resultMap.put("servicebroker", servicebroker);
+            LOGGER.info("getServiceBroker End ");
+        }else{
+            //service call
+            List<CloudServiceBroker> list = serviceService.getServiceBrokers(serviceBroker, client);
+            resultMap.put("list", list);
+            LOGGER.info("getServiceBrokers End ");
+        }
 
-        LOGGER.info("getServiceBrokers End ");
 
         return resultMap;
     }
