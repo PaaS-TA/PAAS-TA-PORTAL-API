@@ -74,34 +74,34 @@ public class OrgController extends Common {
     /**
      * 조직 요약 정보를 조회한다.
      *
-     * @param orgName     the org
+     * @param orgId     the org id
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/OrgSummary/{orgName}"}, method = RequestMethod.GET)
-    public Map<String, Object> getOrgSummary(@PathVariable String orgName, HttpServletRequest request) throws Exception {
-        LOGGER.info("getOrgSummary Start : " + orgName);
-        if(orgName==null){
+    @RequestMapping(value = {"/org/{orgId}/OrgSummary"}, method = RequestMethod.GET)
+    public Map<String, Object> getOrgSummary(@PathVariable String orgId, HttpServletRequest request) throws Exception {
+        LOGGER.info("getOrgSummary Start : " + orgId);
+        if(orgId==null){
             throw new Exception("조직정보를 가져오지 못하였습니다.");
         }
-        return orgService.getOrgSummary(orgName, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgService.getOrgSummary(orgId, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
      * 조직 이름으로 조회한다.
      *
-     * @param orgName     the org
+     * @param orgId     the org id
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/OrgByName/{orgName}"}, method = RequestMethod.GET)
-    public Map<String, Object> getOrgByName(@PathVariable String orgName, HttpServletRequest request) throws Exception {
-        LOGGER.info("getOrgByName Start : " + orgName);
+    @RequestMapping(value = {"/org/{orgId}/OrgByName"}, method = RequestMethod.GET)
+    public Map<String, Object> getOrgByName(@PathVariable String orgId, HttpServletRequest request) throws Exception {
+        LOGGER.info("getOrgByName Start : " + orgId);
         Map<String, Object> cloudOrg = new HashMap<>();
         /* null로 초기화 할때, 에러시 응답하는 결과값에 content tpye이 세팅되지 않음. */
-        cloudOrg = orgService.getOrgByName(orgName , request.getHeader(AUTHORIZATION_HEADER_KEY));
+        cloudOrg = orgService.getOrgByName(orgId , request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("getOrgByName End ");
 

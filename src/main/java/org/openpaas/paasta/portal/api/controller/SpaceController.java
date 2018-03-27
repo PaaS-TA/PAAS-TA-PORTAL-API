@@ -66,7 +66,7 @@ public class SpaceController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/space/SpaceSummary/{spaceId}"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/space/{spaceId}/SpaceSummary"}, method = RequestMethod.GET)
     public Map<String, Object> getSpaceSummary(@PathVariable String spaceId, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceId);
         return spaceService.getSpaceSummary(spaceId,request.getHeader(AUTHORIZATION_HEADER_KEY));
@@ -130,7 +130,7 @@ public class SpaceController extends Common {
      * @version 1.0
      * @since 2016.5.20 최초작성
      */
-    @RequestMapping(value = {"/space/{orgName}"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/{orgName}/space"}, method = RequestMethod.GET)
     public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgName, HttpServletRequest request) throws Exception {
         LOGGER.info("Get Spaces Start " + orgName);
         //List<CloudSpace> spaceList = spaceService.getSpaces(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
@@ -271,7 +271,7 @@ public class SpaceController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/space/SpaceQuota/{spaceQuotaId}"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/space/{spaceQuotaId}/SpaceQuota"}, method = RequestMethod.GET)
     public Map<String, Object> getSpaceQuota(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceQuota Start ");
         LOGGER.info(spaceQuotaId);
