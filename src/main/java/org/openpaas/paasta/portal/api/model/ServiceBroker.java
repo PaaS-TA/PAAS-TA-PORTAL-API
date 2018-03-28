@@ -1,6 +1,8 @@
 package org.openpaas.paasta.portal.api.model;
 
 
+import java.util.UUID;
+
 /**
  * 서비스브로커 모델
  *
@@ -11,10 +13,11 @@ package org.openpaas.paasta.portal.api.model;
 
 public class ServiceBroker {
     private String name;
-    private String newName;
 	private String url;
 	private String username;
     private String password;
+    private UUID guid;
+
 
     public String getName() {
         return name;
@@ -22,14 +25,6 @@ public class ServiceBroker {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getNewName() {
-        return newName;
-    }
-
-    public void setNewName(String newName) {
-        this.newName = newName;
     }
 
     public String getUrl() {
@@ -54,5 +49,13 @@ public class ServiceBroker {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UUID getGuid() {
+        return guid;
+    }
+
+    public void setGuid(UUID guid) {
+        this.guid = guid;
     }
 }
