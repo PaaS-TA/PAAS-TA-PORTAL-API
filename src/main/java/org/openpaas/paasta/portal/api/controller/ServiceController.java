@@ -223,7 +223,7 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/service/service-brokers"}, method = RequestMethod.GET)
     public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, @RequestParam(value="guid", required=false, defaultValue = "") String guid  ,HttpServletRequest request) throws Exception {
 
         //token setting
@@ -256,7 +256,7 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service_brokers"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"/service/service-brokers"}, method = RequestMethod.POST)
     public Map<String, Object>  createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         LOGGER.info("createServiceBroker Start : " + serviceBroker.getName() );
@@ -284,7 +284,7 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service_brokers/{guid}"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {"/service/service-brokers/{guid}"}, method = RequestMethod.PUT)
     public Map<String, Object>  updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid ,HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName() );
@@ -313,7 +313,7 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service_brokers/{guid}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {"/service/service-brokers/{guid}"}, method = RequestMethod.DELETE)
     public Map<String, Object>  deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("deleteServiceBroker Start : " + guid );

@@ -53,8 +53,10 @@ public class CustomOauthClient {
         if (credentials != null) {
 
             if (credentials.getToken() != null) {
+                LOGGER.info(":::::credentials.getToken() is null.");
                 this.token = credentials.getToken();
             } else {
+                LOGGER.info(":::::credentials.getToken() is not null.");
                 this.token = createToken(credentials.getEmail(), credentials.getPassword(),
                         credentials.getClientId(), credentials.getClientSecret());
             }
@@ -92,7 +94,28 @@ public class CustomOauthClient {
     }
 
     private OAuth2AccessToken createToken(String username, String password, String clientId, String clientSecret) {
+        LOGGER.info("===========createToken==========");
+        LOGGER.info("username :"+username);
+        LOGGER.info("password :"+password);
+        LOGGER.info("clientId :"+clientId);
+        LOGGER.info("clientSecret :"+clientSecret);
+        LOGGER.info("=====================");
+
+//        clientId ="admin";
+//        clientSecret ="admin-secret";
+//        clientId ="yschoi2";
+//        clientSecret ="1qaz@WSX";
         OAuth2ProtectedResourceDetails resource = getResourceDetails(username, password, clientId, clientSecret);
+
+        LOGGER.info("===========getResourceDetails==========");
+        LOGGER.info("getTokenName   :"+resource.getTokenName());
+        LOGGER.info("getScope       :"+resource.getScope());
+        LOGGER.info("getClientId    :"+resource.getClientId());
+        LOGGER.info("getClientSecret:"+resource.getClientSecret());
+        LOGGER.info("getId          :"+resource.getId());
+        LOGGER.info("getGrantType   :"+resource.getGrantType());
+        LOGGER.info("=====================");
+
         AccessTokenRequest request = createAccessTokenRequest(username, password);
 
         ResourceOwnerPasswordAccessTokenProvider provider = createResourceOwnerPasswordAccessTokenProvider();
@@ -244,7 +267,11 @@ public class CustomOauthClient {
         HttpHeaders headers = new HttpHeaders();
         String str = clientId+":"+clientSecret;
         String encodeStr = new String(Base64.encodeBase64(str.getBytes()));
-
+LOGGER.info("================getUaaAccessToken============");
+LOGGER.info("clientId      :"+clientId);
+LOGGER.info("clientSecret  :"+clientSecret);
+LOGGER.info("key           : Basic "+encodeStr);
+LOGGER.info("============================");
         headers.add(AUTHORIZATION_HEADER_KEY, " Basic "+encodeStr);
         HttpEntity info1 = new HttpEntity(headers);
 
@@ -272,6 +299,14 @@ public class CustomOauthClient {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER_KEY, token_type+" "+accesstoken );
         HttpEntity<Map> header = new HttpEntity(headers);
+
+        LOGGER.info("===========Clinet List==============");
+        LOGGER.info("Clinet ID      :"+clientId);
+        LOGGER.info("Clinet Secret  :"+clientSecret);
+        LOGGER.info("uaaTarget      :"+uaaTarget);
+        LOGGER.info("token_type     :"+token_type);
+        LOGGER.info("accesstoken    :"+accesstoken);
+        LOGGER.info("=========================");
 
         ResponseEntity<String> responseEntity = restTemplate.exchange(uaaTarget+ "/oauth/clients", HttpMethod.GET, header, String.class);
         return responseEntity;
@@ -349,6 +384,14 @@ public class CustomOauthClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER_KEY, token_type+" "+accesstoken );
+
+        LOGGER.info("===========Clinet Update==============");
+        LOGGER.info("Clinet ID      :"+clientId);
+        LOGGER.info("Clinet Secret  :"+clientSecret);
+        LOGGER.info("uaaTarget      :"+uaaTarget);
+        LOGGER.info("token_type     :"+token_type);
+        LOGGER.info("accesstoken    :"+accesstoken);
+        LOGGER.info("=========================");
 
         HttpEntity<Object> reqEntity = new HttpEntity<>(param, headers);
 

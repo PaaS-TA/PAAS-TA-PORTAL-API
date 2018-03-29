@@ -23,8 +23,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.config.service.EmailConfig;
+import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
@@ -46,6 +49,8 @@ import java.net.URL;
 import java.util.*;
 
 public class Common {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Common.class);
 
     @Value("${cloudfoundry.cc.api.url}")
     public String apiTarget;
@@ -226,7 +231,17 @@ public class Common {
      * @return CloudCredentials
      */
     public CloudCredentials getCloudCredentials(String id, String password) {
-        return new CloudCredentials(id, password);
+
+        LOGGER.info("============getCloudCredentials==============");
+        CloudCredentials test = new CloudCredentials(id, password);
+        LOGGER.info("getToken       :"+test.getToken());
+        LOGGER.info("getClientId    :"+test.getClientId());
+        LOGGER.info("getClientSecret:"+test.getClientSecret());
+        LOGGER.info("getEmail       :"+test.getEmail());
+        LOGGER.info("getPassword    :"+test.getPassword());
+        LOGGER.info("getProxyUser   :"+test.getProxyUser());
+        return test;
+//        return new CloudCredentials(id, password);
     }
 
     /**
@@ -239,11 +254,13 @@ public class Common {
         return new DefaultOAuth2AccessToken(token);
     }
 
+    /* 회원 생성시 사용(메일) */
     public UaaUserOperations getUaaUserOperations(String uaaClientId) throws Exception {
         UaaConnection connection = getUaaConnection(uaaClientId);
         return connection.userOperations();
     }
 
+    /* 권한그룹 조회 등록시 사용 */
     public UaaGroupOperations getUaaGroupOperations(String uaaClientId) throws Exception {
         UaaConnection connection = getUaaConnection(uaaClientId);
         return connection.groupOperations();
