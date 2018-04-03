@@ -34,7 +34,7 @@ import java.util.Map;
 public class SpaceController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceController.class);
-
+    private final String V2_URL = "/v2";
     /**
      * The Space service.
      */
@@ -46,37 +46,19 @@ public class SpaceController extends Common {
     @Autowired
     OrgService orgService;
 
-    private String decodingString(String orgName)
-    {
-        try {
-            orgName = URLDecoder.decode(orgName,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        orgName = orgName.replace(" ", ".");
-        return orgName;
-    }
-
-
     /**
      * 공간 요약 정보를 조회한다.
      *
-     * @param spaceId  the spaceId
+     * @param spaceid  the spaceId
      * @param request the request
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/space/{spaceId}/SpaceSummary"}, method = RequestMethod.GET)
-    public Map<String, Object> getSpaceSummary(@PathVariable String spaceId, HttpServletRequest request) throws Exception {
-        LOGGER.info("Get SpaceSummary Start : " + spaceId);
-        return spaceService.getSpaceSummary(spaceId,request.getHeader(AUTHORIZATION_HEADER_KEY));
+    @GetMapping(V2_URL + "/spaces/{spaceid}/summary")
+    public Map<String, Object> getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get SpaceSummary Start : " + spaceid);
+        return spaceService.getSpaceSummary(spaceid,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
-
-
-
-
-
-
 
     /**
      * 공간명을 변경한다.
@@ -122,7 +104,7 @@ public class SpaceController extends Common {
      * 공간 목록을 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
-     * @param orgName     the org
+     * @param orgid     the org
      * @param request the request
      * @return List<CloudSpace>     orgList
      * @throws Exception the exception
@@ -130,12 +112,11 @@ public class SpaceController extends Common {
      * @version 1.0
      * @since 2016.5.20 최초작성
      */
-    @RequestMapping(value = {"/{orgName}/space"}, method = RequestMethod.GET)
-    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgName, HttpServletRequest request) throws Exception {
-        LOGGER.info("Get Spaces Start " + orgName);
-        //List<CloudSpace> spaceList = spaceService.getSpaces(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    @GetMapping(V2_URL + "/spaces/{orgid}")
+    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgid, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get Spaces Start " + orgid);
         Map<String,Map<String, Object>> maps = new HashMap<>();
-        maps.put("spaceList",spaceService.getSpacesForAdmin(orgName,request.getHeader(AUTHORIZATION_HEADER_KEY)));
+        maps.put("spaceList",spaceService.getSpacesForAdmin(orgid,request.getHeader(AUTHORIZATION_HEADER_KEY)));
         LOGGER.info("Get Spaces End ");
         return maps;
     }
@@ -266,16 +247,15 @@ public class SpaceController extends Common {
     /**
      * 공간 쿼터를 조회한다.
      *
-     * @param spaceQuotaId  the spaceQuotaId
+     * @param spacequotaid  the spaceQuotaId
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/space/{spaceQuotaId}/SpaceQuota"}, method = RequestMethod.GET)
-    public Map<String, Object> getSpaceQuota(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
-        LOGGER.info("getSpaceQuota Start ");
-        LOGGER.info(spaceQuotaId);
-        return spaceService.getSpaceQuota(spaceQuotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    @GetMapping(V2_URL + "/spaces/{spacequotaid}/quota")
+    public Map<String, Object> getSpaceQuota(@PathVariable String spacequotaid, HttpServletRequest request) throws Exception {
+        LOGGER.info("getSpaceQuota Start" + spacequotaid);
+        return spaceService.getSpaceQuota(spacequotaid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 }
