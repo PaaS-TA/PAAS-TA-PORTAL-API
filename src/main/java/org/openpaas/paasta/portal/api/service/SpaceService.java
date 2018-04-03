@@ -438,59 +438,20 @@ public class SpaceService extends Common {
     /**
      * 운영자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
      *
-     * @param orgName the org name
+     * @param orgid the org id
      * @return HashMap<String Object>
      * @throws Exception the exception
      * @author kimdojun
      * @version 1.0
      * @since 2016.9.12 최초작성
      */
-    public Map<String, Object> getSpacesForAdmin(String orgName, String token) throws Exception{
-
-//        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
-//        Map<String, Object> selectedOrg = null;
-//        int orgId = (int)selectedOrg.get("orgId");
-//        return spaceMapper.getSpacesForAdmin(orgId);
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-//
-//        List<CloudSpace> spaceList = client.getSpaces().stream()
-//                .filter(cloudSpace -> cloudSpace.getOrganization().getName().equals(orgName))
-//                .collect(Collectors.toList());
-//        if (spaceList.isEmpty()) {
-//            throw new CloudFoundryException(HttpStatus.NO_CONTENT,"No Content","Space not found");
-//        }
-//
-//        return spaceList;
-        ListSpacesResponse listBuildpacksResponse =
+    public Map<String, Object> getSpacesForAdmin(String orgid, String token) throws Exception{
+        ListSpacesResponse listSpacesResponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaces().list(ListSpacesRequest.builder().organizationId(orgName).build()).block();
+                        .spaces().list(ListSpacesRequest.builder().organizationId(orgid).build()).block();
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+        return objectMapper.convertValue(listSpacesResponse, Map.class);
     }
-//
-//    String orgName = org.getOrgName();
-//
-//        if (!stringNullCheck(orgName)) {
-//        throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-//    }
-//
-//    CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-//
-//    //요청된 조직내에 있는 공간을 찾는다.
-//        /* java8 stream api 사용 */
-//    List<CloudSpace> spaceList = client.getSpaces().stream()
-//            .filter(cloudSpace -> cloudSpace.getOrganization().getName().equals(orgName))
-//            .collect(Collectors.toList());
-//
-//        if (spaceList.isEmpty()) {
-//        throw new CloudFoundryException(HttpStatus.NO_CONTENT,"No Content","Space not found");
-//    }
-//
-//        return spaceList;
-
-
-
-
 
     /**
      * 공간 정보를 조회한다.
@@ -528,7 +489,7 @@ public class SpaceService extends Common {
     /**
      * 공간 쿼터를 조회한다.
      *
-     * @param spaceQuotaId the spaceQuotaId
+     * @param spacequotaid the spaceQuotaId
      * @param token the token
      * @return boolean boolean
      * @throws Exception the exception
@@ -536,30 +497,12 @@ public class SpaceService extends Common {
      * @version 1.0
      * @since 2016.7.11 최초작성
      */
-    public Map<String, Object> getSpaceQuota(String spaceQuotaId, String token) throws Exception {
-//        if (!stringNullCheck(orgName, spaceName)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-//        }
-//
-//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-//
-//        String spaceInfo = admin.getSpace(orgName, spaceName);
-//
-//        LOGGER.info(spaceInfo);
-//
-//        Space respSpace = new ObjectMapper().readValue(spaceInfo, Space.class);
-//
-//        if (respSpace.getEntity().getSpaceQuotaDefinitionGuid() == null) {
-//            return null;
-//        } else {
-//            return admin.getSpaceQuota(respSpace.getEntity().getSpaceQuotaDefinitionGuid());
-//        }
-        GetSpaceQuotaDefinitionResponse listBuildpacksResponse =
+    public Map<String, Object> getSpaceQuota(String spacequotaid, String token) throws Exception {
+        GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitionResponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaceQuotaDefinitions().get(GetSpaceQuotaDefinitionRequest.builder().spaceQuotaDefinitionId(spaceQuotaId).build()).block();
-
+                        .spaceQuotaDefinitions().get(GetSpaceQuotaDefinitionRequest.builder().spaceQuotaDefinitionId(spacequotaid).build()).block();
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+        return objectMapper.convertValue(getSpaceQuotaDefinitionResponse, Map.class);
     }
 
 

@@ -97,36 +97,17 @@ public class OrgService extends Common {
     /**
      * 조직 정보를 이름으로 조회한다.
      *
-     * @param orgName   the org
+     * @param orgid   orgid
      * @param token the token
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public Map<String, Object> getOrgByName(String orgName ,  String token) throws Exception {
-
-//        //token setting
-//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-//
-//        CloudOrganization cloudOrg = new CloudOrganization(null,null);
-//
-//        cloudOrg = admin.getOrgByName(orgName, true);
-//
-///*
-//        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
-//
-//        cloudFoundryClient.organizations()
-//                .list(ListOrganizationsRequest.builder()
-//                        .page(1)
-//                        .build()).block();
-//*/
-//
-//        return cloudOrg;
-        GetOrganizationQuotaDefinitionResponse listBuildpacksResponse =
+    public Map<String, Object> getOrgByName(String orgid ,  String token) throws Exception {
+        GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(orgName).build()).block();
-
+                        .organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(orgid).build()).block();
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+        return objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
     }
 
     /**
@@ -492,11 +473,6 @@ public class OrgService extends Common {
      * @since 2016.9.12 최초작성
      */
     public Map<String, Object> getOrgsForAdmin() throws Exception{
-
-//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-//        CloudInfo cloudInfos = admin.getCloudInfo();
-        //return admin.getOrganizations();
-
         ListOrganizationsResponse listBuildpacksResponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                        .organizations().list(ListOrganizationsRequest.builder().build()).block();
