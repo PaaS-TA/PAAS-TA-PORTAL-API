@@ -29,6 +29,7 @@ import java.util.UUID;
 public class BuildPackController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackController.class);
+    private final String V2_URL = "/v2";
 
     @Autowired
     private BuildPackService buildPackService;
@@ -41,7 +42,7 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/buildpack/buildpacks"}, method = RequestMethod.GET)
+    @GetMapping(value = {V2_URL + "/buildpacks"})
     public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start");
@@ -67,7 +68,7 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/buildpack/buildpacks/{guid}"}, method = RequestMethod.PUT)
+    @PutMapping(value = {V2_URL + "/buildpacks/{guid}"})
     public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateBuildPack Start : " + guid);

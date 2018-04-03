@@ -40,6 +40,7 @@ import java.util.UUID;
 public class ServiceController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceController.class);
+    private final String V2_URL = "/v2";
 
     @Autowired
     private AppService appService;
@@ -216,37 +217,54 @@ public class ServiceController extends Common {
 
 
     /**
-     * 서비스 브로커 리스트 / 상세내용을 조회한다.
+     * 서비스 브로커 리스트를 조회한다.
      *
      * @param serviceBroker the serviceBroker
      * @param request       the request
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service-brokers"}, method = RequestMethod.GET)
-    public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, @RequestParam(value="guid", required=false, defaultValue = "") String guid  ,HttpServletRequest request) throws Exception {
+    @GetMapping(value = {V2_URL + "/servicebrokers"})
+    public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         //token setting
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
         Map<String, Object> resultMap = new HashMap<>();
 
-        if(!guid.equals("")){
-            // 서비스 항목 조회
-            LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
-            serviceBroker.setGuid(UUID.fromString(guid));
-            GetServiceBrokerResponse servicebroker = serviceService.getServiceBroker(serviceBroker);
-            resultMap.put("servicebroker", servicebroker);
-            LOGGER.info("getServiceBroker End ");
-        }else{
-            // 서비스 리스트 조회
-            LOGGER.info("getServiceBrokers Start.");
-            List<ServiceBrokerResource> list = serviceService.getServiceBrokers(serviceBroker);
-            resultMap.put("list", list);
-            LOGGER.info("getServiceBrokers End ");
-        }
+        // 서비스 리스트 조회
+        LOGGER.info("getServiceBrokers Start.");
+        List<ServiceBrokerResource> list = serviceService.getServiceBrokers(serviceBroker);
+        resultMap.put("list", list);
+        LOGGER.info("getServiceBrokers End ");
 
         return resultMap;
     }
+
+    /**
+     * 서비스 브로커 상세내용을 조회한다.
+     *
+     * @param serviceBroker the serviceBroker
+     * @param request       the request
+     * @return CloudServiceInstance cloudServiceInstance
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {V2_URL + "/servicebrokers/{guid}" })
+    public Map<String, Object> getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid  ,HttpServletRequest request) throws Exception {
+
+        //token setting
+        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        Map<String, Object> resultMap = new HashMap<>();
+
+        // 서비스 항목 조회
+        LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
+        serviceBroker.setGuid(UUID.fromString(guid));
+        GetServiceBrokerResponse servicebroker = serviceService.getServiceBroker(serviceBroker);
+        resultMap.put("servicebroker", servicebroker);
+        LOGGER.info("getServiceBroker End ");
+
+        return resultMap;
+    }
+
 
     /**
      * 서비스 브로커를 등록한다.
@@ -256,7 +274,7 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service-brokers"}, method = RequestMethod.POST)
+    @PostMapping(value = {V2_URL + "/servicebrokers"})
     public Map<String, Object>  createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         LOGGER.info("createServiceBroker Start : " + serviceBroker.getName() );
@@ -284,7 +302,7 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service-brokers/{guid}"}, method = RequestMethod.PUT)
+    @PutMapping(value = {V2_URL + "/servicebrokers/{guid}"})
     public Map<String, Object>  updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid ,HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName() );
@@ -294,6 +312,8 @@ public class ServiceController extends Common {
 
         //service call
         //serviceService.updateServiceBroker(serviceBroker, client);
+
+        serviceBroker.setGuid(UUID.fromString(guid));
         serviceService.updateServiceBroker(serviceBroker);
 
         LOGGER.info("updateServiceBroker End ");
@@ -313,7 +333,7 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/service-brokers/{guid}"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = {V2_URL + "/servicebrokers/{guid}"})
     public Map<String, Object>  deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("deleteServiceBroker Start : " + guid );
