@@ -6,10 +6,7 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.service.AuthorityGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,11 +22,12 @@ import java.util.Map;
  */
 @RestController
 @Transactional
-@RequestMapping(value = {"/authority"})
 public class AuthorityGroupController extends Common {
 
     @Autowired
     private AuthorityGroupService authorityGroupService;
+    private final String V2_URL = "/v2";
+
 
     /**
      * 권한 그룹을 조회한다.
@@ -39,13 +37,12 @@ public class AuthorityGroupController extends Common {
      * @author 김도준
      * @since 2016.09.19
      */
-    @RequestMapping(value = {"/getAuthorityGroups"}, method = RequestMethod.POST)
+    @GetMapping(V2_URL+"/authority")
     public Map<String, Object> getAuthorityGroups() throws Exception{
-
         Collection<ScimGroup> groups = authorityGroupService.getAuthorityGroups();
-
         return new HashMap<String, Object>(){{put("groups",  groups);}};
     }
+
 
     /**
      * 권한 그룹 생성
@@ -56,18 +53,14 @@ public class AuthorityGroupController extends Common {
      * @author 김도준
      * @since 2016.09.19
      */
-    @RequestMapping(value = {"/createAuthorityGroup"}, method = RequestMethod.POST)
+    @PostMapping(V2_URL+"/authority/group")
     public Map<String, Object> createAuthorityGroup(@RequestBody Map<String, Object> body) throws Exception{
-
-
         String displayName = (String)body.get("displayName");
-
         List<ScimGroupMember> memberList = (List)body.get("memberList");
-
         ScimGroup group = authorityGroupService.createAuthorityGroup(displayName, memberList);
-
         return new HashMap<String, Object>(){{put("group",  group);}};
     }
+
 
     /**
      * 권한그룹을 삭제한다.
@@ -78,11 +71,9 @@ public class AuthorityGroupController extends Common {
      * @author 김도준
      * @since 2016.09.19
      */
-    @RequestMapping(value = {"/deleteAuthorityGroup"}, method = RequestMethod.POST)
-    public Map<String, Object> deleteAuthorityGroup(@RequestBody Map<String, Object> body) throws Exception{
-
-        String groupGuid = (String)body.get("groupGuid");
-        authorityGroupService.deleteAuthorityGroup(groupGuid);
+    @DeleteMapping(V2_URL+"/authority/group/{groupguid}")
+    public Map<String, Object> deleteAuthorityGroup(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception{
+        authorityGroupService.deleteAuthorityGroup(groupguid);
         return new HashMap<String, Object>(){{put("status",  200);put("statusText","ok");}};
     }
 
@@ -105,15 +96,14 @@ public class AuthorityGroupController extends Common {
      * @return map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/addGroupMembers"}, method = RequestMethod.POST)
+    @PostMapping(V2_URL+"/authority/member")
     public Map<String, Object> addGroupMembers(@RequestBody Map<String, Object> body) throws Exception {
-
         String groupGuid = (String)body.get("groupGuid");
         List<String> memberUserNameList = (List<String>)body.get("memberUserNameList");
-
         ScimGroup group = authorityGroupService.addGroupMembers(groupGuid, memberUserNameList);
         return new HashMap<String, Object>(){{put("group",  group);}};
     }
+
 
     /**
      * 권한 그룹 사용자 삭제
@@ -122,13 +112,10 @@ public class AuthorityGroupController extends Common {
      * @return map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/deleteGroupMembers"}, method = RequestMethod.POST)
-    public Map<String, Object> deleteGroupMembers(@RequestBody Map<String, Object> body) throws Exception {
-
-        String groupGuid = (String)body.get("groupGuid");
+    @DeleteMapping(V2_URL+"/authority/member/{groupguid}")
+    public Map<String, Object> deleteGroupMembers(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception {
         List<String> memberUserNameList = (List<String>)body.get("memberUserNameList");
-
-        ScimGroup group = authorityGroupService.deleteGroupMembers(groupGuid, memberUserNameList);
+        ScimGroup group = authorityGroupService.deleteGroupMembers(groupguid, memberUserNameList);
         return new HashMap<String, Object>(){{put("group",  group);}};
     }
 
