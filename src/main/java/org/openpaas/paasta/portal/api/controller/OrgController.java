@@ -62,6 +62,28 @@ public class OrgController extends Common {
      */
     @Autowired
     UserService userService;
+
+    /**
+     * 공간 목록을 조회한다.
+     * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
+     *
+     * @param orgid     the org
+     * @param request the request
+     * @return List<CloudSpace>     orgList
+     * @throws Exception the exception
+     * @author 김도준
+     * @version 1.0
+     * @since 2016.5.20 최초작성
+     */
+    @GetMapping(V2_URL + "/orgs/{orgid}/space")
+    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgid, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get Spaces Start " + orgid);
+        Map<String,Map<String, Object>> maps = new HashMap<>();
+        maps.put("spaceList",orgService.getSpacesForAdmin(orgid,request.getHeader(AUTHORIZATION_HEADER_KEY)));
+        LOGGER.info("Get Spaces End ");
+        return maps;
+    }
+
     /**
      * 조직 요약 정보를 조회한다.
      *

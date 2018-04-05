@@ -436,24 +436,6 @@ public class SpaceService extends Common {
     }
 
     /**
-     * 운영자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
-     *
-     * @param orgid the org id
-     * @return HashMap<String Object>
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.9.12 최초작성
-     */
-    public Map<String, Object> getSpacesForAdmin(String orgid, String token) throws Exception{
-        ListSpacesResponse listSpacesResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaces().list(ListSpacesRequest.builder().organizationId(orgid).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listSpacesResponse, Map.class);
-    }
-
-    /**
      * 공간 정보를 조회한다.
      *
      * @param spaceName the space name
