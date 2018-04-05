@@ -23,10 +23,10 @@ import java.util.Map;
  */
 @RestController
 @Transactional
-@RequestMapping(value = {"/domain"})
 public class DomainController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainController.class);
+    private final String V2_URL = "/v2";
 
     @Autowired
     private DomainService domainService;
@@ -40,7 +40,7 @@ public class DomainController extends Common {
      * @return the domains
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/getDomains/{status}"}, method = RequestMethod.GET)
+    @GetMapping(V2_URL+"/domains/{status}")
     public Map<String, Object> getDomains(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                            @PathVariable String status) throws Exception {
         return domainService.getDomains(token, status);
@@ -54,7 +54,7 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/addDomain"}, method = RequestMethod.POST)
+    @PostMapping(V2_URL+"/domains")
     public boolean addDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                              @RequestBody Map<String, String> body) throws Exception {
 
@@ -71,7 +71,7 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/deleteDomain"}, method = RequestMethod.POST)
+    @DeleteMapping(V2_URL+"/domains")
     public boolean deleteDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                                 @RequestBody Map<String, String> body) throws Exception {
 
