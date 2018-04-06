@@ -79,7 +79,7 @@ public class CloudFoundryLibTest {
 
         List<CloudService> csList = cfc.getServices();
 
-        System.out.println("Service List : \n");
+        System.out.println("service List : \n");
 
         for (CloudService cs : csList) {
             System.out.println("name : " + cs.getName());
