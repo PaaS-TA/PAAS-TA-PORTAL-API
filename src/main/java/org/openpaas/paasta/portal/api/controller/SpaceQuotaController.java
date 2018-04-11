@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.organizationquotadefinitions.*;
+import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionsResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Quota;
@@ -46,19 +47,19 @@ public class SpaceQuotaController extends Common {
         return spaceQuotaService.getSpaceQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
-//    /**
-//     * 특정 조직의 할당량 정의를 조회한다.
-//     *
-//     * @param guid The guid of the Organization Quota Definition
-//     * @param request the request
-//     * @return ModelAndView model
-//     * @throws Exception the exception
-//     */
-//    @GetMapping(V2_URL + "/orgs/quotaDefinitions/{guid}")
-//    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(@PathVariable String guid, HttpServletRequest request) throws Exception {
-//        LOGGER.info("summary Start : ");
-//        return orgQuotaService.getOrgQuotaDefinitions(guid ,request.getHeader(AUTHORIZATION_HEADER_KEY));
-//    }
+    /**
+     * 특정 조직의 할당량 정의를 조회한다.
+     *
+     * @param spaceQuotaId The guid of the Space Quota Definition
+     * @param request the request
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    @GetMapping(V2_URL + "/space/quotaDefinitions/{spaceQuotaId}")
+    public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
+        LOGGER.info("getSpaceQuotaDefinitions Start : ");
+        return spaceQuotaService.getSpaceQuotaDefinitions(spaceQuotaId ,request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
 //
 //    /**
 //     * 조직 할당량 리스트를 등록한다.
