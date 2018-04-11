@@ -1,14 +1,14 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.v2.organizationquotadefinitions.*;
+import org.cloudfoundry.operations.organizationadmin.SetQuotaRequest;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.model.Quota;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * 할당량 관리(조직,공간) 서비스 - 조직/공간의 할당량에 대한 리스트,조회,등록,수정,삭제 기능을 제공한다.
+ * 할당량 관리(조직) 서비스 - 조직의 할당량에 대한 리스트,조회,등록,수정,삭제,지정 기능을 제공한다.
  *
  * @author 최윤석
  * @version 1.0
@@ -17,10 +17,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @EnableAsync
 @Service
 public class OrgQuotaService extends Common {
-
-    private final Logger LOGGER = getLogger(this.getClass());
-
-    // 조직 할당량 관리
 
     /**
      * 조직 할당량 정보를 조회한다.
@@ -46,12 +42,12 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String guid, String token) throws Exception {
+    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                .organizationQuotaDefinitions()
                 .get(GetOrganizationQuotaDefinitionRequest.builder()
-                        .organizationQuotaDefinitionId(guid)
+                        .organizationQuotaDefinitionId(quotaGuid)
                         .build()
                 ).log()
                 .block();
@@ -65,7 +61,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
+    public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         /* required
         (*)이름  name
@@ -101,7 +97,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
+    public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .organizationQuotaDefinitions()
@@ -127,16 +123,37 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String guid, String token) throws Exception {
+    public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .organizationQuotaDefinitions()
                 .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
-                        .organizationQuotaDefinitionId(guid)
+                        .organizationQuotaDefinitionId(quotaGuid)
                         .async(true) // background 처리 여부(recommend:true)
                         .build()
                 ).log()
                 .block();
     }
-    // 할당량 관리 추가 End
+
+    /**
+     * 특정 조직 할당량 정보를 지정한다.
+     * @param quota the Quota Info
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
+
+        // 공간할당량 셋팅은 operation 에서 구현(admin권한)
+        Common.cloudFoundryOperations(connectionContext(), tokenProvider(adminUserName,adminPassword))
+            .organizationAdmin()
+            .setQuota(SetQuotaRequest.builder()
+                    .quotaName(quota.getName())
+                    .organizationName(quota.getOrganizationName())
+                    .build()
+            ).log()
+            .block();
+
+        return true;
+    }
+
 }

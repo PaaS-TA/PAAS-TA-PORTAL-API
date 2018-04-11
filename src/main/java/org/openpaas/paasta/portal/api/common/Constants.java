@@ -138,7 +138,10 @@ public class Constants {
      */
     public static final String SPACEMANAGER = "SpaceManager";
 
-
+    /**
+     * API REST URL prefix
+     */
+    public static final String V2_URL = "/v2";
 
 
 

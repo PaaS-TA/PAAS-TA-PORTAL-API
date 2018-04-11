@@ -1,11 +1,14 @@
 package org.openpaas.paasta.portal.api.model;
 
+import java.util.UUID;
+
 /**
  * 쿼터 모델
  *
  * @author 조민구
  * @version 1.0
  * @since 2016.4.4 최초작성
+ * 		  2018.4.11 확장
  */
 public class Quota extends Entity {
 
@@ -13,6 +16,14 @@ public class Quota extends Entity {
     private int totalServices;
     private int totalRoutes;
     private int memoryLimit;
+
+	// add
+	private String name;
+	private int instanceMemoryLimit;
+	private int appInstanceLimit;
+	private int totalReservedRoutePorts;
+	private UUID guid;
+	private String organizationName; // 지정시 필요
 
 	public Quota(){
 	}
@@ -35,6 +46,19 @@ public class Quota extends Entity {
     public Quota(Meta meta, String name){
     	super(meta, name);
     }
+
+	public Quota(String name, UUID guid, boolean nonBasicServicesAllowed, int totalServices, int totalRoutes, int memoryLimit,
+				 int instanceMemoryLimit, int appInstanceLimit, int totalReservedRoutePorts) {
+		this.name = name;
+		this.guid = guid;
+		this.nonBasicServicesAllowed = nonBasicServicesAllowed;
+		this.totalServices = totalServices;
+		this.totalRoutes = totalRoutes;
+		this.memoryLimit = memoryLimit;
+		this.instanceMemoryLimit = instanceMemoryLimit;
+		this.appInstanceLimit = appInstanceLimit;
+		this.totalReservedRoutePorts = totalReservedRoutePorts;
+	}
 
 	public int getTotalServices() {
 		return totalServices;
@@ -68,5 +92,53 @@ public class Quota extends Entity {
 		this.nonBasicServicesAllowed = nonBasicServicesAllowed;
 	}
 
+	@Override
+	public String getName() {
+		return name;
+	}
 
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getInstanceMemoryLimit() {
+		return instanceMemoryLimit;
+	}
+
+	public void setInstanceMemoryLimit(int instanceMemoryLimit) {
+		this.instanceMemoryLimit = instanceMemoryLimit;
+	}
+
+	public int getAppInstanceLimit() {
+		return appInstanceLimit;
+	}
+
+	public void setAppInstanceLimit(int appInstanceLimit) {
+		this.appInstanceLimit = appInstanceLimit;
+	}
+
+	public int getTotalReservedRoutePorts() {
+		return totalReservedRoutePorts;
+	}
+
+	public void setTotalReservedRoutePorts(int totalReservedRoutePorts) {
+		this.totalReservedRoutePorts = totalReservedRoutePorts;
+	}
+
+	public UUID getGuid() {
+		return guid;
+	}
+
+	public void setGuid(UUID guid) {
+		this.guid = guid;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
 }
