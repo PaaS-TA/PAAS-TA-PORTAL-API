@@ -1,5 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.cloudfoundry.client.v2.organizationquotadefinitions.DeleteOrganizationQuotaDefinitionRequest;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.DeleteOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionsRequest;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Service;
  */
 @EnableAsync
 @Service
-public class spaceQuotaService extends Common {
+public class SpaceQuotaService1 extends Common {
 
     /**
      * 공간 할당량 정보를 조회한다.
