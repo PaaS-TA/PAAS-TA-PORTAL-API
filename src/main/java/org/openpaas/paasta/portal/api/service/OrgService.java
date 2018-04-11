@@ -36,7 +36,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import sun.rmi.runtime.Log;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
