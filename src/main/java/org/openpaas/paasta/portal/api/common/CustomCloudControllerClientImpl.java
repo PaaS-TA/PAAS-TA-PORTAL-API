@@ -1100,13 +1100,13 @@ public class CustomCloudControllerClientImpl implements CustomCloudControllerCli
 
 	private void createUserProvidedServiceDelegate(CloudService service, Map<String, Object> credentials, String syslogDrainUrl) {
 		assertSpaceProvided("create service");
-		Assert.notNull(credentials, "Service credentials must not be null");
-		Assert.notNull(service, "Service must not be null");
-		Assert.notNull(service.getName(), "Service name must not be null");
-		Assert.isNull(service.getLabel(), "Service label is not valid for user-provided services");
-		Assert.isNull(service.getProvider(), "Service provider is not valid for user-provided services");
-		Assert.isNull(service.getVersion(), "Service version is not valid for user-provided services");
-		Assert.isNull(service.getPlan(), "Service plan is not valid for user-provided services");
+		Assert.notNull(credentials, "service credentials must not be null");
+		Assert.notNull(service, "service must not be null");
+		Assert.notNull(service.getName(), "service name must not be null");
+		Assert.isNull(service.getLabel(), "service label is not valid for user-provided services");
+		Assert.isNull(service.getProvider(), "service provider is not valid for user-provided services");
+		Assert.isNull(service.getVersion(), "service version is not valid for user-provided services");
+		Assert.isNull(service.getPlan(), "service plan is not valid for user-provided services");
 
 		HashMap<String, Object> serviceRequest = new HashMap<>();
 		serviceRequest.put("space_guid", sessionSpace.getMeta().getGuid());
