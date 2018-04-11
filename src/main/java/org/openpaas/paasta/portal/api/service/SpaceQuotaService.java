@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
  */
 @EnableAsync
 @Service
-public class SpaceQuotaService1 extends Common {
+public class SpaceQuotaService extends Common {
 
     /**
      * 공간 할당량 정보를 조회한다.
