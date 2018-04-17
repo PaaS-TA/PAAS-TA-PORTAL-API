@@ -146,9 +146,7 @@ public class GlobalControllerExceptionHandler {
 
     //common message
     private boolean errorResponse(Throwable throwable, HttpStatus status, HttpServletResponse response) throws IOException {
-
-        LOGGER.error("### Exception :" + throwable.getMessage());
-
+        LOGGER.info(response.toString());
         response.sendError(status.value(), messageSource.getMessage(status.toString(), null, Locale.KOREA));
 
         return false;

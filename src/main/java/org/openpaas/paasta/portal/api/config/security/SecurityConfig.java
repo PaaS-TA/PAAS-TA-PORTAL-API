@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,42 +54,47 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
 				.csrf().disable()
-                .authorizeRequests()
-                    .antMatchers("/external/**").permitAll()
-                .antMatchers("/**").permitAll()
-                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/adminMain/**").hasRole("USER")
-                .antMatchers("/app/**").hasRole("USER")
-                .antMatchers("/authority/**").hasRole("USER")
-                .antMatchers("/buildPack/**").hasRole("USER")
-                .antMatchers("/catalog/**").hasRole("USER")
-                .antMatchers("/client/**").hasRole("USER")
-                .antMatchers("/commonCode/**").hasRole("USER")
-                .antMatchers("/configInfo/**").hasRole("USER")
-                .antMatchers("/documents/**").hasRole("USER")
-                .antMatchers("/domain/**").hasRole("USER")
-                .antMatchers("/file/**").hasRole("USER")
-                .antMatchers("/log/**").hasRole("USER")
-                .antMatchers("/menu/**").hasRole("USER")
-                .antMatchers("/login/**").hasRole("USER")
-                .antMatchers("/org/**").hasRole("USER")
-                .antMatchers("/service/**").hasRole("USER")
-                .antMatchers("/space/**").hasRole("USER")
-                .antMatchers("/support/**").hasRole("USER")
-                .antMatchers("/usage/**").hasRole("USER")
-                .antMatchers("/user/**").hasRole("USER")
-                .antMatchers("/userManagement/**").hasRole("USER")
-                .antMatchers("/webIdeUser/**").hasRole("USER")
-//                .antMatchers("/**").permitAll()//hasRole("USER")
+                .antMatchers("/external/**").permitAll()
+                //Spring boot Admin 정보 접근 URL -  시작
+                .antMatchers("/").permitAll()
+                .antMatchers("/index").permitAll()
+                .antMatchers("/info**").permitAll()
+                .antMatchers("/env**").permitAll()
+                .antMatchers("/metrics**").permitAll()
+                .antMatchers("/trace**").permitAll()
+                .antMatchers("/dump**").permitAll()
+                .antMatchers("/jolokia**").permitAll()
+                .antMatchers("/configprops**").permitAll()
+                .antMatchers("/logfile**").permitAll()
+                .antMatchers("/logging**").permitAll()
+                .antMatchers("/refresh**").permitAll()
+                .antMatchers("/flyway**").permitAll()
+                .antMatchers("/liquibase**").permitAll()
+                .antMatchers("/httptrace**").permitAll()
+                .antMatchers("/threaddump**").permitAll()
+                .antMatchers("/heapdump**").permitAll()
+                .antMatchers("/loggers**").permitAll()
+                .antMatchers("/auditevents**").permitAll()
+                .antMatchers("/hystrix.stream**").permitAll()
+                .antMatchers("/docs**").permitAll()
+                .antMatchers("/jmx**").permitAll()
+                .antMatchers("/management/**").permitAll()
+                .antMatchers("/applications/**").permitAll()
+                .antMatchers("/applications/**/**").permitAll()
+                .antMatchers("/applications/**/**/**").permitAll()
+                .antMatchers("/health**").permitAll()
+                .antMatchers("/health/**").permitAll()
+                //Spring boot Admin 정보 접근 URL - 끝
+                .antMatchers("/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
-                .csrf().disable();
+                .csrf().disable().cors().disable();
         /*http
 
                 .authorizeRequests()
