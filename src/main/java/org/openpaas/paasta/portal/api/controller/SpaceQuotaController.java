@@ -1,11 +1,8 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.client.v2.organizationquotadefinitions.*;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionsResponse;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.model.Quota;
-import org.openpaas.paasta.portal.api.service.OrgQuotaService;
 import org.openpaas.paasta.portal.api.service.SpaceQuotaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.UUID;
 
 /**
  * 할당량 관리(공간) 컨트롤러 - 공간의 할당량에 대한 리스트,조회,등록,수정,삭제,지정,해제 기능을 제공한다.
@@ -41,7 +37,7 @@ public class SpaceQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @GetMapping(V2_URL + "/space/quotaDefinitions")
+    @GetMapping(V2_URL + "/space/quota-definitions")
     public ListSpaceQuotaDefinitionsResponse listSpaceQuotaDefinitions(HttpServletRequest request) throws Exception {
         LOGGER.info("listSpaceQuotaDefinitions Start : ");
         return spaceQuotaService.getSpaceQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
@@ -55,7 +51,7 @@ public class SpaceQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @GetMapping(V2_URL + "/space/quotaDefinitions/{spaceQuotaId}")
+    @GetMapping(V2_URL + "/space/quota-definitions/{spaceQuotaId}")
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceQuotaDefinitions Start : ");
         return spaceQuotaService.getSpaceQuotaDefinitions(spaceQuotaId ,request.getHeader(AUTHORIZATION_HEADER_KEY));

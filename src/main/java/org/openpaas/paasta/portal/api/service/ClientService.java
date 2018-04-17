@@ -1,8 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.clients.ListClientsRequest;
 import org.cloudfoundry.uaa.clients.ListClientsResponse;
 import org.json.simple.JSONArray;
@@ -33,7 +31,7 @@ import java.util.Map;
 @Transactional
 public class ClientService extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);
     /**
      * 클라이언트 목록 조회
      *
@@ -73,17 +71,48 @@ public class ClientService extends Common {
     }
 
     //V2
-    public Map getClientList(Map<String, Object> param, String token) throws Exception {
+    public Map getClientList(Map<String, Object> param) throws Exception {
 
         //ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
 
-        ReactorUaaClient uaaClient = uaaClient(connectionContext(), tokenProvider(token));
+        //Test
+        String tempToken = this.getToken();
+
+//        LOGGER.info("::token:::::::"+tempToken);
+//        ReactorUaaClient uaaClient = uaaClient(connectionContext(), tokenProvider(tempToken));
 
 
-LOGGER.info("::token:::::::"+token);
-        ListClientsResponse listClientsResponse = uaaClient.clients().list(ListClientsRequest.builder().build()).block();
+//        ListOrganizationsResponse listOrganizationsResponse =
+//
+//        ListOrganizationsResponse listOrganizationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(tempToken)).organizations()
+//                .list(ListOrganizationsRequest.builder()
+//                        //.page(1)
+//                        .build()).block();
+//                .flatMapIterable(ListOrganizationsResponse::getResources)
+//                .map(resource -> OrganizationSummary.builder()
+//                        .id(resource.getMetadata().getId())
+//                        .name(resource.getEntity().getName())
+//                        .build());
 
+
+//        LOGGER.info(":::::::::::::::::::"+listOrganizationsResponse.toString());
+
+        LOGGER.info(":::::::::::::::::SJJJSJJJS::::"+tokenProvider(adminUserName,adminPassword).getToken(connectionContext()).block());
+
+//tokenProvider(tempToken)
+        ListClientsResponse listClientsResponse = Common.uaaClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .clients()
+                .list(ListClientsRequest.builder()
+                        .build())
+                .block();
+
+
+        /* ERROR io.netty.util.ResourceLeakDetector - LEAK: ByteBuf.release() was not called before it's garbage-collected. */
+        //ListClientsResponse listClientsResponse = Common.cloudFoundryOperations(connectionContext(), tokenProvider(token)).getUaaClient().clients().list(ListClientsRequest.builder().build()).block();
+
+
+LOGGER.info("WHAT:::::::::");
         //ListClientsRequest.builder()::filter
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -92,7 +121,7 @@ LOGGER.info("::token:::::::"+token);
         String str = "";
         JSONArray rtnArray = new JSONArray();
 
-        LOGGER.info("objectMapper.writeValueAsString(listClientsResponse)::::::::"+objectMapper.writeValueAsString(listClientsResponse));
+//        LOGGER.info("objectMapper.writeValueAsString(listClientsResponse)::::::::"+objectMapper.writeValueAsString(listClientsResponse));
 
         try {
 

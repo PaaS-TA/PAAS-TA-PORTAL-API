@@ -38,7 +38,7 @@ public class Quota extends Entity {
 
     }
     /**
-     * Default value :"memory_limit":0,"total_routes":0,"total_services":0,"non_basic_services_allowed":false
+     * Default value :"app_instance_limit:-1" "instance_memory_limit:-1" "total_reserved_route_ports:0"
      * 
      * @param meta
      * @param name

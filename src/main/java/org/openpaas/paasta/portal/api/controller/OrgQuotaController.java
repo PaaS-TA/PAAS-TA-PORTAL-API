@@ -36,8 +36,8 @@ public class OrgQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL + "/orgs/quotaDefinitions")
-    public ListOrganizationQuotaDefinitionsResponse listOrgQuotaDefinitions(HttpServletRequest request) throws Exception {
+    @GetMapping(Constants.V2_URL + "/orgs/quota-definitions")
+    public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
         return orgQuotaService.getOrgQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
@@ -50,8 +50,8 @@ public class OrgQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL + "/orgs/quotaDefinitions/{quotaId}")
-    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
+    @GetMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
+    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
         return orgQuotaService.getOrgQuotaDefinitions(quotaId ,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
@@ -63,7 +63,7 @@ public class OrgQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V2_URL + "/orgs/quotaDefinitions")
+    @PostMapping(Constants.V2_URL + "/orgs/quota-definitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
         return orgQuotaService.createOrgQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
@@ -78,7 +78,7 @@ public class OrgQuotaController extends Common {
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL + "/orgs/quotaDefinitions/{quotaId}")
+    @PutMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(@PathVariable String quotaId, @RequestBody Quota quota, HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
         quota.setGuid(UUID.fromString(quotaId));
@@ -93,7 +93,7 @@ public class OrgQuotaController extends Common {
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL + "/orgs/quotaDefinitions/{quotaId}")
+    @DeleteMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
         return orgQuotaService.deleteOrgQuotaDefinitions(quotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
@@ -115,7 +115,7 @@ public class OrgQuotaController extends Common {
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL + "/orgs/quotaDefinitions/associations")
+    @PutMapping(Constants.V2_URL + "/orgs/quota-definitions/associations")
     public boolean setOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         // Name : 사용자가 입력하는 값이기 떄문에 URL 값으로 받지 않음
         LOGGER.info("setOrgQuotaDefinitions Start : ");

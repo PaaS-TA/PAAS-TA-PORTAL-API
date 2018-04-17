@@ -66,10 +66,10 @@ public class OrgQuotaService extends Common {
         /* required
         (*)이름  name
         (*)메모리 memory_limit
-        (*)인스턴스 메모리 instance_memory_limit
+        (*)인스턴스 메모리 instance_memory_limit   default -1 unlimited amount
         라우트 total_routes
-        서비스 인스턴스 total_services
-        APP 인스턴스 app_instance_limit
+        서비스 인스턴스 total_services             default -1 unlimited amount
+        APP 인스턴스 app_instance_limit           default -1 unlimited amount
         (*)무료 여부  non_basic_services_allowed
         예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
         */
