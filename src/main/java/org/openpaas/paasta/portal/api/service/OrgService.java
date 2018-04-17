@@ -14,10 +14,6 @@ import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQu
 import org.cloudfoundry.client.v2.organizations.*;
 
 
-import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionSpacesRequest;
-import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionSpacesResponse;
-import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryRequest;
-import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryResponse;
 import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -46,8 +42,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -76,58 +70,7 @@ public class OrgService extends Common {
 //    private InviteOrgSpaceMapper inviteOrgSpaceMapper;
 
 
-
-    /**
-     * 운영자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
-     *
-     * @param orgid the org id
-     * @return HashMap<String Object>
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.9.12 최초작성
-     */
-    public Map<String, Object> getSpacesForAdmin(String orgid, String token) throws Exception{
-        ListSpacesResponse listSpacesResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaces().list(ListSpacesRequest.builder().organizationId(orgid).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listSpacesResponse, Map.class);
-    }
-
-    /**
-     * 조직 요약 정보를 조회한다.
-     *
-     * @param orgName   the org
-     * @param token the token
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    public Map<String, Object> getOrgSummary(String orgName , String token) throws Exception {
-
-    SummaryOrganizationResponse summaryOrganizationResponse =
-         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                .organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgName).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(summaryOrganizationResponse, Map.class);
-    }
-
-    /**
-     * 조직 정보를 이름으로 조회한다.
-     *
-     * @param orgid   orgid
-     * @param token the token
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    public Map<String, Object> getOrgByName(String orgid ,  String token) throws Exception {
-        GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(orgid).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
-    }
-
+    
     /**
      * 조직명을 변경한다.
      *
@@ -482,24 +425,6 @@ public class OrgService extends Common {
     }
 
     /**
-     * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다.
-     *
-     * @return HashMap<String Object>
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.9.12 최초작성
-     */
-    public Map<String, Object> getOrgsForAdmin() throws Exception{
-        ListOrganizationsResponse listBuildpacksResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                       .organizations().list(ListOrganizationsRequest.builder().build()).block();
-       ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
-
-    }
-
-    /**
      * 조직 role를 조회한다.
      *
      * @param org   the org
@@ -522,7 +447,8 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public int insertOrgSpaceUser(HashMap map) throws Exception{
-       //int cnt = inviteOrgSpaceMapper.insertInviteOrgSpace(map);
+        // TODO 
+        // int cnt = inviteOrgSpaceMapper.insertInviteOrgSpace(map);
         int cnt = 0;
         return cnt;
     }
@@ -535,7 +461,8 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public int updateOrgSpaceUser(HashMap map) throws Exception{
-//       int cnt = inviteOrgSpaceMapper.updateOrgSpaceUser(map);
+        // TODO 
+        // int cnt = inviteOrgSpaceMapper.updateOrgSpaceUser(map);
         int cnt = 0;
         return cnt;
     }
@@ -548,6 +475,7 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public List<InviteOrgSpace> selectOrgSpaceUser (InviteOrgSpace inviteOrgSpace) throws Exception{
+        // TODO
 //        List<InviteOrgSpace> list = inviteOrgSpaceMapper.selectOrgSpaceUser(inviteOrgSpace);
 //        return list;
         return null;
@@ -1048,4 +976,80 @@ public class OrgService extends Common {
         return true;
     }
 
+    
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
+    /**
+     * 운영자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
+     *
+     * @param orgid the org id
+     * @return HashMap<String Object>
+     * @throws Exception the exception
+     * @author kimdojun
+     * @version 1.0
+     * @since 2016.9.12 최초작성
+     */
+    public Map<String, Object> getSpacesForAdmin(String orgid, String token) throws Exception{
+        ListSpacesResponse listSpacesResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .spaces().list(ListSpacesRequest.builder().organizationId(orgid).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listSpacesResponse, Map.class);
+    }
+
+    /**
+     * 조직 요약 정보를 조회한다.
+     *
+     * @param orgName   the org
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public Map<String, Object> getOrgSummary(String orgName , String token) throws Exception {
+
+    SummaryOrganizationResponse summaryOrganizationResponse =
+         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgName).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(summaryOrganizationResponse, Map.class);
+    }
+
+    /**
+     * 조직 정보를 이름으로 조회한다.
+     *
+     * @param orgid   orgid
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public Map<String, Object> getOrgByName(String orgid ,  String token) throws Exception {
+        GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(orgid).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
+    }
+    
+
+    /**
+     * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다.
+     *
+     * @return HashMap<String Object>
+     * @throws Exception the exception
+     * @author 김도준
+     * @version 1.0
+     * @since 2016.9.12 최초작성
+     */
+    public Map<String, Object> getOrgsForAdmin() throws Exception{
+        ListOrganizationsResponse listBuildpacksResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                       .organizations().list(ListOrganizationsRequest.builder().build()).block();
+       ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+
+    }
+    
 }

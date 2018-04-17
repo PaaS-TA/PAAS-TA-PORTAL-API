@@ -6,6 +6,7 @@ import org.apache.commons.lang.RandomStringUtils;
 
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserDetail;
@@ -20,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -36,7 +35,15 @@ import java.util.*;
 @Transactional
 public class OrgController extends Common {
 
-    private final String V2_URL = "/v2";
+    /**
+     * V1 URL HEAD = (empty string)
+     */
+    private static final String V1_URL = Constants.V1_URL;
+    
+    /**
+     * V2 URL HEAD = "/v2"
+     */
+    private static final String V2_URL = Constants.V2_URL;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrgController.class);
 
@@ -63,64 +70,12 @@ public class OrgController extends Common {
     @Autowired
     UserService userService;
 
-    /**
-     * 공간 목록을 조회한다.
-     * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
-     *
-     * @param orgid     the org
-     * @param request the request
-     * @return List<CloudSpace>     orgList
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.5.20 최초작성
-     */
-    @GetMapping(V2_URL + "/orgs/{orgid}/space")
-    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgid, HttpServletRequest request) throws Exception {
-        LOGGER.info("Get Spaces Start " + orgid);
-        Map<String,Map<String, Object>> maps = new HashMap<>();
-        maps.put("spaceList",orgService.getSpacesForAdmin(orgid,request.getHeader(AUTHORIZATION_HEADER_KEY)));
-        LOGGER.info("Get Spaces End ");
-        return maps;
-    }
-
-    /**
-     * 조직 요약 정보를 조회한다.
-     *
-     * @param orgid     the org id
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    @GetMapping(V2_URL + "/orgs/{orgid}/summary")
-    public Map<String, Object> getOrgSummary(@PathVariable String orgid, HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : " + orgid);
-        if(orgid==null){
-            throw new Exception("조직정보를 가져오지 못하였습니다.");
-        }
-        return orgService.getOrgSummary(orgid, request.getHeader(AUTHORIZATION_HEADER_KEY));
-    }
-
-    /**
-     * 조직 이름으로 조회한다.
-     *
-     * @param orgid     the org id
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    @GetMapping(V2_URL + "/orgs/{orgid}/quota")
-    public Map<String, Object> getOrgByName(@PathVariable String orgid, HttpServletRequest request) throws Exception {
-        LOGGER.info("quota Start : " + orgid);
-        Map<String, Object> cloudOrg = new HashMap<>();
-        /* null로 초기화 할때, 에러시 응답하는 결과값에 content tpye이 세팅되지 않음. */
-        cloudOrg = orgService.getOrgByName(orgid , request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        LOGGER.info("quota End ");
-
-        return cloudOrg;
-    }
-
+    
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 1                   //////
+    //////   Document : (None)                                      //////
+    //////////////////////////////////////////////////////////////////////
+    
     /**
      * 조직명을 변경한다.
      *
@@ -129,7 +84,7 @@ public class OrgController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/renameOrg"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/renameOrg"}, method = RequestMethod.POST)
     public boolean renameOrg(@RequestBody Org org, HttpServletRequest request) throws Exception {
 
         LOGGER.info("Rename Org Start : " + org.getOrgName() + " : " + org.getNewOrgName());
@@ -150,7 +105,7 @@ public class OrgController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/deleteOrg"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/deleteOrg"}, method = RequestMethod.POST)
     public boolean deleteOrg(@RequestBody Org org, HttpServletRequest request) throws Exception {
 
         LOGGER.info("delete Org Start : " + org.getOrgName());
@@ -173,7 +128,7 @@ public class OrgController extends Common {
      * @version 1.0
      * @since 2016.5.13 최초작성
      */
-    @RequestMapping(value = {"/org/getOrgs"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/getOrgs"}, method = RequestMethod.POST)
     public List getOrgs(HttpServletRequest request) throws Exception {
 
         LOGGER.info("Get Orgs Start");
@@ -197,7 +152,7 @@ public class OrgController extends Common {
      * @version 1.0
      * @since 2016.5.16 최초작성
      */
-    @RequestMapping(value = {"/org/createOrg"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/createOrg"}, method = RequestMethod.POST)
     public boolean createOrg(@RequestBody Org org, HttpServletRequest request) throws Exception {
 
         LOGGER.info("Create Org Start");
@@ -220,7 +175,7 @@ public class OrgController extends Common {
      * @version 1.0
      * @since 2016.6.1 최초작성
      */
-    @RequestMapping(value = {"/org/removeOrgFromUser"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/removeOrgFromUser"}, method = RequestMethod.POST)
     public boolean removeUserFromOrg(@RequestBody Org org, HttpServletRequest request) throws Exception {
 
         LOGGER.info("removeUserFromOrg Start");
@@ -243,7 +198,7 @@ public class OrgController extends Common {
      * @version 1.0
      * @since 2016.8.10 최초작성
      */
-    @RequestMapping(value = {"/org/setOrgRole"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/setOrgRole"}, method = RequestMethod.POST)
     public boolean setOrgRole(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, String> body) throws Exception {
 
         LOGGER.info("setOrgRole Start");
@@ -266,7 +221,7 @@ public class OrgController extends Common {
      * @version 1.0
      * @since 2016.8.10 최초작성
      */
-    @RequestMapping(value = {"/org/unsetOrgRole"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/unsetOrgRole"}, method = RequestMethod.POST)
     public boolean unsetOrgRole(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, String> body) throws Exception {
 
         LOGGER.info("unsetOrgRole Start");
@@ -286,7 +241,7 @@ public class OrgController extends Common {
      * @return the all users
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/getAllUsers"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/getAllUsers"}, method = RequestMethod.POST)
     public List<Map<String, Object>> getAllUsers(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, String> body) throws Exception {
 
         List<Map<String, Object>> orgUserList= new ArrayList<>();
@@ -317,7 +272,7 @@ public class OrgController extends Common {
      * @return users for org role
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/getUsersForOrgRole"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/org/getUsersForOrgRole"}, method = RequestMethod.POST)
     public List<Map<String, Object>> getUsersForOrgRole(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, Object> body) throws Exception {
 
         LOGGER.info("getUsersForOrgRole Start");
@@ -341,18 +296,23 @@ public class OrgController extends Common {
     }
 
     /**
-     * 관리자권한으로 조직 목록을 조회한다.
+     * 사용자의 조직권한을 삭제한다.
      *
-     * @return the orgs for admin
+     * @param token the token
+     * @param body  the body
+     * @return the map
      * @throws Exception the exception
      */
-    @GetMapping(V2_URL + "/orgs")
-    public Map<String, Object> getOrgsForAdmin() throws Exception {
-        LOGGER.info("OrgAndSpace ::");
-        //List<Object> orgList = orgService.getOrgsForAdmin();
-        return  orgService.getOrgsForAdmin();
-        //return new HashMap<String, Object>(){{put("orgList", orgList);}};
+    @RequestMapping(value = {V1_URL + "/org/deleteUserOrg"}, method = RequestMethod.POST)
+    public Map<String, Object> deleteUserOrg(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, Object> body) throws Exception {
+
+        Map map = new HashMap();
+        map.put("bSend", orgService.unsetUserOrg(body, token));
+        return map;
     }
+    
+    
+    // related to invition users and sending email
 
     /**
      * 조직에 사용자를  이메일 인증을 통해 초대한다.
@@ -365,7 +325,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invite/inviteEmailSend"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/invite/inviteEmailSend"}, method = RequestMethod.POST)
     public Map<String, Object> inviteEmailSend(@RequestBody Map<String, Object> body) throws Exception {
         LOGGER.info("inviteUser ::"+body.toString());
         String token = RandomStringUtils.randomAlphanumeric(6).toUpperCase() + RandomStringUtils.randomAlphanumeric(2).toUpperCase();
@@ -455,7 +415,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invitations/accept"})
+    @RequestMapping(value = {V1_URL + "/invitations/accept"})
     public Map<String, Object> inviteAccept(@RequestBody HashMap request) throws Exception {
 
         String code = (null == request.get("code")) ? "" : request.get("code").toString();
@@ -485,7 +445,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invitations/userInfo"})
+    @RequestMapping(value = {V1_URL + "/invitations/userInfo"})
     public Map<String, Object> inviteUserInfo(@RequestBody HashMap request) throws Exception {
 
         String code = (null == request.get("code")) ? "" : request.get("code").toString();
@@ -513,7 +473,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invitations/authUser"})
+    @RequestMapping(value = {V1_URL + "/invitations/authUser"})
     public Map<String, Object> inviteUserAdd(@RequestBody HashMap request) throws Exception {
 
         String code = (null == request.get("code")) ? "" : request.get("code").toString();
@@ -538,7 +498,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invite/inviteEmailReSend"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/invite/inviteEmailReSend"}, method = RequestMethod.POST)
     public Map<String, Object> inviteEmailReSend(@RequestBody Map<String, Object> body) throws Exception {
         LOGGER.info("inviteUser ::"+body.toString());
         Map map = new HashMap();
@@ -553,7 +513,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invite/cancelInvite"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/invite/cancelInvite"}, method = RequestMethod.POST)
     public Map<String, Object> cancelInvite(@RequestBody Map<String, Object> body) throws Exception {
         LOGGER.info("inviteUser ::"+body.toString());
         Map map = new HashMap();
@@ -570,7 +530,7 @@ public class OrgController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/invite/inviteEmailSendCnt"}, method = RequestMethod.POST)
+    @RequestMapping(value = {V1_URL + "/invite/inviteEmailSendCnt"}, method = RequestMethod.POST)
     public Map<String, Object> inviteEmailSendCnt(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, Object> body) throws Exception {
 
         Map map = new HashMap();
@@ -578,20 +538,91 @@ public class OrgController extends Common {
         return map;
     }
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     /**
-     * 사용자의 조직권한을 삭제한다.
+     * 공간 목록을 조회한다.
+     * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
-     * @param token the token
-     * @param body  the body
-     * @return the map
+     * @param orgid     the org
+     * @param request the request
+     * @return List<CloudSpace>     orgList
+     * @throws Exception the exception
+     * @author 김도준
+     * @version 2.0
+     * @since 2018.04.17 (modified)
+     */
+    @GetMapping(V2_URL + "/orgs/{orgid}/space")
+    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgid, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get Spaces Start " + orgid);
+        Map<String,Map<String, Object>> maps = new HashMap<>();
+        maps.put("spaceList",orgService.getSpacesForAdmin(orgid,request.getHeader(AUTHORIZATION_HEADER_KEY)));
+        LOGGER.info("Get Spaces End ");
+        return maps;
+    }
+    
+
+    /**
+     * 조직 요약 정보를 조회한다.
+     *
+     * @param orgid     the org id
+     * @param request the request
+     * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/org/deleteUserOrg"}, method = RequestMethod.POST)
-    public Map<String, Object> deleteUserOrg(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, Object> body) throws Exception {
-
-        Map map = new HashMap();
-        map.put("bSend", orgService.unsetUserOrg(body, token));
-        return map;
+    @GetMapping(V2_URL + "/orgs/{orgid}/summary")
+    public Map<String, Object> getOrgSummary(@PathVariable String orgid, HttpServletRequest request) throws Exception {
+        LOGGER.info("summary Start : " + orgid);
+        if(orgid==null){
+            throw new Exception("조직정보를 가져오지 못하였습니다.");
+        }
+        return orgService.getOrgSummary(orgid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
+    
+    /**
+     * 조직 이름으로 조회한다.
+     *
+     * @param orgid     the org id
+     * @param request the request
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    @GetMapping(V2_URL + "/orgs/{orgid}/quota")
+    public Map<String, Object> getOrgByName(@PathVariable String orgid, HttpServletRequest request) throws Exception {
+        LOGGER.info("quota Start : " + orgid);
+        Map<String, Object> cloudOrg = new HashMap<>();
+        /* null로 초기화 할때, 에러시 응답하는 결과값에 content tpye이 세팅되지 않음. */
+        cloudOrg = orgService.getOrgByName(orgid , request.getHeader(AUTHORIZATION_HEADER_KEY));
 
+        LOGGER.info("quota End ");
+
+        return cloudOrg;
+    }
+    
+    /**
+     * 관리자권한으로 조직 목록을 조회한다.
+     *
+     * @return the orgs for admin
+     * @throws Exception the exception
+     */
+    @GetMapping(V2_URL + "/orgs")
+    public Map<String, Object> getOrgsForAdmin() throws Exception {
+        LOGGER.info("OrgAndSpace ::");
+        //List<Object> orgList = orgService.getOrgsForAdmin();
+        return  orgService.getOrgsForAdmin();
+        //return new HashMap<String, Object>(){{put("orgList", orgList);}};
+    }
+    
+    
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
+    //////   Document : http://v3-apidocs.cloudfoundry.org          //////
+    //////   Not yet implemented                                    //////
+    //////////////////////////////////////////////////////////////////////
+    
+    // Not-implemented
+    
 }
