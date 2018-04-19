@@ -1,11 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.applications.*;
-import org.cloudfoundry.client.v3.applications.GetApplicationEnvironmentResponse;
+import org.cloudfoundry.client.v2.events.ListEventsRequest;
+import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.*;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
@@ -16,8 +15,6 @@ import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-//import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
-//import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +27,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+//import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
+//import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
 
 /**
  * 앱 서비스 - 애플리케이션 정보 조회, 구동, 정지 등의 API 를 호출 하는 서비스이다.
@@ -59,21 +59,19 @@ public class AppService extends Common {
     //DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
     //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
 
-    public String getAppSummary(App app, String token) throws IOException{
+    public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException{
 
         //SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
         // 로그 추가(이후 .log() 제거)
         SummaryApplicationResponse summaryApplicationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .applicationsV2()
                 .summary(SummaryApplicationRequest.builder()
-                        .applicationId(app.getGuid().toString())
+                        .applicationId(guid)
                         .build())
                 .log()
                 .block();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        //return summaryApplicationResponse.toString();
-        return objectMapper.writeValueAsString(summaryApplicationResponse);
+        return summaryApplicationResponse;
     }
 
 
@@ -184,13 +182,13 @@ public class AppService extends Common {
     public void updateApp(App app, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
         if (app.getInstances() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build());
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build()).block();
         }
         if (app.getMemory() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).memory(app.getMemory()).build());
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).memory(app.getMemory()).build()).block();
         }
         if (app.getDiskQuota() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build());
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build()).block();
         }
     }
 
@@ -223,20 +221,18 @@ public class AppService extends Common {
     /**
      * 앱 이벤트를 조회한다.
      *
-     * @param app    the app
+     * @param guid
      * @param token the client
      * @return the app events
      * @throws Exception the exception
      */
-    public String getAppEvents(App app, String token) throws Exception {
+    public ListEventsResponse getAppEvents(String guid, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        ListEventsRequest.Builder requestBuilder = ListEventsRequest.builder().actee(guid);
+        ListEventsResponse listEventsResponse = cloudFoundryClient.events().list(requestBuilder.build()).block();
 
-//        List<> = cloudFoundryOperations.applications().getEvents(GetApplicationEventsRequest.builder().name(app.getName()).build()).buffer();
-//
-//        String respAppEvents = client.getAppEvents(app.getGuid());
-
-        return null;
+        return listEventsResponse;
     }
 
     /**
