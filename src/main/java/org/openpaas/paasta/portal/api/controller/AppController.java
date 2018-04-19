@@ -1,19 +1,17 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
+import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.service.AppService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,32 +43,16 @@ public class AppController extends Common {
     /**
      * 앱 요약 정보를 조회한다.
      *
-     * @param app     the app
+     * @param guid
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/getAppSummary"}, method = RequestMethod.POST)
-    public String getAppSummary(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/summary"}, method = RequestMethod.GET)
+    public SummaryApplicationResponse getAppSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("getAppSummary Start : " + guid);
 
-        String respApp = null;
-
-
-        LOGGER.info("getAppSummary Start : " + app.getGuid());
-
-        //token setting
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        LOGGER.info("this.getToken()1:"+this.getToken());
-        LOGGER.info("this.getToken()2:"+this.getToken());
-        LOGGER.info("this.getToken()3:"+this.getToken());
-        LOGGER.info("getHeader::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        //service call
-        respApp = appService.getAppSummary(app, this.getToken()); //
-
-        LOGGER.info("getAppSummary End ");
-
+        SummaryApplicationResponse respApp = appService.getAppSummary(guid, this.getToken());
 
         return respApp;
     }
@@ -275,7 +257,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/updateApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL+"/apps/updateApp"}, method = RequestMethod.POST)
     public boolean updateApp(@RequestBody App app, HttpServletRequest request) throws Exception {
 
         ApplicationStats applicationStats = null;
@@ -287,7 +269,7 @@ public class AppController extends Common {
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
 
         //service call
-        appService.updateApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.updateApp(app, this.getToken());
 
         LOGGER.info("updateApp End ");
 
@@ -347,23 +329,16 @@ public class AppController extends Common {
     /**
      * 앱 이벤트를 조회한다.
      *
-     * @param app     the app
+     * @param guid
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/getAppEvents"}, method = RequestMethod.POST)
-    public String getAppEvents(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/apps/app-usage-events/{guid}"}, method = RequestMethod.GET)
+    public ListEventsResponse getAppEvents(@PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("getAppEvents Start : " + guid);
 
-        String respAppEvents = null;
-
-        LOGGER.info("getAppEvents Start : " + app.getGuid());
-
-        CloudCredentials credentials = new CloudCredentials(new DefaultOAuth2AccessToken(request.getHeader(AUTHORIZATION_HEADER_KEY)), false);
-        CustomCloudFoundryClient client = new CustomCloudFoundryClient(credentials, getTargetURL(apiTarget), true);
-        client.login();
-
-        respAppEvents = appService.getAppEvents(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        ListEventsResponse respAppEvents = appService.getAppEvents(guid, this.getToken());
 
         LOGGER.info("getAppEvents End ");
 
