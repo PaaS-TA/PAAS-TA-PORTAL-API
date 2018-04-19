@@ -3,8 +3,10 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.service.AppService;
@@ -112,29 +114,25 @@ public class AppController extends Common {
     /**
      * 앱 실시간 상태를 조회한다.
      *
-     * @param app     the app
+     * @param guid     the app guid
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/getAppStats"}, method = RequestMethod.POST)
-    public String getAppStats(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/stats"}, method = RequestMethod.GET)
+    public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
-        String respAppStats = null;
-
-
-        LOGGER.info("stopApp Start : " + app.getGuid());
+        LOGGER.info("stopApp Start : " + guid);
 
         //token setting
         //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
-        respAppStats = appService.getAppStats(app, this.getToken());
+        ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, this.getToken());
 
         LOGGER.info("stopApp End ");
 
-
-        return respAppStats;
+        return applicationStatisticsResponse;
     }
 
     /**
