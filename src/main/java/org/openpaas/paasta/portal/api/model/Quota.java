@@ -22,8 +22,11 @@ public class Quota extends Entity {
 	private int instanceMemoryLimit;
 	private int appInstanceLimit;
 	private int totalReservedRoutePorts;
-	private UUID guid;
-	private String organizationName; // 지정시 필요
+	private UUID guid;  // Definition GUID(Organization or Space)
+	private UUID orginazationGuid;
+	private UUID spaceGuid;
+
+	private String organizationName; // 정의 지정시 필요
 
 	public Quota(){
 	}
@@ -132,6 +135,22 @@ public class Quota extends Entity {
 
 	public void setGuid(UUID guid) {
 		this.guid = guid;
+	}
+
+	public UUID getOrginazationGuid() {
+		return orginazationGuid;
+	}
+
+	public void setOrginazationGuid(UUID orginazationGuid) {
+		this.orginazationGuid = orginazationGuid;
+	}
+
+	public UUID getSpaceGuid() {
+		return spaceGuid;
+	}
+
+	public void setSpaceGuid(UUID spaceGuid) {
+		this.spaceGuid = spaceGuid;
 	}
 
 	public String getOrganizationName() {
