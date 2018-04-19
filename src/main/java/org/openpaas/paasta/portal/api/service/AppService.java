@@ -80,24 +80,21 @@ public class AppService extends Common {
     /**
      * 앱 실시간 상태를 조회한다.
      *
-     * @param app   the app
+     * @param guid   the app guid
      * @param token the client
      * @return the app stats
      */
-    public String getAppStats(App app, String token) {
+    public ApplicationStatisticsResponse getAppStats(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
         //ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(app.getGuid().toString()).build()).block();
 
         ApplicationStatisticsResponse applicationStatisticsResponse =
                 cloudFoundryClient.applicationsV2()
                 .statistics(ApplicationStatisticsRequest.builder()
-                        .applicationId(app.getGuid().toString())
+                        .applicationId(guid)
                         .build()).block();
 
-        Map<String, InstanceStatistics> appEnvironment =applicationStatisticsResponse.getInstances();
-
-        return applicationStatisticsResponse.toString();
-        //return "test";
+        return applicationStatisticsResponse;
     }
 
 
