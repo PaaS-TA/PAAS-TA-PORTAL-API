@@ -5,13 +5,17 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
+import org.cloudfoundry.doppler.Envelope;
+import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.applications.*;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
+import org.cloudfoundry.operations.applications.*;
 import org.cloudfoundry.operations.applications.RestageApplicationRequest;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
+import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
@@ -190,6 +194,9 @@ public class AppService extends Common {
         if (app.getDiskQuota() > 0) {
             cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build()).block();
         }
+        if (!app.getName().equals("")) {
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getName()).build()).block();
+        }
     }
 
     /**
@@ -238,7 +245,7 @@ public class AppService extends Common {
     /**
      * 앱 환경변수를 조회한다.
      *
-     * @param app   the app
+     * @param guid
      * @param token the token
      * @return the application env
      * @throws Exception the exception
@@ -246,22 +253,27 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    public String getApplicationEnv(App app, String token) throws Exception {
+    public ApplicationEnvironmentResponse getApplicationEnv(String guid, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        String orgName = app.getOrgName();
-        String spaceName = app.getSpaceName();
-        String appName = app.getName();
+        ApplicationEnvironmentResponse applicationEnvironmentResponse =
+                cloudFoundryClient.applicationsV2()
+                        .environment(ApplicationEnvironmentRequest.builder()
+                                .applicationId(guid)
+                                .build()
+                        ).block();
 
-        if (!stringNullCheck(orgName, spaceName, appName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
-
-        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        ApplicationEnvironments resp = cloudFoundryOperations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder().name(appName).build()).block();
-
-
-        return resp.toString();
-
+        return applicationEnvironmentResponse;
+//        String orgName = app.getOrgName();
+//        String spaceName = app.getSpaceName();
+//        String appName = app.getName();
+//
+//        if (!stringNullCheck(orgName, spaceName, appName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+//        ApplicationEnvironments resp = cloudFoundryOperations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder().name(appName).build()).block();
     }
 
     /**
@@ -461,5 +473,16 @@ public class AppService extends Common {
 //
 //        return getRecentLog;
 //    }
+
+    public List<Envelope> getRecentLog(String guid, String token) {
+        TokenProvider tokenProvider = tokenProvider(token);
+        ReactorDopplerClient reactorDopplerClient  = Common.dopplerClient(connectionContext(), tokenProvider);
+
+        RecentLogsRequest.Builder requestBuilder = RecentLogsRequest.builder();
+        requestBuilder.applicationId(guid);
+
+        List<Envelope> getRecentLog = reactorDopplerClient.recentLogs(requestBuilder.build()).collectList().block();
+        return getRecentLog;
+    }
 
 }
