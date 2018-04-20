@@ -2,11 +2,9 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.v2.organizationquotadefinitions.DeleteOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.DeleteOrganizationQuotaDefinitionResponse;
-import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionRequest;
-import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
-import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionsRequest;
-import org.cloudfoundry.client.v2.spacequotadefinitions.ListSpaceQuotaDefinitionsResponse;
+import org.cloudfoundry.client.v2.spacequotadefinitions.*;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.model.Quota;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
@@ -57,86 +55,151 @@ public class SpaceQuotaService extends Common {
                 .block();
     }
 
-//    /**
-//     * 조직 할당량 정보를 생성한다.
-//     *
-//     * @param quota Quota Info
-//     * @param token the token
-//     * @return ModelAndView model
-//     * @throws Exception the exception
-//     */
-//    public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
-//
-//        /* required
-//        (*)이름  name
-//        (*)메모리 memory_limit
-//        (*)인스턴스 메모리 instance_memory_limit
-//        라우트 total_routes
-//        서비스 인스턴스 total_services
-//        APP 인스턴스 app_instance_limit
-//        (*)무료 여부  non_basic_services_allowed
-//        예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
-//        */
-//
-//        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-//                .organizationQuotaDefinitions()
-//                .create(CreateOrganizationQuotaDefinitionRequest.builder()
-//                        .name(quota.getName())
-//                        .nonBasicServicesAllowed(quota.isNonBasicServicesAllowed())
-//                        .totalServices(quota.getTotalServices())
-//                        .totalRoutes(quota.getTotalRoutes())
-//                        .totalReservedRoutePorts(quota.getTotalReservedRoutePorts())
-//                        .memoryLimit(quota.getMemoryLimit())
-//                        .instanceMemoryLimit(quota.getInstanceMemoryLimit())
-//                        .applicationInstanceLimit(quota.getAppInstanceLimit())
-//                        .build()
-//                ).log()
-//                .block();
-//    }
-//
-//    /**
-//     * 특정 조직 할당량 정보를 수정한다.
-//     *
-//     * @param token the token
-//     * @return ModelAndView model
-//     * @throws Exception the exception
-//     */
-//    public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
-//
-//        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-//                .organizationQuotaDefinitions()
-//                .update(UpdateOrganizationQuotaDefinitionRequest.builder()
-//                        .organizationQuotaDefinitionId(quota.getGuid().toString())
-//                        .name(quota.getName())
-//                        .nonBasicServicesAllowed(quota.isNonBasicServicesAllowed())
-//                        .totalServices(quota.getTotalServices())
-//                        .totalRoutes(quota.getTotalRoutes())
-//                        .totalReservedRoutePorts(quota.getTotalReservedRoutePorts())
-//                        .memoryLimit(quota.getMemoryLimit())
-//                        .instanceMemoryLimit(quota.getInstanceMemoryLimit())
-//                        .applicationInstanceLimit(quota.getAppInstanceLimit())
-//                        .build()
-//                ).log()
-//                .block();
-//    }
-//
-//    /**
-//     * 특정 조직 할당량 정보를 삭제한다.
-//     *
-//     * @param token the token
-//     * @return ModelAndView model
-//     * @throws Exception the exception
-//     */
-//    public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String guid, String token) throws Exception {
-//
-//        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-//                .organizationQuotaDefinitions()
-//                .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
-//                        .organizationQuotaDefinitionId(guid)
-//                        .async(true) // background 처리 여부(recommend:true)
-//                        .build()
-//                ).log()
-//                .block();
-//    }
+    /**
+     * 공간 할당량 정보를 생성한다.
+     *
+     * @param quota Quota Info
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
+
+        /* required
+        (*)이름  name
+        (*)메모리 memory_limit
+        (*)인스턴스 메모리 instance_memory_limit
+        라우트 total_routes
+        서비스 인스턴스 total_services
+        APP 인스턴스 app_instance_limit
+        (*)무료 여부  non_basic_services_allowed
+        예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
+        */
+
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .spaceQuotaDefinitions()
+                .create(CreateSpaceQuotaDefinitionRequest.builder()
+                        .name(quota.getName())
+                        .nonBasicServicesAllowed(quota.isNonBasicServicesAllowed())
+                        .totalServices(quota.getTotalServices())
+                        .totalRoutes(quota.getTotalRoutes())
+                        .totalReservedRoutePorts(quota.getTotalReservedRoutePorts())
+                        .memoryLimit(quota.getMemoryLimit())
+                        .instanceMemoryLimit(quota.getInstanceMemoryLimit())
+                        .applicationInstanceLimit(quota.getAppInstanceLimit())
+                        .organizationId(quota.getOrginazationGuid().toString())
+                        .build()
+                ).log()
+                .block();
+    }
+
+    /**
+     * 특정 공간 할당량 정보를 삭제한다.
+     *
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(String guid, String token) throws Exception {
+
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .spaceQuotaDefinitions()
+                .delete(DeleteSpaceQuotaDefinitionRequest.builder()
+                        .spaceQuotaDefinitionId(guid)
+                        .async(true)  // background job : recommend
+                        .build()
+                ).log()
+                .block();
+    }
+
+    /**
+     * 공간 할당량 정의를 특정 공간에 지정한다.
+     *
+     * @param quota Quota Info
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
+
+        /* required
+            - 공간 정의 GUID
+            - 공간 GUID
+        */
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .spaceQuotaDefinitions()
+                .associateSpace(AssociateSpaceQuotaDefinitionRequest.builder()
+                        .spaceQuotaDefinitionId(quota.getGuid().toString())
+                        .spaceId(quota.getSpaceGuid().toString())
+                        .build()
+                ).log()
+                .block();
+    }
+
+    /**
+     * 해당 공간 할당량 정의를 사용하는 공간 리스트를 조회한다.
+     *
+     * @param guid Space Definition Guid
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(String guid, String token) throws Exception {
+
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .spaceQuotaDefinitions()
+                .listSpaces(ListSpaceQuotaDefinitionSpacesRequest.builder()
+                        .spaceQuotaDefinitionId(guid)
+                        .build()
+                ).log()
+                .block();
+    }
+
+    /**
+     * 해당 공간에 설정된 할당량 정의를 삭제한다.
+     *
+     * @param quota Quota Info
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public boolean removeSpaceQuotaDefinitionsFromSpace(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
+
+         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+            .spaceQuotaDefinitions()
+            .removeSpace(RemoveSpaceQuotaDefinitionRequest.builder()
+                    .spaceQuotaDefinitionId(quota.getGuid().toString())
+                    .spaceId(quota.getSpaceGuid().toString())
+                    .build()
+            ).log()
+            .block();
+        return true;
+    }
+
+    /**
+     * 특정 조직 할당량 정보를 수정한다.
+     *
+     * @param token the token
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
+
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .spaceQuotaDefinitions()
+                .update(UpdateSpaceQuotaDefinitionRequest.builder()
+                        .spaceQuotaDefinitionId(quota.getGuid().toString())
+                        .name(quota.getName())
+                        .nonBasicServicesAllowed(quota.isNonBasicServicesAllowed())
+                        .totalServices(quota.getTotalServices())
+                        .totalRoutes(quota.getTotalRoutes())
+                        .totalReservedRoutePorts(quota.getTotalReservedRoutePorts())
+                        .memoryLimit(quota.getMemoryLimit())
+                        .instanceMemoryLimit(quota.getInstanceMemoryLimit())
+                        .applicationInstanceLimit(quota.getAppInstanceLimit())
+                        .build()
+                ).log()
+                .block();
+    }
 
 }

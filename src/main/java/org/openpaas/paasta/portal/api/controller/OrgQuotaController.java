@@ -39,6 +39,7 @@ public class OrgQuotaController extends Common {
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions")
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
+        LOGGER.info(":::::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
         return orgQuotaService.getOrgQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
@@ -65,7 +66,7 @@ public class OrgQuotaController extends Common {
      */
     @PostMapping(Constants.V2_URL + "/orgs/quota-definitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : ");
+        LOGGER.info("createOrgQuotaDefinitions Start : ");
         return orgQuotaService.createOrgQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
@@ -80,7 +81,7 @@ public class OrgQuotaController extends Common {
      */
     @PutMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(@PathVariable String quotaId, @RequestBody Quota quota, HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : ");
+        LOGGER.info("updateOrgQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(quotaId));
         return orgQuotaService.updateOrgQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
@@ -95,7 +96,7 @@ public class OrgQuotaController extends Common {
      */
     @DeleteMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : ");
+        LOGGER.info("deleteOrgQuotaDefinitions Start : ");
         return orgQuotaService.deleteOrgQuotaDefinitions(quotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         /* return status 참고
