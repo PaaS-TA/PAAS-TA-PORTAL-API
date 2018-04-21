@@ -8,7 +8,7 @@ import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.lib.util.JsonUtil;
-
+import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
@@ -16,6 +16,8 @@ import org.cloudfoundry.client.v2.organizations.*;
 
 import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.SpaceEntity;
+import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,6 +42,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Future;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -122,25 +125,6 @@ public class OrgService extends Common {
 
         return true;
 
-    }
-
-    /**
-     * 조직 목록을 조회한다.
-     *
-     * @param token the token
-     * @return List<CloudOrganization>    orgList
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.5.13 최초작성
-     */
-    public List getOrgs(String token) throws Exception {
-
-        //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        List<CloudOrganization> orgList = client.getOrganizations();
-
-        return orgList;
     }
 
     /**
@@ -981,75 +965,149 @@ public class OrgService extends Common {
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
-
+    
+    private final Duration blockDuration = Duration.ofSeconds(30);
+        
     /**
-     * 운영자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
+     * 조직 Id를 이용해 조직 정보를 조회한다.
      *
-     * @param orgid the org id
-     * @return HashMap<String Object>
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.9.12 최초작성
-     */
-    public Map<String, Object> getSpacesForAdmin(String orgid, String token) throws Exception{
-        ListSpacesResponse listSpacesResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaces().list(ListSpacesRequest.builder().organizationId(orgid).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listSpacesResponse, Map.class);
-    }
-
-    /**
-     * 조직 요약 정보를 조회한다.
-     *
-     * @param orgName   the org
+     * @param orgId the org id
      * @param token the token
-     * @return ModelAndView model
-     * @throws Exception the exception
+     * @return GetOrganizationResponse
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
      */
-    public Map<String, Object> getOrgSummary(String orgName , String token) throws Exception {
-
-    SummaryOrganizationResponse summaryOrganizationResponse =
-         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                .organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgName).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(summaryOrganizationResponse, Map.class);
-    }
-
-    /**
-     * 조직 정보를 이름으로 조회한다.
-     *
-     * @param orgid   orgid
-     * @param token the token
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    public Map<String, Object> getOrgByName(String orgid ,  String token) throws Exception {
-        GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(orgid).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
+    public GetOrganizationResponse getOrg(String orgId, String token) {
+    	GetOrganizationResponse response = 
+    		Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+    		.organizations()
+    		.get(GetOrganizationRequest.builder().organizationId(orgId).build())
+    		.block(blockDuration);
+    	
+    	return response;
     }
     
-
+    /**
+     * 조직 Id를 이용해 조직 요약 정보를 조회한다.
+     *
+     * @param orgId the org id
+     * @param token the token
+     * @return SummaryOrganizationResponse
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
+     */
+    public SummaryOrganizationResponse getOrgSummary(String orgId, String token) {
+		SummaryOrganizationResponse response = 
+			Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+		    .organizations()
+		    .summary(SummaryOrganizationRequest.builder().organizationId(orgId).build())
+		    .block(blockDuration);
+		
+		return response;
+	}
+    
+    /**
+     * 사용자/운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다.
+     *
+     * @param token the token
+     * @return ListOrganizationsResponse
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
+     */
+	public ListOrganizationsResponse getOrgsForUser(final String token) {
+		ListOrganizationsResponse response = 
+			Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+		    .organizations()
+		    .list(ListOrganizationsRequest.builder().build())
+		    .block(blockDuration);
+		
+		return response;
+	}
+	
+	/**
+     * 조직 목록을 조회한다. 단, 내부의 resources만 추출해서 반환한다.
+     *
+     * @param token the token
+     * @return List<OrganizationResource> organization list
+     * @author 김도준(1.x), hgcho(2.x)
+     * @version 2.0
+     * @since 2018.4.22
+     */
+    public List<OrganizationResource> getOrgs(String token) {
+    	ListOrganizationsResponse response = 
+			Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+		    .organizations()
+		    .list(ListOrganizationsRequest.builder().build())
+		    .block(blockDuration);
+    	
+    	return response.getResources();
+    }
+    
     /**
      * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다.
      *
-     * @return HashMap<String Object>
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.9.12 최초작성
+     * @return ListOrganizationsResponse
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
      */
-    public Map<String, Object> getOrgsForAdmin() throws Exception{
-        ListOrganizationsResponse listBuildpacksResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                       .organizations().list(ListOrganizationsRequest.builder().build()).block();
-       ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
-
-    }
+	public ListOrganizationsResponse getOrgsForAdmin() {
+		ListOrganizationsResponse response = 
+			Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword))
+		    .organizations()
+		    .list(ListOrganizationsRequest.builder().build())
+		    .block(blockDuration);
+		
+		return response;
+	}
     
+	/**
+     * 운영자/사용자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
+     *
+     * @param orgId the org id
+     * @param token the token
+     * @return Map&lt;String, Object&gt;
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
+     */
+    public ListSpacesResponse getOrgSpaces(String orgId, String token) {
+		ListSpacesResponse listSpacesResponse = 
+			Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+			.spaces()
+		    .list(ListSpacesRequest.builder().organizationId(orgId).build())
+		    .block(blockDuration);
+		
+		return listSpacesResponse;
+    }
+
+    /**
+     * 조직의 Quota를 조회한다.
+     * 
+     *
+     * @param orgid the org id
+     * @param token the token
+     * @return Map&lt;String, Object&gt;
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
+     */
+    public GetOrganizationQuotaDefinitionResponse getOrgQuota(String orgId, String token) {
+    	//final Map<String, Object> listOrgs = (List<Map<String, Object>>get).get("resources")
+    	
+    	GetOrganizationResponse org = getOrg(orgId, token);
+    	String quotaId = org.getEntity().getQuotaDefinitionId();
+    	
+        GetOrganizationQuotaDefinitionResponse response =
+	        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+	        .organizationQuotaDefinitions()
+	        .get(GetOrganizationQuotaDefinitionRequest.builder()
+	        	.organizationQuotaDefinitionId(quotaId).build())
+	        .block(blockDuration);
+        
+        return response;
+    }
 }
