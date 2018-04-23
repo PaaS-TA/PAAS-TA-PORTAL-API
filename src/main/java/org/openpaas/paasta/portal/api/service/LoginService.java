@@ -31,6 +31,4 @@ public class LoginService extends Common {
     public OAuth2AccessToken login(String id, String password) throws MalformedURLException, URISyntaxException {
         return new CloudFoundryClient(new CloudCredentials(id, password), getTargetURL(apiTarget), true).login();
     }
-
-
 }

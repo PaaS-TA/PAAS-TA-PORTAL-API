@@ -1,9 +1,11 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
+import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
+import org.cloudfoundry.doppler.Envelope;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -127,19 +129,12 @@ public class AppController extends Common {
      */
     @RequestMapping(value = {"/app/renameApp"}, method = RequestMethod.POST)
     public boolean renameApp(@RequestBody App app, HttpServletRequest request) throws Exception {
-
-
         LOGGER.info("Rename App Start : " + " : " + app.getName() + " : " + app.getNewName());
 
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
         //service call
-        appService.renameApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.renameApp(app, this.getToken());
 
         LOGGER.info("Rename App End ");
-
-
         return true;
     }
 
@@ -263,7 +258,7 @@ public class AppController extends Common {
         ApplicationStats applicationStats = null;
 
 
-        LOGGER.info("updateApp Start : " + app.getName());
+        LOGGER.info("updateApp Start : " + app.getGuid());
 
         //token setting
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
@@ -349,7 +344,7 @@ public class AppController extends Common {
     /**
      * 앱 환경변수를 조회한다.
      *
-     * @param app     the app
+     * @param guid
      * @param request the request
      * @return map application env
      * @throws Exception the exception
@@ -357,15 +352,15 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    @RequestMapping(value = {"/app/getApplicationEnv"}, method = RequestMethod.POST)
-    public Map getApplicationEnv(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/env"}, method = RequestMethod.GET)
+    public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("getApplicationEnv Start : " + guid);
 
-        LOGGER.info("getApplicationEnv Start : " + app.getName());
-        //Map<String,String> appEnv = appService.getApplicationEnv(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
-        Map<String,String> appEnv = null;
+        ApplicationEnvironmentResponse respAppEvents = appService.getApplicationEnv(guid, this.getToken());
+
         LOGGER.info("getApplicationEnv End ");
 
-        return appEnv;
+        return respAppEvents;
     }
 
     /**
@@ -500,30 +495,27 @@ public class AppController extends Common {
     /**
      * 앱 최근 로그
      *
-     * @param app     the app
+     * @param guid
      * @param request the request
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/getRecentLogs"}, method = RequestMethod.POST)
-    public Map getSpaceSummary(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
+    public Map getSpaceSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
-        LOGGER.info("getRecentLog Start : appGuid={}", app.getGuid().toString());
-
-        // Get CloudFoundry class
-//        TokenProvider tokenProvider = tokenProvider(request.getHeader(AUTHORIZATION_HEADER_KEY));
-//        org.cloudfoundry.client.CloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider);
-//        ReactorDopplerClient reactorDopplerClient = dopplerClient(connectionContext(), tokenProvider);
+        LOGGER.info("getRecentLog Start : " + guid);
 
         Map mapLog = new HashMap();
         try {
-//            Stream<Envelope> list = appService.getRecentLog(reactorDopplerClient, app.getGuid().toString()).toStream();
-//
-//            mapLog.put("log", list.toArray());
-
+            List<Envelope> respAppEvents = appService.getRecentLog(guid, this.getToken());
+            mapLog.put("log", respAppEvents);
         } catch (Exception e) {
+            LOGGER.info("################ ");
+            LOGGER.error(e.toString());
             mapLog.put("log", "");
         }
+
+        LOGGER.info("getRecentLog End");
 
         return mapLog;
     }

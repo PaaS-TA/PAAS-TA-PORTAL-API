@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.util.JsonUtil;
+import org.cloudfoundry.client.v2.organizations.OrganizationResource;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Usage;
@@ -57,17 +58,25 @@ public class UsageService {
      */
     public Map<String, Object> getUsageOrganizationList(HttpServletRequest req) throws Exception {
         List<Map<String, Object>> resultList = new ArrayList<>();
-        List<CloudOrganization> organizationList = orgService.getOrgs(req.getHeader(cfAuthorizationHeaderKey));
+        List<OrganizationResource> organizationList = orgService.getOrgs(req.getHeader(cfAuthorizationHeaderKey));
 
-        organizationList.stream().collect(toList()).forEach(cloudOrganization -> resultList.add(new HashMap<String, Object>() {{
-            put("name", cloudOrganization.getName());
-            put("value", cloudOrganization.getName());
-            put("guid", cloudOrganization.getMeta().getGuid());
-        }}));
+        organizationList.stream().collect(toList()).forEach(
+        	organization -> resultList.add(new HashMap<String, Object>() {
+				private static final long serialVersionUID = 3768241859823289161L;
+				{
+		            put("name", organization.getEntity().getName());
+		            put("value", organization.getEntity().getName());
+		            put("guid", organization.getMetadata().getId());
+				}
+			})
+        );
 
-        return new HashMap<String, Object>() {{
-            put("list", resultList);
-        }};
+        return new HashMap<String, Object>() {
+			private static final long serialVersionUID = 8001794184100601997L;
+			{
+        		put("list", resultList);
+        	}
+        };
     }
 
 

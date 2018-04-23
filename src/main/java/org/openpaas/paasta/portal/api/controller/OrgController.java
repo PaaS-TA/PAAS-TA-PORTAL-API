@@ -5,6 +5,14 @@ import org.apache.commons.lang.RandomStringUtils;
 
 
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
+import org.cloudfoundry.client.v2.organizations.GetOrganizationResponse;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
+import org.cloudfoundry.client.v2.organizations.OrganizationResource;
+import org.cloudfoundry.client.v2.organizations.SummaryOrganizationResponse;
+import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.SpaceResource;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
@@ -128,12 +136,13 @@ public class OrgController extends Common {
      * @version 1.0
      * @since 2016.5.13 최초작성
      */
+    @Deprecated
     @RequestMapping(value = {V1_URL + "/org/getOrgs"}, method = RequestMethod.POST)
-    public List getOrgs(HttpServletRequest request) throws Exception {
+    public List<OrganizationResource> getOrgs(HttpServletRequest request) {
 
         LOGGER.info("Get Orgs Start");
 
-        List<CloudOrganization> orgList  = orgService.getOrgs(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        List<OrganizationResource> orgList  = orgService.getOrgs(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Get Orgs End");
 
@@ -543,6 +552,74 @@ public class OrgController extends Common {
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
 
+    private String getCFAuthorization(final HttpServletRequest request) {
+    	return request.getHeader(AUTHORIZATION_HEADER_KEY);
+    }
+
+    /**
+     * JSON to Object mapping method
+     * @param obj a object
+     * @param clazz mapping class(type)
+     * @return Mapping object
+     */
+    private <T> T convertValue(Object obj, Class<T> clazz) {
+    	return new ObjectMapper().convertValue(obj, clazz);
+    }
+    
+    /**
+     * 조직 정보를 조회한다.
+     * 
+     * @param orgid
+     * @param request
+     * @return information of the organization
+     */
+    @GetMapping(V2_URL + "/orgs/{orgid}")
+    public GetOrganizationResponse getOrg(@PathVariable String orgid, HttpServletRequest request) {
+    	LOGGER.info("get org start : " + orgid);
+    	if (orgid == null)
+    		throw new IllegalArgumentException("Org id is empty.");
+    	
+    	return orgService.getOrg(orgid, getCFAuthorization(request));
+    }
+    
+    /**
+     * 조직 요약 정보를 조회한다.
+     *
+     * @param orgid     the org id
+     * @param request the request
+     * @return summary of the organization
+     */
+    @GetMapping(V2_URL + "/orgs/{orgid}/summary")
+    public SummaryOrganizationResponse getOrgSummary(@PathVariable String orgid, HttpServletRequest request) {
+        LOGGER.info("org summary : " + orgid);
+		if (orgid == null) {
+			throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
+		}
+		return orgService.getOrgSummary(orgid, getCFAuthorization(request));
+    }
+    
+    /**
+     * 관리자/사용자 권한으로 조직 목록을 조회한다.
+     *
+     * @return the orgs for admin
+     * @throws Exception the exception
+     */
+    @GetMapping(V2_URL + "/orgs")
+    public ListOrganizationsResponse getOrgsForUser(final HttpServletRequest request) throws Exception {
+        LOGGER.debug("Org list by user");
+        return orgService.getOrgsForUser(getCFAuthorization(request));
+    }
+    
+    /**
+     * 관리자 권한으로 조직 목록을 조회한다.
+     * @return
+     */
+    @GetMapping(V2_URL + "/orgs-admin")
+    public ListOrganizationsResponse getOrgsForAdmin() {
+    	LOGGER.debug("Org list for admin");
+    	return orgService.getOrgsForAdmin();
+    }
+
     /**
      * 공간 목록을 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
@@ -551,39 +628,21 @@ public class OrgController extends Common {
      * @param request the request
      * @return List<CloudSpace>     orgList
      * @throws Exception the exception
-     * @author 김도준
+     * @author hgcho
      * @version 2.0
      * @since 2018.04.17 (modified)
      */
     @GetMapping(V2_URL + "/orgs/{orgid}/space")
-    public Map<String,Map<String, Object>> getSpaces(@PathVariable String orgid, HttpServletRequest request) throws Exception {
-        LOGGER.info("Get Spaces Start " + orgid);
-        Map<String,Map<String, Object>> maps = new HashMap<>();
-        maps.put("spaceList",orgService.getSpacesForAdmin(orgid,request.getHeader(AUTHORIZATION_HEADER_KEY)));
-        LOGGER.info("Get Spaces End ");
-        return maps;
-    }
-    
-
-    /**
-     * 조직 요약 정보를 조회한다.
-     *
-     * @param orgid     the org id
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    @GetMapping(V2_URL + "/orgs/{orgid}/summary")
-    public Map<String, Object> getOrgSummary(@PathVariable String orgid, HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : " + orgid);
-        if(orgid==null){
-            throw new Exception("조직정보를 가져오지 못하였습니다.");
-        }
-        return orgService.getOrgSummary(orgid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    public Map<?, ?> getSpaces(@PathVariable String orgid, final HttpServletRequest request) {
+    	LOGGER.debug("Get Spaces " + orgid);
+    	final Map<String, Object> result = new HashMap<>();
+		result.put("spaceList", orgService.getOrgSpaces(orgid, getCFAuthorization(request)));
+		
+        return result;
     }
     
     /**
-     * 조직 이름으로 조회한다.
+     * 조직의 자원 할당량을 조회한다.
      *
      * @param orgid     the org id
      * @param request the request
@@ -591,31 +650,10 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(V2_URL + "/orgs/{orgid}/quota")
-    public Map<String, Object> getOrgByName(@PathVariable String orgid, HttpServletRequest request) throws Exception {
-        LOGGER.info("quota Start : " + orgid);
-        Map<String, Object> cloudOrg = new HashMap<>();
-        /* null로 초기화 할때, 에러시 응답하는 결과값에 content tpye이 세팅되지 않음. */
-        cloudOrg = orgService.getOrgByName(orgid , request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        LOGGER.info("quota End ");
-
-        return cloudOrg;
+    public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgid, HttpServletRequest request) {
+        LOGGER.info("quota : " + orgid);
+        return orgService.getOrgQuota(orgid, getCFAuthorization(request));
     }
-    
-    /**
-     * 관리자권한으로 조직 목록을 조회한다.
-     *
-     * @return the orgs for admin
-     * @throws Exception the exception
-     */
-    @GetMapping(V2_URL + "/orgs")
-    public Map<String, Object> getOrgsForAdmin() throws Exception {
-        LOGGER.info("OrgAndSpace ::");
-        //List<Object> orgList = orgService.getOrgsForAdmin();
-        return  orgService.getOrgsForAdmin();
-        //return new HashMap<String, Object>(){{put("orgList", orgList);}};
-    }
-    
     
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
@@ -624,5 +662,4 @@ public class OrgController extends Common {
     //////////////////////////////////////////////////////////////////////
     
     // Not-implemented
-    
 }

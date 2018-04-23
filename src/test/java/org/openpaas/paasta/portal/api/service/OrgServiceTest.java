@@ -5,6 +5,7 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.v2.organizations.OrganizationResource;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -145,7 +146,7 @@ public class OrgServiceTest extends CommonTest {
         CloudOrganization result;
 
         try {
-            result = orgService.getOrgByName(org, clientToken);
+            result = orgService.getOrgQuota(org, clientToken);
         } finally {
 
         }
@@ -163,7 +164,7 @@ public class OrgServiceTest extends CommonTest {
         CloudOrganization result;
 
         try {
-            result = orgService.getOrgByName(org, clientToken);
+            result = orgService.getOrgQuota(org, clientToken);
         } finally {
 
         }
@@ -244,7 +245,7 @@ public class OrgServiceTest extends CommonTest {
     @Test
     public void getOrgs_200() throws Exception {
 
-        List<CloudOrganization> result;
+        List<OrganizationResource> result;
 
         try {
             result = orgService.getOrgs(clientToken);
@@ -258,7 +259,7 @@ public class OrgServiceTest extends CommonTest {
     @Test
     public void getOrgs_204_NoOrg() throws Exception {
 
-        List<CloudOrganization> result;
+        List<OrganizationResource> result;
 
         try {
             result = orgService.getOrgs(noOrgClientToken);
