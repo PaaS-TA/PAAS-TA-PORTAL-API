@@ -40,7 +40,6 @@ public class SpaceQuotaController extends Common {
     @GetMapping(Constants.V2_URL + "/spaces/quota-definitions")
     public ListSpaceQuotaDefinitionsResponse listSpaceQuotaDefinitions(HttpServletRequest request) throws Exception {
         LOGGER.info("listSpaceQuotaDefinitions Start : ");
-        LOGGER.info("token:["+request.getHeader(AUTHORIZATION_HEADER_KEY)+"] End");
         return spaceQuotaService.getSpaceQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 

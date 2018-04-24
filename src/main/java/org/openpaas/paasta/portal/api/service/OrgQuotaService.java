@@ -27,7 +27,7 @@ public class OrgQuotaService extends Common {
      */
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitionsList(String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .organizationQuotaDefinitions()
                 .list(ListOrganizationQuotaDefinitionsRequest.builder()
                         .build()
@@ -44,7 +44,7 @@ public class OrgQuotaService extends Common {
      */
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                .organizationQuotaDefinitions()
                 .get(GetOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)
@@ -74,7 +74,7 @@ public class OrgQuotaService extends Common {
         예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
         */
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .organizationQuotaDefinitions()
                 .create(CreateOrganizationQuotaDefinitionRequest.builder()
                         .name(quota.getName())
@@ -99,7 +99,7 @@ public class OrgQuotaService extends Common {
      */
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .organizationQuotaDefinitions()
                 .update(UpdateOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quota.getGuid().toString())
@@ -125,7 +125,7 @@ public class OrgQuotaService extends Common {
      */
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .organizationQuotaDefinitions()
                 .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)

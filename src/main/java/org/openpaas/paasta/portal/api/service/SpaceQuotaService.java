@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.DeleteOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.DeleteOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.*;
@@ -28,7 +29,7 @@ public class SpaceQuotaService extends Common {
      */
     public ListSpaceQuotaDefinitionsResponse getSpaceQuotaDefinitionsList(String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                .spaceQuotaDefinitions()
                 .list(ListSpaceQuotaDefinitionsRequest.builder()
                         .build()
@@ -46,7 +47,7 @@ public class SpaceQuotaService extends Common {
      */
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(String spaceQuotaId, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .spaceQuotaDefinitions()
                 .get(GetSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(spaceQuotaId)
@@ -63,9 +64,9 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
+    public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws ClientV2Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .spaceQuotaDefinitions()
                 .create(CreateSpaceQuotaDefinitionRequest.builder()
                         .name(quota.getName())
@@ -91,7 +92,7 @@ public class SpaceQuotaService extends Common {
      */
     public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .spaceQuotaDefinitions()
                 .delete(DeleteSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(guid)
@@ -115,7 +116,7 @@ public class SpaceQuotaService extends Common {
             - 공간 정의 GUID
             - 공간 GUID
         */
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .spaceQuotaDefinitions()
                 .associateSpace(AssociateSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(quota.getGuid().toString())
@@ -135,7 +136,7 @@ public class SpaceQuotaService extends Common {
      */
     public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .spaceQuotaDefinitions()
                 .listSpaces(ListSpaceQuotaDefinitionSpacesRequest.builder()
                         .spaceQuotaDefinitionId(guid)
@@ -154,7 +155,7 @@ public class SpaceQuotaService extends Common {
      */
     public boolean removeSpaceQuotaDefinitionsFromSpace(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
 
-         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+         Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
             .spaceQuotaDefinitions()
             .removeSpace(RemoveSpaceQuotaDefinitionRequest.builder()
                     .spaceQuotaDefinitionId(quota.getGuid().toString())
@@ -174,7 +175,7 @@ public class SpaceQuotaService extends Common {
      */
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .spaceQuotaDefinitions()
                 .update(UpdateSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(quota.getGuid().toString())
@@ -186,6 +187,7 @@ public class SpaceQuotaService extends Common {
                         .memoryLimit(quota.getMemoryLimit())
                         .instanceMemoryLimit(quota.getInstanceMemoryLimit())
                         .applicationInstanceLimit(quota.getAppInstanceLimit())
+                        .organizationId(quota.getOrginazationGuid().toString())
                         .build()
                 ).log()
                 .block();
