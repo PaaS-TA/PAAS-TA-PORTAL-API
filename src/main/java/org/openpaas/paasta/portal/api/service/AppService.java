@@ -17,7 +17,6 @@ import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
@@ -26,11 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 //import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
 //import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
@@ -194,8 +191,11 @@ public class AppService extends Common {
         if (app.getDiskQuota() > 0) {
             cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build()).block();
         }
-        if (!app.getName().equals("")) {
+        if (app.getName() != null && !app.getName().equals("")) {
             cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getName()).build()).block();
+        }
+        if (app.getEnvironment() != null && app.getEnvironment().size() > 0) {
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(app.getEnvironment()).build()).block();
         }
     }
 
@@ -288,8 +288,6 @@ public class AppService extends Common {
      * @since 2016.6.30 최초작성
      */
     public boolean updateApplicationEnv(App app, String token) throws Exception {
-
-
 //        String orgName = app.getOrgName();
 //        String spaceName = app.getSpaceName();
 //        String appName = app.getName();
@@ -423,20 +421,22 @@ public class AppService extends Common {
     /**
      * 인덱스로 앱 인스턴스를 종료한다.
      *
-     * @param param the param
-     * @param req   the req
+     * @param guid
+     * @param index
+     * @param token
      * @return the map
      * @throws Exception the exception
      */
-    public Map<String, Object> executeTerminateAppInstanceByIndex(App param, HttpServletRequest req) throws Exception {
-        LOGGER.info("SERVICE executeTerminateAppInstanceByIndex param :: {}", param.toString());
+    public void terminateInstance(String guid, String index, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
 
-        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(AUTHORIZATION_HEADER_KEY), param.getOrgName(), param.getSpaceName());
-        customCloudFoundryClient.terminateAppInstanceByIndex(param.getGuid(), param.getAppInstanceIndex(), param.getOrgName(), param.getSpaceName());
+        TerminateApplicationInstanceRequest.Builder requestBuilder = TerminateApplicationInstanceRequest.builder();
+        requestBuilder.applicationId(guid);
+        requestBuilder.index(index);
+        cloudFoundryClient.applicationsV2().terminateInstance(requestBuilder.build()).block();
 
-        return new HashMap<String, Object>() {{
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
+//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(AUTHORIZATION_HEADER_KEY), param.getOrgName(), param.getSpaceName());
+//        customCloudFoundryClient.terminateAppInstanceByIndex(param.getGuid(), param.getAppInstanceIndex(), param.getOrgName(), param.getSpaceName());
     }
 
 

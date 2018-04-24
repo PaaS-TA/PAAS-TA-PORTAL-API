@@ -259,6 +259,11 @@ public class AppController extends Common {
 
 
         LOGGER.info("updateApp Start : " + app.getGuid());
+        LOGGER.info("getInstances : " + app.getInstances());
+        LOGGER.info("getMemory : " + app.getMemory());
+        LOGGER.info("getDiskQuota : " + app.getDiskQuota());
+        LOGGER.info("getName : " + app.getName());
+        LOGGER.info("getEnvironment : " + app.getEnvironment());
 
         //token setting
         //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
@@ -379,7 +384,7 @@ public class AppController extends Common {
 
         LOGGER.info("updateApplicationEnv Start : " + app.getName());
 
-        appService.updateApplicationEnv(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.updateApplicationEnv(app, this.getToken());
 
         LOGGER.info("updateApplicationEnv End ");
 
@@ -463,15 +468,17 @@ public class AppController extends Common {
     /**
      * 인덱스에 의해 앱 인스턴스를 중지시킨다.
      *
-     * @param param the param
-     * @param req   the req
+     * @param guid
+     * @param index
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/executeTerminateAppInstanceByIndex"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> executeTerminateAppInstanceByIndex(@RequestBody App param, HttpServletRequest req) throws Exception {
-        LOGGER.info("executeTerminateAppInstanceByIndex:: param:: {}", param.toString());
-        return appService.executeTerminateAppInstanceByIndex(param, req);
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
+    public boolean terminateInstance(@PathVariable String guid, @PathVariable String index) throws Exception {
+        LOGGER.info("terminateInstance Start");
+        appService.terminateInstance(guid, index, this.getToken());
+        LOGGER.info("terminateInstance End");
+        return true;
     }
 
 
