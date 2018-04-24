@@ -39,17 +39,17 @@ public class SpaceQuotaService extends Common {
     /**
      * 특정 공간 할당량 정의 정보를 조회한다.
      *
-     * @param spaceQuotaDefinitionId the Space QuotaDefinition Guid
+     * @param spaceQuotaId the Space QuotaDefinition Guid
      * @param token the token
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(String spaceQuotaDefinitionId, String token) throws Exception {
+    public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(String spaceQuotaId, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .spaceQuotaDefinitions()
                 .get(GetSpaceQuotaDefinitionRequest.builder()
-                        .spaceQuotaDefinitionId(spaceQuotaDefinitionId)
+                        .spaceQuotaDefinitionId(spaceQuotaId)
                         .build()
                 ).log()
                 .block();
@@ -64,17 +64,6 @@ public class SpaceQuotaService extends Common {
      * @throws Exception the exception
      */
     public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
-
-        /* required
-        (*)이름  name
-        (*)메모리 memory_limit
-        (*)인스턴스 메모리 instance_memory_limit
-        라우트 total_routes
-        서비스 인스턴스 total_services
-        APP 인스턴스 app_instance_limit
-        (*)무료 여부  non_basic_services_allowed
-        예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
-        */
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .spaceQuotaDefinitions()
