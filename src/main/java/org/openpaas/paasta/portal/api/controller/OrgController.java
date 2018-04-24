@@ -667,7 +667,7 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(V2_URL+"/orgs/{orgid}")
-    public DeleteOrganizationResponse deleteOrgV2(@PathVariable String orgid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public boolean deleteOrgV2(@PathVariable String orgid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return orgService.deleteOrgV2(orgid, token);
     }
 

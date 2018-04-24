@@ -18,6 +18,11 @@ import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceEntity;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
+import org.cloudfoundry.client.v2.users.GetUserRequest;
+import org.cloudfoundry.client.v2.users.GetUserResponse;
+import org.cloudfoundry.client.v2.users.UserResource;
+import org.cloudfoundry.uaa.users.UserInfoRequest;
+import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,6 +39,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import sun.rmi.runtime.Log;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -1110,11 +1116,26 @@ public class OrgService extends Common {
 
         return response;
     }
-    public DeleteOrganizationResponse deleteOrgV2(String orgid, String token) throws Exception {
-        DeleteOrganizationResponse deleteOrganizationResponse =
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-        .organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgid).build()).block();
-        return deleteOrganizationResponse;
+    public boolean deleteOrgV2(String orgid, String token) throws Exception {
+        boolean result = false;
+
+        UserInfoResponse userInfoResponse=
+                Common.uaaClient(connectionContext(), tokenProvider(token))
+                .users().userInfo(UserInfoRequest.builder().build()).block();
+        ListOrganizationManagersResponse listOrganizationManagersResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+                .organizations().listManagers(ListOrganizationManagersRequest.builder().organizationId(orgid).build()).block();
+        for (UserResource resource: listOrganizationManagersResponse.getResources()) {
+            if(resource.getEntity().getUsername().equals(userInfoResponse.getUserName()))
+            {
+                LOGGER.info("삭제성공" + resource.getEntity().getUsername() + "::" + userInfoResponse.getUserName());
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                .organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgid).build()).block();
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     public UpdateOrganizationResponse orgReNameV2(String orgid, String orgrename, String token)
