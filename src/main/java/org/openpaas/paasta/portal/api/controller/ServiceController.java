@@ -4,8 +4,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudServiceBroker;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
-import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
-import org.cloudfoundry.client.v2.servicebrokers.ServiceBrokerResource;
+import org.cloudfoundry.client.v2.servicebrokers.*;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -40,7 +39,6 @@ import java.util.UUID;
 public class ServiceController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceController.class);
-    private final String V2_URL = "/v2";
 
     @Autowired
     private AppService appService;
@@ -159,7 +157,7 @@ public class ServiceController extends Common {
      */
     @RequestMapping(value = {"/service/getUserProvidedService"}, method = RequestMethod.POST)
     public Map<String, Object> getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                      @RequestBody Map<String, String> body) throws Exception {
+                                               @RequestBody Map<String, String> body) throws Exception {
 
         LOGGER.info("getUserProvidedService Start");
 
@@ -182,7 +180,7 @@ public class ServiceController extends Common {
      */
     @RequestMapping(value = {"/service/createUserProvidedService"}, method = RequestMethod.POST)
     public boolean createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                               @RequestBody Map<String, String> body) throws Exception {
+                                      @RequestBody Map<String, String> body) throws Exception {
 
         LOGGER.info("createUserProvided Start");
 
@@ -205,7 +203,7 @@ public class ServiceController extends Common {
      */
     @RequestMapping(value = {"/service/updateUserProvidedService"}, method = RequestMethod.POST)
     public boolean updateUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                               @RequestBody Map<String, String> body) throws Exception {
+                                      @RequestBody Map<String, String> body) throws Exception {
 
         LOGGER.info("updateUserProvidedService Start");
 
@@ -218,26 +216,14 @@ public class ServiceController extends Common {
 
     /**
      * 서비스 브로커 리스트를 조회한다.
-     *
-     * @param serviceBroker the serviceBroker
      * @param request       the request
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {V2_URL + "/servicebrokers"})
-    public Map<String, Object> getServiceBrokers(@ModelAttribute ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-        Map<String, Object> resultMap = new HashMap<>();
-
-        // 서비스 리스트 조회
-        LOGGER.info("getServiceBrokers Start.");
-        List<ServiceBrokerResource> list = serviceService.getServiceBrokers(serviceBroker);
-        resultMap.put("list", list);
-        LOGGER.info("getServiceBrokers End ");
-
-        return resultMap;
+    @GetMapping(value = {Constants.V2_URL + "/servicebrokers"})
+    public ListServiceBrokersResponse getServiceBrokers(HttpServletRequest request) throws Exception {
+        LOGGER.info("getServiceBrokers Start:");
+        return serviceService.getServiceBrokers(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -248,21 +234,10 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {V2_URL + "/servicebrokers/{guid}" })
-    public Map<String, Object> getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid  ,HttpServletRequest request) throws Exception {
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-        Map<String, Object> resultMap = new HashMap<>();
-
-        // 서비스 항목 조회
+    @GetMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}" })
+    public GetServiceBrokerResponse getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid  ,HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
-        serviceBroker.setGuid(UUID.fromString(guid));
-        GetServiceBrokerResponse servicebroker = serviceService.getServiceBroker(serviceBroker);
-        resultMap.put("servicebroker", servicebroker);
-        LOGGER.info("getServiceBroker End ");
-
-        return resultMap;
+        return serviceService.getServiceBroker(serviceBroker,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -274,23 +249,11 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PostMapping(value = {V2_URL + "/servicebrokers"})
-    public Map<String, Object>  createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
+    @PostMapping(value = {Constants.V2_URL + "/servicebrokers"})
+    public CreateServiceBrokerResponse createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         LOGGER.info("createServiceBroker Start : " + serviceBroker.getName() );
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        //service call
-        serviceService.createServiceBroker(serviceBroker);
-
-        LOGGER.info("createServiceBroker End ");
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        return resultMap;
-
+        return serviceService.createServiceBroker(serviceBroker,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -302,26 +265,12 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PutMapping(value = {V2_URL + "/servicebrokers/{guid}"})
-    public Map<String, Object>  updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid ,HttpServletRequest request) throws Exception {
+    @PutMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
+    public UpdateServiceBrokerResponse updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid , HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName() );
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        //service call
-        //serviceService.updateServiceBroker(serviceBroker, client);
-
         serviceBroker.setGuid(UUID.fromString(guid));
-        serviceService.updateServiceBroker(serviceBroker);
-
-        LOGGER.info("updateServiceBroker End ");
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        return resultMap;
-
+        return serviceService.updateServiceBroker(serviceBroker,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -333,18 +282,11 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {V2_URL + "/servicebrokers/{guid}"})
+    @DeleteMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
     public Map<String, Object>  deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("deleteServiceBroker Start : " + guid );
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        //service call
-        serviceService.deleteServiceBroker(guid);
-
-        LOGGER.info("deleteServiceBroker End ");
+        serviceService.deleteServiceBroker(guid,request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
