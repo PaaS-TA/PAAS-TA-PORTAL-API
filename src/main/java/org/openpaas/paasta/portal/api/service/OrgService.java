@@ -88,7 +88,7 @@ public class OrgService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public boolean renameOrg(@RequestBody Org org, String token) throws Exception {
+    public boolean renameOrgV1(@RequestBody Org org, String token) throws Exception {
 
         //token setting
         CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
@@ -106,7 +106,7 @@ public class OrgService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    public boolean deleteOrg(@RequestBody Org org, String token) throws Exception {
+    public boolean deleteOrgV1(@RequestBody Org org, String token) throws Exception {
 
         CloudFoundryClient client = getCloudFoundryClient(token);
         CloudInfo cloudInfo = client.getCloudInfo();
@@ -1116,7 +1116,7 @@ public class OrgService extends Common {
 
         return response;
     }
-    public boolean deleteOrgV2(String orgid, String token) throws Exception {
+    public boolean deleteOrg(String orgid, String token) throws Exception {
         boolean result = false;
 
         UserInfoResponse userInfoResponse=
@@ -1138,7 +1138,7 @@ public class OrgService extends Common {
         return result;
     }
 
-    public UpdateOrganizationResponse orgReNameV2(String orgid, String orgrename, String token)
+    public UpdateOrganizationResponse renameOrg(String orgid, String orgrename, String token)
     {
         UpdateOrganizationResponse updateOrganizationResponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(token))

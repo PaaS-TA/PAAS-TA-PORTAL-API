@@ -15,6 +15,7 @@ import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserDetail;
+import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.service.OrgService;
 import org.openpaas.paasta.portal.api.service.SpaceService;
 import org.openpaas.paasta.portal.api.service.UserService;
@@ -94,7 +95,7 @@ public class OrgController extends Common {
 
         LOGGER.info("Rename Org Start : " + org.getOrgName() + " : " + org.getNewOrgName());
 
-        orgService.renameOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        orgService.renameOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Rename Org End ");
 
@@ -111,11 +112,11 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {V1_URL + "/org/deleteOrg"}, method = RequestMethod.POST)
-    public boolean deleteOrg(@RequestBody Org org, HttpServletRequest request) throws Exception {
+    public boolean deleteOrgV1(@RequestBody Org org, HttpServletRequest request) throws Exception {
 
         LOGGER.info("delete Org Start : " + org.getOrgName());
 
-        orgService.deleteOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        orgService.deleteOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("delete Org End ");
 
@@ -651,14 +652,7 @@ public class OrgController extends Common {
         LOGGER.info("quota : " + orgid);
         return orgService.getOrgQuota(orgid, getCFAuthorization(request));
     }
-
-    //////////////////////////////////////////////////////////////////////
-    //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
-    //////   Document : http://v3-apidocs.cloudfoundry.org          //////
-    //////   Not yet implemented                                    //////
-    //////////////////////////////////////////////////////////////////////
-
-    // Not-implemented
+    
     /**
      * 사용자의 조직을 삭제한다.
      * @param orgid organization id
@@ -667,14 +661,23 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(V2_URL+"/orgs/{orgid}")
-    public boolean deleteOrgV2(@PathVariable String orgid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return orgService.deleteOrgV2(orgid, token);
+    public boolean deleteOrg(@PathVariable String orgid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return orgService.deleteOrg(orgid, token);
     }
 
-    @PutMapping(V2_URL+"/orgs/{orgid}")
-    public UpdateOrganizationResponse orgReName(@PathVariable String orgid,@RequestBody String orgrename,@RequestHeader(AUTHORIZATION_HEADER_KEY) String token)
-    {
-        return orgService.orgReNameV2(orgid,orgrename,token);
+    @PutMapping( V2_URL + "/orgs/{orgid}" )
+    public UpdateOrganizationResponse renameOrg( @PathVariable String orgid, @RequestBody String wantedName,
+        @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        return orgService.renameOrg( orgid, wantedName, token );
     }
+    
+    
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
+    //////   Document : http://v3-apidocs.cloudfoundry.org          //////
+    //////   Not yet implemented                                    //////
+    //////////////////////////////////////////////////////////////////////
+
+    // Not-implemented
 }
