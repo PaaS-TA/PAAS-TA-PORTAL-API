@@ -29,7 +29,7 @@ import java.util.Map;
 @RestController
 @Transactional
 
-public class LoginController extends Common{
+public class LoginController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
@@ -48,10 +48,10 @@ public class LoginController extends Common{
      * @throws Exception the exception
      */
     @CrossOrigin
-    @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes="application/json")
+    @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes = "application/json")
     public Map login(@RequestBody Map<String, Object> body) throws Exception {
-        String id = (String)body.get("id");
-        String password = (String)body.get("password");
+        String id = (String) body.get("id");
+        String password = (String) body.get("password");
 
         LOGGER.info("> into login ...");
         LOGGER.info("id: {}", id);
@@ -66,37 +66,33 @@ public class LoginController extends Common{
             user = new UserDetail();
             user.setUserId(id);
             user.setStatus("1");
-            if (adminUserName.equals(id)){
+            if (adminUserName.equals(id)) {
                 user.setAdminYn("Y");
             }
             userService.createUser(user);
         } else {
             user = userService.getUser(id);
 
-            if (adminUserName.equals(id)){
+            if (adminUserName.equals(id)) {
                 user.setAdminYn("Y");
             }
-            userService.updateUser(id, user);
+
         }
 
         user = userService.getUser(id);
 
         List auths = new ArrayList();
-        auths.add("ROLE_USER");
 
         //Start 테스트용(ASIS:DB조회 데이터) 임시 데이터 생성(아래 참조부분만 셋팅)
         user = new UserDetail();
-        user.setUserName("yschoi");
         //End 테스트용 임시 계정데이터 생성(아래 참조부분만 셋팅)
 
         if ("Y".equals(user.getAdminYn())) auths.add("ROLE_ADMIN");
+        else auths.add("ROLE_USER");
 
         result.put("token", token.getValue());
-        result.put("expireDate", token.getExpiration().getTime()-10000);
+        result.put("expireDate", token.getExpiration().getTime() - 10000);
         result.put("id", id);
-        result.put("password", password);
-        result.put("name", user.getUserName());
-        result.put("imgPath", user.getImgPath());
         result.put("auth", auths);
         return result;
     }
@@ -122,7 +118,7 @@ public class LoginController extends Common{
         List<UserDetail> listUser = userService.getUserDetailInfo(body);
         resultMap.put("resultUserDetail", listUser);
 
-        if(listUser.size() > 0) {
+        if (listUser.size() > 0) {
             UserDetail userDetail1 = listUser.get(0);
             if (!"0".equals(userDetail1.getStatus())) {
                 resultMap.put("bRtn", false);

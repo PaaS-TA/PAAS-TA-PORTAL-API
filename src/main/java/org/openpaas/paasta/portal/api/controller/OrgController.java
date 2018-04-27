@@ -6,10 +6,7 @@ import org.apache.commons.lang.RandomStringUtils;
 
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
-import org.cloudfoundry.client.v2.organizations.GetOrganizationResponse;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
-import org.cloudfoundry.client.v2.organizations.OrganizationResource;
-import org.cloudfoundry.client.v2.organizations.SummaryOrganizationResponse;
+import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,6 +15,7 @@ import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserDetail;
+import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.service.OrgService;
 import org.openpaas.paasta.portal.api.service.SpaceService;
 import org.openpaas.paasta.portal.api.service.UserService;
@@ -47,7 +45,7 @@ public class OrgController extends Common {
      * V1 URL HEAD = (empty string)
      */
     private static final String V1_URL = Constants.V1_URL;
-    
+
     /**
      * V2 URL HEAD = "/v2"
      */
@@ -78,12 +76,12 @@ public class OrgController extends Common {
     @Autowired
     UserService userService;
 
-    
+
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 1                   //////
     //////   Document : (None)                                      //////
     //////////////////////////////////////////////////////////////////////
-    
+
     /**
      * 조직명을 변경한다.
      *
@@ -97,7 +95,7 @@ public class OrgController extends Common {
 
         LOGGER.info("Rename Org Start : " + org.getOrgName() + " : " + org.getNewOrgName());
 
-        orgService.renameOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        orgService.renameOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Rename Org End ");
 
@@ -114,11 +112,11 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {V1_URL + "/org/deleteOrg"}, method = RequestMethod.POST)
-    public boolean deleteOrg(@RequestBody Org org, HttpServletRequest request) throws Exception {
+    public boolean deleteOrgV1(@RequestBody Org org, HttpServletRequest request) throws Exception {
 
         LOGGER.info("delete Org Start : " + org.getOrgName());
 
-        orgService.deleteOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        orgService.deleteOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("delete Org End ");
 
@@ -319,8 +317,8 @@ public class OrgController extends Common {
         map.put("bSend", orgService.unsetUserOrg(body, token));
         return map;
     }
-    
-    
+
+
     // related to invition users and sending email
 
     /**
@@ -565,10 +563,10 @@ public class OrgController extends Common {
     private <T> T convertValue(Object obj, Class<T> clazz) {
     	return new ObjectMapper().convertValue(obj, clazz);
     }
-    
+
     /**
      * 조직 정보를 조회한다.
-     * 
+     *
      * @param orgid
      * @param request
      * @return information of the organization
@@ -578,10 +576,10 @@ public class OrgController extends Common {
     	LOGGER.info("get org start : " + orgid);
     	if (orgid == null)
     		throw new IllegalArgumentException("Org id is empty.");
-    	
+
     	return orgService.getOrg(orgid, getCFAuthorization(request));
     }
-    
+
     /**
      * 조직 요약 정보를 조회한다.
      *
@@ -597,7 +595,7 @@ public class OrgController extends Common {
 		}
 		return orgService.getOrgSummary(orgid, getCFAuthorization(request));
     }
-    
+
     /**
      * 관리자/사용자 권한으로 조직 목록을 조회한다.
      *
@@ -609,7 +607,7 @@ public class OrgController extends Common {
         LOGGER.debug("Org list by user");
         return orgService.getOrgsForUser(getCFAuthorization(request));
     }
-    
+
     /**
      * 관리자 권한으로 조직 목록을 조회한다.
      * @return
@@ -637,10 +635,10 @@ public class OrgController extends Common {
     	LOGGER.debug("Get Spaces " + orgid);
     	final Map<String, Object> result = new HashMap<>();
 		result.put("spaceList", orgService.getOrgSpaces(orgid, getCFAuthorization(request)));
-		
+
         return result;
     }
-    
+
     /**
      * 조직의 자원 할당량을 조회한다.
      *
@@ -655,11 +653,31 @@ public class OrgController extends Common {
         return orgService.getOrgQuota(orgid, getCFAuthorization(request));
     }
     
+    /**
+     * 사용자의 조직을 삭제한다.
+     * @param orgid organization id
+     * @param token the token
+     * @return boolean
+     * @throws Exception the exception
+     */
+    @DeleteMapping(V2_URL+"/orgs/{orgid}")
+    public boolean deleteOrg(@PathVariable String orgid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return orgService.deleteOrg(orgid, token);
+    }
+
+    @PutMapping( V2_URL + "/orgs/{orgid}" )
+    public UpdateOrganizationResponse renameOrg( @PathVariable String orgid, @RequestBody String wantedName,
+        @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        return orgService.renameOrg( orgid, wantedName, token );
+    }
+    
+    
+
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
     //////   Document : http://v3-apidocs.cloudfoundry.org          //////
     //////   Not yet implemented                                    //////
     //////////////////////////////////////////////////////////////////////
-    
+
     // Not-implemented
 }

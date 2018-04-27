@@ -8,6 +8,7 @@ import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.servicebrokers.*;
+import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 //import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
@@ -183,22 +184,16 @@ public class ServiceService extends Common {
     /**
      * 서비스 브로커 리스트를 조회한다.
      *
-     * @param serviceBroker the cloudServiceBroker
+     * @param token token
      * @return the boolean
      * @throws Exception the exception
      */
-    public List<ServiceBrokerResource> getServiceBrokers(ServiceBroker serviceBroker) throws Exception {
-
-        //List<CloudServiceBroker> serviceBrokerList = client.getServiceBrokers();
-
-        List<ServiceBrokerResource> serviceBrokerList=
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+    public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
+        return  Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
                 .list(ListServiceBrokersRequest.builder().build())
-                .block()
-                .getResources();
-
-        return serviceBrokerList;
+                .log()
+                .block();
     }
 
 
@@ -209,19 +204,14 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker) throws Exception {
-
-        //CloudServiceBroker cloudServiceBroker = client.getServiceBroker(serviceBroker.getName());
-
-        GetServiceBrokerResponse serviceBrokerResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+    public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
                 .get(GetServiceBrokerRequest.builder()
                         .serviceBrokerId(serviceBroker.getGuid().toString())
-                        .build())
+                        .build()
+                ).log()
                 .block();
-
-        return serviceBrokerResponse;
     }
 
     /**
@@ -231,12 +221,8 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public boolean createServiceBroker(ServiceBroker serviceBroker) throws Exception {
-
-        CloudServiceBroker cloudServiceBroker = new CloudServiceBroker(serviceBroker.getUrl(), serviceBroker.getUsername(), serviceBroker.getPassword());
-        cloudServiceBroker.setName(serviceBroker.getName());
-
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+    public CreateServiceBrokerResponse createServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
                 .create(CreateServiceBrokerRequest.builder()
                         .name(serviceBroker.getName())
@@ -245,10 +231,6 @@ public class ServiceService extends Common {
                         .authenticationPassword(serviceBroker.getPassword())
                         .build()
                 ).block();
-
-        //client.createServiceBroker(cloudServiceBroker);
-
-        return true;
     }
 
     /**
@@ -259,26 +241,13 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public boolean updateServiceBroker(ServiceBroker serviceBroker) throws Exception {
-
-//        CloudServiceBroker cloudServiceBroker = new CloudServiceBroker(serviceBroker.getUrl(), serviceBroker.getUsername(), serviceBroker.getPassword());
-//        cloudServiceBroker.setName(serviceBroker.getName());
-//        client.updateServiceBroker(cloudServiceBroker);
-
-        /* 서비스 이름만 변경을 위한 분기 처리
-           사용자명, URL 값 미존재시 이름만 변경으로 처리
-           T0-Be : portal-user 에서 서비스 이름만 변경하는 기능 있는지 확인후 분기 처리 삭제 할것)
+    public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
+        /* 서비스 이름만 변경을 위한 분기 처리 URL 생성할것
+           T0-Be : portal-user 에서 서비스 이름만 변경하는 기능 있는지 확인후 URL 분리 혹은 현 메소드에 분기 추가 처리
+           //if(serviceBroker.getUsername().isEmpty() && serviceBroker.getUrl().isEmpty()){
+           // 사용자 화면 개발 완료시 삭제 처리 필요
         */
-        if(serviceBroker.getUsername().isEmpty() && serviceBroker.getUrl().isEmpty()){
-            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                    .serviceBrokers()
-                    .update(UpdateServiceBrokerRequest.builder()
-                            .serviceBrokerId(serviceBroker.getGuid().toString())
-                            .name(serviceBroker.getName())
-                            .build()
-                    ).block();
-        }else{
-            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+            return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                     .serviceBrokers()
                     .update(UpdateServiceBrokerRequest.builder()
                             .serviceBrokerId(serviceBroker.getGuid().toString())
@@ -288,9 +257,24 @@ public class ServiceService extends Common {
                             .brokerUrl(serviceBroker.getUrl())
                             .build()
                     ).block();
-        }
+    }
 
-        return true;
+    /**
+     * 서비스 브로커 이름을 변경한다.
+     *
+     * @param serviceBroker the serviceBroker
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public UpdateServiceBrokerResponse renameServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
+        // 서비스 브로커 이름변경 메소드를 CF Method 를 따로 제공하지 않으므로 update Method 를 사용하여 수정한다. 사용시 컨트롤단 생성 필요
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+                .serviceBrokers()
+                .update(UpdateServiceBrokerRequest.builder()
+                        .serviceBrokerId(serviceBroker.getGuid().toString())
+                        .name(serviceBroker.getName())
+                        .build()
+                ).block();
     }
 
     /**
@@ -300,38 +284,15 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public boolean deleteServiceBroker(String guid) throws Exception {
+    public boolean deleteServiceBroker(String guid, String token) throws Exception {
 
-        //client.deleteServiceBroker(serviceBroker.getName());
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
                 .delete(DeleteServiceBrokerRequest.builder()
                         .serviceBrokerId(guid)
                         .build()
                 )
                 .block();
-        return true;
-    }
-
-
-    /**
-     * 서비스 브로커 이름을 변경한다.
-     *
-     * @param serviceBroker the serviceBroker
-     * @return the boolean
-     * @throws Exception the exception
-     */
-    public boolean renameServiceBroker(ServiceBroker serviceBroker) throws Exception {
-
-        //client.renameServiceBroker(serviceBroker.getName(), serviceBroker.getNewName());
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                .serviceBrokers()
-                .update(UpdateServiceBrokerRequest.builder()
-                        .serviceBrokerId(serviceBroker.getGuid().toString())
-                        .name(serviceBroker.getName())
-                        .build()
-                ).block();
-
         return true;
     }
 
