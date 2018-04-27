@@ -5,6 +5,9 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
+import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
+import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
+import org.cloudfoundry.client.v2.routes.CreateRouteResponse;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
 //import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
@@ -328,7 +332,7 @@ public class AppService extends Common {
     /**
      * 라우트 추가 및 라우트와 앱을 연결한다. (앱에 URI를 추가함)
      *
-     * @param app   the app
+     * @param body
      * @param token the token
      * @return the boolean
      * @throws Exception the exception
@@ -336,21 +340,59 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    public boolean addApplicationRoute(App app, String token) throws Exception {
+    public boolean addApplicationRoute(Map body, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+//        ReactorDopplerClient reactorDopplerClient  = Common.dopplerClient(connectionContext(), tokenProvider(token));
 
-        String orgName = app.getOrgName();
-        String spaceName = app.getSpaceName();
-        String appName = app.getName();
-        String host = app.getHost();
-        String domainName = app.getDomainName();
 
-        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
+        CreateRouteResponse createRouteResponse =
+                cloudFoundryClient.routes()
+                        .create(CreateRouteRequest.builder()
+                                .host(body.get("host").toString())
+                                .domainId(body.get("domainId").toString())
+                                .spaceId(body.get("spaceId").toString())
+                                .build()
+                        ).block();
 
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
+        LOGGER.info(createRouteResponse.toString());
 
-        client.bindRoute(host, domainName, appName);
+        cloudFoundryClient.routeMappings()
+                .create(CreateRouteMappingRequest.builder()
+                        .applicationId(body.get("applicationId").toString())
+                        .routeId(createRouteResponse.getMetadata().getId())
+                        .build()
+                ).block();
+
+
+//        cloudFoundryClient.routes()
+//                .associateApplication(AssociateRouteApplicationRequest.builder()
+//                        .applicationId("")
+//                        .routeId("")
+//                        .build()
+//                ).block();
+
+//                AssociateApplicationRouteResponse associateApplicationRouteResponse =
+//                cloudFoundryClient.applicationsV2()
+//                        .associateRoute(AssociateApplicationRouteRequest.builder()
+//                                .applicationId("")
+//                                .routeId("")
+//                                .build()
+//                        ).block();
+
+
+//        String orgName = app.getOrgName();
+//        String spaceName = app.getSpaceName();
+//        String appName = app.getName();
+//        String host = app.getHost();
+//        String domainName = app.getDomainName();
+//
+//        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
+//
+//        client.bindRoute(host, domainName, appName);
 
         return true;
     }

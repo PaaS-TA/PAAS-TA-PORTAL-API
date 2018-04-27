@@ -395,7 +395,7 @@ public class AppController extends Common {
     /**
      * 라우트 추가 및 라우트와 앱을 연결한다. (앱에 URI를 추가함)
      *
-     * @param app     the app
+     * @param body
      * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
@@ -403,17 +403,11 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @RequestMapping(value = {"/app/addApplicationRoute"}, method = RequestMethod.POST)
-    public boolean addApplicationRoute(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/routes"}, method = RequestMethod.POST)
+    public boolean addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
+        LOGGER.info("addApplicationRoute Start ");
 
-        LOGGER.info("addApplicationRoute Start : " + app.getName());
-
-/*
-            CloudRoute route = client.getRoutes("115.68.46.29.xip.io").stream()
-                    .filter(existingRoute -> existingRoute.getHost().equals(host)).findAny().orElse(null);
-*/
-
-        appService.addApplicationRoute(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.addApplicationRoute(body, this.getToken());
 
         LOGGER.info("addApplicationRoute End ");
 
