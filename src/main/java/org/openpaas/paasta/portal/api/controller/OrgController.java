@@ -661,8 +661,15 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(V2_URL+"/orgs/{orgid}")
-    public boolean deleteOrg(@PathVariable String orgid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return orgService.deleteOrg(orgid, token);
+    public DeleteOrganizationResponse deleteOrg(@PathVariable String orgid, 
+        @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request ) throws Exception {
+        boolean isRecursive;
+        if (null != request.getParameter( "recursive" ))
+            isRecursive = Boolean.valueOf( (String) request.getParameter( "recursive" ) );
+        else
+            isRecursive = false;
+        
+        return orgService.deleteOrg(orgid, isRecursive, token);
     }
 
     @PutMapping( V2_URL + "/orgs/{orgid}" )

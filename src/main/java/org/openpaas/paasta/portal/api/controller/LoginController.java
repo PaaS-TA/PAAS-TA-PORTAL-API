@@ -39,7 +39,6 @@ public class LoginController extends Common {
     @Autowired
     private UserService userService;
 
-
     /**
      * Login map.
      *
@@ -48,17 +47,76 @@ public class LoginController extends Common {
      * @throws Exception the exception
      */
     @CrossOrigin
-    @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map login(@RequestBody Map<String, Object> body) throws Exception {
-        String id = (String) body.get("id");
-        String password = (String) body.get("password");
+    @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes="application/json")
+    public Map<String, Object> login(@RequestBody Map<String, Object> body) throws Exception {
+        String id = (String)body.get("id");
+        String password = (String)body.get("password");
 
         LOGGER.info("> into login ...");
         LOGGER.info("id: {}", id);
 
         Map<String, Object> result = new HashMap<>();
         OAuth2AccessToken token = loginService.login(id, password);
-        LOGGER.info(token.getTokenType());
+        long currentTime = System.currentTimeMillis();
+
+        UserDetail user = null;
+
+        if (!userService.isExist(id)) {
+            LOGGER.info("UserDetail info of {} was not found. create {}'s Userdetail info...", id, id);
+            user = new UserDetail();
+            user.setUserId(id);
+            user.setStatus("1");
+            if (adminUserName.equals(id)){
+                user.setAdminYn("Y");
+            }
+            userService.createUser(user);
+        } else {
+            user = userService.getUser(id);
+
+            if (adminUserName.equals(id)){
+                user.setAdminYn("Y");
+            }
+            userService.updateUser(id, user);
+        }
+
+        user = userService.getUser(id);
+
+        List auths = new ArrayList();
+        auths.add("ROLE_USER");
+
+        //Start 테스트용(ASIS:DB조회 데이터) 임시 데이터 생성(아래 참조부분만 셋팅)
+        user = new UserDetail();
+        user.setUserName("yschoi");
+        //End 테스트용 임시 계정데이터 생성(아래 참조부분만 셋팅)
+
+        if ("Y".equals(user.getAdminYn())) auths.add("ROLE_ADMIN");
+
+        result.put("token", token.getValue());
+        result.put("refresh_token", token.getRefreshToken().getValue());
+        result.put("expireDate", token.getExpiration().getTime()-10000);
+        result.put("expireIn", token.getExpiresIn());
+        result.put("expiredAt-cal", (token.getExpiration().getTime() - currentTime) / 1000);
+        result.put("id", id);
+        result.put("password", password);
+        result.put("name", user.getUserName());
+        result.put("imgPath", user.getImgPath());
+        result.put("auth", auths);
+        return result;
+    }
+    
+    @RequestMapping(value = {"/login2"}, method = RequestMethod.POST, consumes="application/json")
+    public Map<String, Object> login2(@RequestBody Map<String, Object> body) throws Exception {
+        String id = (String)body.get("id");
+        String password = (String)body.get("password");
+
+        LOGGER.info("> into login ...");
+        LOGGER.info("id: {}", id);
+
+        Map<String, Object> result = new HashMap<>();
+        // uaa client login 
+        OAuth2AccessToken token = loginService.login2(id, password);
+        long currentTime = System.currentTimeMillis();
+
         UserDetail user = null;
         //TODO : 나중에 꼭 수정해야함....Commonapi에서 정보가져오도록
         user = new UserDetail();
@@ -93,7 +151,10 @@ public class LoginController extends Common {
         else auths.add("ROLE_USER");
 
         result.put("token", token.getValue());
+        result.put("refresh_token", token.getRefreshToken().getValue());
         result.put("expireDate", token.getExpiration().getTime()-10000);
+        result.put("expireIn", token.getExpiresIn());
+        result.put("expiredAt-cal", (token.getExpiration().getTime() - currentTime) / 1000);
         result.put("id", id);
         result.put("password", password);
         result.put("name", user.getUserName());
@@ -101,6 +162,51 @@ public class LoginController extends Common {
         result.put("auth", auths);
         return result;
     }
+    
+    @PostMapping("/token/refresh")
+    public Map<String, Object> refresh(@RequestBody Map<String, Object> body) throws Exception {
+        String tokenStr = (String) body.get( "token" );
+        String refreshTokenStr = (String) body.get( "refresh_token" );
+        
+        Map<String, Object> result = new HashMap<>();
+        //OAuth2AccessToken token = loginService.refresh( tokenStr, refreshTokenStr );
+        OAuth2AccessToken token = loginService.refresh( "", refreshTokenStr );
+        long currentTime = System.currentTimeMillis();
+        
+        result.put("token", token.getValue());
+        result.put("refresh_token", token.getRefreshToken().getValue());
+        result.put("expireDate", token.getExpiration().getTime()-10000);
+        result.put("expireIn", token.getExpiresIn());
+        result.put("expiredAt-cal", (token.getExpiration().getTime() - currentTime) / 1000);
+        result.put( "real_token", token );
+        
+        LOGGER.info( "token realization : {}", token );
+        
+        return result;
+    }
+    
+    @PostMapping("/token/refresh2")
+    public Map<String, Object> refresh2(@RequestBody Map<String, Object> body) throws Exception {
+        String tokenStr = (String) body.get( "token" );
+        String refreshTokenStr = (String) body.get( "refresh_token" );
+        
+        Map<String, Object> result = new HashMap<>();
+        //OAuth2AccessToken token = loginService.refresh( tokenStr, refreshTokenStr );
+        OAuth2AccessToken token = loginService.refresh2( tokenStr, refreshTokenStr );
+        long currentTime = System.currentTimeMillis();
+        
+        result.put("token", token.getValue());
+        result.put("refresh_token", token.getRefreshToken().getValue());
+        result.put("expireDate", token.getExpiration().getTime()-10000);
+        result.put("expireIn", token.getExpiresIn());
+        result.put("expiredAt-cal", (token.getExpiration().getTime() - currentTime) / 1000);
+        result.put( "real_token", token );
+        
+        LOGGER.info( "token realization : {}", token );
+        
+        return result;
+    }
+    
 
     /**
      * Request email authentication map.
