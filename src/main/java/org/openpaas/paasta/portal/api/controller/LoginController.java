@@ -58,8 +58,14 @@ public class LoginController extends Common {
 
         Map<String, Object> result = new HashMap<>();
         OAuth2AccessToken token = loginService.login(id, password);
-
+        LOGGER.info(token.getTokenType());
         UserDetail user = null;
+        //TODO : 나중에 꼭 수정해야함....Commonapi에서 정보가져오도록
+        user = new UserDetail();
+        user.setUserId(id);
+        user.setStatus("1");
+        user.setAdminYn("Y");
+
 
         if (!userService.isExist(id)) {
             LOGGER.info("UserDetail info of {} was not found. create {}'s Userdetail info...", id, id);
@@ -76,23 +82,22 @@ public class LoginController extends Common {
             if (adminUserName.equals(id)) {
                 user.setAdminYn("Y");
             }
-
+            userService.updateUser(id,user);
         }
 
-        user = userService.getUser(id);
 
         List auths = new ArrayList();
-
-        //Start 테스트용(ASIS:DB조회 데이터) 임시 데이터 생성(아래 참조부분만 셋팅)
-        user = new UserDetail();
-        //End 테스트용 임시 계정데이터 생성(아래 참조부분만 셋팅)
-
+        //TODO: common 서비스 에서 가져오도록 수정되어야함
+        user = userService.getUser(id);
         if ("Y".equals(user.getAdminYn())) auths.add("ROLE_ADMIN");
         else auths.add("ROLE_USER");
 
         result.put("token", token.getValue());
-        result.put("expireDate", token.getExpiration().getTime() - 10000);
+        result.put("expireDate", token.getExpiration().getTime()-10000);
         result.put("id", id);
+        result.put("password", password);
+        result.put("name", user.getUserName());
+        result.put("imgPath", user.getImgPath());
         result.put("auth", auths);
         return result;
     }
