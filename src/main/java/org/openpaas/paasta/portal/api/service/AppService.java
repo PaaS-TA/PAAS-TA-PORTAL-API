@@ -57,8 +57,8 @@ public class AppService extends Common {
     @Autowired
     private AppAutoScaleModalService appAutoScaleModalService;
 
-//    @Autowired
-//    ReactorCloudFoundryClient reactorCloudFoundryClient;
+    @Autowired
+    ReactorCloudFoundryClient reactorCloudFoundryClient;
 
     //ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
     //DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
