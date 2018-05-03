@@ -46,9 +46,11 @@ public class Space {
     private int spaceId;
     private int orgId;
     private String spaceGuid;
+    private String orgGuid;
     private Date created;
     private Date lastModified;
 
+    private boolean recursive = true;
 
     private List<App> apps = new ArrayList<App>();
 
@@ -98,6 +100,7 @@ public class Space {
 
     public void setGuid(UUID guid) {
         this.guid = guid;
+        this.setSpaceGuid( guid.toString() );
     }
 
     public String getName() {
@@ -218,6 +221,15 @@ public class Space {
 
     public void setSpaceGuid(String spaceGuid) {
         this.spaceGuid = spaceGuid;
+        this.setGuid( UUID.fromString( spaceGuid ) );
+    }
+    
+    public String getOrgGuid() {
+        return orgGuid;
+    }
+    
+    public void setOrgGuid( String orgGuid ) {
+        this.orgGuid = orgGuid;
     }
 
     public Date getCreated() {
@@ -250,4 +262,11 @@ public class Space {
         }
     }
 
+    public boolean isRecursive() {
+        return recursive;
+    }
+    
+    public void setRecursive( boolean recursive ) {
+        this.recursive = recursive;
+    }
 }

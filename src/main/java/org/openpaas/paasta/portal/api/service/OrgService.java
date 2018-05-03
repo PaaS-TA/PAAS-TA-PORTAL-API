@@ -4,35 +4,25 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
-import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.lib.util.JsonUtil;
-import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
-import org.cloudfoundry.client.v2.organizationquotadefinitions.ListOrganizationQuotaDefinitionsRequest;
 import org.cloudfoundry.client.v2.organizations.*;
 
 
 import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
-import org.cloudfoundry.client.v2.spaces.SpaceEntity;
-import org.cloudfoundry.client.v2.spaces.SpaceResource;
-import org.cloudfoundry.client.v2.users.GetUserRequest;
-import org.cloudfoundry.client.v2.users.GetUserResponse;
-import org.cloudfoundry.client.v2.users.UserResource;
-import org.cloudfoundry.client.v3.organizations.GetOrganizationDefaultIsolationSegmentRequest;
+import org.cloudfoundry.operations.domains.CreateDomainRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
-import org.cloudfoundry.uaa.users.ChangeUserPasswordRequest;
-import org.cloudfoundry.uaa.users.InviteUsersRequest;
-import org.cloudfoundry.uaa.users.UpdateUserRequest;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -49,10 +39,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import reactor.core.Disposable;
-import reactor.core.publisher.Mono;
-import sun.rmi.runtime.Log;
-
 import javax.activation.DataHandler;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -60,13 +46,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -87,6 +68,8 @@ public class OrgService extends Common {
     private SpaceService spaceService;
     @Autowired
     private AsyncUtilService asyncUtilService;
+    
+    
 //    @Autowired
 //    private OrgMapper orgMapper;
 //    @Autowired
@@ -439,10 +422,9 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public List<CloudSpace> getOrgRole(Org org, String token) throws Exception {
-
-        List<CloudSpace> listSpace = spaceService.getSpaces(org, token);
-        return listSpace;
-
+        /*List<CloudSpace> listSpace = spaceService.getSpaces(org, token);
+        return listSpace;*/
+        return null;
     }
 
     /**
@@ -1104,10 +1086,12 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    public UpdateOrganizationResponse renameOrg(String orgid, String newOrgName, String token) {
+    public UpdateOrganizationResponse renameOrg(Org org, String token) {
+        Objects.requireNonNull(org.getGuid(), "Org GUID(guid) must not be null.");
+        Objects.requireNonNull(org.getNewOrgName(), "New org name(newOrgName) must not be null.");
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .organizations()
-                .update(UpdateOrganizationRequest.builder().organizationId(orgid).name(newOrgName).build())
+                .update(UpdateOrganizationRequest.builder().organizationId(org.getGuid().toString()).name(org.getNewOrgName()).build())
                 .block();
     } 
     
@@ -1122,7 +1106,7 @@ public class OrgService extends Common {
      * @version 2.1
      * @since 2018.5.2
      */
-    public DeleteOrganizationResponse deleteOrg(String orgid, boolean recursive, String token) throws Exception {
+    public DeleteOrganizationResponse deleteOrg(Org org, String token) throws Exception {
         boolean result = false;
 
         /*
@@ -1147,6 +1131,11 @@ public class OrgService extends Common {
         }
         */
         
+        Objects.requireNonNull(org.getGuid(), "Org GUID(guid) must not be null.");
+        final String orgId = org.getGuid().toString();
+        final boolean recursive = org.isRecursive();
+        final SummaryOrganizationResponse orgSummary = getOrgSummary( orgId, token );
+        
         //// Check Admin user
         // 현재 token의 유저 정보를 가져온다.
         // TODO 특정 유저의 정보를 가져오는 메소드가 구현되어 있으면, 해당 메소드로 교체할 것. (hgcho)
@@ -1159,11 +1148,11 @@ public class OrgService extends Common {
         
         if ( isAdmin ) {
             // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
-            LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", getOrg(orgid, token).getEntity().getName() );
+            LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName() );
             return Common
                 .cloudFoundryClient( connectionContext(), tokenProvider( token ) )
                 .organizations().delete( DeleteOrganizationRequest.builder()
-                    .organizationId( orgid ).recursive( true ).async( true ).build() )
+                    .organizationId( orgId ).recursive( true ).async( true ).build() )
                 .block();
         }
         
@@ -1172,27 +1161,32 @@ public class OrgService extends Common {
         // TODO 특정 Role에 해당하는 유저를 찾는 메소드가 구현되면, 해당 메소드로 교체할 것. (hgcho)
         final ListOrganizationManagersResponse managerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
         .organizations()
-        .listManagers( ListOrganizationManagersRequest.builder().organizationId( orgid ).build() )
+        .listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() )
         .block();
         
         // OrgManager role을 가진 유저 수 파악
         final int countManagerUsers = managerResponse.getTotalResults();
         
-        // 자신에게 OrgManager Role이 주어진게 맞는지 탐색
+        // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
         final boolean existManagerRoleExactly = 
             managerResponse.getResources().stream()
             .filter(
                 ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) )
             .count() == 1L;
+        
+        LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}",
+            existManagerRoleExactly, countManagerUsers);
         if ( existManagerRoleExactly ) {
             // OrgManager role을 가진 User가 2명 이상일 경우 무조건 작업 Cancel    
-            
             if ( countManagerUsers == 1 ) {
                 // 정확히 일치할 때
+                LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
+                LOGGER.debug( "User : {}, To delete org : {}(GUID : {})", userInfoResponse.getUserId(), orgSummary.getName(), org.getGuid().toString());
                 return Common
-                    .cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                    //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                    .cloudFoundryClient( connectionContext(), tokenProvider( adminUserName, adminPassword ) )
                     .organizations().delete( DeleteOrganizationRequest.builder()
-                        .organizationId( orgid ).recursive( recursive ).async( true ).build() )
+                        .organizationId( orgId ).recursive( recursive ).async( true ).build() )
                     .block();
             } else if ( countManagerUsers > 1 ) {
                 // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
@@ -1282,12 +1276,21 @@ public class OrgService extends Common {
      * @since 2018.5.2
      */
     // Org 
-    public UpdateOrganizationResponse updateOrgQuota(String orgId, String quotaId, String token) {
+    public UpdateOrganizationResponse updateOrgQuota(String orgId, Org org, String token) {
+        Objects.requireNonNull( org.getGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid." );
+        Objects.requireNonNull( org.getQuotaGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid." );
+        String orgGuid = org.getGuid().toString();
+        String quotaGuid = org.getQuotaGuid();
+        
+        if ( !orgId.equals( orgGuid ) )
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST,
+                "Org GUID in the path doesn't match org GUID in request body." );
+        
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
             .organizations()
             .update( 
                 UpdateOrganizationRequest.builder()
-                .organizationId( orgId ).quotaDefinitionId( quotaId ).build() )
+                .organizationId( orgGuid ).quotaDefinitionId( quotaGuid ).build() )
             .block();
     }
 }

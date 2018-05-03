@@ -5,6 +5,7 @@ import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.tokens.AbstractToken;
+import org.cloudfoundry.uaa.tokens.CheckTokenRequest;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.cloudfoundry.uaa.tokens.RefreshTokenRequest;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Operators;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -56,61 +58,17 @@ public class LoginService extends Common {
      * @throws URISyntaxException    the uri syntax exception
      */
     public OAuth2AccessToken login(String id, String password) throws MalformedURLException, URISyntaxException {
-        return new CloudFoundryClient(new CloudCredentials(id, password), getTargetURL(apiTarget), true).login();
+        CloudCredentials cc = new CloudCredentials(id, password);
+        OAuth2AccessToken token = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
+        
+        return token;
     }
     
     public OAuth2AccessToken refresh(String token, String refreshToken) throws MalformedURLException, URISyntaxException {
-        return new CloudFoundryClient(new CloudCredentials(getOAuth2Token(token, refreshToken), true), getTargetURL(apiTarget), true).login();
-    }
-    
-    public OAuth2AccessToken login2(String id, String password) throws MalformedURLException, URISyntaxException {
-        ReactorUaaClient uaaClient = uaaClient( connectionContext(), tokenProvider( id, password ) );
-        GetTokenByClientCredentialsResponse tokenResponse = uaaClient
-            .tokens()
-            .getByClientCredentials( 
-                GetTokenByClientCredentialsRequest.builder().clientId( id ).clientSecret( password ).build() )
-            .onErrorReturn(
-                GetTokenByClientCredentialsResponse.builder().scopes( "get_token_fail" ).expiresInSeconds( 0 ).build() )
-            .block();
+        CloudCredentials cc = new CloudCredentials(getOAuth2Token(token, refreshToken), true);
+        OAuth2AccessToken newToken = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
         
-        OAuth2AccessToken accessToken = getOAuth2TokenFromTokenResponse(tokenResponse);
-        return accessToken;
-    }
-    
-    class Wrapper<T> {
-        private ArrayList<T> objs = new ArrayList<>();
-        
-        public ArrayList<T> get() {
-            return this.objs;
-        }
-        
-        public void set(T obj) {
-            this.objs.add( obj );
-        }
-    }
-    
-    public OAuth2AccessToken refresh2(String token, String refreshToken) {
-        Wrapper<RefreshTokenResponse> tokenRefresh = new Wrapper<>();
-        Mono<RefreshTokenResponse> mono = 
-            uaaClient( connectionContext(), tokenProvider( token ) ).tokens()
-            .refresh( RefreshTokenRequest.builder()
-                .refreshToken( refreshToken ).tokenFormat( TokenFormat.OPAQUE ).clientId( "" ).clientSecret( "" ).build() )
-            .onErrorReturn( RefreshTokenResponse.builder().refreshToken( "" ).accessToken( "" ).tokenId( "" ).tokenType( "" ).scopes( "refresh_fail" ).expiresInSeconds( 0 ).build() );
-        Consumer<RefreshTokenResponse> consumer = new Consumer<RefreshTokenResponse>() {
-            
-            @Override
-            public void accept( RefreshTokenResponse response ) {
-                tokenRefresh.set( response );
-            }
-        };
-        mono.subscribe( consumer ).dispose();
-        
-        OAuth2AccessToken accessToken = getOAuth2TokenFromTokenResponse(tokenRefresh.get().get( 0 ));
-        return accessToken;
-    }
-    
-    private final OAuth2AccessToken getOAuth2Token(String token) {
-        return new DefaultOAuth2AccessToken( token );
+        return newToken;
     }
     
     private final OAuth2AccessToken getOAuth2Token(String token, String refreshToken) {
@@ -124,12 +82,4 @@ public class LoginService extends Common {
         final Map<String, String> tokenMap = objectMapper.convertValue( tokenResponse, typeRef );
         return DefaultOAuth2AccessToken.valueOf( tokenMap );
     }
-    
-    /*
-    private class ClientInfo {
-        public ClientInfo(final Reactor) {
-            // TODO Auto-generated constructor stub
-        }
-    }
-    */
 }

@@ -1,21 +1,19 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.RandomStringUtils;
 
 
-import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
-import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserDetail;
-import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.service.OrgService;
 import org.openpaas.paasta.portal.api.service.SpaceService;
 import org.openpaas.paasta.portal.api.service.UserService;
@@ -27,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -571,29 +571,29 @@ public class OrgController extends Common {
      * @param request
      * @return information of the organization
      */
-    @GetMapping(V2_URL + "/orgs/{orgid}")
-    public GetOrganizationResponse getOrg(@PathVariable String orgid, HttpServletRequest request) {
-    	LOGGER.info("get org start : " + orgid);
-    	if (orgid == null)
+    @GetMapping(V2_URL + "/orgs/{orgId}")
+    public GetOrganizationResponse getOrg(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+    	LOGGER.info("get org start : " + orgId);
+    	if (orgId == null)
     		throw new IllegalArgumentException("Org id is empty.");
 
-    	return orgService.getOrg(orgid, getCFAuthorization(request));
+    	return orgService.getOrg(orgId, token);
     }
 
     /**
      * 조직 요약 정보를 조회한다.
      *
-     * @param orgid     the org id
+     * @param orgId     the org id
      * @param request the request
      * @return summary of the organization
      */
-    @GetMapping(V2_URL + "/orgs/{orgid}/summary")
-    public SummaryOrganizationResponse getOrgSummary(@PathVariable String orgid, HttpServletRequest request) {
-        LOGGER.info("org summary : " + orgid);
-		if (orgid == null) {
+    @GetMapping(V2_URL + "/orgs/{orgId}/summary")
+    public SummaryOrganizationResponse getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+        LOGGER.info("org summary : " + orgId);
+		if (orgId == null) {
 			throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
 		}
-		return orgService.getOrgSummary(orgid, getCFAuthorization(request));
+		return orgService.getOrgSummary(orgId, token);
     }
 
     /**
@@ -603,9 +603,9 @@ public class OrgController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(V2_URL + "/orgs")
-    public ListOrganizationsResponse getOrgsForUser(final HttpServletRequest request) throws Exception {
+    public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.debug("Org list by user");
-        return orgService.getOrgsForUser(getCFAuthorization(request));
+        return orgService.getOrgsForUser(token);
     }
 
     /**
@@ -622,7 +622,7 @@ public class OrgController extends Common {
      * 공간 목록을 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
-     * @param orgid     the org
+     * @param orgId     the org
      * @param request the request
      * @return List<CloudSpace>     orgList
      * @throws Exception the exception
@@ -630,56 +630,67 @@ public class OrgController extends Common {
      * @version 2.0
      * @since 2018.04.17 (modified)
      */
-    @GetMapping(V2_URL + "/orgs/{orgid}/space")
-    public Map<?, ?> getSpaces(@PathVariable String orgid, final HttpServletRequest request) {
-    	LOGGER.debug("Get Spaces " + orgid);
+    @GetMapping(V2_URL + "/orgs/{orgId}/spaces")
+    public Map<?, ?> getSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+    	LOGGER.debug("Get Spaces " + orgId);
     	final Map<String, Object> result = new HashMap<>();
-		result.put("spaceList", orgService.getOrgSpaces(orgid, getCFAuthorization(request)));
+		result.put("spaceList", orgService.getOrgSpaces(orgId, token));
 
         return result;
     }
-
+    
     /**
-     * 조직의 자원 할당량을 조회한다.
-     *
-     * @param orgid     the org id
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
+     * 사용자의 조직의 이름을 변경한다.
+     * @param orgId
+     * @param wantedName
+     * @param token
+     * @return
      */
-    @GetMapping(V2_URL + "/orgs/{orgid}/quota")
-    public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgid, HttpServletRequest request) {
-        LOGGER.info("quota : " + orgid);
-        return orgService.getOrgQuota(orgid, getCFAuthorization(request));
+    @PutMapping( V2_URL + "/orgs" )
+    public UpdateOrganizationResponse renameOrg( 
+        @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        return orgService.renameOrg( org, token );
     }
     
     /**
      * 사용자의 조직을 삭제한다.
-     * @param orgid organization id
+     * @param orgId organization id
      * @param token the token
      * @return boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(V2_URL+"/orgs/{orgid}")
-    public DeleteOrganizationResponse deleteOrg(@PathVariable String orgid, 
-        @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request ) throws Exception {
-        boolean isRecursive;
-        if (null != request.getParameter( "recursive" ))
-            isRecursive = Boolean.valueOf( (String) request.getParameter( "recursive" ) );
-        else
-            isRecursive = false;
-        
-        return orgService.deleteOrg(orgid, isRecursive, token);
-    }
-
-    @PutMapping( V2_URL + "/orgs/{orgid}" )
-    public UpdateOrganizationResponse renameOrg( @PathVariable String orgid, @RequestBody String wantedName,
-        @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        return orgService.renameOrg( orgid, wantedName, token );
+    @DeleteMapping(V2_URL+"/orgs")
+    public DeleteOrganizationResponse deleteOrg(
+        @RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
+        return orgService.deleteOrg(org, token);
     }
     
+    // space read-only
+    public ListSpacesResponse getOrgSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+        return orgService.getOrgSpaces( orgId, token );
+    }
     
-
+    // quota read, update
+    /**
+     * 조직의 자원 할당량을 조회한다.
+     *
+     * @param orgId     the org id
+     * @param request the request
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    @GetMapping(V2_URL + "/orgs/{orgId}/quota")
+    public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+        LOGGER.info("Get quota of org {}" + orgId);
+        return orgService.getOrgQuota(orgId, token);
+    }
+    
+    @PutMapping(V2_URL + "/orgs/{orgId}/quota")
+    public UpdateOrganizationResponse updateOrgQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        LOGGER.info("Update quota of org {} / quota {}", org.getGuid(), org.getQuotaGuid());
+        return orgService.updateOrgQuota( orgId, org, token );
+    }
+    
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
     //////   Document : http://v3-apidocs.cloudfoundry.org          //////
