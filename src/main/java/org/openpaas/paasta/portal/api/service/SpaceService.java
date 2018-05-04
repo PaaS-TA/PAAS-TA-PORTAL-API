@@ -20,6 +20,7 @@ import org.openpaas.paasta.portal.api.model.Space;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -41,8 +42,9 @@ public class SpaceService extends Common {
     @Autowired
     private AsyncUtilService asyncUtilService;
     
-/*    @Autowired
-    private OrgService orgService;*/
+    @Autowired 
+    @Lazy // To resolve circular reference
+    private OrgService orgService;
     
 //    @Autowired
 //    private SpaceMapper spaceMapper;
@@ -84,10 +86,7 @@ public class SpaceService extends Common {
         if (org.getGuid() != null) {
             orgId = org.getGuid().toString();
         } else if (org.getName() != null) {
-            //orgId = orgService.getOrgId( org.getName(), token );
-            orgId = Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
-                .organizations().get( OrganizationInfoRequest.builder().name( org.getName() ).build() )
-                .block().getId();
+            orgId = orgService.getOrgId( org.getName(), token );
         } else {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "To get spaces in org, you must be require org name or org id." );
         }
