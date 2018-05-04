@@ -2,23 +2,13 @@ package org.openpaas.paasta.portal.api.service;
 
 import com.google.gson.Gson;
 
-import reactor.core.publisher.Mono;
-
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
-import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
-import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsRequest;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
-import org.cloudfoundry.client.v2.organizations.SummaryOrganizationRequest;
-import org.cloudfoundry.client.v2.organizations.SummaryOrganizationResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spaces.*;
-import org.cloudfoundry.operations.spaces.SpaceSummary;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
@@ -36,8 +26,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 공간 서비스 - 공간 목록 , 공간 이름 변경 , 공간 생성 및 삭제 등을 제공한다.
@@ -48,13 +36,13 @@ import java.util.stream.Stream;
  */
 @Service
 public class SpaceService extends Common {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceService.class);
+    
     @Autowired
     private AsyncUtilService asyncUtilService;
     
-    @Autowired
-    private OrgService orgService;
+/*    @Autowired
+    private OrgService orgService;*/
     
 //    @Autowired
 //    private SpaceMapper spaceMapper;
@@ -96,7 +84,10 @@ public class SpaceService extends Common {
         if (org.getGuid() != null) {
             orgId = org.getGuid().toString();
         } else if (org.getName() != null) {
-            orgId = orgService.getOrgId( org.getName(), token );
+            //orgId = orgService.getOrgId( org.getName(), token );
+            orgId = Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
+                .organizations().get( OrganizationInfoRequest.builder().name( org.getName() ).build() )
+                .block().getId();
         } else {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "To get spaces in org, you must be require org name or org id." );
         }
