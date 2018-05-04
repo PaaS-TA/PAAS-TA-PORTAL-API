@@ -14,7 +14,6 @@
 build/**
 bin/**
 out/**
-.idea/**
 
 # Package Files #
 *.jar
@@ -34,6 +33,11 @@ hs_err_pid*
 # eclise settings
 .classpath
 .project
+
+# idea settings
+*.iml
+*.idea
+.idea/**
 
 # remove spring bean configuration
 .spring*
