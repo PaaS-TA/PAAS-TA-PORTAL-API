@@ -53,6 +53,9 @@ public class SpaceService extends Common {
     @Autowired
     private AsyncUtilService asyncUtilService;
     
+    @Autowired
+    private OrgService orgService;
+    
 //    @Autowired
 //    private SpaceMapper spaceMapper;
 //    @Autowired
@@ -73,6 +76,35 @@ public class SpaceService extends Common {
         ListSpacesResponse response = Common
             .cloudFoundryClient( connectionContext(), tokenProvider( token ) ).spaces()
             .list( ListSpacesRequest.builder().build() ).block();
+        
+        return response;
+    }
+    
+    /**
+     * 공간(스페이스) 목록 조회한다.
+     * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
+     *
+     * @param org   the org
+     * @param token the token
+     * @return ListSpacesResponse
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.5.3
+     */
+    public ListSpacesResponse getSpaces(Org org, String token) {
+        String orgId = null;
+        if (org.getGuid() != null) {
+            orgId = org.getGuid().toString();
+        } else if (org.getName() != null) {
+            orgId = orgService.getOrgId( org.getName(), token );
+        } else {
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "To get spaces in org, you must be require org name or org id." );
+        }
+        
+        Objects.requireNonNull( orgId, "Org id must not be null." );
+        ListSpacesResponse response = Common
+            .cloudFoundryClient( connectionContext(), tokenProvider( token ) ).spaces()
+            .list( ListSpacesRequest.builder().organizationId( orgId ).build() ).block();
         
         return response;
     }
@@ -456,7 +488,7 @@ public class SpaceService extends Common {
      * @return the spaces info
      * @throws Exception the exception
      */
-    public List<Space> getSpacesInfo(String spaceName, int orgId) throws Exception{
+    public List<Space> getSpacesInfo(String spaceName, String orgId) throws Exception{
         Map map = new HashMap();
         map.put("spaceName" , spaceName);
         map.put("orgId" , orgId);

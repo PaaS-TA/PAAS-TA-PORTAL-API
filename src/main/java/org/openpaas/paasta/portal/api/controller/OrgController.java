@@ -341,7 +341,7 @@ public class OrgController extends Common {
         String inviteUserId = (String) body.getOrDefault("inviteUserId", "inviteUserId");
         String userId = (String) body.getOrDefault("userId", "userId");
         body.put("token",token);
-        int orgId =-1;
+        String orgId = null;
 
 
         /** 초대 관련 데이터 입력**/
@@ -355,7 +355,7 @@ public class OrgController extends Common {
                 Map tmpData = new HashMap();
                 String gubun = "0";
                 String inviteName = (String) inviteList.get(1);
-                int inviteId = orgService.getOrgId(inviteName);
+                String inviteId = orgService.getOrgId(inviteName, null);
                 orgId = inviteId;
                 tmpData.put("token",token);
                 tmpData.put("gubun",gubun);
@@ -373,10 +373,10 @@ public class OrgController extends Common {
             List inviteList = (List) dataList.get(i);
             if("space".equals((inviteList.get(0)))){
                 Map tmpData = new HashMap();
-                int inviteId = 0;
+                String inviteId = null;
                 String gubun = "1";
                 String inviteName = (String) inviteList.get(1);
-                inviteId = spaceService.getSpacesInfo(inviteName,orgId).get(0).getSpaceId();
+                inviteId = spaceService.getSpacesInfo(inviteName, orgId).get(0).getSpaceGuid();
                 tmpData.put("token",token);
                 tmpData.put("gubun",gubun);
                 tmpData.put("inviteId",inviteId);

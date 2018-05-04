@@ -4,6 +4,7 @@ import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.util.JsonUtil;
 import org.cloudfoundry.client.v2.organizations.OrganizationResource;
+import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Usage;
@@ -90,14 +91,14 @@ public class UsageService {
      */
     public Map<String, Object> getUsageSpaceList(Usage param, HttpServletRequest req) throws Exception {
         List<Map<String, Object>> resultList = new ArrayList<>();
-        List<CloudSpace> spaceList = spaceService.getSpaces(new Org() {{
+        List<SpaceResource> spaceList = spaceService.getSpaces(new Org() {{
             setOrgName(param.getOrgName());
-        }}, req.getHeader(cfAuthorizationHeaderKey));
+        }}, req.getHeader(cfAuthorizationHeaderKey)).getResources();
 
-        spaceList.stream().collect(toList()).forEach(cloudOrganization -> resultList.add(new HashMap<String, Object>() {{
-            put("name", cloudOrganization.getName());
-            put("value", cloudOrganization.getName());
-            put("guid", cloudOrganization.getMeta().getGuid());
+        spaceList.stream().collect(toList()).forEach(spaceResource -> resultList.add(new HashMap<String, Object>() {{
+            put("name", spaceResource.getEntity().getName());
+            put("value", spaceResource.getEntity().getName());
+            put("guid", spaceResource.getMetadata().getId());
         }}));
 
         return new HashMap<String, Object>() {{

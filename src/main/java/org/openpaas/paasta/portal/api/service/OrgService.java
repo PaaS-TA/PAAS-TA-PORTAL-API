@@ -676,22 +676,6 @@ public class OrgService extends Common {
     }
 
     /**
-     * 조직 이름을 가지고 조직 아이디를 조회한다.
-     *
-     * @param orgName //조직 이름
-     * @return 조직 아이디
-     * @throws Exception the exception
-     */
-    public int getOrgId(String orgName) throws Exception{
-
-//        Map<String, Object> selectedOrg = orgMapper.selectOrg(orgName);
-        Map<String, Object> selectedOrg = null;
-        int orgId = (int)selectedOrg.get("orgId");
-
-        return orgId;
-    }
-
-    /**
      * 공간에 대한 초대를 완료하고 초대상태를 Y로 만들어준다.
      *
      * @param code 초대 토큰
@@ -1068,6 +1052,21 @@ public class OrgService extends Common {
 		    .list(ListOrganizationsRequest.builder().build())
             .block();
 	}
+	
+
+    /**
+     * 조직 이름을 가지고 조직 아이디를 조회한다.
+     *
+     * @param orgName //조직 이름
+     * @return 조직 아이디
+     * @throws Exception the exception
+     * @version 2.0
+     * @author hgcho
+     * @since 2018.5.4
+     */
+    public String getOrgId(String orgName, String token) {
+        return getOrg( orgName, token ).getMetadata().getId();
+    }
 	
 	public OrganizationDetail getOrgUsingName(final String name, final String token) {
 	    return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
