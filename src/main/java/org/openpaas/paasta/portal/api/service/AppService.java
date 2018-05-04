@@ -2,20 +2,25 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
+import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteResponse;
+import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
+import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
+import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.*;
 import org.cloudfoundry.operations.applications.RestageApplicationRequest;
-import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
-import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
@@ -206,27 +211,59 @@ public class AppService extends Common {
     /**
      * 앱-서비스를 바인드한다.
      *
-     * @param app    the app
+     * @param body
      * @param token the client
      * @throws Exception the exception
      */
-    public void bindService(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.services().bind(BindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
+    public void bindService(Map body, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
 
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> parameterMap = mapper.readValue(body.get("parameter").toString(), new TypeReference<Map<String, Object>>() {
+        });
+
+        cloudFoundryClient.serviceBindingsV2()
+                .create(CreateServiceBindingRequest.builder()
+                        .applicationId(body.get("applicationId").toString())
+                        .serviceInstanceId(body.get("serviceInstanceId").toString())
+                        .parameters(parameterMap)
+                        .build()
+                ).block();
+
+//        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+//        cloudFoundryOperations.services().bind(BindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
     }
 
 
     /**
      * 앱-서비스를 언바인드한다.
      *
-     * @param app    the app
+     * @param serviceInstanceId
+     * @param applicationId
      * @param token the client
      * @throws Exception the exception
      */
-    public void unbindService(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.services().unbind(UnbindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
+    public void unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+
+        ListServiceInstanceServiceBindingsResponse listServiceInstanceServiceBindingsResponse =
+            cloudFoundryClient.serviceInstances()
+                    .listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder()
+                            .applicationId(applicationId)
+                            .serviceInstanceId(serviceInstanceId)
+                            .build()
+                    ).block();
+
+        String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
+
+        cloudFoundryClient.serviceBindingsV2()
+                .delete(DeleteServiceBindingRequest.builder()
+                        .serviceBindingId(instancesServiceBindingGuid)
+                        .build()
+                ).block();
+
+//        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
+//        cloudFoundryOperations.services().unbind(UnbindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
     }
 
     /**
@@ -354,8 +391,6 @@ public class AppService extends Common {
                                 .build()
                         ).block();
 
-        LOGGER.info(createRouteResponse.toString());
-
         cloudFoundryClient.routeMappings()
                 .create(CreateRouteMappingRequest.builder()
                         .applicationId(body.get("applicationId").toString())
@@ -400,7 +435,8 @@ public class AppService extends Common {
     /**
      * 앱 라우트를 해제한다.
      *
-     * @param app   the app
+     * @param guid
+     * @param route_guid
      * @param token the token
      * @return the boolean
      * @throws Exception the exception
@@ -408,23 +444,51 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    public boolean removeApplicationRoute(App app, String token) throws Exception {
+    public boolean removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+        cloudFoundryClient.applicationsV2()
+                .removeRoute(
+                        RemoveApplicationRouteRequest.builder()
+                        .applicationId(guid)
+                        .routeId(route_guid)
+                        .build()
+                ).block();
+
+        cloudFoundryClient.routes()
+                .delete(DeleteRouteRequest.builder()
+                        .routeId(route_guid)
+                        .build()
+                ).block();
 
 
-        String orgName = app.getOrgName();
-        String spaceName = app.getSpaceName();
-        String appName = app.getName();
-        String host = app.getHost();
-        String domainName = app.getDomainName();
+//        cloudFoundryClient.routeMappings()
+//                .delete(DeleteRouteMappingRequest.builder()
+//                        .routeMappingId(body.get("routeMappingId").toString())
+//                        .build()
+//                ).block();
+//
+//        cloudFoundryClient.routes()
+//                .delete(DeleteRouteRequest.builder()
+//                        .routeId(body.get("routeId").toString())
+//                        .build()
+//                ).block();
 
-        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
 
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-
-        client.unbindRoute(host, domainName, appName);
-        client.deleteRoute(host, domainName);
+//        String orgName = app.getOrgName();
+//        String spaceName = app.getSpaceName();
+//        String appName = app.getName();
+//        String host = app.getHost();
+//        String domainName = app.getDomainName();
+//
+//        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
+//
+//        client.unbindRoute(host, domainName, appName);
+//        client.deleteRoute(host, domainName);
 
         return true;
     }

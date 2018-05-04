@@ -3,24 +3,24 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudService;
-import org.cloudfoundry.client.lib.domain.CloudServiceBroker;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.servicebrokers.*;
-import org.cloudfoundry.operations.applications.StartApplicationRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-//import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import java.util.List;
 import java.util.Map;
+
+//import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
 
 /**
  * 서비스 컨트롤 - 서비스 목록 , 서비스 상세 정보, 서비스 인스턴스 추가, 서비스 인스턴스 수정, 서비스 인스턴스 삭제 등 서비스 인스턴스 관리를  제공한다.
@@ -309,6 +309,16 @@ public class ServiceService extends Common {
         String appImageUrl = "";
         return appImageUrl;
 
+    }
+
+    public ListServiceInstancesResponse getServicesInstances(String guid, String token) {
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+
+        ListServiceInstancesResponse listServicesInstancesResponse =
+                cloudFoundryClient.serviceInstances().list(ListServiceInstancesRequest.builder().spaceId(guid).build()
+                ).block();
+
+        return listServicesInstancesResponse;
     }
 
 

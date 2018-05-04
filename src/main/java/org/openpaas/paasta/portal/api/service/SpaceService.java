@@ -5,20 +5,13 @@ import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
-import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
-import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsRequest;
-import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
-import org.cloudfoundry.client.v2.organizations.SummaryOrganizationRequest;
-import org.cloudfoundry.client.v2.organizations.SummaryOrganizationResponse;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spaces.*;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-//import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
-//import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -32,6 +25,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
+//import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
+//import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
 
 /**
  * 공간 서비스 - 공간 목록 , 공간 이름 변경 , 공간 생성 및 삭제 등을 제공한다.
@@ -233,7 +229,16 @@ public class SpaceService extends Common {
      * @return space summary
      * @throws Exception the exception
      */
-    public Map<String,Object> getSpaceSummary(String spaceId, String token) throws Exception{
+    public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception{
+        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+        GetSpaceSummaryResponse respSapceSummary =
+                cloudFoundryClient.spaces()
+                        .getSummary(GetSpaceSummaryRequest.builder()
+                                .spaceId(spaceId).build()
+                ).block();
+
+        return respSapceSummary;
 
 //
 //        if(!stringNullCheck(orgName,spaceName)) {
@@ -269,11 +274,13 @@ public class SpaceService extends Common {
 //        respSpace.setMemoryUsage(memUsageTotal);
 //
 //        return respSpace;
-        GetSpaceSummaryResponse getSpaceSummaryResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
+
+
+//        GetSpaceSummaryResponse getSpaceSummaryResponse =
+//                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+//                        .spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
     }
 
     /**
@@ -530,6 +537,18 @@ public class SpaceService extends Common {
         LOGGER.info("Get Space Id: Result size={}", spaceList.size());
 
         return spaceList.get(0).getMetadata().getId();
+    }
+
+    public ListSpaceServicesResponse getSpaceServices(String spaceId, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+        ListSpaceServicesResponse respSpaceServices =
+                cloudFoundryClient.spaces()
+                .listServices(ListSpaceServicesRequest.builder()
+                        .spaceId(spaceId).build()
+                ).block();
+
+        return respSpaceServices;
     }
 
 

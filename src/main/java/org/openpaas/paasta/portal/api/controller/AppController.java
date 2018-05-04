@@ -279,24 +279,18 @@ public class AppController extends Common {
     /**
      * 앱-서비스를 바인드한다.
      *
-     * @param app     the app
+     * @param body
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/bindService"}, method = RequestMethod.POST)
-    public boolean bindService(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/service-bindings"}, method = RequestMethod.POST)
+    public boolean bindService(@RequestBody Map body, HttpServletRequest request) throws Exception {
+        LOGGER.info("bindService Start ");
 
-        LOGGER.info("bindService Start : " + app.getName() + " / " + app.getServiceName());
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        //service call
-        appService.bindService(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.bindService(body, this.getToken());
 
         LOGGER.info("bindService End ");
-
         return true;
     }
 
@@ -304,24 +298,17 @@ public class AppController extends Common {
     /**
      * 앱-서비스를 언바인드한다.
      *
-     * @param app     the app
-     * @param request the request
+     * @param serviceInstanceId
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/unbindService"}, method = RequestMethod.POST)
-    public boolean unbindService(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
+    public boolean unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
+        LOGGER.info("unbindService Start ");
 
-        LOGGER.info("unbindService Start : " + app.getName() + " / " + app.getServiceName());
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        //service call
-        appService.unbindService(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.unbindService(serviceInstanceId, applicationId, this.getToken());
 
         LOGGER.info("unbindService End ");
-
         return true;
     }
 
@@ -418,20 +405,20 @@ public class AppController extends Common {
     /**
      * 앱 라우트를 해제한다.
      *
-     * @param app     the app
-     * @param request the request
+     * @param guid
+     * @param route_guid
      * @return boolean boolean
      * @throws Exception the exception
      * @author 김도준
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @RequestMapping(value = {"/app/removeApplicationRoute"}, method = RequestMethod.POST)
-    public boolean removeApplicationRoute(@RequestBody App app, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
+    public boolean removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid) throws Exception {
 
-        LOGGER.info("removeApplicationRoute Start : " + app.getName());
+        LOGGER.info("removeApplicationRoute Start ");
 
-        appService.removeApplicationRoute(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.removeApplicationRoute(guid, route_guid , this.getToken());
 
         LOGGER.info("removeApplicationRoute End ");
         return true;

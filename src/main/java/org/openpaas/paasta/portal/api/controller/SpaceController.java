@@ -1,10 +1,11 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
-import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryResponse;
+import org.cloudfoundry.client.v2.spaces.ListSpaceServicesResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.model.Org;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Space;
 import org.openpaas.paasta.portal.api.service.OrgService;
 import org.openpaas.paasta.portal.api.service.SpaceService;
@@ -15,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,10 +52,16 @@ public class SpaceController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @GetMapping(V2_URL + "/spaces/{spaceid}/summary")
-    public Map<String, Object> getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summary"}, method = RequestMethod.GET)
+    public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
-        return spaceService.getSpaceSummary(spaceid,request.getHeader(AUTHORIZATION_HEADER_KEY));
+
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
+//        return spaceService.getSpaceSummary(spaceid,request.getHeader(AUTHORIZATION_HEADER_KEY));
+
+        LOGGER.info("Get SpaceSummary End ");
+
+        return respSapceSummary;
     }
 
     /**
@@ -235,6 +239,17 @@ public class SpaceController extends Common {
     public Map<String, Object> getSpaceQuota(@PathVariable String spacequotaid, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceQuota Start" + spacequotaid);
         return spaceService.getSpaceQuota(spacequotaid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
+
+    @RequestMapping(value = {Constants.V2_URL+"/spaces/{guid}/services"}, method = RequestMethod.GET)
+    public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("getSpaceServices Start : " + guid);
+
+        ListSpaceServicesResponse respSpaceServices = spaceService.getSpaceServices(guid, this.getToken());
+
+        LOGGER.info("getSpaceServices End ");
+
+        return respSpaceServices;
     }
 
 }

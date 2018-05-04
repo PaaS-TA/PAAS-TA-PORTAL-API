@@ -2,14 +2,16 @@ package org.openpaas.paasta.portal.api.controller;
 
 
 import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.domain.CloudServiceBroker;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
-import org.cloudfoundry.client.v2.servicebrokers.*;
+import org.cloudfoundry.client.v2.servicebrokers.CreateServiceBrokerResponse;
+import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
+import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
+import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.openpaas.paasta.portal.api.service.AppService;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -306,6 +307,17 @@ public class ServiceController extends Common {
         resultMap.put("serviceImageUrl", serviceService.getServiceImageUrl(service.getServiceName()));
 
         return resultMap;
+    }
+
+    @RequestMapping(value = {Constants.V2_URL+"/service-instances/space/{guid}"}, method = RequestMethod.GET)
+    public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid,HttpServletRequest request) throws Exception {
+        LOGGER.info("getServicesInstances Start ");
+
+        ListServiceInstancesResponse respServicesInstances = serviceService.getServicesInstances(guid, this.getToken());
+
+        LOGGER.info("getServicesInstances End ");
+
+        return respServicesInstances;
     }
 
 
