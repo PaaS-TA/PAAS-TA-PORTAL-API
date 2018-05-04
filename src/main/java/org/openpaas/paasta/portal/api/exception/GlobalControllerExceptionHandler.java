@@ -2,6 +2,8 @@ package org.openpaas.paasta.portal.api.exception;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
+import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.identity.uaa.error.UaaException;
 import org.codehaus.jettison.json.JSONException;
@@ -26,6 +28,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -42,7 +46,10 @@ import java.util.Locale;
 @ControllerAdvice
 public class GlobalControllerExceptionHandler {
 
-    private  static final Logger LOGGER = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
+    
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+    //private static final Locale DEFAULT_LOCALE = Locale.KOREA;
 
     @Autowired
     public MessageSource messageSource;
@@ -54,15 +61,15 @@ public class GlobalControllerExceptionHandler {
         LOGGER.error("IllegalArgumentException : " + ex );
         String msg = "";
         if (ex.getMessage().contains("Organization") &&  ex.getMessage().contains("not found")) {
-            msg = messageSource.getMessage("Organization_not_found", null, Locale.KOREA);
+            msg = messageSource.getMessage("Organization_not_found", null, DEFAULT_LOCALE);
         } else if (ex.getMessage().contains("Domain not found for URI")) {
-            msg = messageSource.getMessage("Domain_not_found_for_URI", null, Locale.KOREA);
+            msg = messageSource.getMessage("Domain_not_found_for_URI", null, DEFAULT_LOCALE);
         } else if (ex.getMessage().contains("No matching organization and space found for org")) {
-            msg = messageSource.getMessage("No_matching_organization_and_space_found_for_org", null, Locale.KOREA);
+            msg = messageSource.getMessage("No_matching_organization_and_space_found_for_org", null, DEFAULT_LOCALE);
         } else if(ex.getMessage().contains("Host") && ex.getMessage().contains("not found for domain")){
-            msg = messageSource.getMessage("Host_not_found_for_domain",null, Locale.KOREA);
+            msg = messageSource.getMessage("Host_not_found_for_domain",null, DEFAULT_LOCALE);
         } else{
-            msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, Locale.KOREA);
+            msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, DEFAULT_LOCALE);
         }
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
         return false;
@@ -82,9 +89,11 @@ public class GlobalControllerExceptionHandler {
         try {
             message = ex.getDescription().replace(" ", "_").split(":");
             LOGGER.error("message : " + message[0] );
-            msg = messageSource.getMessage(message[0], null, Locale.KOREA);
+            //msg = messageSource.getMessage(message[0], null, DEFAULT_LOCALE);
+            msg = getStackTraceString( ex );
         }catch(Exception e){
-            msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, Locale.KOREA);
+            //msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, DEFAULT_LOCALE);
+            msg = getStackTraceString( e );
         }
 
         response.sendError(ex.getStatusCode().value(), msg);
@@ -103,9 +112,9 @@ public class GlobalControllerExceptionHandler {
         try {
             message = ex.getMessage().replace(" ", "_").split(":");
             LOGGER.error("message : " + message[0] );
-            msg = messageSource.getMessage(message[0], null, Locale.KOREA);
+            msg = messageSource.getMessage(message[0], null, DEFAULT_LOCALE);
         }catch(Exception e){
-            msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, Locale.KOREA);
+            msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, DEFAULT_LOCALE);
         }
 
         response.sendError(ex.getHttpStatus(), msg);
@@ -142,14 +151,37 @@ public class GlobalControllerExceptionHandler {
         return errorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR , response);
     }
 
-
+    private String getStackTraceString(Throwable t) {
+        final StringWriter swriter = new StringWriter();
+        final PrintWriter pwriter = new PrintWriter( swriter );
+        t.printStackTrace( pwriter );
+        pwriter.flush();
+        
+        final String result = swriter.toString();
+        IOUtils.closeQuietly( pwriter );
+        IOUtils.closeQuietly( swriter );
+        
+        return result;
+    }
 
     //common message
     private boolean errorResponse(Throwable throwable, HttpStatus status, HttpServletResponse response) throws IOException {
         LOGGER.info(response.toString());
-        response.sendError(status.value(), messageSource.getMessage(status.toString(), null, Locale.KOREA));
-
+        //response.sendError(status.value(), messageSource.getMessage(status.toString(), null, DEFAULT_LOCALE));
+        final StringBuffer buffer = new StringBuffer();
+        buffer.append( "Response : " )
+            .append( response.toString() ).append( '\n' )
+            .append( "Occured an exception : " ).append( throwable.getMessage() ).append( '\n' )
+            .append( "Caused by... ").append( '\n' )
+            .append( getStackTraceString( throwable ) );
+            
+        
+        response.sendError(status.value(), buffer.toString());
+        LOGGER.error("Http status : {}", status.value());
+        LOGGER.error("Error message : {}", buffer.toString());
+        
         return false;
     }
 
 }
+

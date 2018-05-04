@@ -129,7 +129,7 @@ public class UserService extends Common {
      */
     public UserDetail getUser(String userId) {
 //        return userDetailMapper.selectOne(userId);
-        return null;
+        return new UserDetail();
     }
 
     /**

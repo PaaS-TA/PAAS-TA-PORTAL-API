@@ -37,6 +37,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import io.netty.handler.codec.base64.Base64Decoder;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -370,7 +372,8 @@ public class CustomCloudControllerClientImpl implements CustomCloudControllerCli
 			int y = tokenString.indexOf('.', x + 1);
 			String encodedString = tokenString.substring(x + 1, y);
 			try {
-				byte[] decodedBytes = new sun.misc.BASE64Decoder().decodeBuffer(encodedString);
+				//byte[] decodedBytes = new sun.misc.BASE64Decoder().decodeBuffer(encodedString);
+			    byte[] decodedBytes = Base64.getDecoder().decode( encodedString );
 				userJson = new String(decodedBytes, 0, decodedBytes.length, "UTF-8");
 			} catch (IOException e) {
 				LOGGER.error(e);

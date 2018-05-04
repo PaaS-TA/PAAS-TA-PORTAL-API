@@ -15,6 +15,7 @@ import java.util.UUID;
 public class Org extends Entity {
     private String orgName;
     private String newOrgName;
+    private boolean recursive = true;
 
     private UUID guid;
     private String name;
@@ -28,6 +29,7 @@ public class Org extends Entity {
     private boolean billingEnabled = false;
 
     private Quota quota;
+    private String quotaGuid;
 
     public Org() {
         //empty
@@ -48,6 +50,23 @@ public class Org extends Entity {
     public void setQuota(Quota quota) {
         this.quota = quota;
     }
+    
+    public String getQuotaGuid() {
+        if (this.quotaGuid != null) {
+            return quotaGuid;
+        } else if (this.quota != null && this.quota.getGuid() != null) {
+            return this.quota.getGuid().toString();
+        } else {
+            return null;
+        }
+    }
+    
+    public void setQuotaGuid( String quotaGuid ) {
+        if (this.quota != null && this.quota.getGuid() != null)
+            this.quotaGuid = this.quota.getGuid().toString();
+        else
+            this.quotaGuid = quotaGuid;
+    }
 
     public String getOrgName() {
         return orgName;
@@ -65,6 +84,13 @@ public class Org extends Entity {
         this.newOrgName = newOrgName;
     }
 
+    public boolean isRecursive() {
+        return recursive;
+    }
+    
+    public void setRecursive( boolean recursive ) {
+        this.recursive = recursive;
+    }
 
     public int getMemoryUsage() {
         return memoryUsage;

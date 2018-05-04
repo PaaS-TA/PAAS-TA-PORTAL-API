@@ -74,6 +74,8 @@ dependencies {
     compile ('io.projectreactor:reactor-core:3.1.2.RELEASE')
     compile ('io.projectreactor.ipc:reactor-netty:0.7.2.RELEASE')
     compile group: 'org.cloudfoundry', name: 'cloudfoundry-client', version: '3.3.0.RELEASE' //추가
+
+
     //cloud foundry uaa
     compile files('libs/uaa-java-client-1.0.2-SNAPSHOT.jar')
     compile ('org.cloudfoundry.identity:cloudfoundry-identity-scim:2.7.4'){
@@ -102,3 +104,25 @@ test {
     }
 }
 
+/* 
+// windows only
+task pathingJar(type: Jar) {
+    dependsOn configurations.runtime
+    appendix = 'pathing'
+
+    doFirst {
+       manifest {
+           attributes "Class-Path": configurations.runtime.files.collect {it.toURL().toString().replaceFirst("file:/", '/')}.join(" ")
+       }
+   }
+}
+
+bootRun {
+   dependsOn pathingJar
+   jvmArgs = [ '-server', '-Xmx256m', '-Dspring.profiles.active=local', '-Deureka.client.enabled=false', '-Dspring.cloud.config.enabled=false', '-Dspring.config.location=C:/paasta-workspace/official/PAAS-TA-PORTAL-CONFIG-DATA/PortalApi.yml', '-Dio.netty.leakDetectionLevel=PARANOID' ]
+   doFirst {
+       // classpath = files("$buildDir/classes/main", "$buildDir/resources/main", pathingJar.archivePath)
+       classpath = files(sourceSets.main.output.files, pathingJar.archivePath)
+   }
+} 
+*/
