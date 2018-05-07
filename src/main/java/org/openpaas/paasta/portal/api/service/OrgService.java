@@ -12,15 +12,10 @@ import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
-
-
 import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
-import org.cloudfoundry.operations.domains.CreateDomainRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.jsoup.Jsoup;
@@ -28,6 +23,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
+import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -36,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -48,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -953,7 +951,25 @@ public class OrgService extends Common {
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
-    
+
+    @Autowired
+    LoginService loginService;
+
+    public TokenGrantTokenProvider tokenProviderWithRefresh(String token) {
+        try {
+            OAuth2AccessToken refreshToken = loginService.refresh(token);
+            if (refreshToken != null)
+                token = refreshToken.getValue();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+
+        if (token.indexOf("bearer") < 0) {
+            token = "bearer " + token;
+        }
+        return new TokenGrantTokenProvider(token);
+    }
+
     /**
      * 이름을 받아 조직을 생성한다. (Org Create)
      * @param token
@@ -963,7 +979,7 @@ public class OrgService extends Common {
      * @since 2018.5.2
      */
     public CreateOrganizationResponse createOrg(final String token, final String orgName) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+        return Common.cloudFoundryClient( connectionContext(), tokenProviderWithRefresh( token ) )
         .organizations()
         .create( CreateOrganizationRequest.builder().name( orgName ).build() )
         .block();
@@ -980,7 +996,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public GetOrganizationResponse getOrg(final String orgId, final String token) {
-    	return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+    	return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
     		.organizations()
     		.get(GetOrganizationRequest.builder().organizationId(orgId).build())
     		.block();
@@ -998,7 +1014,7 @@ public class OrgService extends Common {
      */
     // Org Read
     public SummaryOrganizationResponse getOrgSummary(final String orgId, final String token) {
-		return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+		return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
 		    .organizations()
 		    .summary(SummaryOrganizationRequest.builder().organizationId(orgId).build())
             .block();
@@ -1015,7 +1031,7 @@ public class OrgService extends Common {
      */
     @Deprecated
     public List<OrganizationResource> getOrgs(String token) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
             .organizations()
             .list(ListOrganizationsRequest.builder().build())
             .block()
@@ -1032,7 +1048,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
 	public ListOrganizationsResponse getOrgsForUser(final String token) {
-	    return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+	    return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
 		    .organizations()
 		    .list(ListOrganizationsRequest.builder().build())
 		    .block();
@@ -1069,7 +1085,7 @@ public class OrgService extends Common {
     }
 	
 	public OrganizationDetail getOrgUsingName(final String name, final String token) {
-	    return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
+	    return Common.cloudFoundryOperations( connectionContext(), tokenProviderWithRefresh( token ) )
 	    .organizations()
 	    .get( OrganizationInfoRequest.builder().name( name ).build() )
 	    .block();
@@ -1077,8 +1093,7 @@ public class OrgService extends Common {
 	
     /**
      * 사용자 포털에서 조직의 이름을 수정한다. (Org Update : name)
-     * @param orgid
-     * @param newOrgName
+     * @param org
      * @param token
      * @return UpdateOrganizationResponse
      * @author hgcho, ParkCholhan
@@ -1088,7 +1103,7 @@ public class OrgService extends Common {
     public UpdateOrganizationResponse renameOrg(Org org, String token) {
         Objects.requireNonNull(org.getGuid(), "Org GUID(guid) must not be null.");
         Objects.requireNonNull(org.getNewOrgName(), "New org name(newOrgName) must not be null.");
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
                 .organizations()
                 .update(UpdateOrganizationRequest.builder().organizationId(org.getGuid().toString()).name(org.getNewOrgName()).build())
                 .block();
@@ -1097,7 +1112,7 @@ public class OrgService extends Common {
     /**
      * 사용자 포털에서 조직을 삭제한다. (Org Delete)<br>
      * 만약 false가 넘어올 경우, 권한이 없거나 혹은 
-     * @param orgid
+     * @param org
      * @param token
      * @return
      * @throws Exception
@@ -1139,7 +1154,7 @@ public class OrgService extends Common {
         // 현재 token의 유저 정보를 가져온다.
         // TODO 특정 유저의 정보를 가져오는 메소드가 구현되어 있으면, 해당 메소드로 교체할 것. (hgcho)
         final UserInfoResponse userInfoResponse=
-            Common.uaaClient(connectionContext(), tokenProvider(token))
+            Common.uaaClient(connectionContext(), tokenProviderWithRefresh(token))
             .users().userInfo(UserInfoRequest.builder().build()).block();
         
         // Admin 계정인지 확인
@@ -1149,7 +1164,7 @@ public class OrgService extends Common {
             // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
             LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName() );
             return Common
-                .cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                .cloudFoundryClient( connectionContext(), tokenProviderWithRefresh( token ) )
                 .organizations().delete( DeleteOrganizationRequest.builder()
                     .organizationId( orgId ).recursive( true ).async( true ).build() )
                 .block();
@@ -1158,7 +1173,7 @@ public class OrgService extends Common {
         ///// Real user
         // 지우려는 조직의 OrgManager Role이 주어진 유저를 찾는다.
         // TODO 특정 Role에 해당하는 유저를 찾는 메소드가 구현되면, 해당 메소드로 교체할 것. (hgcho)
-        final ListOrganizationManagersResponse managerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        final ListOrganizationManagersResponse managerResponse = Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
         .organizations()
         .listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() )
         .block();
@@ -1231,7 +1246,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public ListSpacesResponse getOrgSpaces(String orgId, String token) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
             .spaces()
             .list(ListSpacesRequest.builder().organizationId(orgId).build())
             .block();
@@ -1268,7 +1283,7 @@ public class OrgService extends Common {
      * 조직에 할당한 Quota를 변경한다. <br>
      * (기존의 Quota GUID와 동일한 경우에도 변경하는 동작을 수행한다) (Org Update : set quota)
      * @param orgId
-     * @param quotaId
+     * @param org
      * @param token
      * @return UpdateOrganizationResponse
      * @version 2.0
@@ -1285,7 +1300,7 @@ public class OrgService extends Common {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST,
                 "Org GUID in the path doesn't match org GUID in request body." );
         
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProviderWithRefresh(token))
             .organizations()
             .update( 
                 UpdateOrganizationRequest.builder()
