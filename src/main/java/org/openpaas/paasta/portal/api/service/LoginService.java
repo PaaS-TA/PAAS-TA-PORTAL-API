@@ -67,11 +67,6 @@ public class LoginService extends Common {
         CloudCredentials cc = new CloudCredentials(token, true);
         OAuth2AccessToken newToken = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
 
-        Common.uaaClient(null, null).tokens()
-            .refresh(
-                RefreshTokenRequest.builder().build()
-            ).block();
-
         return newToken;
     }
 
