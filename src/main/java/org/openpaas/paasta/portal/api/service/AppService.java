@@ -21,8 +21,8 @@ import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
-import org.cloudfoundry.operations.applications.*;
-import org.cloudfoundry.operations.applications.RestageApplicationRequest;
+import org.cloudfoundry.operations.applications.LogsRequest;
+import org.cloudfoundry.operations.applications.RenameApplicationRequest;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
@@ -129,8 +129,16 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public void startApp(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build());
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+
+        cloudFoundryClient.applicationsV3()
+                .start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .build()
+                ).block();
+
+//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+//        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build());
     }
 
 
@@ -142,8 +150,16 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public void stopApp(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.applications().stop(StopApplicationRequest.builder().name(app.getName()).build());
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+
+        cloudFoundryClient.applicationsV3()
+                .stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .build()
+                ).block();
+
+//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+//        cloudFoundryOperations.applications().stop(StopApplicationRequest.builder().name(app.getName()).build());
     }
 
 
@@ -180,8 +196,16 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public void restageApp(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.applications().restage(RestageApplicationRequest.builder().name(app.getName()).build());
+        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+
+        cloudFoundryClient.applicationsV2()
+                .restage(RestageApplicationRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .build()
+                ).block();
+
+//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+//        cloudFoundryOperations.applications().restage(RestageApplicationRequest.builder().name(app.getName()).build());
     }
 
     /**

@@ -176,20 +176,13 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/startApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V3_URL+"/apps/startApp"}, method = RequestMethod.POST)
     public boolean startApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+        LOGGER.info("startApp Start ");
 
-
-        LOGGER.info("startApp Start : " + app.getName());
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        //service call
-        appService.startApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.startApp(app, this.getToken());
 
         LOGGER.info("startApp End ");
-
         return true;
     }
 
@@ -202,20 +195,13 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/stopApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V3_URL+"/apps/stopApp"}, method = RequestMethod.POST)
     public boolean stopApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+        LOGGER.info("stopApp Start ");
 
-
-        LOGGER.info("stopApp Start : " + app.getName());
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        //service call
-        appService.stopApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.stopApp(app, this.getToken());
 
         LOGGER.info("stopApp End ");
-
         return true;
     }
 
@@ -228,20 +214,13 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/restageApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL+"/apps/restageApp"}, method = RequestMethod.POST)
     public boolean restageApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+        LOGGER.info("restageApp Start ");
 
-
-        LOGGER.info("restageApp Start : " + app.getGuid());
-
-        //token setting
-        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        //service call
-        appService.restageApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        appService.restageApp(app, this.getToken());
 
         LOGGER.info("restageApp End ");
-
         return true;
     }
 
