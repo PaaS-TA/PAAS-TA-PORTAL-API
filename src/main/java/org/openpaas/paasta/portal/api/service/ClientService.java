@@ -8,10 +8,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,43 +30,36 @@ import java.util.Map;
 public class ClientService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);
-    /**
-     * 클라이언트 목록 조회
-     *
-     * @param customCloudFoundryClient CustomCloudFoundryClient
-     * @param param                    Map
-     * @return Map client list
-     * @throws Exception the exception
-     */
-    public Map getClientList(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
 
-        ResponseEntity<String> responseEntity = customCloudFoundryClient.getClientList(uaaClientId, uaaClientSecret, uaaTarget);
-
-        String str = responseEntity.getBody();
-        JSONArray rtnArray = new JSONArray();
-
-        try {
-
-            JSONParser jsonParser = new JSONParser();
-
-            //JSON데이터를 넣어 JSON Object 로 만들어 준다.
-            JSONObject stringToJson = (JSONObject) jsonParser.parse(str);
-
-            //배열을 추출
-            rtnArray = (JSONArray) stringToJson.get("resources");
-
-        } catch (Exception e) {
-            return null;
-        }
-
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("list", rtnArray);
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-
-        return resultMap;
-
-    }
+//    public Map getClientList(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
+//
+//        ResponseEntity<String> responseEntity = customCloudFoundryClient.getClientList(uaaClientId, uaaClientSecret, uaaTarget);
+//
+//        String str = responseEntity.getBody();
+//        JSONArray rtnArray = new JSONArray();
+//
+//        try {
+//
+//            JSONParser jsonParser = new JSONParser();
+//
+//            //JSON데이터를 넣어 JSON Object 로 만들어 준다.
+//            JSONObject stringToJson = (JSONObject) jsonParser.parse(str);
+//
+//            //배열을 추출
+//            rtnArray = (JSONArray) stringToJson.get("resources");
+//
+//        } catch (Exception e) {
+//            return null;
+//        }
+//
+//        Map<String, Object> resultMap = new HashMap<>();
+//
+//        resultMap.put("list", rtnArray);
+//        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+//
+//        return resultMap;
+//
+//    }
 
     //V2
     public Map getClientList(Map<String, Object> param) throws Exception {
@@ -154,33 +145,33 @@ LOGGER.info("WHAT:::::::::");
      * @return Map client
      * @throws Exception the exception
      */
-    public Map getClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
-
-        ResponseEntity<String> responseEntity = customCloudFoundryClient.getClient(uaaClientId, uaaClientSecret, uaaTarget, param);
-        String str = responseEntity.getBody();
-
-        JSONObject stringToJson = new JSONObject();
-
-        try {
-
-            JSONParser jsonParser = new JSONParser();
-
-            //JSON데이터를 넣어 JSON Object 로 만들어 준다.
-            stringToJson = (JSONObject) jsonParser.parse(str);
-
-        } catch (Exception e) {
-            return null;
-        }
-
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("info", stringToJson);
-        resultMap.put("infoString", str);
-
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-
-        return resultMap;
-    }
+//    public Map getClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
+//
+//        ResponseEntity<String> responseEntity = customCloudFoundryClient.getClient(uaaClientId, uaaClientSecret, uaaTarget, param);
+//        String str = responseEntity.getBody();
+//
+//        JSONObject stringToJson = new JSONObject();
+//
+//        try {
+//
+//            JSONParser jsonParser = new JSONParser();
+//
+//            //JSON데이터를 넣어 JSON Object 로 만들어 준다.
+//            stringToJson = (JSONObject) jsonParser.parse(str);
+//
+//        } catch (Exception e) {
+//            return null;
+//        }
+//
+//        Map<String, Object> resultMap = new HashMap<>();
+//
+//        resultMap.put("info", stringToJson);
+//        resultMap.put("infoString", str);
+//
+//        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+//
+//        return resultMap;
+//    }
 
     /**
      * 클라이언트 등록
@@ -190,16 +181,16 @@ LOGGER.info("WHAT:::::::::");
      * @return Map map
      * @throws Exception the exception
      */
-    public Map registerClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
-
-        ResponseEntity<String> responseEntity = customCloudFoundryClient.registerClient(uaaAdminClientId, uaaAdminClientSecret, uaaTarget, param);
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        resultMap.put("CODE", responseEntity.getStatusCode());
-
-        return resultMap;
-    }
+//    public Map registerClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
+//
+//        ResponseEntity<String> responseEntity = customCloudFoundryClient.registerClient(uaaAdminClientId, uaaAdminClientSecret, uaaTarget, param);
+//
+//        Map<String, Object> resultMap = new HashMap<>();
+//        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+//        resultMap.put("CODE", responseEntity.getStatusCode());
+//
+//        return resultMap;
+//    }
 
     /**
      * 클라이언트 수정
@@ -209,18 +200,18 @@ LOGGER.info("WHAT:::::::::");
      * @return Map map
      * @throws Exception the exception
      */
-    public Map updateClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
-
-        ResponseEntity<String> responseEntity = customCloudFoundryClient.updateClient(uaaAdminClientId, uaaAdminClientSecret, uaaTarget, param);
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        resultMap.put("CODE", responseEntity.getStatusCode());
-
-        return resultMap;
-
-
-    }
+//    public Map updateClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
+//
+//        ResponseEntity<String> responseEntity = customCloudFoundryClient.updateClient(uaaAdminClientId, uaaAdminClientSecret, uaaTarget, param);
+//
+//        Map<String, Object> resultMap = new HashMap<>();
+//        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+//        resultMap.put("CODE", responseEntity.getStatusCode());
+//
+//        return resultMap;
+//
+//
+//    }
 
     /**
      * 클라이언트 삭제
@@ -230,15 +221,15 @@ LOGGER.info("WHAT:::::::::");
      * @return Map map
      * @throws Exception the exception
      */
-    public Map deleteClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
-
-        ResponseEntity<String> responseEntity = customCloudFoundryClient.deleteClient(uaaAdminClientId, uaaAdminClientSecret, uaaTarget, param);
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        resultMap.put("CODE", responseEntity.getStatusCode());
-
-        return resultMap;
-    }
+//    public Map deleteClient(CustomCloudFoundryClient customCloudFoundryClient, Map<String, Object> param) throws Exception {
+//
+//        ResponseEntity<String> responseEntity = customCloudFoundryClient.deleteClient(uaaAdminClientId, uaaAdminClientSecret, uaaTarget, param);
+//
+//        Map<String, Object> resultMap = new HashMap<>();
+//        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+//        resultMap.put("CODE", responseEntity.getStatusCode());
+//
+//        return resultMap;
+//    }
 
 }

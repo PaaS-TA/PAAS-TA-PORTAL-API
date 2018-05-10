@@ -1,12 +1,8 @@
 package org.openpaas.paasta.portal.api.service;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
-import org.cloudfoundry.client.lib.util.JsonUtil;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
@@ -16,38 +12,20 @@ import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
-import org.cloudfoundry.reactor.TokenProvider;
-import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
-import org.openpaas.paasta.portal.api.model.Space;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Operators;
 
-import javax.activation.DataHandler;
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.util.ByteArrayDataSource;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.Future;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -69,213 +47,7 @@ public class OrgService extends Common {
     private SpaceService spaceService;
     @Autowired
     private AsyncUtilService asyncUtilService;
-    
-    
-//    @Autowired
-//    private OrgMapper orgMapper;
-//    @Autowired
-//    private UserMapper userMapper;
-//    @Autowired
-//    private InviteOrgSpaceMapper inviteOrgSpaceMapper;
 
-
-
-    /**
-     * 조직명을 변경한다.
-     *
-     * @param org   the org
-     * @param token the token
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    public boolean renameOrgV1(@RequestBody Org org, String token) throws Exception {
-
-        //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-
-        client.renameOrg(org.getOrgName(),org.getNewOrgName());
-        return true;
-
-    }
-
-    /**
-     * 조직을 삭제한다.
-     *
-     * @param org   the org
-     * @param token the token
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    public boolean deleteOrgV1(@RequestBody Org org, String token) throws Exception {
-
-        CloudFoundryClient client = getCloudFoundryClient(token);
-        CloudInfo cloudInfo = client.getCloudInfo();
-
-        List<Map> list = userService.getListForTheUser("managed_organizations", token);
-
-        Boolean auth = false;
-
-        for (Map orgMap : list) {
-            if (org.getOrgName().equals(orgMap.get("orgName"))) {
-                auth = true;
-            }
-        }
-        //OrgManager 권한이 있는지 체크
-        if (auth || (adminUserName).equals(cloudInfo.getUser())) {
-            CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-            admin.deleteOrg(org.getOrgName());
-
-        } else {
-            throw new CloudFoundryException(HttpStatus.FORBIDDEN,"Forbidden","You are not authorized to perform the requested action.");
-        }
-
-        return true;
-
-    }
-
-    /**
-     * 조직을 생성한다.
-     *
-     * @param org   the org
-     * @param token the token
-     * @return boolean boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.5.16 최초작성
-     */
-    public boolean createOrg(@RequestBody Org org, String token) throws Exception {
-
-        String newOrgName = org.getNewOrgName();
-
-        if (!stringNullCheck(newOrgName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-
-        client.createOrg(newOrgName);
-
-        if (client.getCloudInfo().getUser().equals(adminUserName)) {
-            /**  Cloud Foundry ORG Roles
-             *   managers : ORG MANAGER
-             *   billing_managers : BILLING MANAGER
-             *   auditors : ORG AUDITOR
-             */
-            client.setOrgRole(newOrgName, client.getCloudInfo().getUser(), "users");
-            client.setOrgRole(newOrgName, client.getCloudInfo().getUser(), "managers");
-        }
-
-        return true;
-    }
-
-    /**
-     * 조직을 탈퇴한다.
-     *
-     * @param org   the org
-     * @param token the token
-     * @return boolean boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.6.1 최초작성
-     */
-    public boolean removeUserFromOrg(@RequestBody Org org, String token) throws Exception {
-
-        String orgName = org.getOrgName();
-
-        if (!stringNullCheck(orgName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-
-        List<CloudSpace> spaceList = client.getSpaces();
-
-        String userGuid = client.getUserGuid();
-
-        //해당 유저가 해당 조직의 모든 공간들에 대해 가진 role을 모두 제거
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-
-        if (spaceList != null) {
-
-            for (CloudSpace space : spaceList) {
-                if (space.getOrganization().getName().equals(orgName)) {
-                    //unset space role
-                    String spaceName = space.getName();
-                    admin.unsetSpaceRole(orgName, spaceName, userGuid, "auditors");
-                    admin.unsetSpaceRole(orgName, spaceName, userGuid, "developers");
-                    admin.unsetSpaceRole(orgName, spaceName, userGuid, "managers");
-                    admin.removeSpaceFromUser(userGuid, orgName, spaceName);
-                }
-            }
-        }
-
-        //해당 유저가 해당 조직에 대해 가지고 있는 role을 제거
-        admin.unsetOrgRole(orgName, userGuid, "auditors");
-        admin.unsetOrgRole(orgName, userGuid, "managers");
-        admin.removeOrgFromUser(userGuid, orgName);
-
-        return true;
-    }
-
-
-    /**
-     * 조직 role을 부여한다.
-     * users role을 부여하지 않고 다른 role을 부여할 경우에도 그대로 role이 부여되므로 문제가
-     *
-     * @param orgName  the org name
-     * @param userName the user name
-     * @param userRole the user role
-     * @param token    the token
-     * @return Map org role
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.8.10 최초작성
-     */
-    public boolean setOrgRole(String orgName, String userName, String userRole, String token) throws Exception{
-        if (!stringNullCheck(orgName,userName, userRole)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        String orgRole = toStringRole(userRole);
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-
-        client.setOrgRole(orgName, userName, orgRole);
-
-        return true;
-    }
-
-
-    /**
-     * 조직 role을 제거한다.
-     *
-     * @param orgName  the org name
-     * @param userGuid the user guid
-     * @param userRole the user role
-     * @param token    the token
-     * @return Map boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.8.10 최초작성
-     */
-    public boolean unsetOrgRole(String orgName, String userGuid, String userRole, String token) throws Exception{
-        if (!stringNullCheck(orgName,userGuid, userRole)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        String orgRole = toStringRole(userRole);
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        client.unsetOrgRole(orgName, userGuid, orgRole);
-
-        return true;
-    }
 
     /*
      * role 문자를 변경한다.
@@ -286,95 +58,29 @@ public class OrgService extends Common {
     private String toStringRole(String userRole) {
         String roleStr;
 
-        switch (userRole){
-            case "users": roleStr = "users"; break;
-            case "OrgManager": roleStr = "managers"; break;
-            case "BillingManager": roleStr = "billing_managers"; break;
-            case "OrgAuditor": roleStr = "auditors"; break;
-            default: throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Invalid userRole.");
+        switch (userRole) {
+            case "users":
+                roleStr = "users";
+                break;
+            case "OrgManager":
+                roleStr = "managers";
+                break;
+            case "BillingManager":
+                roleStr = "billing_managers";
+                break;
+            case "OrgAuditor":
+                roleStr = "auditors";
+                break;
+            default:
+                throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Invalid userRole.");
         }
 
         return roleStr;
     }
 
     /**
-     * 해당 조직의 유저목록과 각 유저의 역할을 가져온다.
-     *
-     * @param orgName the org name
-     * @param token   the token
-     * @return all users
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.8.31 최초작성
-     */
-    public List<Map<String, Object>> getAllUsers(String orgName, String token) throws Exception {
-
-        if (!stringNullCheck(orgName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-        List<Map<String, Object>> orgUserList = new ArrayList();
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        UUID orgGuid = null;
-        orgGuid = client.getOrgByName(orgName, true).getMeta().getGuid();
-        LOGGER.debug("orgGuid : " +orgGuid);
-        if(orgGuid!=null) {
-            Future<List<Map<String, Object>>> users = asyncUtilService.getUsers(orgGuid, client);
-            Future<Map<String, CloudUser>> managers = asyncUtilService.getUsersForOrgRole_managers(orgGuid, client);
-            Future<Map<String, CloudUser>> billingManagers = asyncUtilService.getUsersForOrgRole_billingManagers(orgGuid, client);
-            Future<Map<String, CloudUser>> auditors = asyncUtilService.getUsersForOrgRole_auditors(orgGuid, client);
-
-            while (!(users.isDone() && managers.isDone() && billingManagers.isDone() && auditors.isDone())) {
-                Thread.sleep(10); //10-millisecond pause between each check
-            }
-            orgUserList = putUserList(orgName, users.get(), managers.get() ,billingManagers.get() ,auditors.get());
-        }
-
-        LOGGER.debug("orgUserList : " +orgUserList.size());
-
-
-        return orgUserList;
-    }
-
-    /**
-     * 요청된 유저가 해당 조직에서 가지고 있는 역할을 가져온다.
-     *
-     * @param orgName  the org name
-     * @param userList the user list
-     * @param token    the token
-     * @return users for org role
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.9.05 최초작성
-     */
-    public List<Map<String, Object>> getUsersForOrgRole(String orgName, List<Map<String,Object>> userList, String token) throws Exception {
-
-        if (!stringNullCheck(orgName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        UUID orgGuid = client.getOrgByName(orgName, true).getMeta().getGuid();
-
-        Future<Map<String, CloudUser>> managers = asyncUtilService.getUsersForOrgRole_managers(orgGuid,client);
-        Future<Map<String, CloudUser>> billingManagers = asyncUtilService.getUsersForOrgRole_billingManagers(orgGuid, client);
-        Future<Map<String, CloudUser>> auditors = asyncUtilService.getUsersForOrgRole_auditors(orgGuid,client);
-
-        while (!(managers.isDone() && billingManagers.isDone() && auditors.isDone())) {
-            Thread.sleep(10);
-        }
-
-        List<Map<String, Object>> orgUserList = putUserList(orgName, userList, managers.get() ,billingManagers.get() ,auditors.get());
-        for (int i=0 ; i<orgUserList.size();i++){
-            Map orgMap = orgUserList.get(i);
-            LOGGER.debug("orgMap" + i+" : " + JsonUtil.convertToJson(orgMap));
-        }
-        return orgUserList;
-    }
-
-    /**
      * 권한별로 수집된 유저정보를 취합하여 하나의 객체로 만들어 리턴한다.
+     *
      * @param userList
      * @param managers
      * @param billingManagers
@@ -385,23 +91,18 @@ public class OrgService extends Common {
      * @version 1.0
      * @since 2016.9.05 최초작성
      */
-    private List<Map<String, Object>> putUserList( String orgName,
-                                                   List<Map<String, Object>> userList,
-                                                   Map<String, CloudUser> managers,
-                                                   Map<String, CloudUser> billingManagers,
-                                                   Map<String, CloudUser> auditors) throws Exception
-    {
+    private List<Map<String, Object>> putUserList(String orgName, List<Map<String, Object>> userList, Map<String, CloudUser> managers, Map<String, CloudUser> billingManagers, Map<String, CloudUser> auditors) throws Exception {
         List<Map<String, Object>> orgUserList = new ArrayList<>();
 
-        for(Map<String, Object> userMap : userList) {
+        for (Map<String, Object> userMap : userList) {
             List<String> userRoles = new ArrayList<>();
-            if(managers.get(userMap.get("userName")) != null){
+            if (managers.get(userMap.get("userName")) != null) {
                 userRoles.add("OrgManager");
             }
-            if(billingManagers.get(userMap.get("userName")) != null){
+            if (billingManagers.get(userMap.get("userName")) != null) {
                 userRoles.add("BillingManager");
             }
-            if(auditors.get(userMap.get("userName")) != null){
+            if (auditors.get(userMap.get("userName")) != null) {
                 userRoles.add("OrgAuditor");
             }
 
@@ -435,7 +136,7 @@ public class OrgService extends Common {
      * @return the int
      * @throws Exception the exception
      */
-    public int insertOrgSpaceUser(HashMap map) throws Exception{
+    public int insertOrgSpaceUser(HashMap map) throws Exception {
         // TODO
         // int cnt = inviteOrgSpaceMapper.insertInviteOrgSpace(map);
         int cnt = 0;
@@ -449,7 +150,7 @@ public class OrgService extends Common {
      * @return the int
      * @throws Exception the exception
      */
-    public int updateOrgSpaceUser(HashMap map) throws Exception{
+    public int updateOrgSpaceUser(HashMap map) throws Exception {
         // TODO
         // int cnt = inviteOrgSpaceMapper.updateOrgSpaceUser(map);
         int cnt = 0;
@@ -463,218 +164,13 @@ public class OrgService extends Common {
      * @return the list
      * @throws Exception the exception
      */
-    public List<InviteOrgSpace> selectOrgSpaceUser (InviteOrgSpace inviteOrgSpace) throws Exception{
+    public List<InviteOrgSpace> selectOrgSpaceUser(InviteOrgSpace inviteOrgSpace) throws Exception {
         // TODO
 //        List<InviteOrgSpace> list = inviteOrgSpaceMapper.selectOrgSpaceUser(inviteOrgSpace);
 //        return list;
         return null;
     }
 
-    /**
-     * 조직과 공간의 사용자를 저장한다.
-     *
-     * @param map the map
-     * @throws Exception the exception
-     */
-    public void setOrgSpaceUser(Map map) throws Exception{
-
-        List listOrg = (List)map.getOrDefault("listOrg", new ArrayList());
-        List listSpace = (List)map.getOrDefault("listSpace", new ArrayList());
-        String userId = (String)map.getOrDefault("userId","");
-        LOGGER.debug("map : "+map);
-        CloudFoundryClient admin = getCloudFoundryClient(adminUserName, adminPassword);
-
-        for (int i=0; i<listOrg.size(); i++){
-
-            List listOrgInfo = (List)listOrg.get(i);
-            String orgName = listOrgInfo.get(0).toString();
-//            CloudEntityResourceMapper resourceMapper = new CloudEntityResourceMapper();
-            if ((Boolean)listOrgInfo.get(1)){
-                setOrgRole(orgName, userId, "OrgManager", admin.login().getValue());
-            }
-            if ((Boolean)listOrgInfo.get(2)){
-                setOrgRole(orgName, userId, "BillingManager", admin.login().getValue());
-            }
-            if ((Boolean)listOrgInfo.get(3)){
-                setOrgRole(orgName, userId, "OrgAuditor", admin.login().getValue());
-            }
-            for (int j=0; j<listSpace.size(); j++){
-                    List list = (List) listSpace.get(j);
-                    String spaceName = list.get(0).toString();
-                    if ((Boolean)list.get(1)){
-                        spaceService.setSpaceRole(orgName, spaceName,userId,"SpaceManager",admin.login().getValue());
-                    }
-                    if ((Boolean)list.get(2)){
-                    spaceService.setSpaceRole(orgName, spaceName,userId,"SpaceDeveloper",admin.login().getValue());
-                    }
-                    if ((Boolean)list.get(3)){
-                    spaceService.setSpaceRole(orgName, spaceName,userId,"SpaceAuditor",admin.login().getValue());
-                    }
-            }
-        }
-    }
-
-    /**
-     * 조직과 공간의 사용자를 삭제한다.
-     *
-     * @param map the map
-     * @throws Exception the exception
-     */
-    public void unsetOrgSpaceUser(Map map) throws Exception{
-
-        List listOrg = (List)map.getOrDefault("listOrg", new ArrayList());
-        List listSpace = (List)map.getOrDefault("listSpace", new ArrayList());
-        String userId = (String)map.getOrDefault("userId","");
-        LOGGER.debug("map : "+map);
-        CloudFoundryClient admin = getCloudFoundryClient(adminUserName, adminPassword);
-
-        for (int i=0; i<listOrg.size(); i++){
-
-            List listOrgInfo = (List)listOrg.get(i);
-            String orgName = listOrgInfo.get(0).toString();
-            if ((Boolean)listOrgInfo.get(1)){
-                unsetOrgRole(orgName, userId, "OrgManager", admin.login().getValue());
-            }
-            if ((Boolean)listOrgInfo.get(2)){
-                unsetOrgRole(orgName, userId, "BillingManager", admin.login().getValue());
-            }
-            if ((Boolean)listOrgInfo.get(3)){
-                unsetOrgRole(orgName, userId, "OrgAuditor", admin.login().getValue());
-            }
-            for (int j=0; j<listSpace.size(); j++){
-                List list = (List) listSpace.get(j);
-                String spaceName = list.get(0).toString();
-                if ((Boolean)list.get(1)){
-                    spaceService.unsetSpaceRole(orgName, spaceName,userId,"SpaceManager",admin.login().getValue());
-                }
-                if ((Boolean)list.get(2)){
-                    spaceService.unsetSpaceRole(orgName, spaceName,userId,"SpaceDeveloper",admin.login().getValue());
-                }
-                if ((Boolean)list.get(3)){
-                    spaceService.unsetSpaceRole(orgName, spaceName,userId,"SpaceAuditor",admin.login().getValue());
-                }
-            }
-        }
-    }
-
-    /**
-     * 사용자 초대 이메일을 발송한다.
-     *
-     * @param map {userId : 초대하는 사용자 아이디,,inviteId 사용자 아이디, }
-     * @return
-     * @throws Exception the exception
-     */
-    @Async
-    public void inviteMemberEmail(Map map) throws Exception{
-
-        List dataList = (List) map.getOrDefault("dataList",new ArrayList());
-        String token = (String) map.getOrDefault("token","token");
-        String sOrg ="";
-        String sSpace ="";
-        String tmpSpace ="";
-        for (int i=0; i<dataList.size(); i++){
-            List inviteList = (List) dataList.get(i);
-            if("space".equals(inviteList.get(0))){
-                if("".equals(tmpSpace)){
-                    sSpace = (String) inviteList.get(1);
-                    tmpSpace = (String) inviteList.get(1);
-                }else{
-                    if(!tmpSpace.equals(dataList.get(1))){
-                        tmpSpace = (String) inviteList.get(1);
-                        sSpace = sSpace + ", "+ inviteList.get(1);
-                    }
-                }
-            }
-            if("org".equals(inviteList.get(0))){
-                if("".equals(sOrg)){
-                    sOrg = (String) inviteList.get(1);
-                }
-            }
-        }
-        map.put("code", token);
-        map.put("org", sOrg);
-        map.put("space", sSpace);
-        map.put("sFile", "accept.html");
-        map.put("contextUrl", "/invitations/accept");
-        sendInviteEmail(map);
-    }
-
-    /**
-     * body의 내용을 url의 parameter로 보내준다.
-     * 이미지를 넣을 경우
-     *
-     * @param body {userId , refreshToken, ....}
-     * @return boolean boolean
-     * @throws IOException        the io exception
-     * @throws MessagingException the messaging exception
-     */
-    public boolean sendInviteEmail(Map body) throws IOException, MessagingException {
-        Boolean bRtn = false;
-        try {
-            String inviteId = (String) body.getOrDefault("inviteUserId", "inviteUserId");
-            String userId = (String) body.getOrDefault("userId", "userId");
-            String code = (String) body.getOrDefault("code", "code");
-            String org = (String) body.getOrDefault("org", "");
-            String space = (String) body.getOrDefault("space", "");
-
-            String sSpan = " " + org + " 조직 ";
-            if(!"".equals(space)){
-                sSpan = sSpan +", " + space + " 공간 ";
-            }
-            // 메일 관련 정보
-            Properties properties = emailConfig.properties();
-
-
-//         메일 내용
-            String username = (String) body.getOrDefault("username", properties.get("mail.smtp.username"));
-            String userEmail = (String) body.getOrDefault("userEmail", properties.get("mail.smtp.userEmail"));
-            ClassLoader classLoader = getClass().getClassLoader();
-            String sFile = (String) body.getOrDefault("sFile", properties.get("mail.smtp.sFile"));
-            String authUrl = (String) body.getOrDefault("authUrl", properties.get("mail.smtp.authUrl"));
-            String contextUrl = (String) body.getOrDefault("contextUrl","");
-
-            String subject = (String) body.getOrDefault("subject", properties.get("mail.smtp.subject"));
-            // 인증
-            Authenticator auth = emailConfig.auth();
-            subject = sSpan + subject;
-
-            // 메일 세션
-            Session session = Session.getInstance(properties, auth);
-
-            File file = new File(classLoader.getResource(sFile).getFile());
-            System.out.println(file.getAbsolutePath());
-            Document doc = Jsoup.parse(file, "UTF-8");
-            Elements elementAhref = doc.select("a[href]");
-            Elements elementSpan = doc.select("span");
-
-            if (elementAhref.size() != 0) {
-                elementAhref.get(0).attr("href", authUrl +contextUrl+ "?code=" + code);
-            }
-            if (elementSpan.size() > 0) {
-                elementSpan.get(0).childNode(0).attr("text", userId);
-                elementSpan.get(1).childNode(0).attr("text", sSpan);
-            }
-
-            MimeMessage msg = new MimeMessage(session);
-            msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
-            msg.addHeader("format", "flowed");
-            msg.addHeader("Content-Transfer-Encoding", "8bit");
-
-            msg.setDataHandler(new DataHandler(new ByteArrayDataSource(doc.outerHtml(), "text/html")));
-            msg.setSentDate(new Date());
-            msg.setSubject(subject);
-            msg.setContent(doc.outerHtml(), "text/html;charset=" + "EUC-KR");
-            msg.setFrom(new InternetAddress(userEmail, username));
-            msg.setReplyTo(InternetAddress.parse(userEmail, false));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(inviteId, false));
-            Transport.send(msg);
-            bRtn = true;
-        } catch (IOException | MessagingException e) {
-            e.printStackTrace();
-        }
-        return bRtn;
-
-    }
 
     /**
      * 공간에 대한 초대를 완료하고 초대상태를 Y로 만들어준다.
@@ -682,9 +178,9 @@ public class OrgService extends Common {
      * @param code 초대 토큰
      * @return 상태를 Y 로 수정한 개수
      */
-    public int updateInviteY(String code){
+    public int updateInviteY(String code) {
         Map map = new HashMap();
-        map.put("token",code);
+        map.put("token", code);
 //        int cnt = inviteOrgSpaceMapper.updateInviteY(map);
         int cnt = 0;
         return cnt;
@@ -697,12 +193,12 @@ public class OrgService extends Common {
      * @param accessCnt //접근회수
      * @return 수정된 개수
      */
-    public int updateAccessCnt(String code, int accessCnt){
+    public int updateAccessCnt(String code, int accessCnt) {
         Map map = new HashMap();
-        map.put("token",code);
-        map.put("accessCnt",accessCnt);
+        map.put("token", code);
+        map.put("accessCnt", accessCnt);
 //        int cnt = inviteOrgSpaceMapper.updateAccessCnt(map);
-        int cnt =0;
+        int cnt = 0;
         return cnt;
     }
 
@@ -712,51 +208,14 @@ public class OrgService extends Common {
      * @param code the code
      * @return List 초대 정보
      */
-    public List selectInviteInfo(String code){
+    public List selectInviteInfo(String code) {
         Map map = new HashMap();
-        map.put("token",code);
+        map.put("token", code);
 //        List list = inviteOrgSpaceMapper.selectInviteInfo(map);
         List list = null;
         return list;
     }
 
-    /**
-     * 초대정보 list 에 대한 공간의 CloudFoundry에 적용한다.
-     *
-     * @param list the list
-     * @throws Exception the exception
-     */
-    public void setOrgSpaceUserList(List<Map> list) throws Exception {
-        for (int i=0;i<list.size();i++){
-            Map map = list.get(i);
-            setOrgSpaceMember(map);
-        }
-    }
-
-    /**
-     * 초대정보 list 에 대한 공간의 CloudFoundry에 적용한다.
-     *
-     * @param map the map
-     * @throws Exception the exception
-     */
-    public void setOrgSpaceMember(Map map) throws Exception{
-        String gubun = (String) map.getOrDefault("gubun", "");
-        String role = (String) map.getOrDefault("roleName", "");
-        String inviteName = (String) map.getOrDefault("inviteName", "");
-        String userId = (String) map.getOrDefault("inviteUserId", "");
-        int inviteId = Integer.parseInt(map.getOrDefault("inviteId", -1).toString());
-        CloudFoundryClient admin = getCloudFoundryClient(adminUserName, adminPassword);
-
-        if("0".equals(gubun)){
-            setOrgRole(inviteName, userId, "users", admin.login().getValue());
-            setOrgRole(inviteName, userId, role, admin.login().getValue());
-        }
-
-        if("1".equals(gubun)){
-            List<Space> spaceInfo = spaceService.getSpacesInfoById(inviteId);
-            spaceService.setSpaceRole(spaceInfo.get(0).getOrgName(), inviteName,userId,role,admin.login().getValue());
-        }
-    }
 
     /**
      * 사용자 탭의 getAllUsers 서비스에 데이터 추가할 데이터를 가져온다.
@@ -774,9 +233,9 @@ public class OrgService extends Common {
         inviteOrgSpace.setInviteName(orgName);
         //List<InviteOrgSpace> orgInviteList = inviteOrgSpaceMapper.getUsersByInvite(inviteOrgSpace);
         List<InviteOrgSpace> orgInviteList = null;
-        List<Map<String, Object>>orgUserList = new ArrayList<>();
+        List<Map<String, Object>> orgUserList = new ArrayList<>();
         String voUserId = "";
-        for (int i = 0; i < orgInviteList.size(); i++){
+        for (int i = 0; i < orgInviteList.size(); i++) {
             InviteOrgSpace vo = orgInviteList.get(i);
             if (!vo.getInviteUserId().equals(voUserId)) {
                 Map voMap = new HashMap<>();
@@ -789,11 +248,11 @@ public class OrgService extends Common {
                 voMap.put("token", vo.getToken());
                 voMap.put("inviteYn", "Y");
                 List list = new ArrayList();
-                String rolename ="";
-                for (int j = 0; j < orgInviteList.size(); j++){
+                String rolename = "";
+                for (int j = 0; j < orgInviteList.size(); j++) {
                     InviteOrgSpace vo1 = orgInviteList.get(i);
                     if (vo1.getInviteUserId().equals(voUserId)) {
-                        if(!vo.getRoleName().equals(rolename)) {
+                        if (!vo.getRoleName().equals(rolename)) {
                             rolename = vo.getRoleName();
                             list.add(rolename);
                         }
@@ -806,61 +265,6 @@ public class OrgService extends Common {
         return orgUserList;
     }
 
-    /**
-     * 사용자 초대 이메일을 재전송한다.
-     *
-     * @param map {userId : 초대하는 사용자 아이디,,inviteId 사용자 아이디, }
-     * @return map map
-     * @throws Exception the exception
-     */
-    public Map inviteMemberEmailResend(Map map) throws Exception{
-        InviteOrgSpace inviteOrgSpace = new InviteOrgSpace();
-        inviteOrgSpace.setToken((String) map.getOrDefault("token", ""));
-        inviteOrgSpace.setInviteId(-1);
-        List<InviteOrgSpace> dataList = (List) selectOrgSpaceUser(inviteOrgSpace);
-        String inviteId = "";
-        String userId = "";
-        //재전송코드
-        String reToken = RandomStringUtils.randomAlphanumeric(6).toUpperCase() + RandomStringUtils.randomAlphanumeric(2).toUpperCase();
-        String sOrg ="";
-        String sSpace ="";
-        String tmpSpace ="";
-        for (int i=0; i<dataList.size(); i++){
-            InviteOrgSpace vo = dataList.get(i);
-            if("1".equals(vo.getGubun())){
-                if("".equals(tmpSpace)){
-                    sSpace =  vo.getInviteName();
-                    tmpSpace = vo.getInviteName();
-                }else{
-                    if(!tmpSpace.equals(dataList.get(1))){
-                        tmpSpace = vo.getInviteName();
-                        sSpace = sSpace + ", "+ vo.getInviteName();
-                    }
-                }
-            }
-            if("0".equals(vo.getGubun())){
-                if("".equals(sOrg)){
-                    sOrg = vo.getInviteName();
-                }
-            }
-            inviteId = vo.getInviteUserId();
-            userId = vo.getUserId();
-        }
-        map.put("code", reToken);
-        map.put("org", sOrg);
-        map.put("space", sSpace);
-        map.put("sFile", "accept.html");
-        map.put("inviteUserId",inviteId);
-        map.put("userId",userId);
-        map.put("contextUrl", "/invitations/accept");
-        HashMap updateTokenMap = new HashMap<>();
-        updateTokenMap.put("createTime",new Date());
-        updateTokenMap.put("retoken",reToken);
-        updateTokenMap.put("token",inviteOrgSpace.getToken());
-//        inviteOrgSpaceMapper.updateOrgSpaceUserToken(updateTokenMap);
-        Boolean bRtn = sendInviteEmail(map);
-        return updateTokenMap;
-    }
 
     /**
      * 초대한 token 정보를 가지고 초대취소를 수행한다.
@@ -872,81 +276,6 @@ public class OrgService extends Common {
     public int cancelInvite(Map map) throws Exception {
 //        return inviteOrgSpaceMapper.deleteOrgSpaceUserToken(map);
         return 0;
-    }
-
-    /**
-     * 해당 조직의 사용자를 조회한다.
-     *
-     * @param body  the body
-     * @param token the token
-     * @return List Map
-     * @throws Exception the exception
-     * @author injeong
-     * @version 1.0
-     * @since 2016.8.31 최초작성
-     */
-    public List<Map<String, Object>> getOrgUser(Map body, String token) throws Exception {
-
-        String orgName = (String) body.getOrDefault("orgName" , "");
-        if (!stringNullCheck(orgName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        UUID orgGuid = null;
-        orgGuid = client.getOrgByName(orgName, true).getMeta().getGuid();
-        LOGGER.debug("orgGuid : " +orgGuid);
-        List<Map<String, Object>> users = client.getUsers(orgGuid);
-
-        LOGGER.debug("getOrgUser : " +users.toString());
-
-        return users;
-    }
-
-    /**
-     * 사용자의 조직 권한을 삭제한다.
-     *
-     * @param body  the body
-     * @param token the token
-     * @return the boolean
-     * @throws Exception the exception
-     */
-    public boolean unsetUserOrg(Map body, String token) throws Exception {
-
-        String orgName = (String) body.getOrDefault("orgName","");
-        String userGuid= (String) body.getOrDefault("userGuid","");
-
-        if (!stringNullCheck(orgName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-        List<Map> listOrgOrSpace = new ArrayList<>();
-
-//        List keyOfRole = new ArrayList();
-//        keyOfRole.add("managed_organizations");
-//        keyOfRole.add("billing_managed_organizations");
-//        keyOfRole.add("organizations");
-//        keyOfRole.add("managed_spaces");
-//        keyOfRole.add("spaces");
-//        keyOfRole.add("audited_spaces");
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        //해당 유저가 해당 조직의 모든 공간들에 대해 가진 role을 모두 제거
-
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-        Map<String, Object> allOrgOrSpace = admin.listAllOrgOrSpaceForTheUser(userGuid, "spaces");
-        List<Map> resources = (List) allOrgOrSpace.get("resources");
-        for (Map<String, Map> resource : resources) {
-            String unSetSpaceName = (String) resource.get("entity").get("name");
-            admin.unsetSpaceRole(orgName, unSetSpaceName, userGuid, "auditors");
-            admin.unsetSpaceRole(orgName, unSetSpaceName, userGuid, "developers");
-            admin.unsetSpaceRole(orgName, unSetSpaceName, userGuid, "managers");
-            admin.removeSpaceFromUser(userGuid, orgName, unSetSpaceName);
-        }
-        //해당 유저가 해당 조직에 대해 가지고 있는 role을 제거
-        admin.unsetOrgRole(orgName, userGuid, "auditors");
-        admin.unsetOrgRole(orgName, userGuid, "managers");
-        admin.unsetOrgRole(orgName, userGuid, "billing_managers");
-        admin.removeOrgFromUser(userGuid, orgName);
-        return true;
     }
 
 
@@ -961,8 +290,7 @@ public class OrgService extends Common {
     public TokenGrantTokenProvider tokenProviderWithRefresh(String token) {
         try {
             OAuth2AccessToken refreshToken = loginService.refresh(token);
-            if (refreshToken != null)
-                token = refreshToken.getValue();
+            if (refreshToken != null) token = refreshToken.getValue();
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
@@ -975,6 +303,7 @@ public class OrgService extends Common {
 
     /**
      * 이름을 받아 조직을 생성한다. (Org Create)
+     *
      * @param token
      * @param orgName
      * @return CreateOrganizationResponse
@@ -982,10 +311,7 @@ public class OrgService extends Common {
      * @since 2018.5.2
      */
     public CreateOrganizationResponse createOrg(final String token, final String orgName) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-        .organizations()
-        .create( CreateOrganizationRequest.builder().name( orgName ).build() )
-        .block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(orgName).build()).block();
     }
 
     /**
@@ -999,10 +325,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public GetOrganizationResponse getOrg(final String orgId, final String token) {
-    	return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-    		.organizations()
-    		.get(GetOrganizationRequest.builder().organizationId(orgId).build())
-    		.block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
 
     /**
@@ -1017,12 +340,9 @@ public class OrgService extends Common {
      */
     // Org Read
     public SummaryOrganizationResponse getOrgSummary(final String orgId, final String token) {
-		return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-		    .organizations()
-		    .summary(SummaryOrganizationRequest.builder().organizationId(orgId).build())
-            .block();
-	}
-    
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
+    }
+
     /**
      * 조직 목록을 조회한다. 단, 내부의 resources만 추출해서 반환한다.
      *
@@ -1034,11 +354,7 @@ public class OrgService extends Common {
      */
     @Deprecated
     public List<OrganizationResource> getOrgs(String token) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-            .organizations()
-            .list(ListOrganizationsRequest.builder().build())
-            .block()
-            .getResources();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block().getResources();
     }
 
     /**
@@ -1050,12 +366,9 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-	public ListOrganizationsResponse getOrgsForUser(final String token) {
-	    return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-		    .organizations()
-		    .list(ListOrganizationsRequest.builder().build())
-		    .block();
-	}
+    public ListOrganizationsResponse getOrgsForUser(final String token) {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block();
+    }
 
     /**
      * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다. (Org Read for all)
@@ -1065,13 +378,10 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-	public ListOrganizationsResponse getOrgsForAdmin() {
-		return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword))
-		    .organizations()
-		    .list(ListOrganizationsRequest.builder().build())
-            .block();
-	}
-	
+    public ListOrganizationsResponse getOrgsForAdmin() {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().list(ListOrganizationsRequest.builder().build()).block();
+    }
+
 
     /**
      * 조직 이름을 가지고 조직 아이디를 조회한다.
@@ -1084,18 +394,16 @@ public class OrgService extends Common {
      * @since 2018.5.4
      */
     public String getOrgId(String orgName, String token) {
-        return getOrg( orgName, token ).getMetadata().getId();
+        return getOrg(orgName, token).getMetadata().getId();
     }
-	
-	public OrganizationDetail getOrgUsingName(final String name, final String token) {
-	    return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
-	    .organizations()
-	    .get( OrganizationInfoRequest.builder().name( name ).build() )
-	    .block();
-	}
-	
+
+    public OrganizationDetail getOrgUsingName(final String name, final String token) {
+        return Common.cloudFoundryOperations(connectionContext(), tokenProvider(token)).organizations().get(OrganizationInfoRequest.builder().name(name).build()).block();
+    }
+
     /**
      * 사용자 포털에서 조직의 이름을 수정한다. (Org Update : name)
+     *
      * @param org
      * @param token
      * @return UpdateOrganizationResponse
@@ -1106,15 +414,13 @@ public class OrgService extends Common {
     public UpdateOrganizationResponse renameOrg(Org org, String token) {
         Objects.requireNonNull(org.getGuid(), "Org GUID(guid) must not be null.");
         Objects.requireNonNull(org.getNewOrgName(), "New org name(newOrgName) must not be null.");
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-                .organizations()
-                .update(UpdateOrganizationRequest.builder().organizationId(org.getGuid().toString()).name(org.getNewOrgName()).build())
-                .block();
-    } 
-    
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().update(UpdateOrganizationRequest.builder().organizationId(org.getGuid().toString()).name(org.getNewOrgName()).build()).block();
+    }
+
     /**
      * 사용자 포털에서 조직을 삭제한다. (Org Delete)<br>
-     * 만약 false가 넘어올 경우, 권한이 없거나 혹은 
+     * 만약 false가 넘어올 경우, 권한이 없거나 혹은
+     *
      * @param org
      * @param token
      * @return
@@ -1147,97 +453,63 @@ public class OrgService extends Common {
             }
         }
         */
-        
+
         Objects.requireNonNull(org.getGuid(), "Org GUID(guid) must not be null.");
         final String orgId = org.getGuid().toString();
         final boolean recursive = org.isRecursive();
-        final SummaryOrganizationResponse orgSummary = getOrgSummary( orgId, token );
-        
+        final SummaryOrganizationResponse orgSummary = getOrgSummary(orgId, token);
+
         //// Check Admin user
         // 현재 token의 유저 정보를 가져온다.
         // TODO 특정 유저의 정보를 가져오는 메소드가 구현되어 있으면, 해당 메소드로 교체할 것. (hgcho)
-        final UserInfoResponse userInfoResponse=
-            Common.uaaClient(connectionContext(), tokenProvider(token))
-            .users().userInfo(UserInfoRequest.builder().build()).block();
-        
+        final UserInfoResponse userInfoResponse = Common.uaaClient(connectionContext(), tokenProvider(token)).users().userInfo(UserInfoRequest.builder().build()).block();
+
         // Admin 계정인지 확인
-        final boolean isAdmin = userInfoResponse.getUserName().equals( adminUserName );
-        
-        if ( isAdmin ) {
+        final boolean isAdmin = userInfoResponse.getUserName().equals(adminUserName);
+
+        if (isAdmin) {
             // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
-            LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName() );
-            return Common
-                .cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .organizations().delete( DeleteOrganizationRequest.builder()
-                    .organizationId( orgId ).recursive( true ).async( true ).build() )
-                .block();
+            LOGGER.warn("Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName());
+            return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(true).async(true).build()).block();
         }
-        
+
         ///// Real user
         // 지우려는 조직의 OrgManager Role이 주어진 유저를 찾는다.
         // TODO 특정 Role에 해당하는 유저를 찾는 메소드가 구현되면, 해당 메소드로 교체할 것. (hgcho)
-        final ListOrganizationManagersResponse managerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-        .organizations()
-        .listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() )
-        .block();
-        
+        final ListOrganizationManagersResponse managerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().listManagers(ListOrganizationManagersRequest.builder().organizationId(orgId).build()).block();
+
         // OrgManager role을 가진 유저 수 파악
         final int countManagerUsers = managerResponse.getTotalResults();
-        
+
         // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
-        final boolean existManagerRoleExactly = 
-            managerResponse.getResources().stream()
-            .filter(
-                ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) )
-            .count() == 1L;
-        
-        LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}",
-            existManagerRoleExactly, countManagerUsers);
-        if ( existManagerRoleExactly ) {
+        final boolean existManagerRoleExactly = managerResponse.getResources().stream().filter(ur -> ur.getMetadata().getId().equals(userInfoResponse.getUserId())).count() == 1L;
+
+        LOGGER.debug("existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers);
+        if (existManagerRoleExactly) {
             // OrgManager role을 가진 User가 2명 이상일 경우 무조건 작업 Cancel    
-            if ( countManagerUsers == 1 ) {
+            if (countManagerUsers == 1) {
                 // 정확히 일치할 때
-                LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
-                LOGGER.debug( "User : {}, To delete org : {}(GUID : {})", userInfoResponse.getUserId(), orgSummary.getName(), org.getGuid().toString());
+                LOGGER.debug("Though user isn't admin, user can delete organization if user's role is OrgManager.");
+                LOGGER.debug("User : {}, To delete org : {}(GUID : {})", userInfoResponse.getUserId(), orgSummary.getName(), org.getGuid().toString());
                 return Common
-                    //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                    .cloudFoundryClient( connectionContext(), tokenProvider( adminUserName, adminPassword ) )
-                    .organizations().delete( DeleteOrganizationRequest.builder()
-                        .organizationId( orgId ).recursive( recursive ).async( true ).build() )
-                    .block();
-            } else if ( countManagerUsers > 1 ) {
+                        //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                        .cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(recursive).async(true).build()).block();
+            } else if (countManagerUsers > 1) {
                 // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
-                return DeleteOrganizationResponse.builder()
-                    .entity( 
-                        JobEntity.builder().error(
-                            "OrgManager users is greater than 1. To delete org, you have to unset OrgManager role of other user(s)." )
-                        .errorDetails( ErrorDetails.builder().code( 409 ).build() )
-                        .build() )
-                    .build();
+                return DeleteOrganizationResponse.builder().entity(JobEntity.builder().error("OrgManager users is greater than 1. To delete org, you have to unset OrgManager role of other user(s).").errorDetails(ErrorDetails.builder().code(409).build()).build()).build();
             } else {
                 // 해당 유저를 포함하여 누구도 OrgManager Role이 없는 경우 (403 : Forbidden)
-                return DeleteOrganizationResponse.builder()
-                    .entity( 
-                        JobEntity.builder().error(
-                            "OrgManager users is zero. To delete org, you have to get OrgManager role." )
-                        .errorDetails( ErrorDetails.builder().code( 403 ).build() )
-                        .build() )
-                    .build();
+                return DeleteOrganizationResponse.builder().entity(JobEntity.builder().error("OrgManager users is zero. To delete org, you have to get OrgManager role.").errorDetails(ErrorDetails.builder().code(403).build()).build()).build();
             }
         } else {
             // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
-            return DeleteOrganizationResponse.builder()
-                .entity( 
-                    JobEntity.builder().error(
-                        "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
-                    .errorDetails( ErrorDetails.builder().code( 403 ).build() )
-                    .build() )
-                .build();
+            return DeleteOrganizationResponse.builder().entity(JobEntity.builder().error("You don't have a OrgManager role. To delete org, you have to get OrgManager role.").errorDetails(ErrorDetails.builder().code(403).build()).build()).build();
         }
     }
 
     //// Org's space : Read only (Space list)
     //// Space ==> SpaceService (CRUD)
+
     /**
      * 운영자/사용자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
      *
@@ -1249,18 +521,15 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public ListSpacesResponse getOrgSpaces(String orgId, String token) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-            .spaces()
-            .list(ListSpacesRequest.builder().organizationId(orgId).build())
-            .block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
     }
-    
+
     //// Org's Quota setting : Read, Update
     //// Globally quota detail info. ==> OrgQuotaService (CRUD)
-    
+
     /**
-     * 조직의 Quota를 조회한다. (Org Read : quota(s)) 
-     * 
+     * 조직의 Quota를 조회한다. (Org Read : quota(s))
+     *
      * @param orgId the org id
      * @param token the token
      * @return Map&lt;String, Object&gt;
@@ -1269,22 +538,18 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(String orgId, String token) {
-    	GetOrganizationResponse org = getOrg(orgId, token);
-    	String quotaId = org.getEntity().getQuotaDefinitionId();
+        GetOrganizationResponse org = getOrg(orgId, token);
+        String quotaId = org.getEntity().getQuotaDefinitionId();
 
-        GetOrganizationQuotaDefinitionResponse response =
-	        Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-	        .organizationQuotaDefinitions()
-	        .get(GetOrganizationQuotaDefinitionRequest.builder()
-	        	.organizationQuotaDefinitionId(quotaId).build())
-	        .block();
-        
+        GetOrganizationQuotaDefinitionResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaId).build()).block();
+
         return response;
     }
-    
+
     /**
      * 조직에 할당한 Quota를 변경한다. <br>
      * (기존의 Quota GUID와 동일한 경우에도 변경하는 동작을 수행한다) (Org Update : set quota)
+     *
      * @param orgId
      * @param org
      * @param token
@@ -1294,20 +559,14 @@ public class OrgService extends Common {
      */
     // Org 
     public UpdateOrganizationResponse updateOrgQuota(String orgId, Org org, String token) {
-        Objects.requireNonNull( org.getGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid." );
-        Objects.requireNonNull( org.getQuotaGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid." );
+        Objects.requireNonNull(org.getGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid.");
+        Objects.requireNonNull(org.getQuotaGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid.");
         String orgGuid = org.getGuid().toString();
         String quotaGuid = org.getQuotaGuid();
-        
-        if ( !orgId.equals( orgGuid ) )
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST,
-                "Org GUID in the path doesn't match org GUID in request body." );
-        
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword))
-            .organizations()
-            .update( 
-                UpdateOrganizationRequest.builder()
-                .organizationId( orgGuid ).quotaDefinitionId( quotaGuid ).build() )
-            .block();
+
+        if (!orgId.equals(orgGuid))
+            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Org GUID in the path doesn't match org GUID in request body.");
+
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().update(UpdateOrganizationRequest.builder().organizationId(orgGuid).quotaDefinitionId(quotaGuid).build()).block();
     }
 }

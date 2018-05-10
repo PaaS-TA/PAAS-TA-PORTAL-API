@@ -2,7 +2,6 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import com.corundumstudio.socketio.SocketIOClient;
-import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
@@ -27,12 +26,10 @@ import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -307,16 +304,6 @@ public class AppService extends Common {
                         ).block();
 
         return applicationEnvironmentResponse;
-//        String orgName = app.getOrgName();
-//        String spaceName = app.getSpaceName();
-//        String appName = app.getName();
-//
-//        if (!stringNullCheck(orgName, spaceName, appName)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-//        }
-//
-//        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
-//        ApplicationEnvironments resp = cloudFoundryOperations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder().name(appName).build()).block();
     }
 
     /**
@@ -506,23 +493,6 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public boolean deleteRoute(String orgName, String spaceName, List<String> urls, String token) throws Exception {
-
-        if (!stringNullCheck(orgName, spaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
-
-        if (urls == null) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-
-        for (String url : urls) {
-            String[] array = url.split("\\.", 2);
-            client.deleteRoute(array[0], array[1]);
-        }
-
-
         return true;
     }
 

@@ -1,21 +1,15 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
-import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
-import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.servicebrokers.*;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.Map;
@@ -63,13 +57,13 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public boolean renameInstanceService(org.openpaas.paasta.portal.api.model.Service service, CustomCloudFoundryClient client) throws Exception {
-
-        client.renameInstanceService(service.getGuid(), service.getNewName());
-
-        return true;
-
-    }
+//    public boolean renameInstanceService(org.openpaas.paasta.portal.api.model.Service service, CustomCloudFoundryClient client) throws Exception {
+//
+//        client.renameInstanceService(service.getGuid(), service.getNewName());
+//
+//        return true;
+//
+//    }
 
     /**
      * 서비스 인스턴스를 삭제한다.
@@ -78,11 +72,11 @@ public class ServiceService extends Common {
      * @param client  the client
      * @throws Exception the exception
      */
-    public void deleteInstanceService(org.openpaas.paasta.portal.api.model.Service service,  CustomCloudFoundryClient client) throws Exception {
-
-        client.deleteInstanceService(service.getGuid());
-
-    }
+//    public void deleteInstanceService(org.openpaas.paasta.portal.api.model.Service service,  CustomCloudFoundryClient client) throws Exception {
+//
+//        client.deleteInstanceService(service.getGuid());
+//
+//    }
 
     /**
      * 유저 프로바이드 서비스를 조회한다.
@@ -97,19 +91,19 @@ public class ServiceService extends Common {
      */
     public Map<String, Object> getUserProvided(String token, Map<String, String> body) throws Exception {
 
-        String orgName = body.get("orgName");
-        String spaceName = body.get("spaceName");
-        String serviceInstanceName = body.get("serviceInstanceName");
-
-        if (!stringNullCheck(orgName, spaceName, serviceInstanceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-
-        Map<String, Object> userProvidedServiceInstance = client.getUserProvidedServiceInstance(orgName, spaceName, serviceInstanceName);
-        LOGGER.info(userProvidedServiceInstance.toString());
-        return userProvidedServiceInstance;
+//        String orgName = body.get("orgName");
+//        String spaceName = body.get("spaceName");
+//        String serviceInstanceName = body.get("serviceInstanceName");
+//
+//        if (!stringNullCheck(orgName, spaceName, serviceInstanceName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+//        }
+//
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
+//
+//        Map<String, Object> userProvidedServiceInstance = client.getUserProvidedServiceInstance(orgName, spaceName, serviceInstanceName);
+//        LOGGER.info(userProvidedServiceInstance.toString());
+        return null;
     }
 
     /**
@@ -130,20 +124,20 @@ public class ServiceService extends Common {
         String serviceInstanceName = body.get("serviceInstanceName");
         String credentialsStr = body.get("credentials");
         String syslogDrainUrl = body.get("syslogDrainUrl"); // null 또는 빈값 허용
-
-        if (!stringNullCheck(orgName, spaceName, serviceInstanceName, credentialsStr)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
-
-        CloudService service = new CloudService();
-        service.setName(serviceInstanceName);
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-
-        client.createUserProvidedService(service, credentials, syslogDrainUrl);
+//
+//        if (!stringNullCheck(orgName, spaceName, serviceInstanceName, credentialsStr)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+//        }
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
+//
+//        CloudService service = new CloudService();
+//        service.setName(serviceInstanceName);
+//
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
+//
+//        client.createUserProvidedService(service, credentials, syslogDrainUrl);
         return true;
     }
 
@@ -158,27 +152,27 @@ public class ServiceService extends Common {
      * @version 1.0
      * @since 2016.8.4 최초작성
      */
-    public boolean updateUserProvided(String token, Map<String, String> body) throws Exception {
-
-        String orgName = body.get("orgName");
-        String spaceName = body.get("spaceName");
-        String serviceInstanceName = body.get("serviceInstanceName");
-        String newServiceInstanceName = body.get("newServiceInstanceName"); // null 또는 빈값 허용
-        String credentialsStr = body.get("credentials");
-        String syslogDrainUrl = body.get("syslogDrainUrl"); // null 또는 빈값 허용
-
-        if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-
-        client.updateUserProvidedService(orgName, spaceName, serviceInstanceName, newServiceInstanceName, credentials, syslogDrainUrl);
-        return true;
-    }
+//    public boolean updateUserProvided(String token, Map<String, String> body) throws Exception {
+//
+//        String orgName = body.get("orgName");
+//        String spaceName = body.get("spaceName");
+//        String serviceInstanceName = body.get("serviceInstanceName");
+//        String newServiceInstanceName = body.get("newServiceInstanceName"); // null 또는 빈값 허용
+//        String credentialsStr = body.get("credentials");
+//        String syslogDrainUrl = body.get("syslogDrainUrl"); // null 또는 빈값 허용
+//
+//        if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+//        }
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
+//
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
+//
+//        client.updateUserProvidedService(orgName, spaceName, serviceInstanceName, newServiceInstanceName, credentials, syslogDrainUrl);
+//        return true;
+//    }
 
 
     /**

@@ -11,7 +11,6 @@ import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.openpaas.paasta.portal.api.service.AppService;
@@ -87,10 +86,10 @@ public class ServiceController extends Common {
         LOGGER.info("renameInstanceService Start : " + service.getGuid() );
 
         //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
 
         //service call
-        serviceService.renameInstanceService(service, client);
+//        serviceService.renameInstanceService(service, client);
 
         LOGGER.info("renameInstanceService End ");
 
@@ -112,10 +111,10 @@ public class ServiceController extends Common {
         LOGGER.info("deleteInstanceService Start : " + service.getGuid() );
 
         //token setting
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
+//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
 
         //service call
-        serviceService.deleteInstanceService(service, client);
+//        serviceService.deleteInstanceService(service, client);
 
         LOGGER.info("deleteInstanceService End ");
 
@@ -134,13 +133,13 @@ public class ServiceController extends Common {
     @RequestMapping(value = {"/service/deleteInstanceServiceForBoundApp"}, method = RequestMethod.POST)
     public boolean deleteInstanceServiceForBoundApp(@RequestBody Service service, HttpServletRequest request) throws Exception {
         CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
-        CustomCloudFoundryClient customClient = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
+//        CustomCloudFoundryClient customClient = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
 
         // UNBIND SERVICE
         //CISS appService.unbindService(new App(){{setName(service.getName()); setServiceName(service.getServiceName());}}, client);
 
         // DELETE SERVICE INSTANCE
-        serviceService.deleteInstanceService(service, customClient);
+//        serviceService.deleteInstanceService(service, customClient);
 
         return true;
     }
@@ -208,7 +207,7 @@ public class ServiceController extends Common {
 
         LOGGER.info("updateUserProvidedService Start");
 
-        serviceService.updateUserProvided(token, body);
+//        serviceService.updateUserProvided(token, body);
 
         LOGGER.info("updateUserProvidedService End");
         return true;

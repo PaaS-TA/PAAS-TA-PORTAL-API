@@ -2,7 +2,6 @@ package org.openpaas.paasta.portal.api.common;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
-
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.identity.uaa.api.UaaConnectionFactory;
 import org.cloudfoundry.identity.uaa.api.client.UaaClientOperations;
@@ -18,12 +17,7 @@ import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.UaaClient;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
-import org.openpaas.paasta.portal.api.config.service.EmailConfig;
-import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
 import org.slf4j.Logger;
@@ -34,13 +28,6 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 
-import javax.activation.DataHandler;
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.util.ByteArrayDataSource;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -93,8 +80,6 @@ public class Common {
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
 
-    @Autowired
-    public EmailConfig emailConfig;
 
     @Autowired
     private LoginService loginService;
@@ -162,56 +147,6 @@ public class Common {
         return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), organization, space, true);
     }
 
-    /**
-     * get CloudFoundryClinet Object from token String
-     *
-     * @param token
-     * @return CloudFoundryClinet
-     */
-    public CustomCloudFoundryClient getCustomCloudFoundryClient(String token) throws Exception {
-
-        return new CustomCloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), true);
-    }
-
-    /**
-     * get CloudFoundryClinet Object from token String
-     * with organization, space
-     *
-     * @param token
-     * @param organization
-     * @param space
-     * @return CloudFoundryClinet
-     */
-    public CustomCloudFoundryClient getCustomCloudFoundryClient(String token, String organization, String space) throws Exception {
-
-        return new CustomCloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), organization, space, true);
-    }
-
-    /**
-     * get CustomCloudFoundryClinet Object from id, password
-     *
-     * @param id
-     * @param password
-     * @return CustomCloudFoundryClinet
-     */
-    public CustomCloudFoundryClient getCustomCloudFoundryClient(String id, String password) throws Exception {
-        return new CustomCloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), true);
-    }
-
-    /**
-     * get CustomCloudFoundryClinet Object from token String
-     * with organization, space
-     *
-     * @param id
-     * @param password
-     * @param organization
-     * @param space
-     * @return CustomCloudFoundryClinet
-     */
-    public CustomCloudFoundryClient getCustomCloudFoundryClient(String id, String password, String organization, String space) throws Exception {
-
-        return new CustomCloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), organization, space, true);
-    }
 
     /**
      * get CloudCredentials Object from token String
@@ -234,12 +169,12 @@ public class Common {
 
         LOGGER.info("============getCloudCredentials==============");
         CloudCredentials test = new CloudCredentials(id, password);
-        LOGGER.info("getToken       :"+test.getToken());
-        LOGGER.info("getClientId    :"+test.getClientId());
-        LOGGER.info("getClientSecret:"+test.getClientSecret());
-        LOGGER.info("getEmail       :"+test.getEmail());
-        LOGGER.info("getPassword    :"+test.getPassword());
-        LOGGER.info("getProxyUser   :"+test.getProxyUser());
+        LOGGER.info("getToken       :" + test.getToken());
+        LOGGER.info("getClientId    :" + test.getClientId());
+        LOGGER.info("getClientSecret:" + test.getClientSecret());
+        LOGGER.info("getEmail       :" + test.getEmail());
+        LOGGER.info("getPassword    :" + test.getPassword());
+        LOGGER.info("getProxyUser   :" + test.getProxyUser());
         return test;
 //        return new CloudCredentials(id, password);
     }
@@ -390,124 +325,13 @@ public class Common {
         return diffCnt;
     }
 
-
-    /**
-     * body의 내용을 url의 parameter로 보내준다.
-     * 이미지를 넣을 경우
-     *
-     * @param body{userId , refreshToken, ....}
-     * @return
-     * @throws IOException
-     * @throws MessagingException
-     */
-    public boolean sendEmail(Map body) throws IOException, MessagingException {
-        Boolean bRtn = false;
-        try {
-            String userId = (String) body.getOrDefault("userId", "");
-            String refreshToken = (String) body.getOrDefault("refreshToken", "");
-
-            // 메일 관련 정보
-            Properties properties = emailConfig.properties();
-
-
-//         메일 내용
-            String username = (String) body.getOrDefault("username", properties.get("mail.smtp.username"));
-            String userEmail = (String) body.getOrDefault("userEmail", properties.get("mail.smtp.userEmail"));
-            ClassLoader classLoader = getClass().getClassLoader();
-            String sFile = (String) body.getOrDefault("sFile", properties.get("mail.smtp.sFile"));
-            String authUrl = (String) body.getOrDefault("authUrl", properties.get("mail.smtp.authUrl"));
-            String subject = (String) body.getOrDefault("subject", properties.get("mail.smtp.subject"));
-            String contextUrl = (String) body.getOrDefault("contextUrl", properties.get("mail.smtp.contextUrl"));
-            // 인증
-            Authenticator auth = emailConfig.auth();
-
-            // 메일 세션
-            Session session = Session.getInstance(properties, auth);
-
-            File file = new File(classLoader.getResource(sFile).getFile());
-            System.out.println(file.getAbsolutePath());
-            Document doc = Jsoup.parse(file, "UTF-8");
-            Elements elementAhref = doc.select("a[href]");
-            Elements elementSpan = doc.select("span");
-
-            if (elementAhref.size() != 0) {
-                elementAhref.get(0).attr("href", authUrl + "/" + contextUrl + "?userId=" + userId + "&refreshToken=" + refreshToken);
-            }
-            if (elementSpan.size() != 0) {
-                elementSpan.get(0).childNode(0).attr("text", userId);
-            }
-
-            MimeMessage msg = new MimeMessage(session);
-            msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
-            msg.addHeader("format", "flowed");
-            msg.addHeader("Content-Transfer-Encoding", "8bit");
-
-            msg.setDataHandler(new DataHandler(new ByteArrayDataSource(doc.outerHtml(), "text/html")));
-            msg.setSentDate(new Date());
-            msg.setSubject(subject);
-            msg.setContent(doc.outerHtml(), "text/html;charset=" + "EUC-KR");
-            msg.setFrom(new InternetAddress(userEmail, username));
-            msg.setReplyTo(InternetAddress.parse(userEmail, false));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(userId, false));
-            Transport.send(msg);
-            bRtn = true;
-        } catch (IOException | MessagingException e) {
-            e.printStackTrace();
-
-        }
-        return bRtn;
-
-    }
-    /**
-     * 사용자 Uaa 등록
-     * @param scimUser
-     * @throws MalformedURLException
-     */
-    /**
-     * public void register(ScimUser scimUser) throws MalformedURLException {
-     * <p>
-     * <p>
-     * ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
-     * credentials.setAccessTokenUri("https://uaa.115.68.46.29.xip.io/oauth/token/61a208dd-6e56-4afe-8f0e-9b6a9b0492ef?grant_type=client_credentials&response_type=token");
-     * <p>
-     * credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
-     * <p>
-     * credentials.setClientId("admin");
-     * credentials.setClientSecret("admin");
-     * <p>
-     * URL uaaHost = new URL("http://uaa.115.68.46.29.xip.io");
-     * UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
-     * UaaUserOperations uaaUserOperations = connection.userOperations();
-     * uaaUserOperations.createUser(scimUser);
-     * <p>
-     * }
-     *
-     * @SuppressWarnings({"rawtypes", "unchecked"})
-     * public void resetPassword(String userId, String newPassword, String type) throws MalformedURLException {
-     * ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
-     * credentials.setAccessTokenUri(uaaTarget + "/oauth/token?grant_type=client_credentials&response_type=token");
-     * <p>
-     * credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
-     * <p>
-     * credentials.setClientId("admin");
-     * credentials.setClientSecret("admin");
-     * <p>
-     * <p>
-     * URL uaaHost = new URL(uaaTarget);
-     * UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
-     * //        connection.userOperations().changeUserPassword();createUser(scimUser);
-     * }
-     */
-
     public static String convertApiUrl(String url) {
         return url.replace("https://", "").replace("http://", "");
     }
 
 
-
     /**
      * DefaultCloudFoundryOperations을 생성하여, 반환한다.
-     *
      *
      * @param connectionContext
      * @param tokenProvider
@@ -519,7 +343,6 @@ public class Common {
 
     /**
      * DefaultCloudFoundryOperations을 생성하여, 반환한다.
-     *
      *
      * @param cloudFoundryClient
      * @param dopplerClient
@@ -533,7 +356,6 @@ public class Common {
     /**
      * DefaultCloudFoundryOperations을 생성하여, 반환한다.
      *
-     *
      * @param connectionContext
      * @param tokenProvider
      * @param org
@@ -546,7 +368,6 @@ public class Common {
 
     /**
      * DefaultCloudFoundryOperations을 생성하여, 반환한다.
-     *
      *
      * @param cloudFoundryClient
      * @param dopplerClient
@@ -562,7 +383,6 @@ public class Common {
     /**
      * ReactorCloudFoundryClient 생성하여, 반환한다.
      *
-     *
      * @param connectionContext
      * @param tokenProvider
      * @return DefaultCloudFoundryOperations
@@ -570,7 +390,6 @@ public class Common {
     public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
-
 
 
     public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
