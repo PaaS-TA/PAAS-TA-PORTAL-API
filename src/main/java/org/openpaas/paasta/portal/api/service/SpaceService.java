@@ -9,7 +9,6 @@ import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionR
 import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
@@ -57,7 +56,6 @@ public class SpaceService extends Common {
      * 공간(스페이스) 목록 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
-     * @param org   the org
      * @param token the token
      * @return ListSpacesResponse
      * @author hgcho
@@ -108,46 +106,17 @@ public class SpaceService extends Common {
      * @param token the token
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
+     * @author hgcho
      * @version 2.0
      * @since 2018.5.3
      */
-    public CreateSpaceResponse createSpace(Space space, String token) throws Exception{
-        // TODO
-        /*
-        String orgName = space.getOrgName();
-        String newSpaceName = space.getNewSpaceName();
-
-        if(!stringNullCheck(orgName,newSpaceName)){
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-
-        //해당 조직에 동일한 이름의 공간이 존재하는지 확인
-        // java8 stream api 사용
-        boolean isSpaceExist = client.getSpaces().stream()
-                .anyMatch(existingSpace -> existingSpace.getOrganization().getName().equals(orgName)
-                        && existingSpace.getName().equals(newSpaceName));
-
-        if (isSpaceExist) {
-            throw new CloudFoundryException(HttpStatus.CONFLICT,"Conflict","Space name already exists");
-        }
-
-        client.createSpace(orgName, newSpaceName);
-        String userName = client.getCloudInfo().getUser();
-
-        client.setOrgRole(orgName, userName, "users");
-        client.setSpaceRole(orgName, newSpaceName, userName, "managers");
-        client.setSpaceRole(orgName, newSpaceName, userName, "developers");
-        */
-
+    public CreateSpaceResponse createSpace(Space space, String token) {
         Objects.requireNonNull( space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
         Objects.requireNonNull( space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
 
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-            .spaces().create( CreateSpaceRequest.builder().name( space.getName() )
-                .organizationId( space.getOrgGuid() ).build() )
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+            .spaces().create(CreateSpaceRequest.builder()
+                .name(space.getSpaceName()).organizationId(space.getOrgGuid()).build())
             .block();
     }
 
@@ -203,7 +172,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    public DeleteSpaceResponse deleteSpace(Space space, String token) throws Exception{
+    public DeleteSpaceResponse deleteSpace(Space space, String token) {
         Objects.requireNonNull( space.getGuid(), "Space GUID must not be null. Require parameters; spaceGuid[, recursive]" );
 
         String spaceGuid = space.getGuid().toString();

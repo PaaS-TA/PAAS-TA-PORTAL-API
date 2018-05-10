@@ -50,7 +50,7 @@ public class Space {
     private Date created;
     private Date lastModified;
 
-    private boolean recursive = true;
+    private boolean recursive;
 
     private List<App> apps = new ArrayList<App>();
 
@@ -100,7 +100,9 @@ public class Space {
 
     public void setGuid(UUID guid) {
         this.guid = guid;
-        this.setSpaceGuid( guid.toString() );
+        if (this.spaceGuid == null || "".equals(this.spaceGuid)) {
+            this.setSpaceGuid(guid.toString());
+        }
     }
 
     public String getName() {
@@ -221,7 +223,9 @@ public class Space {
 
     public void setSpaceGuid(String spaceGuid) {
         this.spaceGuid = spaceGuid;
-        this.setGuid( UUID.fromString( spaceGuid ) );
+        if (this.guid == null) {
+            this.setGuid(UUID.fromString(spaceGuid));
+        }
     }
     
     public String getOrgGuid() {

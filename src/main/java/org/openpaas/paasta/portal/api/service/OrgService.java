@@ -12,15 +12,12 @@ import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
-
-
 import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
-import org.cloudfoundry.operations.domains.CreateDomainRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.jsoup.Jsoup;
@@ -28,6 +25,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
+import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -36,8 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import reactor.core.publisher.Operators;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -953,7 +954,25 @@ public class OrgService extends Common {
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
-    
+
+    @Autowired
+    LoginService loginService;
+
+    public TokenGrantTokenProvider tokenProviderWithRefresh(String token) {
+        try {
+            OAuth2AccessToken refreshToken = loginService.refresh(token);
+            if (refreshToken != null)
+                token = refreshToken.getValue();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+
+        if (token.indexOf("bearer") < 0) {
+            token = "bearer " + token;
+        }
+        return new TokenGrantTokenProvider(token);
+    }
+
     /**
      * 이름을 받아 조직을 생성한다. (Org Create)
      * @param token
@@ -1077,8 +1096,7 @@ public class OrgService extends Common {
 	
     /**
      * 사용자 포털에서 조직의 이름을 수정한다. (Org Update : name)
-     * @param orgid
-     * @param newOrgName
+     * @param org
      * @param token
      * @return UpdateOrganizationResponse
      * @author hgcho, ParkCholhan
@@ -1097,7 +1115,7 @@ public class OrgService extends Common {
     /**
      * 사용자 포털에서 조직을 삭제한다. (Org Delete)<br>
      * 만약 false가 넘어올 경우, 권한이 없거나 혹은 
-     * @param orgid
+     * @param org
      * @param token
      * @return
      * @throws Exception
@@ -1268,7 +1286,7 @@ public class OrgService extends Common {
      * 조직에 할당한 Quota를 변경한다. <br>
      * (기존의 Quota GUID와 동일한 경우에도 변경하는 동작을 수행한다) (Org Update : set quota)
      * @param orgId
-     * @param quotaId
+     * @param org
      * @param token
      * @return UpdateOrganizationResponse
      * @version 2.0
@@ -1285,7 +1303,7 @@ public class OrgService extends Common {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST,
                 "Org GUID in the path doesn't match org GUID in request body." );
         
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword))
             .organizations()
             .update( 
                 UpdateOrganizationRequest.builder()
