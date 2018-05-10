@@ -1,14 +1,8 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
-import org.cloudfoundry.client.v2.spaces.GetSpaceSummaryResponse;
-import org.cloudfoundry.client.v2.spaces.ListSpaceServicesResponse;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.cloudfoundry.client.v2.spaces.CreateSpaceResponse;
-import org.cloudfoundry.client.v2.spaces.GetSpaceResponse;
-import org.cloudfoundry.client.v2.spaces.UpdateSpaceResponse;
+import org.cloudfoundry.client.v2.spaces.*;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -23,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 공간 컨트롤러 - 공간 목록 , 공간 이름 변경 , 공간 생성 및 삭제 등을 제공한다.
@@ -85,8 +78,9 @@ public class SpaceController extends Common {
      * @return UpdateSpaceResponse
      * @version 2.0
      * @author hgcho
+     * @since 2018.5.8
      */
-    @PostMapping(V2_URL + "/spaces")
+    @PutMapping(V2_URL + "/spaces")
     public UpdateSpaceResponse renameSpace(@RequestBody Space space, HttpServletRequest request) throws Exception {
         LOGGER.info("Rename Space : {}", space.getNewSpaceName());
         return spaceService.renameSpace(space, request.getHeader(AUTHORIZATION_HEADER_KEY));
@@ -96,37 +90,40 @@ public class SpaceController extends Common {
     /**
      * 공간을 삭제한다.
      *
-     * @param space   the space
-     * @param request the request
+     * @param guid   the space
+     * @param recursive is to delete recursive?
+     * @param authHeader a cloud foundry access token
      * @return ModelAndView model
-     * @throws Exception the exception
+     * @version 2.0
+     * @author hgcho
+     * @since 2018.5.8
      */
-    @RequestMapping(value = {"/space/deleteSpace"}, method = RequestMethod.POST)
-    // TODO
-    public boolean deleteSpace(@RequestBody Space space, HttpServletRequest request) throws Exception {
-        LOGGER.info("Delete Space Start ");
-
-        spaceService.deleteSpace(space, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        LOGGER.info("Delete Space End ");
-        return true;
+    @DeleteMapping(V2_URL + "/spaces")
+    public DeleteSpaceResponse deleteSpace(@RequestParam String guid, @RequestParam boolean recursive, @RequestHeader(
+        AUTHORIZATION_HEADER_KEY )
+        String authHeader) {
+        // Delete method cannot bind body. So space's information receives parameters.
+        final Space space = new Space();
+        space.setSpaceGuid(guid);
+        space.setRecursive(recursive);
+        LOGGER.info("Delete Space : {} / recursive deleting : {}", space.getGuid(), space.isRecursive());
+        return spaceService.deleteSpace(space, authHeader);
     }
 
      /**
      * 공간을 생성한다.
      *
      * @param space   the space
-     * @param request the request
+     * @param authHeader a cloud foundry access token
      * @return boolean boolean
      * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.5.20 최초작성
+     * @version 2.0
+     * @author hgcho
+     * @since 2018.5.8
      */
-    @RequestMapping(value = {"/space/createSpace"}, method = RequestMethod.POST)
-    // TODO
+    @PostMapping(V2_URL + "/spaces")
     public CreateSpaceResponse createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String authHeader) throws Exception {
-        LOGGER.info("Create Space : {}", space.getName(), space.getOrgGuid());
+        LOGGER.info("Create Space : {}, {}", space.getSpaceName(), space.getOrgGuid());
         return spaceService.createSpace(space, authHeader);
     }
 

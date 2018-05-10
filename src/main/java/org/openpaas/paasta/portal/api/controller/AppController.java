@@ -1,11 +1,13 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import com.corundumstudio.socketio.SocketIOClient;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.doppler.Envelope;
+import org.cloudfoundry.doppler.LogMessage;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -506,6 +508,36 @@ public class AppController extends Common {
         LOGGER.info("getRecentLog End");
 
         return mapLog;
+    }
+
+    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/taillogs"}, method = RequestMethod.GET)
+    public Map getTailLogs(@PathVariable String guid, HttpServletRequest request) throws Exception {
+
+        LOGGER.info("getTailLogs Start ");
+
+        Map mapLog = new HashMap();
+        try {
+            List<LogMessage> respAppEvents = appService.getTailLog(guid, this.getToken());
+            mapLog.put("log", respAppEvents);
+        } catch (Exception e) {
+            LOGGER.info("################ ");
+            LOGGER.error(e.toString());
+            mapLog.put("log", "");
+        }
+
+        LOGGER.info("getTailLogs End ");
+
+        return mapLog;
+    }
+
+    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName) {
+        try {
+            client = appService.socketTailLogs(client, appName, orgName, spaceName, this.getToken());
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+
+        }
+        return client;
     }
 
 }
