@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 
+import com.corundumstudio.socketio.SocketIOClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
@@ -16,6 +17,7 @@ import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.doppler.Envelope;
+import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
@@ -589,6 +591,64 @@ public class AppService extends Common {
 
         List<Envelope> getRecentLog = reactorDopplerClient.recentLogs(requestBuilder.build()).collectList().block();
         return getRecentLog;
+    }
+
+    public List<LogMessage> getTailLog(String guid, String token) {
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), "demo.org", "dev");
+//        CloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
+
+//        List<LogMessage> getTailLog = cloudFoundryOperations.applications()
+//                .logs(LogsRequest.builder()
+//                        .name("github-test-app2")
+//                        .build()
+//                ).collectList().block();
+
+        cloudFoundryOperations.applications()
+                .logs(LogsRequest.builder()
+                        .name("github-test-app2")
+                        .build()
+                ).subscribe((msg) -> {
+                    printLog(msg);
+                },
+                (error) -> {
+                    error.printStackTrace();
+                }
+        );
+
+        return null;
+    }
+    private void printLog(LogMessage msg) {
+        LOGGER.info(" ["+msg.getSourceType()+"/"+msg.getSourceInstance()+"] ["+msg.getMessageType()+msg.getMessageType()+"] "+msg.getMessage());
+//        System.out.println(
+//                new StringBuffer()
+//                        .append(new Timestamp(msg.getTimestamp()/1000000).toLocalDateTime())
+//                        .append(" [")
+//                        .append(msg.getSourceType())
+//                        .append("/")
+//                        .append(msg.getSourceInstance())
+//                        .append("] [")
+//                        .append(msg.getMessageType())
+//                        .append("] ")
+//                        .append(msg.getMessage())
+//        );
+    }
+
+    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName, String token) {
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), orgName, spaceName);
+
+        cloudFoundryOperations.applications()
+                .logs(LogsRequest.builder()
+                        .name(appName)
+                        .build()
+                ).subscribe((msg) -> {
+                    printLog(msg);
+                    client.sendEvent("message", " ["+msg.getSourceType()+"/"+msg.getSourceInstance()+"] ["+msg.getMessageType()+msg.getMessageType()+"] "+msg.getMessage());
+                },
+                (error) -> {
+                    error.printStackTrace();
+                }
+        );
+        return client;
     }
 
 }
