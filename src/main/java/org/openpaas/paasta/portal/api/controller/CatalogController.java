@@ -614,7 +614,7 @@ public class CatalogController extends Common {
     }
 
     @PostMapping("/v2/catalogs/app")
-    public void createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
-        catalogService.createApp(param, req, response);
+    public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
+        return catalogService.createApp(param, req, response);
     }
 }

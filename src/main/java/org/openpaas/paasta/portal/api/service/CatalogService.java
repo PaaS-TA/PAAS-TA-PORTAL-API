@@ -1240,7 +1240,7 @@ public class CatalogService extends Common {
                         .application(file.toPath())
                         .build()
         ).block();
-        file.deleteOnExit();
+        file.delete();
     }
 
     private File createTempFile(Catalog param, HttpServletRequest req, HttpServletResponse response)  throws Exception{
@@ -1248,17 +1248,14 @@ public class CatalogService extends Common {
         response.setContentType("application/octet-stream");
         String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
         response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
-        File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length()-4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length()-4), new File("C:\\example"));
-
+        File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length()-4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length()-4));
         InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
         OutputStream outStream = new FileOutputStream(file);
         byte[] buf = new byte[1024];
         int len = 0;
-
         while((len = is.read(buf)) > 0){
             outStream.write(buf, 0, len);
         }
-
         outStream.close();
         is.close();
         return file;
