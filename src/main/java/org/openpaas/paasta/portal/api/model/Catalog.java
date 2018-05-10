@@ -42,6 +42,7 @@ public class Catalog {
     private String appName;
     private String orgName;
     private String spaceName;
+    private String spaceId;
     private String serviceInstanceName;
     private UUID appGuid;
     private UUID serviceInstanceGuid;
@@ -565,6 +566,25 @@ public class Catalog {
         this.spaceName = spaceName;
     }
 
+
+    /**
+     * GETTER 공간guid
+     *
+     * @return 공간guid
+     */
+    public String getSpaceId() {
+        return this.spaceId;
+    }
+
+    /**
+     * SETTER 공간guid
+     *
+     * @param spaceId 공간guid
+     */
+    public void setSpaceId(String spaceId) {
+        this.spaceId = spaceId;
+    }
+
     /**
      * GETTER 서비스 인스턴스명
      *
@@ -922,6 +942,7 @@ public class Catalog {
                 ", appName='" + appName + '\'' +
                 ", orgName='" + orgName + '\'' +
                 ", spaceName='" + spaceName + '\'' +
+                ", spaceId='" + spaceId + '\'' +
                 ", serviceInstanceName='" + serviceInstanceName + '\'' +
                 ", appGuid=" + appGuid +
                 ", serviceInstanceGuid=" + serviceInstanceGuid +

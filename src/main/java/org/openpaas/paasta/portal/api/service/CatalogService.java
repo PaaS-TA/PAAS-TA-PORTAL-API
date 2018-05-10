@@ -6,11 +6,14 @@ import org.cloudfoundry.client.lib.domain.*;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.lib.util.JsonUtil;
+import org.cloudfoundry.client.v2.applications.*;
+import org.cloudfoundry.client.v2.applications.CreateApplicationRequest;
+import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
+import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
+import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
-//import org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper;
-//import org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.model.Org;
@@ -25,7 +28,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 
 import static java.util.Optional.*;
@@ -797,7 +805,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> executeCatalogStarter(Catalog param, HttpServletRequest req) throws Exception {
+    public Map<String, Object> executeCatalogStarter(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
         // CREATE APPLICATION
         this.procCatalogCreateApplication(param, req);
 
@@ -805,7 +813,7 @@ public class CatalogService extends Common {
         // UPLOAD APPLICATION
         if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
             // UPLOAD APPLICATION
-            this.procCatalogUploadApplication(param, req);
+            this.procCatalogUploadApplication(param, req, response);
         }
 
         // CREATE SERVICE INSTANCE
@@ -841,8 +849,8 @@ public class CatalogService extends Common {
         UUID resultAppGuid = null;
         if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
             // START APPLICATION
-            Map<String, Object> resultMap = this.procCatalogStartApplication(param, req);
-            resultAppGuid = (UUID) resultMap.get("APP_GUID");
+           // Map<String, Object> resultMap = this.procCatalogStartApplication(param, req);
+            //resultAppGuid = (UUID) resultMap.get("APP_GUID");
         }
 
         UUID finalResultAppGuid = resultAppGuid;
@@ -878,19 +886,19 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> executeCatalogBuildPack(Catalog param, HttpServletRequest req) throws Exception {
+    public Map<String, Object> executeCatalogBuildPack(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
         UUID resultAppGuid = null;
 
         // CREATE APPLICATION
         this.procCatalogCreateApplication(param, req);
 
         // UPLOAD APPLICATION
-        if (!Constants.USE_YN_N.equals(param.getAppSampleFilePath())) this.procCatalogUploadApplication(param, req);
+        if (!Constants.USE_YN_N.equals(param.getAppSampleFilePath())) this.procCatalogUploadApplication(param, req, response);
 
         if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
             // START APPLICATION
-            Map<String, Object> resultMap = this.procCatalogStartApplication(param, req);
-            resultAppGuid = (UUID) resultMap.get("APP_GUID");
+            //Map<String, Object> resultMap = this.procCatalogStartApplication(param, req);
+            //resultAppGuid = (UUID) resultMap.get("APP_GUID");
         }
 
         UUID finalResultAppGuid = resultAppGuid;
@@ -1016,7 +1024,6 @@ public class CatalogService extends Common {
         Staging staging = new Staging(Constants.CREATE_APPLICATION_STAGING_COMMAND, buildPackName);
         Integer disk = param.getDiskSize();
         Integer memory = param.getMemorySize();
-
         List<String> uris = new ArrayList<String>() {{
             add(param.getHostName());
         }};
@@ -1034,6 +1041,8 @@ public class CatalogService extends Common {
         } else {
             CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
             cloudFoundryClient.createApplication(appName, staging, disk, memory, uris, null);
+
+
         }
     }
 
@@ -1045,26 +1054,75 @@ public class CatalogService extends Common {
      * @param req   HttpServletRequest(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private void procCatalogUploadApplication(Catalog param, HttpServletRequest req) throws Exception {
+    private void procCatalogUploadApplication(Catalog param, HttpServletRequest req,HttpServletResponse response) throws Exception {
         CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
         String appName = param.getName();
+        response.setContentType("application/octet-stream");
+        String fileNameForBrowser = getDisposition("sample-spring.war", getBrowser(req));
+        response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
 
-        cloudFoundryClient.uploadApplication(appName, appName, new URL(param.getAppSampleFilePath()).openStream());
+        OutputStream os = response.getOutputStream();
+        InputStream is = new URL(param.getAppSampleFilePath()).openStream();
+        cloudFoundryClient.uploadApplication(appName, appName, is);
+
     }
+
+    private String getBrowser(HttpServletRequest request) {
+        String header = request.getHeader("User-Agent");
+        if (header.indexOf("MSIE") > -1) {
+            return "MSIE";
+        } else if (header.indexOf("Chrome") > -1) {
+            return "Chrome";
+        } else if (header.indexOf("Opera") > -1) {
+            return "Opera";
+        } else if (header.indexOf("Trident/7.0") > -1){
+            //IE 11 이상 //IE 버전 별 체크 >> Trident/6.0(IE 10) , Trident/5.0(IE 9) , Trident/4.0(IE 8)
+            return "MSIE";
+        }
+
+        return "Firefox";
+    }
+
+    private String getDisposition(String filename, String browser) throws Exception {
+        String encodedFilename = null;
+
+        if (browser.equals("MSIE")) {
+            encodedFilename = URLEncoder.encode(filename, "UTF-8").replaceAll("\\+", "%20");
+        } else if (browser.equals("Firefox")) {
+            encodedFilename = "\"" + new String(filename.getBytes("UTF-8"), "8859_1") + "\"";
+        } else if (browser.equals("Opera")) {
+            encodedFilename = "\"" + new String(filename.getBytes("UTF-8"), "8859_1") + "\"";
+        } else if (browser.equals("Chrome")) {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < filename.length(); i++) {
+                char c = filename.charAt(i);
+                if (c > '~') {
+                    sb.append(URLEncoder.encode("" + c, "UTF-8"));
+                } else {
+                    sb.append(c);
+                }
+            }
+            encodedFilename = sb.toString();
+        } else {
+            throw new RuntimeException("Not supported browser");
+        }
+
+        return encodedFilename;
+    }
+
 
 
     /**
      * 카탈로그 앱을 시작한다.
      *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param param Catalog
+     * @param token   token
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> procCatalogStartApplication(Catalog param, HttpServletRequest req) throws Exception {
-        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-        String appName = param.getName();
-
+    private Map<String, Object> procCatalogStartApplication(Catalog param, String token) throws Exception {
+//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
+//        String appName = param.getName();
 //        // START APPLICATION
 //        appService.startApp(new App() {{
 //            setName(appName);
@@ -1074,8 +1132,18 @@ public class CatalogService extends Common {
 //        CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
 //        UUID resultAppGuid = cloudApplication.getMeta().getGuid();
 //
+//        Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).
+//                applicationsV3().start(StartApplicationRequest.builder().applicationId(appid).build()).block();
+//
+        Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName())
+                .applications().start(
+                        StartApplicationRequest
+                                .builder()
+                                .name(param.getAppName())
+                                .build())
+                .block();
+
         return new HashMap<String, Object>() {{
-            //put("APP_GUID", resultAppGuid);
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
@@ -1098,10 +1166,102 @@ public class CatalogService extends Common {
         Map<String, Object> tempMap = JsonUtil.convertJsonToMap(resultString);
         Map tempSubMap = (Map) tempMap.get("metadata"); // FOR TEST CASE
 
+
+
         return new HashMap<String, Object>() {{
             put("SERVICE_INSTANCE_GUID", tempSubMap.get("guid"));
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
+    }
+
+
+    public Map<String, Object> createApp(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception{
+        String token = req.getHeader(cfAuthorizationHeaderKey);
+        File file = createTempFile(param, req,response); // 임시파일을 생성합니다.
+
+        String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
+        String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
+
+        routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
+        fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
+
+        if(Constants.USE_YN_Y.equals(param.getAppSampleStartYn())){ //앱 실행버튼이 on일때
+           return procCatalogStartApplication(param, token); //앱 시작
+        }
+        return new HashMap<String, Object>() {{
+           put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+    private String createApplication(Catalog param, String token){
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                applicationsV2().create(
+                CreateApplicationRequest
+                        .builder()
+                        .buildpack(param.getBuildPackName())
+                        .memory(param.getMemorySize())
+                        .name(param.getAppName())
+                        .diskQuota(param.getDiskSize())
+                        .spaceId(param.getSpaceId())
+                        .build())
+                .block().getMetadata().getId();
+
+    }
+
+    private String createRoute(Catalog param, String token){
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                routes().create(
+                CreateRouteRequest
+                        .builder()
+                        .host(param.getAppName())
+                        .domainId(param.getDomainName())
+                        .spaceId(param.getSpaceId())
+                        .build())
+                .block().getMetadata().getId();
+    }
+
+    private void routeMapping(String applicationid, String routeid, String token){
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                routeMappings().create(
+                CreateRouteMappingRequest
+                        .builder()
+                        .routeId(routeid)
+                        .applicationId(applicationid)
+                        .build()
+        ).block();
+    }
+
+    private  void fileUpload(File file, String applicationid, String token){
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                applicationsV2().upload(
+                UploadApplicationRequest
+                        .builder()
+                        .applicationId(applicationid)
+                        .application(file.toPath())
+                        .build()
+        ).block();
+        file.deleteOnExit();
+    }
+
+    private File createTempFile(Catalog param, HttpServletRequest req, HttpServletResponse response)  throws Exception{
+
+        response.setContentType("application/octet-stream");
+        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
+        response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
+        File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length()-4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length()-4), new File("C:\\example"));
+
+        InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
+        OutputStream outStream = new FileOutputStream(file);
+        byte[] buf = new byte[1024];
+        int len = 0;
+
+        while((len = is.read(buf)) > 0){
+            outStream.write(buf, 0, len);
+        }
+
+        outStream.close();
+        is.close();
+        return file;
     }
 
 
