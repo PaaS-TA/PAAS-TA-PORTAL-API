@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
 import com.google.gson.Gson;
-
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudUser;
@@ -11,7 +10,6 @@ import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.Future;
 
 //import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
 //import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
@@ -191,43 +188,7 @@ public class SpaceService extends Common {
                 .recursive( recursive ).async( true ).build() ).block();
     }
 
-    public Space getSpaceSummary(Space space, String spaceName) throws Exception{
 
-        String orgName = space.getOrgName();
-        if(!stringNullCheck(orgName,spaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-
-        String spaceString = admin.getSpaceSummary(orgName, spaceName);
-        Space respSpace = new ObjectMapper().readValue(spaceString, Space.class);
-
-        //LOGGER.info(spaceString);
-        int memTotal = 0;
-        int memUsageTotal = 0;
-
-        for (App app : respSpace.getApps()) {
-
-            memTotal += app.getMemory() * app.getInstances();
-
-            if (app.getState().equals("STARTED")) {
-                // space.setAppCountStarted(space.getAppCountStarted() + 1);
-
-                memUsageTotal += app.getMemory() * app.getInstances();
-
-            } else if (app.getState().equals("STOPPED")) {
-                //space.setAppCountStopped(space.getAppCountStopped() + 1);
-            } else {
-                //space.setAppCountCrashed(space.getAppCountCrashed() + 1);
-            }
-        }
-
-        respSpace.setMemoryLimit(memTotal);
-        respSpace.setMemoryUsage(memUsageTotal);
-
-        return respSpace;
-    }
 
 
 
@@ -293,60 +254,7 @@ public class SpaceService extends Common {
 //        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
     }
 
-    /**
-     * 공간 role을 부여한다.
-     *
-     * @param orgName   the org name
-     * @param spaceName the space name
-     * @param userName  the user name
-     * @param userRole  the user role
-     * @param token     the token
-     * @return Map space role
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.18 최초작성
-     */
-    public boolean setSpaceRole(String orgName, String spaceName, String userName, String userRole, String token) throws Exception{
-        if (!stringNullCheck(orgName, spaceName, userName, userRole)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
 
-        String spaceRole = toStringRole(userRole);
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        client.setSpaceRole(orgName, spaceName, userName, spaceRole);
-
-        return true;
-    }
-
-
-    /**
-     * 공간 role을 제거한다.
-     *
-     * @param orgName   the org name
-     * @param spaceName the space name
-     * @param userGuid  the user guid
-     * @param userRole  the user role
-     * @param token     the token
-     * @return Map boolean
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.18 최초작성
-     */
-    public boolean unsetSpaceRole(String orgName, String spaceName, String userGuid, String userRole, String token) throws Exception{
-        if (!stringNullCheck(orgName, spaceName, userGuid, userRole)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        String spaceRole = toStringRole(userRole);
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        client.unsetSpaceRole(orgName, spaceName, userGuid, spaceRole);
-
-        return true;
-    }
 
 
     /**
@@ -373,41 +281,6 @@ public class SpaceService extends Common {
     }
 
 
-    /**
-     * 요청된 유저들에 대한 해당 스페이스의 역할목록을 가져온다
-     *
-     * @param orgName   the org name
-     * @param spaceName the space name
-     * @param userList  the user list
-     * @param token     the token
-     * @return users for space role
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.9.05 최초작성
-     */
-    public List<Map<String, Object>> getUsersForSpaceRole(String orgName, String spaceName, List<Map<String,Object>> userList, String token) throws Exception {
-
-        if (!stringNullCheck(orgName, spaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-        }
-
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-        UUID orgGuid = client.getOrgByName(orgName, true).getMeta().getGuid();
-
-        Future<Map<String, CloudUser>> managers = asyncUtilService.getUsersForSpaceRole_managers(orgGuid, spaceName, client);
-        Future<Map<String, CloudUser>> developers = asyncUtilService.getUsersForSpaceRole_developers(orgGuid,spaceName, client);
-        Future<Map<String, CloudUser>> auditors = asyncUtilService.getUsersForSpaceRole_auditors(orgGuid,spaceName,client);
-
-        while (!(managers.isDone() && developers.isDone() && auditors.isDone())) {
-            Thread.sleep(10);
-        }
-
-        //org 유저목록에 스페이스
-        List<Map<String, Object>> spaceUserList = putUserList(orgName, spaceName, userList, managers.get() ,developers.get() ,auditors.get());
-
-        return spaceUserList;
-    }
 
 
     /**

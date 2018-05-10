@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.common.CustomCloudFoundryClient;
 import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.ClientService;
 import org.slf4j.Logger;
@@ -15,14 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-/**
- * ClientController.java
- * 클라이언트 목록 , 클라이언트 삭제 등 클라이언트 관련 API를 호출 받는 컨트롤러
- *
- * @author 김영지
- * @version 1.0
- * @since 2016.9.29 최초작성
- */
+
 @RestController
 @RequestMapping(value = {"/client"})
 public class ClientController extends Common {
@@ -41,11 +33,12 @@ public class ClientController extends Common {
      */
     @RequestMapping(value = {"/getClientList"}, method = RequestMethod.POST)
     public Map<String, Object> getClientList(@RequestBody Map<String, Object> param, HttpServletRequest request) throws Exception {
-        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(adminUserName, adminPassword);
-
-        LOGGER.info("AUTHORIZATION_HEADER_KEY:::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        return clientService.getClientList(adminCcfc, param);
+//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//
+//        LOGGER.info("AUTHORIZATION_HEADER_KEY:::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
+//
+//        return clientService.getClientList(adminCcfc, param);
+        return null;
 
     }
 
@@ -58,8 +51,10 @@ public class ClientController extends Common {
      */
     @RequestMapping(value = {"/getClient"}, method = RequestMethod.POST)
     public Map<String, Object> getClient(@RequestBody Map<String, Object> param) throws Exception {
-        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(adminUserName, adminPassword);
-        return clientService.getClient(adminCcfc, param);
+//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//        return clientService.getClient(adminCcfc, param);
+
+        return null;
     }
 
     /**
@@ -71,8 +66,10 @@ public class ClientController extends Common {
      */
     @RequestMapping(value = {"/registerClient"}, method = RequestMethod.POST)
     public Map<String, Object> registerClient(@RequestBody Map<String, Object> param) throws Exception {
-        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
-        return clientService.registerClient(adminCcfc, param);
+//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
+//        return clientService.registerClient(adminCcfc, param);
+
+        return null;
     }
 
     /**
@@ -84,8 +81,10 @@ public class ClientController extends Common {
      */
     @RequestMapping(value = {"/updateClient"}, method = RequestMethod.POST)
     public Map<String, Object> updateClient(@RequestBody Map<String, Object> param) throws Exception {
-        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
-        return clientService.updateClient(adminCcfc, param);
+//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
+//        return clientService.updateClient(adminCcfc, param);
+
+        return null;
     }
 
     /**
@@ -97,8 +96,10 @@ public class ClientController extends Common {
      */
     @RequestMapping(value = {"/deleteClient"}, method = RequestMethod.POST)
     public Map<String, Object> deleteClient(@RequestBody Map<String, Object> param) throws Exception {
-        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
-        return clientService.deleteClient(adminCcfc, param);
+//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
+//        return clientService.deleteClient(adminCcfc, param);
+
+        return null;
     }
 
 }

@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.service.CatalogService;
 import org.slf4j.Logger;
@@ -21,8 +22,7 @@ import java.util.Map;
  * @since 2016.07.04 최초작성
  */
 @RestController
-@RequestMapping(value = {"/catalog"})
-public class CatalogController {
+public class CatalogController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CatalogController.class);
     private final CatalogService catalogService;
@@ -516,8 +516,8 @@ public class CatalogController {
      * @throws Exception Exception(자바클래스)
      */
     @RequestMapping(value = {"/executeCatalogStarter"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> executeCatalogStarter(@RequestBody Catalog param, HttpServletRequest req) throws Exception {
-        return catalogService.executeCatalogStarter(param, req);
+    public Map<String, Object> executeCatalogStarter(@RequestBody Catalog param, HttpServletRequest req,HttpServletResponse response) throws Exception {
+        return catalogService.executeCatalogStarter(param, req,response);
     }
 
 
@@ -542,8 +542,8 @@ public class CatalogController {
      * @throws Exception Exception(자바클래스)
      */
     @RequestMapping(value = {"/executeCatalogBuildPack"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> executeCatalogBuildPack(@RequestBody Catalog param, HttpServletRequest req) throws Exception {
-        return catalogService.executeCatalogBuildPack(param, req);
+    public Map<String, Object> executeCatalogBuildPack(@RequestBody Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
+        return catalogService.executeCatalogBuildPack(param, req, response);
     }
 
 
@@ -611,5 +611,10 @@ public class CatalogController {
     @RequestMapping(value = {"/appBindServiceV2"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> appBindServiceV2(@RequestBody Catalog param, HttpServletRequest req) throws Exception {
         return catalogService.procCatalogBindService(param, req);
+    }
+
+    @PostMapping("/v2/catalogs/app")
+    public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
+        return catalogService.createApp(param, req, response);
     }
 }

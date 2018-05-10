@@ -145,7 +145,7 @@ public class SpaceController extends Common {
 
         LOGGER.info("setSpaceRole Start");
 
-        spaceService.setSpaceRole(body.get("orgName"),body.get("spaceName"), body.get("userName"), body.get("userRole"), token);
+//        spaceService.setSpaceRole(body.get("orgName"),body.get("spaceName"), body.get("userName"), body.get("userRole"), token);
 
         LOGGER.info("setSpaceRole End");
 
@@ -169,7 +169,7 @@ public class SpaceController extends Common {
 
         LOGGER.info("unsetSpaceRole Start");
 
-        spaceService.unsetSpaceRole(body.get("orgName"),body.get("spaceName"), body.get("userGuid"), body.get("userRole"), token);
+//        spaceService.unsetSpaceRole(body.get("orgName"),body.get("spaceName"), body.get("userGuid"), body.get("userRole"), token);
 
         LOGGER.info("unsetSpaceRole End");
 
@@ -203,11 +203,11 @@ public class SpaceController extends Common {
             }
         }
         List<Map<String, Object>> inviteOrgUserList = orgService.getUsersByInvite(body.get("spaceName").toString(), userId, gubun);
-        List<Map<String, Object>> spaceUserList = spaceService.getUsersForSpaceRole(body.get("orgName").toString(), body.get("spaceName").toString(), userList, token);
-        spaceUserList.addAll(inviteOrgUserList);
+//        List<Map<String, Object>> spaceUserList = spaceService.getUsersForSpaceRole(body.get("orgName").toString(), body.get("spaceName").toString(), userList, token);
+//        spaceUserList.addAll(inviteOrgUserList);
         LOGGER.info("getUsersForSpaceRole End");
 
-        return spaceUserList;
+        return null;
     }
 
     /**

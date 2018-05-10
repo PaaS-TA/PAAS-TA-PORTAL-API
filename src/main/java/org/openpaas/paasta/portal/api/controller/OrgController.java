@@ -95,7 +95,7 @@ public class OrgController extends Common {
 
         LOGGER.info("Rename Org Start : " + org.getOrgName() + " : " + org.getNewOrgName());
 
-        orgService.renameOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+//        orgService.renameOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Rename Org End ");
 
@@ -116,7 +116,7 @@ public class OrgController extends Common {
 
         LOGGER.info("delete Org Start : " + org.getOrgName());
 
-        orgService.deleteOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+//        orgService.deleteOrgV1(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("delete Org End ");
 
@@ -164,7 +164,7 @@ public class OrgController extends Common {
 
         LOGGER.info("Create Org Start");
 
-        orgService.createOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+//        orgService.createOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("Create Org End. Created org: " + org.getNewOrgName());
 
@@ -187,7 +187,7 @@ public class OrgController extends Common {
 
         LOGGER.info("removeUserFromOrg Start");
 
-        orgService.removeUserFromOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
+//        orgService.removeUserFromOrg(org, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         LOGGER.info("removeUserFromOrg End");
 
@@ -210,7 +210,7 @@ public class OrgController extends Common {
 
         LOGGER.info("setOrgRole Start");
 
-        orgService.setOrgRole(body.get("orgName"), body.get("userName"), body.get("userRole"), token);
+//        orgService.setOrgRole(body.get("orgName"), body.get("userName"), body.get("userRole"), token);
 
         LOGGER.info("setOrgRole End");
 
@@ -233,7 +233,7 @@ public class OrgController extends Common {
 
         LOGGER.info("unsetOrgRole Start");
 
-        orgService.unsetOrgRole(body.get("orgName"), body.get("userGuid"), body.get("userRole"), token);
+//        orgService.unsetOrgRole(body.get("orgName"), body.get("userGuid"), body.get("userRole"), token);
 
         LOGGER.info("unsetOrgRole End");
 
@@ -260,7 +260,7 @@ public class OrgController extends Common {
             if("".equals(orgName) || orgName ==null){
                 throw  new Exception(messageSource.getMessage("Organization_not_found", null, Locale.KOREA));
             }
-            orgUserList = orgService.getAllUsers(body.get("orgName"), token);
+//            orgUserList = orgService.getAllUsers(body.get("orgName"), token);
             String gubun ="0";
             List<Map<String, Object>> inviteOrgUserList = orgService.getUsersByInvite(body.get("orgName"), userId, gubun);
             orgUserList.addAll(inviteOrgUserList);
@@ -295,11 +295,11 @@ public class OrgController extends Common {
             }
         }
 //        List<Map<String, Object>> orgUserList = orgService.getUsersForOrgRole(body.get("orgName").toString(), (List<Map<String, Object>>)body.get("userList"), token);
-        List<Map<String, Object>> orgUserList = orgService.getUsersForOrgRole(body.get("orgName").toString(), userList, token);
-        orgUserList.addAll(inviteOrgUserList);
+//        List<Map<String, Object>> orgUserList = orgService.getUsersForOrgRole(body.get("orgName").toString(), userList, token);
+//        orgUserList.addAll(inviteOrgUserList);
         LOGGER.info("getUsersForOrgRole End");
 
-        return orgUserList;
+        return null;
     }
 
     /**
@@ -314,7 +314,7 @@ public class OrgController extends Common {
     public Map<String, Object> deleteUserOrg(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, Object> body) throws Exception {
 
         Map map = new HashMap();
-        map.put("bSend", orgService.unsetUserOrg(body, token));
+//        map.put("bSend", orgService.unsetUserOrg(body, token));
         return map;
     }
 
@@ -410,7 +410,7 @@ public class OrgController extends Common {
         }
         Map map = new HashMap();
         map.put("rtnCnt", iRtn);
-        orgService.inviteMemberEmail(body);
+//        orgService.inviteMemberEmail(body);
         return map;
     }
 
@@ -437,7 +437,7 @@ public class OrgController extends Common {
         int cnt = orgService.updateInviteY(code);
         orgService.updateAccessCnt(code, accessCnt+1);
         if(cnt>0) {
-            orgService.setOrgSpaceUserList(list);
+//            orgService.setOrgSpaceUserList(list);
             result.put("success",messageSource.getMessage("invite.info.success", null, Locale.KOREA));
         }else{
             result.put("error",messageSource.getMessage("invite.info.noCnt", null, Locale.KOREA));
@@ -463,9 +463,9 @@ public class OrgController extends Common {
 
         if(list.size() > 0) {
             String inviteId = (String) list.get(0).getOrDefault("inviteUserId", "");
-            UserDetail userDetail = userService.getUser(inviteId);
-            result.put("userId", inviteId);
-            result.put("userDetail", userDetail);
+//            UserDetail userDetail = userService.getUser(inviteId);
+//            result.put("userId", inviteId);
+//            result.put("userDetail", userDetail);
         }
         result.put("listSize", list.size());
 
@@ -491,8 +491,8 @@ public class OrgController extends Common {
         Map userDetail = new HashMap();
         String inviteId = (String) list.get(0).getOrDefault("inviteuserid","");
         userDetail.put("userId", inviteId);
-        userService.createUserAdd(userDetail);
-        result.put("inserUserIdCnt" ,userService.createUserAdd(userDetail));
+//        userService.createUserAdd(userDetail);
+//        result.put("inserUserIdCnt" ,userService.createUserAdd(userDetail));
         result.put("userId" ,inviteId);
         result.put("userDetail" ,userDetail);
         return  result;
@@ -509,7 +509,7 @@ public class OrgController extends Common {
     public Map<String, Object> inviteEmailReSend(@RequestBody Map<String, Object> body) throws Exception {
         LOGGER.info("inviteUser ::"+body.toString());
         Map map = new HashMap();
-        map.put("bSend", orgService.inviteMemberEmailResend(body));
+//        map.put("bSend", orgService.inviteMemberEmailResend(body));
         return map;
     }
 
@@ -541,7 +541,7 @@ public class OrgController extends Common {
     public Map<String, Object> inviteEmailSendCnt(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, Object> body) throws Exception {
 
         Map map = new HashMap();
-        map.put("bSend", orgService.getOrgUser(body, token));
+//        map.put("bSend", orgService.getOrgUser(body, token));
         return map;
     }
 
@@ -567,8 +567,8 @@ public class OrgController extends Common {
     /**
      * 조직 정보를 조회한다.
      *
-     * @param orgid
-     * @param request
+     * @param orgId
+     * @param token
      * @return information of the organization
      */
     @GetMapping(V2_URL + "/orgs/{orgId}")
@@ -584,7 +584,7 @@ public class OrgController extends Common {
      * 조직 요약 정보를 조회한다.
      *
      * @param orgId     the org id
-     * @param request the request
+     * @param token the request
      * @return summary of the organization
      */
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
@@ -623,7 +623,7 @@ public class OrgController extends Common {
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
      * @param orgId     the org
-     * @param request the request
+     * @param token the request
      * @return List<CloudSpace>     orgList
      * @throws Exception the exception
      * @author hgcho
@@ -641,8 +641,8 @@ public class OrgController extends Common {
     
     /**
      * 사용자의 조직의 이름을 변경한다.
-     * @param orgId
-     * @param wantedName
+     * @param org
+     * @param token
      * @param token
      * @return
      */
@@ -654,7 +654,7 @@ public class OrgController extends Common {
     
     /**
      * 사용자의 조직을 삭제한다.
-     * @param orgId organization id
+     * @param org organization id
      * @param token the token
      * @return boolean
      * @throws Exception the exception
@@ -675,7 +675,7 @@ public class OrgController extends Common {
      * 조직의 자원 할당량을 조회한다.
      *
      * @param orgId     the org id
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
