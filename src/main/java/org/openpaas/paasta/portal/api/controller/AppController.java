@@ -44,6 +44,7 @@ public class AppController extends Common {
 
 //    @Autowired
 //    private LoginService loginService;
+
     /**
      * 앱 요약 정보를 조회한다.
      *
@@ -52,7 +53,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/summary"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/summary"}, method = RequestMethod.GET)
     public SummaryApplicationResponse getAppSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getAppSummary Start : " + guid);
 
@@ -100,12 +101,12 @@ public class AppController extends Common {
     /**
      * 앱 실시간 상태를 조회한다.
      *
-     * @param guid     the app guid
+     * @param guid    the app guid
      * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/stats"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/stats"}, method = RequestMethod.GET)
     public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("stopApp Start : " + guid);
@@ -129,10 +130,9 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/renameApp"}, method = RequestMethod.POST)
-    public boolean renameApp(@RequestBody App app, HttpServletRequest request) throws Exception {
-        LOGGER.info("Rename App Start : " + " : " + app.getName() + " : " + app.getNewName());
-
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/rename"}, method = RequestMethod.PUT)
+    public boolean renameApp(@PathVariable String guid, @RequestBody App app, HttpServletRequest request) throws Exception {
+        LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
         appService.renameApp(app, this.getToken());
 
@@ -176,7 +176,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL+"/apps/startApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V3_URL + "/apps/startApp"}, method = RequestMethod.POST)
     public boolean startApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("startApp Start ");
 
@@ -195,7 +195,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL+"/apps/stopApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V3_URL + "/apps/stopApp"}, method = RequestMethod.POST)
     public boolean stopApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("stopApp Start ");
 
@@ -214,7 +214,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/restageApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/restageApp"}, method = RequestMethod.POST)
     public boolean restageApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("restageApp Start ");
 
@@ -233,7 +233,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/updateApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/updateApp"}, method = RequestMethod.POST)
     public boolean updateApp(@RequestBody App app, HttpServletRequest request) throws Exception {
 
         ApplicationStats applicationStats = null;
@@ -265,7 +265,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/service-bindings"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL + "/service-bindings"}, method = RequestMethod.POST)
     public boolean bindService(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("bindService Start ");
 
@@ -283,7 +283,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {Constants.V2_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
     public boolean unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
         LOGGER.info("unbindService Start ");
 
@@ -302,7 +302,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/app-usage-events/{guid}"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/app-usage-events/{guid}"}, method = RequestMethod.GET)
     public ListEventsResponse getAppEvents(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getAppEvents Start : " + guid);
 
@@ -325,7 +325,7 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/env"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/env"}, method = RequestMethod.GET)
     public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getApplicationEnv Start : " + guid);
 
@@ -371,7 +371,7 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @RequestMapping(value = {Constants.V2_URL+"/routes"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL + "/routes"}, method = RequestMethod.POST)
     public boolean addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
 
@@ -394,12 +394,12 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
     public boolean removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid) throws Exception {
 
         LOGGER.info("removeApplicationRoute Start ");
 
-        appService.removeApplicationRoute(guid, route_guid , this.getToken());
+        appService.removeApplicationRoute(guid, route_guid, this.getToken());
 
         LOGGER.info("removeApplicationRoute End ");
         return true;
@@ -421,7 +421,7 @@ public class AppController extends Common {
 
         LOGGER.info("deleteRoute Start");
 
-        appService.deleteRoute(body.get("orgName").toString(), body.get("spaceName").toString(), (List)body.get("urls"), token);
+        appService.deleteRoute(body.get("orgName").toString(), body.get("spaceName").toString(), (List) body.get("urls"), token);
 
         LOGGER.info("deleteRoute End ");
         return true;
@@ -435,7 +435,7 @@ public class AppController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
     public boolean terminateInstance(@PathVariable String guid, @PathVariable String index) throws Exception {
         LOGGER.info("terminateInstance Start");
         appService.terminateInstance(guid, index, this.getToken());
@@ -460,7 +460,6 @@ public class AppController extends Common {
     }
 
 
-
     /**
      * 앱 최근 로그
      *
@@ -469,7 +468,7 @@ public class AppController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
     public Map getSpaceSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getRecentLog Start : " + guid);
@@ -489,7 +488,7 @@ public class AppController extends Common {
         return mapLog;
     }
 
-    @RequestMapping(value = {Constants.V2_URL+"/apps/{guid}/taillogs"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/taillogs"}, method = RequestMethod.GET)
     public Map getTailLogs(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getTailLogs Start ");
