@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.v2.PaginatedResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.service.DomainService;
 import org.slf4j.Logger;
@@ -40,10 +41,10 @@ public class DomainController extends Common {
      * @return the domains
      * @throws Exception the exception
      */
-    @GetMapping(V2_URL+"/domains/{status}")
-    public Map<String, Object> getDomains(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                           @PathVariable String status) throws Exception {
-        return domainService.getDomains(token, status);
+    @GetMapping( V2_URL + "/domains/{status}" )
+    public PaginatedResponse getDomains( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
+                                         @PathVariable String status) throws Exception {
+        return domainService.getDomains(token, status.toLowerCase());
     }
 
     /**
@@ -54,13 +55,16 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @PostMapping(V2_URL+"/domains")
-    public boolean addDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                             @RequestBody Map<String, String> body) throws Exception {
-
-        domainService.addDomain(token, body.get("orgName"), body.get("spaceName"), body.get("domainName"));
-
-        return true;
+    @PostMapping( V2_URL + "/domains" )
+    public boolean addDomain ( @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token,
+                               @RequestBody Map<String, String> body ) throws Exception {
+        final String domainName = body.get( "domainName" );
+        final String orgId = body.get( "orgId" );
+        if ( body.containsKey( "isShared" ) )
+            return domainService.addDomain(
+                token, domainName, orgId, Boolean.valueOf( body.get( "isShared" ) ) );
+        else
+            return domainService.addDomain( token, domainName, orgId );
     }
 
     /**
@@ -75,9 +79,7 @@ public class DomainController extends Common {
     public boolean deleteDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                                 @RequestBody Map<String, String> body) throws Exception {
 
-        domainService.deleteDomain(token, body.get("orgName"), body.get("spaceName"), body.get("domainName"));
-
-        return true;
+        return domainService.deleteDomain(token, body.get("domainName"));
     }
 
 
