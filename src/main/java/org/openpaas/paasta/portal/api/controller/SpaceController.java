@@ -232,21 +232,6 @@ public class SpaceController extends Common {
         return null;
     }
 
-
-    /**
-     * 공간 쿼터를 조회한다.
-     *
-     * @param spacequotaid  the spaceQuotaId
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    @GetMapping(V2_URL + "/spaces/{spacequotaid}/quota")
-    public Map<String, Object> getSpaceQuota(@PathVariable String spacequotaid, HttpServletRequest request) throws Exception {
-        LOGGER.info("getSpaceQuota Start" + spacequotaid);
-        return spaceService.getSpaceQuota(spacequotaid, request.getHeader(AUTHORIZATION_HEADER_KEY));
-    }
-
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{guid}/services"}, method = RequestMethod.GET)
     public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceServices Start : " + guid);

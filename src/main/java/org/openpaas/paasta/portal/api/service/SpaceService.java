@@ -288,26 +288,6 @@ public class SpaceService extends Common {
         return selectSpace;
     }
 
-
-    /**
-     * 공간 쿼터를 조회한다.
-     *
-     * @param spacequotaid the spaceQuotaId
-     * @param token the token
-     * @return boolean boolean
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.7.11 최초작성
-     */
-    public Map<String, Object> getSpaceQuota(String spacequotaid, String token) throws Exception {
-        GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitionResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                        .spaceQuotaDefinitions().get(GetSpaceQuotaDefinitionRequest.builder().spaceQuotaDefinitionId(spacequotaid).build()).block();
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(getSpaceQuotaDefinitionResponse, Map.class);
-    }
-
     /**
      * 공간에 생성되어 있는 서비스를 조회한다.
      *
