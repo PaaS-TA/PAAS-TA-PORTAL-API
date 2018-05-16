@@ -34,6 +34,7 @@ import java.util.Map;
 public class UserController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+    private final String V2_URL = "/v2";
 
     @Autowired
     private UserService userService;
@@ -174,6 +175,39 @@ public class UserController extends Common {
     @RequestMapping(value = {"/getListForTheUser/{keyOfRole}"}, method = RequestMethod.POST)
     public List<Map> getListForTheUser(@PathVariable String keyOfRole, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+    @RequestMapping(value = {"/getUserInfo"}, method = RequestMethod.GET)
+    public Map<String, Object> getAllUserName() throws Exception {
+//        List<Map<String,String>> userInfo = userService.getUserInfo();
+//        Map<String, Object> resultMap = new HashMap();
+//        resultMap.put("userInfo", userInfo);
+        return null;
+    }
+
+    @GetMapping(V2_URL + "/user/name-by-id/{username}")
+    public String getUserId(@PathVariable String username) {
+        return userService.getUserId( username );
+    }
+
+    @GetMapping(V2_URL + "/user/id-by-name/{userId}")
+    public String getUsername(@PathVariable String userId) {
+        return userService.getUsername( userId );
+    }
+
+    @GetMapping(V2_URL + "/user/summary/{userIdentifier}")
+    public User getUserSummary( @PathVariable String userIdentifier, @RequestParam String type) {
+        String filterType;
+        if (null == type)
+            filterType = "default";
+        else
+            filterType = type;
+
+        switch(filterType) {
+            case "name":
+                return userService.getUserSummaryByUsername( userIdentifier );
+            default:
+            case "id":
+                return userService.getUserSummary( userIdentifier );
+        }
         //to return
         List<Map> listOrgOrSpace = new ArrayList<>();
 

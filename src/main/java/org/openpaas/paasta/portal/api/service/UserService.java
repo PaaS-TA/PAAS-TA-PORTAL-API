@@ -1,5 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.v2.users.ListUsersRequest;
+import org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.TokenProvider;
 
 import org.cloudfoundry.identity.uaa.login.UaaResetPasswordService;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -11,9 +16,12 @@ import org.openpaas.paasta.portal.api.model.UserDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+import java.util.function.Function;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -35,10 +43,14 @@ public class UserService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
-
     @Autowired
     ReactorCloudFoundryClient reactorCloudFoundryClient;
 
+    @Autowired
+    ConnectionContext connectionContext;
+
+    @Autowired
+    TokenProvider adminTokenProvider;
 
     /**
      * 사용자 생성
@@ -321,4 +333,69 @@ public class UserService extends Common {
         return bRtn;
     }
 
+
+    private enum UaaUserLookupFilterType { Username, Id, Origin }
+
+    private String createUserLookupFilter(UaaUserLookupFilterType filterType, String filterValue) {
+        Objects.requireNonNull( filterType, "User lookup FilterType" );
+        Objects.requireNonNull( filterValue, "User lookup FilterValue" );
+
+        StringBuilder builder = new StringBuilder();
+        builder.append( filterType.name() ).append( " eq \"" ).append( filterValue ).append( "\"" );
+        return builder.toString();
+    }
+
+    /**
+     * 유저 이름(user name)으로 유저의 GUID(user id)를 가져온다.
+     * @param username
+     * @return User ID
+     */
+    public String getUserId(String username) {
+        final List<UserId> userIdList = Common.uaaClient( connectionContext, adminTokenProvider )
+            .users().lookup( LookupUserIdsRequest.builder()
+            .filter( createUserLookupFilter( UaaUserLookupFilterType.Username, username ) )
+            .build() )
+            .block()
+        .getResources();
+        if (userIdList.size() <= 0)
+            throw new CloudFoundryException( HttpStatus.NOT_FOUND, "Username cannot find" );
+
+        return userIdList.get( 0 ).getId();
+    }
+
+    /**
+     * 유저 GUID(user id)로 유저의 이름(user name)을 가져온다.
+     * @param userId
+     * @return User name
+     */
+    public String getUsername(String userId) {
+        final LookupUserIdsResponse response = Common.uaaClient( connectionContext, adminTokenProvider )
+            .users().lookup( LookupUserIdsRequest.builder()
+                .filter( createUserLookupFilter( UaaUserLookupFilterType.Id, userId ) )
+                .build() )
+            .block();
+        if (response.getResources().size() <= 0)
+            throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User name cannot find" );
+
+        return response.getResources().get( 0 ).getUserName();
+    }
+
+    private User getUserSummaryWithFilter(UaaUserLookupFilterType filterType, String filterValue) {
+        final ListUsersResponse response = Common.uaaClient( connectionContext, adminTokenProvider )
+            .users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder()
+                .filter( createUserLookupFilter( filterType, filterValue ) ).build())
+            .block();
+        if (response.getResources().size() <= 0)
+            throw new CloudFoundryException( HttpStatus.NOT_FOUND, ( filterType.name() + " of user cannot find" ) );
+
+        return response.getResources().get(0);
+    }
+
+    public User getUserSummary(String userId) {
+        return getUserSummaryWithFilter( UaaUserLookupFilterType.Id, userId );
+    }
+
+    public User getUserSummaryByUsername(String userName) {
+        return getUserSummaryWithFilter( UaaUserLookupFilterType.Username, userName );
+    }
 }
