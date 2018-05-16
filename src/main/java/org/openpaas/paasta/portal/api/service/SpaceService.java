@@ -1,16 +1,9 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.google.gson.Gson;
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.CloudUser;
-import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionRequest;
-import org.cloudfoundry.client.v2.spacequotadefinitions.GetSpaceQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
 import org.slf4j.Logger;
@@ -20,8 +13,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 //import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
 //import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
