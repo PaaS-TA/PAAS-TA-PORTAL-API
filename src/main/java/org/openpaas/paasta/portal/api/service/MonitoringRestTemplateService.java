@@ -21,9 +21,12 @@ public class MonitoringRestTemplateService extends Common {
 
     public Map send(String reqUrl, HttpMethod httpMethod, Object bodyObject){
         HttpHeaders reqHeaders = new HttpHeaders();
+        reqHeaders.add("Accept", "application/json");
+        reqHeaders.add("Content-Type", "application/json; charset=utf-8");
         HttpEntity<Object> reqEntity = new HttpEntity<>(bodyObject, reqHeaders);
-        LOGGER.info("####### monitoringApiTarget Url ::: " + monitoringApiTarget + reqUrl);
+//        LOGGER.info("####### monitoringApiTarget Url ::: " + monitoringApiTarget + reqUrl);
         RestTemplate restTemplate = new RestTemplate();
+        monitoringApiTarget = "http://115.68.151.184:8080";
         ResponseEntity<Map> resEntity = restTemplate.exchange(monitoringApiTarget + reqUrl, httpMethod , reqEntity, Map.class);
         Map body = resEntity.getBody();
         LOGGER.info("Response Type: {}", resEntity.getBody().getClass());

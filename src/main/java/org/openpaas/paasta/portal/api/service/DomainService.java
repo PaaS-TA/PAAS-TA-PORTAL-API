@@ -2,31 +2,44 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.v2.PaginatedResponse;
+import org.cloudfoundry.client.v2.Resource;
+import org.cloudfoundry.client.v2.domains.DeleteDomainRequest;
+import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.domains.ListDomainsResponse;
+import org.cloudfoundry.client.v2.privatedomains.CreatePrivateDomainRequest;
+import org.cloudfoundry.client.v2.privatedomains.CreatePrivateDomainResponse;
 import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsRequest;
 import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsResponse;
+import org.cloudfoundry.client.v2.shareddomains.CreateSharedDomainRequest;
+import org.cloudfoundry.client.v2.shareddomains.CreateSharedDomainResponse;
 import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsRequest;
 import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsResponse;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.TokenProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 도메인 컨트롤러 - 도메인 정보를 조회, 수정, 삭제한다.
  *
- * @author 김도준
- * @version 1.0
- * @since 2016.09.19 최초작성
+ * @author 박철한
+ * @version 2.0
+ * @since 2018.4.30
  */
 @Service
 public class DomainService extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DomainService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger( DomainService.class );
 
 
     /**
@@ -34,73 +47,124 @@ public class DomainService extends Common {
      *
      * @param token  the token
      * @param status the status
-     * @return domains
+     * @return domains response (V2)
      * @throws Exception the exception
-     * @author kimdojun
-     * @since 2016.7.25 최초작성
+     * @author 박철한, 조현구
+     * @since 2018.4.30
      */
-    public Map<String, Object> getDomains(String token, String status) throws Exception {
-
-        LOGGER.info("Start getDomains service. status : "+status);
-        ObjectMapper objectMapper = new ObjectMapper();
-        if(!stringNullCheck(status)){
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Invalid status");
-        } else {
-            switch (status){
-                case "all":
-                    ListDomainsResponse listDomainsResponse =
-                            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                                    .domains().list(ListDomainsRequest.builder().build()).block();
-                    return objectMapper.convertValue(listDomainsResponse, Map.class);
-                case "private":
-                    ListPrivateDomainsResponse ListPrivateDomainResponse =
-                            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                                    .privateDomains().list(ListPrivateDomainsRequest.builder().build()).block();
-                    return objectMapper.convertValue(ListPrivateDomainResponse, Map.class);
-                case "shared":
-                    ListSharedDomainsResponse listSharedDomainsResponse =
-                            Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-                                    .sharedDomains().list(ListSharedDomainsRequest.builder().build()).block();
-                    return objectMapper.convertValue(listSharedDomainsResponse, Map.class);
-                default:
-                    throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Invalid status");
-            }
+    public PaginatedResponse getDomains ( String token, String status ) throws Exception {
+        LOGGER.debug( "Start getDomains service. status : " + status );
+        if ( !stringNullCheck( status ) ) {
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Invalid status" );
         }
 
+        switch ( status ) {
+            case "all":
+                return getAllDomains( connectionContext(), tokenProvider( token ) );
+            case "private":
+                return getPrivateDomains( connectionContext(), tokenProvider( token ) );
+            case "shared":
+                return getSharedDomains( connectionContext(), tokenProvider( token ) );
+            default:
+                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Invalid status" );
+        }
+    }
 
+    private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
+        return Common.cloudFoundryClient( context, tokenProvider )
+            .domains().list( ListDomainsRequest.builder().build() ).block();
+    }
 
+    private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider, final String[] names) {
+        return Common.cloudFoundryClient( context, tokenProvider )
+            .domains().list( ListDomainsRequest.builder().name( names ).build() ).block();
+    }
+
+    private ListPrivateDomainsResponse getPrivateDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
+        return Common.cloudFoundryClient( context, tokenProvider )
+            .privateDomains().list( ListPrivateDomainsRequest.builder().build() ).block();
+    }
+
+    private ListSharedDomainsResponse getSharedDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
+        return Common.cloudFoundryClient( context, tokenProvider )
+            .sharedDomains().list( ListSharedDomainsRequest.builder().build() ).block();
+    }
+
+    /**
+     * 도메인 추가 (without 'is a domain shared' value, default: false)
+     * @param token
+     * @param domainName
+     * @param orgId
+     * @return
+     * @throws Exception
+     */
+    public boolean addDomain ( String token, String domainName, String orgId ) throws Exception {
+        return addDomain( token, domainName, orgId,false );
     }
 
     /**
      * 도메인 추가
      *
      * @param token      the token
-     * @param orgName    the org name
-     * @param spaceName  the space name
      * @param domainName the domain name
-     * @return Boolean boolean
+     * @param orgId      the organization id
+     * @return isShared  Is it the shared domain?
      * @throws Exception the exception
-     * @author kimdojun
-     * @since 2016.7.25 최초작성
+     * @author 조현구
+     * @since 2018.5.15
      */
-    public boolean addDomain(String token, String orgName, String spaceName, String domainName) throws Exception {
-        LOGGER.info("Start addDomain service. domainName : "+domainName);
+    public boolean addDomain ( String token, final String domainName, final String orgId, boolean isShared ) {
+        LOGGER.info( "Start addDomain service. domainName : " + domainName );
 
-        if (!stringNullCheck(orgName,spaceName,domainName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+        if ( !stringNullCheck( token, domainName ) )
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request",
+                "Required request body content is missing : token or domain name" );
+
+        if ( !isShared && !stringNullCheck( orgId ) ) {
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request",
+                "Required request body content is missing : Organization ID" );
         }
 
-        CloudFoundryClient client = getCloudFoundryClient(token,orgName,spaceName);
+        boolean anyMatch = getAllDomains( connectionContext(), tokenProvider( token ) )
+            .getResources().parallelStream()
+            .anyMatch( domainResource -> domainName.equals( domainResource.getEntity().getName() ) );
 
+        if ( anyMatch )
+            throw new CloudFoundryException( HttpStatus.CONFLICT, "Conflict domains", "Domain name already exist." );
 
-        if(client.getDomains().stream().anyMatch(domain -> domain.getName().equals(domainName))){
-            throw new CloudFoundryException(HttpStatus.CONFLICT,"Conflict","Domain name already exist.");
+        final String addedDomainName;
+
+        if ( isShared ) {
+            final CreateSharedDomainResponse response =
+                addSharedDomain( connectionContext(), tokenProvider( token ), domainName );
+            LOGGER.debug( "Response for adding shared domain is... {}", response);
+            addedDomainName = response.getEntity().getName();
+        } else {
+            final CreatePrivateDomainResponse response =
+                addPrivateDomain( connectionContext(), tokenProvider( token ), domainName, orgId );
+            LOGGER.debug( "Response for adding private domain is... {}", response);
+            addedDomainName = response.getEntity().getName();
         }
 
-        client.addDomain(domainName);
+        if (!addedDomainName.equals( domainName )) {
+            LOGGER.error( "It can't add domain with given domain name : {}", domainName );
+            return false;
+        } else {
+            return true;
+        }
+    }
 
-        LOGGER.info("End addDomain service. domainName : "+domainName);
-        return true;
+    private CreateSharedDomainResponse addSharedDomain( ConnectionContext context, TokenProvider tokenProvider, String domainName ) {
+        return Common.cloudFoundryClient( context, tokenProvider ).sharedDomains()
+            .create( CreateSharedDomainRequest.builder().name( domainName ).build() )
+            .block();
+    }
+
+    public CreatePrivateDomainResponse addPrivateDomain( ConnectionContext context, TokenProvider tokenProvider,
+                                                         String domainName, String orgId ) {
+        return Common.cloudFoundryClient( context, tokenProvider ).privateDomains()
+            .create( CreatePrivateDomainRequest.builder().name( domainName ).owningOrganizationId( orgId ).build() )
+            .block();
     }
 
 
@@ -108,26 +172,30 @@ public class DomainService extends Common {
      * 도메인 삭제
      *
      * @param token      the token
-     * @param orgName    the org name
-     * @param spaceName  the space name
      * @param domainName the domain name
-     * @return Boolean boolean
+     * @return Boolean did a domain delete surely?
      * @throws Exception the exception
-     * @author kimdojun
-     * @since 2016.7.25 최초작성
+     * @author 조현구
+     * @since 2018.5.15
      */
-    public boolean deleteDomain(String token, String orgName, String spaceName, String domainName) throws Exception {
-        LOGGER.info("Start deleteDomain service. domainName : "+domainName);
+    public boolean deleteDomain ( String token, String domainName ) throws Exception {
+        LOGGER.info( "Start deleteDomain service. domainName : " + domainName );
 
-        if (!stringNullCheck(orgName,spaceName,domainName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
+        if ( !stringNullCheck( token, domainName ) ) {
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
         }
 
-        CloudFoundryClient client = getCloudFoundryClient(token,orgName,spaceName);
-        client.deleteDomain(domainName);
+        List<DomainResource> domains = getAllDomains( connectionContext(), tokenProvider( token ) ).getResources()
+            .parallelStream().filter( domain -> domainName.equals( domain.getEntity().getName() ) )
+            .collect(Collectors.toList());
 
-        LOGGER.info("End deleteDomain service. domainName : "+domainName);
-        return true;
+        LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
+        if (domains.size() > 0) {
+            return true;
+        } else {
+            LOGGER.error( "Cannot delete a domain! : {}", domainName );
+            throw new CloudFoundryException(
+                HttpStatus.SERVICE_UNAVAILABLE, "Cannot delete", "Cannot delete a domain : " + domainName);
+        }
     }
-
 }
