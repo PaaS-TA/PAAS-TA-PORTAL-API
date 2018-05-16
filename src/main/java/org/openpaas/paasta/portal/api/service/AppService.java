@@ -19,7 +19,6 @@ import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.RenameApplicationRequest;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -68,7 +67,7 @@ public class AppService extends Common {
     //DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
     //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
 
-    public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException{
+    public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException {
 
         //SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
         // 로그 추가(이후 .log() 제거)
@@ -87,19 +86,19 @@ public class AppService extends Common {
     /**
      * 앱 실시간 상태를 조회한다.
      *
-     * @param guid   the app guid
+     * @param guid  the app guid
      * @param token the client
      * @return the app stats
      */
     public ApplicationStatisticsResponse getAppStats(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         //ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(app.getGuid().toString()).build()).block();
 
         ApplicationStatisticsResponse applicationStatisticsResponse =
                 cloudFoundryClient.applicationsV2()
-                .statistics(ApplicationStatisticsRequest.builder()
-                        .applicationId(guid)
-                        .build()).block();
+                        .statistics(ApplicationStatisticsRequest.builder()
+                                .applicationId(guid)
+                                .build()).block();
 
         return applicationStatisticsResponse;
     }
@@ -113,7 +112,7 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public void renameApp(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), app.getOrgName(), app.getSpaceName());
         cloudFoundryOperations.applications().rename(RenameApplicationRequest.builder().name(app.getName()).newName(app.getNewName()).build());
     }
 
@@ -121,12 +120,12 @@ public class AppService extends Common {
     /**
      * 앱을 실행한다.
      *
-     * @param app    the app
+     * @param app   the app
      * @param token the client
      * @throws Exception the exception
      */
     public void startApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         cloudFoundryClient.applicationsV3()
                 .start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder()
@@ -142,12 +141,12 @@ public class AppService extends Common {
     /**
      * 앱을 중지한다.
      *
-     * @param app    the app
+     * @param app   the app
      * @param token the client
      * @throws Exception the exception
      */
     public void stopApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         cloudFoundryClient.applicationsV3()
                 .stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder()
@@ -163,37 +162,50 @@ public class AppService extends Common {
     /**
      * 앱을 삭제한다.
      *
-     * @param app    the app
-     * @param token the client
+     * @param guid the app
      * @throws Exception the exception
      */
-    public void deleteApp(App app, String token) throws Exception {
-
-        //앱 삭제
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.applications().delete(DeleteApplicationRequest.builder().name(app.getName()).build());
-        //AutoScale 설정 삭제
+    public Map deleteApp(String guid) {
+        HashMap result = new HashMap();
         try {
+            //앱 삭제
+            ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(guid).build()).block();
+
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+
+        try {
+            //AutoScale 설정 삭제
             HashMap map = new HashMap();
-            map.put("guid", String.valueOf(app.getGuid()));
+            map.put("guid", String.valueOf(guid));
             if (null != appAutoScaleModalService.getAppAutoScaleInfo(map).get("list")) {
-                appAutoScaleModalService.deleteAppAutoScale(String.valueOf(app.getGuid()));
+                appAutoScaleModalService.deleteAppAutoScale(String.valueOf(guid));
             }
         } catch (Exception e) {
             e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
         }
+
+        return result;
     }
 
 
     /**
      * 앱을 리스테이징한다.
      *
-     * @param app    the app
+     * @param app   the app
      * @param token the client
      * @throws Exception the exception
      */
     public void restageApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         cloudFoundryClient.applicationsV2()
                 .restage(RestageApplicationRequest.builder()
@@ -208,12 +220,12 @@ public class AppService extends Common {
     /**
      * 앱 인스턴스를 변경한다.
      *
-     * @param app    the app
+     * @param app   the app
      * @param token the client
      * @throws Exception the exception
      */
     public void updateApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         if (app.getInstances() > 0) {
             cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build()).block();
         }
@@ -239,7 +251,7 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public void bindService(Map body, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = mapper.readValue(body.get("parameter").toString(), new TypeReference<Map<String, Object>>() {
@@ -263,19 +275,19 @@ public class AppService extends Common {
      *
      * @param serviceInstanceId
      * @param applicationId
-     * @param token the client
+     * @param token             the client
      * @throws Exception the exception
      */
     public void unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         ListServiceInstanceServiceBindingsResponse listServiceInstanceServiceBindingsResponse =
-            cloudFoundryClient.serviceInstances()
-                    .listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder()
-                            .applicationId(applicationId)
-                            .serviceInstanceId(serviceInstanceId)
-                            .build()
-                    ).block();
+                cloudFoundryClient.serviceInstances()
+                        .listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder()
+                                .applicationId(applicationId)
+                                .serviceInstanceId(serviceInstanceId)
+                                .build()
+                        ).block();
 
         String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
 
@@ -298,7 +310,7 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public ListEventsResponse getAppEvents(String guid, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         ListEventsRequest.Builder requestBuilder = ListEventsRequest.builder().actee(guid);
         ListEventsResponse listEventsResponse = cloudFoundryClient.events().list(requestBuilder.build()).block();
@@ -318,7 +330,7 @@ public class AppService extends Common {
      * @since 2016.6.29 최초작성
      */
     public ApplicationEnvironmentResponse getApplicationEnv(String guid, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         ApplicationEnvironmentResponse applicationEnvironmentResponse =
                 cloudFoundryClient.applicationsV2()
@@ -391,7 +403,7 @@ public class AppService extends Common {
      * @since 2016.7.6 최초작성
      */
     public boolean addApplicationRoute(Map body, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 //        ReactorDopplerClient reactorDopplerClient  = Common.dopplerClient(connectionContext(), tokenProvider(token));
 
 
@@ -450,7 +462,7 @@ public class AppService extends Common {
      *
      * @param guid
      * @param route_guid
-     * @param token the token
+     * @param token      the token
      * @return the boolean
      * @throws Exception the exception
      * @author 김도준
@@ -458,14 +470,14 @@ public class AppService extends Common {
      * @since 2016.7.6 최초작성
      */
     public boolean removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         cloudFoundryClient.applicationsV2()
                 .removeRoute(
                         RemoveApplicationRouteRequest.builder()
-                        .applicationId(guid)
-                        .routeId(route_guid)
-                        .build()
+                                .applicationId(guid)
+                                .routeId(route_guid)
+                                .build()
                 ).block();
 
         cloudFoundryClient.routes()
@@ -530,7 +542,7 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     public void terminateInstance(String guid, String index, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         TerminateApplicationInstanceRequest.Builder requestBuilder = TerminateApplicationInstanceRequest.builder();
         requestBuilder.applicationId(guid);
@@ -578,7 +590,7 @@ public class AppService extends Common {
 
     public List<Envelope> getRecentLog(String guid, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
-        ReactorDopplerClient reactorDopplerClient  = Common.dopplerClient(connectionContext(), tokenProvider);
+        ReactorDopplerClient reactorDopplerClient = Common.dopplerClient(connectionContext(), tokenProvider);
 
         RecentLogsRequest.Builder requestBuilder = RecentLogsRequest.builder();
         requestBuilder.applicationId(guid);
@@ -611,8 +623,9 @@ public class AppService extends Common {
 
         return null;
     }
+
     private void printLog(LogMessage msg) {
-        LOGGER.info(" ["+msg.getSourceType()+"/"+msg.getSourceInstance()+"] ["+msg.getMessageType()+msg.getMessageType()+"] "+msg.getMessage());
+        LOGGER.info(" [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
 //        System.out.println(
 //                new StringBuffer()
 //                        .append(new Timestamp(msg.getTimestamp()/1000000).toLocalDateTime())
@@ -636,7 +649,7 @@ public class AppService extends Common {
                         .build()
                 ).subscribe((msg) -> {
                     printLog(msg);
-                    client.sendEvent("message", " ["+msg.getSourceType()+"/"+msg.getSourceInstance()+"] ["+msg.getMessageType()+msg.getMessageType()+"] "+msg.getMessage());
+                    client.sendEvent("message", " [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
                 },
                 (error) -> {
                     error.printStackTrace();
@@ -645,4 +658,20 @@ public class AppService extends Common {
         return client;
     }
 
+//    public Map test(){
+//        try {
+//            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(adminUserName, adminPassword));
+//            reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).phoneNumber(PhoneNumber.builder().value(userDetail.getTellPhone()).build()).email(Email.builder().value(userDetail.getUserName()).build()).build()).block();
+//
+//            DefaultCloudFoundryOperations defaultCloudFoundryOperations = Common.cloudFoundryOperations(connectionContext(), tokenProvider(userDetail.getUserId(), userDetail.getPassword()));
+//
+//            result.put("result", true);
+//            result.put("msg", "You have successfully completed the task.");
+//            //TODO : ORG 권한 부여
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            result.put("result", false);
+//            result.put("msg", e.getMessage());
+//        }
+//    }
 }

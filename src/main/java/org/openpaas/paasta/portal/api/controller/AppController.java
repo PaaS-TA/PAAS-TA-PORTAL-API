@@ -144,27 +144,15 @@ public class AppController extends Common {
     /**
      * 앱을 삭제한다.
      *
-     * @param app     the app
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/app/deleteApp"}, method = RequestMethod.POST)
-    public boolean deleteApp(@RequestBody App app, HttpServletRequest request) throws Exception {
-
-
-        LOGGER.info("delete App Start : " + app.getName());
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        appService.deleteApp(app, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-
+    @DeleteMapping(value = {Constants.V2_URL + "/apps/{guid}"})
+    public Map deleteApp(@PathVariable String guid) throws Exception {
+        LOGGER.info("delete App Start : " + guid);
+        Map result = appService.deleteApp(guid);
         LOGGER.info("delete App End ");
-
-
-        return true;
+        return result;
     }
 
 
