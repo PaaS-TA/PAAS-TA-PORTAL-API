@@ -14,6 +14,7 @@ import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.tokenprovider.ClientCredentialsGrantTokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.UaaClient;
@@ -398,6 +399,14 @@ public class Common {
 
     public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
+    }
+
+    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, String clientId, String clientSecret) {
+        return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(ClientCredentialsGrantTokenProvider.builder()
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .build()
+        ).build();
     }
 
     public DefaultConnectionContext connectionContext() {

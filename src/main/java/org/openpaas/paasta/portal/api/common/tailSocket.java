@@ -57,16 +57,6 @@ public class tailSocket implements CommandLineRunner {
 
 //                client.sendEvent("message", new ChatObject("", "Welcome to the chat!"));
 //				SocketIOClient client2 = appService.socketTailLogs(client, "");
-
-//				Timer timer = new Timer();
-//				TimerTask task = new TimerTask() {
-//					@Override
-//					public void run() {
-//						System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaa");
-//						client.sendEvent("message", new ChatObject("", "Welcome to the chat!"));
-//					}
-//				};
-//				timer.schedule(task, 5000, 10);
             }
         });
         server.addDisconnectListener(new DisconnectListener() {

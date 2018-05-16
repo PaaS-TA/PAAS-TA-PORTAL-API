@@ -147,5 +147,6 @@ public class Constants {
      * API REST URL prefix
      */
     public static final String V2_URL = "/v2";
+    public static final String V3_URL = "/v3";
 
 }

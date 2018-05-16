@@ -254,77 +254,6 @@ public class SpaceService extends Common {
 //        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
     }
 
-
-
-
-    /**
-     * role을 문자열로 변환한다.
-     *
-     * @param userRole
-     * @return Map boolean
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.18 최초작성
-     */
-    private String toStringRole(String userRole) {
-        String roleStr;
-
-        switch (userRole){
-            case "SpaceManager": roleStr = "managers"; break;
-            case "SpaceDeveloper": roleStr = "developers"; break;
-            case "SpaceAuditor": roleStr = "auditors"; break;
-            default: throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Invalid userRole.");
-        }
-
-        return roleStr;
-    }
-
-
-
-
-    /**
-     * 권한별로 수집된 유저정보를 취합하여 하나의 객체로 통합해 리턴한다.
-     * @param orgName
-     * @param spaceName
-     * @param userList
-     * @param managers
-     * @param developers
-     * @param auditors
-     * @return spaceUserList
-     * @throws Exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.9.05 최초작성
-     */
-    private List<Map<String, Object>> putUserList(String orgName, String spaceName,
-                                                  List<Map<String, Object>> userList,
-                                                  Map<String, CloudUser> managers,
-                                                  Map<String, CloudUser> developers,
-                                                  Map<String, CloudUser> auditors) throws Exception
-    {
-        List<Map<String, Object>> spaceUserList = new ArrayList<>();
-
-        for(Map<String, Object> userMap : userList) {
-            List<String> userRoles = new ArrayList<>();
-            if(managers.get(userMap.get("userName")) != null){
-                userRoles.add("SpaceManager");
-            }
-            if(developers.get(userMap.get("userName")) != null){
-                userRoles.add("SpaceDeveloper");
-            }
-            if(auditors.get(userMap.get("userName")) != null){
-                userRoles.add("SpaceAuditor");
-            }
-
-            userMap.put("orgName", orgName);
-            userMap.put("spaceName", spaceName);
-            userMap.put("userRoles", userRoles);
-            spaceUserList.add(userMap);
-        }
-        return spaceUserList;
-    }
-
     /**
      * 공간 정보를 조회한다.
      *
@@ -333,6 +262,7 @@ public class SpaceService extends Common {
      * @return the spaces info
      * @throws Exception the exception
      */
+    @Deprecated
     public List<Space> getSpacesInfo(String spaceName, String orgId) throws Exception{
         Map map = new HashMap();
         map.put("spaceName" , spaceName);
@@ -349,6 +279,7 @@ public class SpaceService extends Common {
      * @return the spaces info by id
      * @throws Exception the exception
      */
+    @Deprecated
     public List<Space> getSpacesInfoById(int spaceId) throws Exception{
         Map map = new HashMap();
         map.put("spaceId" , spaceId);
@@ -377,51 +308,17 @@ public class SpaceService extends Common {
         return objectMapper.convertValue(getSpaceQuotaDefinitionResponse, Map.class);
     }
 
-
-    public Space getSpaceSummery(CloudFoundryClient cloudFoundryClient, String spaceId) throws IOException {
-        LOGGER.info("Get Space Summary: spaceId={}", spaceId);
-
-        GetSpaceSummaryResponse spaceSummaryResponse = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
-
-        Gson gson = new Gson();
-
-        String jsonSummary = gson.toJson(spaceSummaryResponse);
-        Space space = new ObjectMapper().readValue(jsonSummary, Space.class);
-
-        int memTotal = 0;
-        int memUsageTotal = 0;
-
-        for (App app : space.getApps()) {
-
-            memTotal += app.getMemory() * app.getInstances();
-
-            if (app.getState().equals("STARTED")) {
-                space.setAppCountStarted(space.getAppCountStarted() + 1);
-
-                memUsageTotal += app.getMemory() * app.getInstances();
-
-            } else if (app.getState().equals("STOPPED")) {
-                space.setAppCountStopped(space.getAppCountStopped() + 1);
-            } else {
-                space.setAppCountCrashed(space.getAppCountCrashed() + 1);
-            }
-        }
-
-        space.setMemoryLimit(memTotal);
-        space.setMemoryUsage(memUsageTotal);
-
-        return space;
-    }
-
-    public String getSpaceId(CloudFoundryClient cloudFoundryClient, String organizationId, String spaceName) {
-        LOGGER.info("Get Space Id: organizationId={}, spaceName={}", organizationId, spaceName);
-
-        List<SpaceResource> spaceList = cloudFoundryClient.spaces().list(ListSpacesRequest.builder().organizationId(organizationId).name(spaceName).build()).block().getResources();
-        LOGGER.info("Get Space Id: Result size={}", spaceList.size());
-
-        return spaceList.get(0).getMetadata().getId();
-    }
-
+    /**
+     * 공간에 생성되어 있는 서비스를 조회한다.
+     *
+     * @param spaceId
+     * @param token
+     * @return
+     * @throws Exception
+     * @author 박철한
+     * @version 2.0
+     * @since 2018.4.30
+     */
     public ListSpaceServicesResponse getSpaceServices(String spaceId, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -433,6 +330,4 @@ public class SpaceService extends Common {
 
         return respSpaceServices;
     }
-
-
 }

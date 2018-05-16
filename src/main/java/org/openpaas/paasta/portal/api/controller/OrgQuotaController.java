@@ -38,8 +38,7 @@ public class OrgQuotaController extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions")
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : ");
-        LOGGER.info(":::::"+request.getHeader(AUTHORIZATION_HEADER_KEY));
+        LOGGER.info("getOrgQuotaDefinitions Start : ");
         return orgQuotaService.getOrgQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
@@ -53,7 +52,7 @@ public class OrgQuotaController extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
-        LOGGER.info("summary Start : ");
+        LOGGER.info("getOrgQuotaDefinition Start : ");
         return orgQuotaService.getOrgQuotaDefinitions(quotaId ,request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
@@ -98,15 +97,6 @@ public class OrgQuotaController extends Common {
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("deleteOrgQuotaDefinitions Start : ");
         return orgQuotaService.deleteOrgQuotaDefinitions(quotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        /* return status 참고
-            "entity": {
-        "error": null,
-        "error_details": null,
-        "guid": "35c690de-bbff-4384-9415-dee4e5767ad3",
-        "status": "queued"
-            },
-         */
     }
 
     /**
