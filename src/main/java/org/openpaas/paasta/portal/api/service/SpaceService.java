@@ -44,6 +44,11 @@ public class SpaceService extends Common {
     @Lazy // To resolve circular reference
     private OrgService orgService;
 
+//    @Autowired
+//    private SpaceMapper spaceMapper;
+//    @Autowired
+//    private OrgMapper orgMapper;
+
     /**
      * 공간(스페이스) 목록 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
@@ -173,6 +178,11 @@ public class SpaceService extends Common {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
         }
 
+        /*
+        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
+
+        client.deleteSpace(orgName, spaceName);
+        */
         return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).spaces()
             .delete( DeleteSpaceRequest.builder().spaceId( spaceGuid )
                 .recursive( recursive ).async( true ).build() ).block();
@@ -190,15 +200,134 @@ public class SpaceService extends Common {
      * @return space summary
      * @throws Exception the exception
      */
-    public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) );
+    public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception{
+        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         GetSpaceSummaryResponse respSapceSummary =
-            cloudFoundryClient.spaces()
-                .getSummary( GetSpaceSummaryRequest.builder()
-                    .spaceId( spaceId ).build()
+                cloudFoundryClient.spaces()
+                        .getSummary(GetSpaceSummaryRequest.builder()
+                                .spaceId(spaceId).build()
                 ).block();
 
         return respSapceSummary;
+
+//
+//        if(!stringNullCheck(orgName,spaceName)) {
+//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
+//        }
+//
+//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
+//
+//        String spaceString = admin.getSpaceSummary(orgName, spaceName);
+//        Space respSpace = new ObjectMapper().readValue(spaceString, Space.class);
+//
+//        //LOGGER.info(spaceString);
+//        int memTotal = 0;
+//        int memUsageTotal = 0;
+//
+//        for (App app : respSpace.getApps()) {
+//
+//            memTotal += app.getMemory() * app.getInstances();
+//
+//            if (app.getState().equals("STARTED")) {
+//               // space.setAppCountStarted(space.getAppCountStarted() + 1);
+//
+//                memUsageTotal += app.getMemory() * app.getInstances();
+//
+//            } else if (app.getState().equals("STOPPED")) {
+//                //space.setAppCountStopped(space.getAppCountStopped() + 1);
+//            } else {
+//                //space.setAppCountCrashed(space.getAppCountCrashed() + 1);
+//            }
+//        }
+//
+//        respSpace.setMemoryLimit(memTotal);
+//        respSpace.setMemoryUsage(memUsageTotal);
+//
+//        return respSpace;
+
+
+//        GetSpaceSummaryResponse getSpaceSummaryResponse =
+//                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+//                        .spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
+    }
+
+    /**
+     * 공간 정보를 조회한다.
+     *
+     * @param spaceName the space name
+     * @param orgId     the org id
+     * @return the spaces info
+     * @throws Exception the exception
+     */
+    @Deprecated
+    public List<Space> getSpacesInfo(String spaceName, String orgId) throws Exception{
+        Map map = new HashMap();
+        map.put("spaceName" , spaceName);
+        map.put("orgId" , orgId);
+//        List selectSpace = spaceMapper.getSpacesInfo(map);
+        List selectSpace = null;
+        return selectSpace;
+    }
+
+    /**
+     * 공간ID로 공간정보를 조회한다.
+     *
+     * @param spaceId the space id
+     * @return the spaces info by id
+     * @throws Exception the exception
+     */
+    @Deprecated
+    public List<Space> getSpacesInfoById(int spaceId) throws Exception{
+        Map map = new HashMap();
+        map.put("spaceId" , spaceId);
+//        List selectSpace = spaceMapper.getSpacesInfoById(map);
+        List selectSpace = null;
+        return selectSpace;
+    }
+
+
+    /**
+     * 공간 쿼터를 조회한다.
+     *
+     * @param spacequotaid the spaceQuotaId
+     * @param token the token
+     * @return boolean boolean
+     * @throws Exception the exception
+     * @author kimdojun
+     * @version 1.0
+     * @since 2016.7.11 최초작성
+     */
+    public Map<String, Object> getSpaceQuota(String spacequotaid, String token) throws Exception {
+        GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitionResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
+                        .spaceQuotaDefinitions().get(GetSpaceQuotaDefinitionRequest.builder().spaceQuotaDefinitionId(spacequotaid).build()).block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(getSpaceQuotaDefinitionResponse, Map.class);
+    }
+
+    /**
+     * 공간에 생성되어 있는 서비스를 조회한다.
+     *
+     * @param spaceId
+     * @param token
+     * @return
+     * @throws Exception
+     * @author 박철한
+     * @version 2.0
+     * @since 2018.4.30
+     */
+    public ListSpaceServicesResponse getSpaceServices(String spaceId, String token) throws Exception {
+        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+        ListSpaceServicesResponse respSpaceServices =
+                cloudFoundryClient.spaces()
+                .listServices(ListSpaceServicesRequest.builder()
+                        .spaceId(spaceId).build()
+                ).block();
+
+        return respSpaceServices;
     }
 }
