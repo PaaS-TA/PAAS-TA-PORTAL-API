@@ -1,5 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.velocity.runtime.directive.Foreach;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudService;
@@ -11,6 +13,8 @@ import org.cloudfoundry.client.v2.applications.UploadApplicationRequest;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
+import org.cloudfoundry.operations.routes.CheckRouteRequest;
+import org.cloudfoundry.reactor.TokenProvider;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -596,23 +600,40 @@ public class CatalogService extends Common {
     /**
      * 카탈로그 서비스 이용사양 목록을 조회한다.
      *
-     * @param param Catalog(모델클래스)
+     * @param servicename ServiceName(자바클래스)
      * @param req   HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> getCatalogServicePlanList(Catalog param, HttpServletRequest req) throws Exception {
-        List<Map<String, Object>> resultList = new ArrayList<>();
+    public Map<String, Object> getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
 
-        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-        List<CloudServiceOffering> serviceOfferingsList = cloudFoundryClient.getServiceOfferings();
-
-        serviceOfferingsList.stream().filter(cso -> of(param).map(Catalog::getServicePackName).orElse("").equals(cso.getName())).flatMap(cos -> cos.getCloudServicePlans().stream()).collect(toList()).forEach(cloudServicePlan -> resultList.add(new HashMap<String, Object>() {{
-            put("name", cloudServicePlan.getName());
-            put("value", cloudServicePlan.getName());
-            put("description", cloudServicePlan.getDescription());
-            put("guid", cloudServicePlan.getMeta().getGuid());
-        }}));
+        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .services()
+                .list(ListServicesRequest
+                        .builder()
+                        .build())
+                .block();
+        Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream()
+                .filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
+        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .servicePlans()
+                .list(ListServicePlansRequest
+                        .builder()
+                        .serviceId(serviceResource.get().getMetadata().getId())
+                        .build())
+                .block();
+//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
+//        List<CloudServiceOffering> serviceOfferingsList = cloudFoundryClient.getServiceOfferings();
+//
+//        serviceOfferingsList.stream()
+//                .filter(cso -> of(param).map(Catalog::getServicePackName).orElse("").equals(cso.getName()))
+//                .flatMap(cos -> cos.getCloudServicePlans().stream())
+//                .collect(toList()).forEach(cloudServicePlan -> resultList.add(new HashMap<String, Object>() {{
+//            put("name", cloudServicePlan.getName());
+//            put("value", cloudServicePlan.getName());
+//            put("description", cloudServicePlan.getDescription());
+//            put("guid", cloudServicePlan.getMeta().getGuid());
+//        }}));
 
         return new HashMap<String, Object>() {{
             put("list", resultList);
@@ -672,47 +693,45 @@ public class CatalogService extends Common {
     /**
      * 카탈로그 앱 목록을 조회한다.
      *
-     * @param param Catalog(모델클래스)
+     * @param orgid String(자바클래스)
+     * @param spaceid String(자바클래스)
      * @param req   HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> getCatalogAppList(Catalog param, HttpServletRequest req) throws Exception {
-//        return new HashMap<String, Object>() {{
-//            put("list", spaceService.getSpaceSummary(new Space() {{
-//                setOrgName(param.getOrgName());
-//                setSpaceName(param.getSpaceName());
-//            }}, req.getHeader(cfAuthorizationHeaderKey)).getApps());
-//        }};
-        return null;
+    public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+        return listApplicationsResponse;
     }
 
 
     /**
      * 카탈로그 앱 이름 생성여부를 조회한다.
      *
-     * @param param Catalog(모델클래스)
+     * @param name  name(앱 이름)
      * @param req   HttpServletRequest(자바클래스)
      * @param res   HttpServletResponse(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> getCheckCatalogApplicationNameExists(Catalog param, HttpServletRequest req, HttpServletResponse res) throws Exception {
-//        List<App> resultList = spaceService.getSpaceSummary(new Space() {{
-//            setOrgName(param.getOrgName());
-//            setSpaceName(param.getSpaceName());
-//        }}, req.getHeader(cfAuthorizationHeaderKey)).getApps();
-//
-//        for (App app : resultList) {
-//            if (app.getName().equals(param.getName())) {
-//                commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
-//            }
-//        }
-//
-//        return new HashMap<String, Object>() {{
-//            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-//        }};
-        return null;
+    public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
+
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .applicationsV2().list(ListApplicationsRequest
+                        .builder()
+                        .organizationId(orgid)
+                        .spaceId(spaceid)
+                        .build())
+                .block();
+
+        for (ApplicationResource applicationResource: listApplicationsResponse.getResources()) {
+            if(applicationResource.getEntity().getName().equals(name))
+            {commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");}
+        }
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
     }
 
 
@@ -1054,8 +1073,8 @@ public class CatalogService extends Common {
         CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
         String appName = param.getName();
         response.setContentType("application/octet-stream");
-        String fileNameForBrowser = getDisposition("sample-spring.war", getBrowser(req));
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
+        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
+        response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
 
         OutputStream os = response.getOutputStream();
         InputStream is = new URL(param.getAppSampleFilePath()).openStream();
@@ -1199,10 +1218,22 @@ public class CatalogService extends Common {
                 routeMappings().create(CreateRouteMappingRequest.builder().routeId(routeid).applicationId(applicationid).build()).block();
     }
 
-    private void fileUpload(File file, String applicationid, String token) {
+    private  void fileUpload(File file, String applicationid, String token){
+        try{
         Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
+                applicationsV2().upload(
+                UploadApplicationRequest
+                        .builder()
+                        .applicationId(applicationid)
+                        .application(file.toPath())
+                        .build()
+        ).block();}
+        catch(Exception e){
+
+        }
+        finally{
         file.delete();
+        }
     }
 
     private File createTempFile(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
@@ -1212,14 +1243,10 @@ public class CatalogService extends Common {
         response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
         File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
         InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
-        OutputStream outStream = new FileOutputStream(file);
-        byte[] buf = new byte[1024];
-        int len = 0;
-        while ((len = is.read(buf)) > 0) {
-            outStream.write(buf, 0, len);
-        }
-        outStream.close();
-        is.close();
+        OutputStream out = new FileOutputStream(file);
+        IOUtils.copy(is, out);
+        IOUtils.closeQuietly(is);
+        IOUtils.closeQuietly(out);
         return file;
     }
 

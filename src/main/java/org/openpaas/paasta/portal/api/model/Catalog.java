@@ -41,6 +41,7 @@ public class Catalog {
     private String servicePlan;
     private String appName;
     private String orgName;
+    private String orgId;
     private String spaceName;
     private String spaceId;
     private String serviceInstanceName;
@@ -547,6 +548,25 @@ public class Catalog {
     public void setOrgName(String orgName) {
         this.orgName = orgName;
     }
+
+    /**
+     * GETTER 조직명
+     *
+     * @return 조직명
+     */
+    public String getOrgId() {
+        return this.orgId;
+    }
+
+    /**
+     * SETTER 조직명
+     *
+     * @param orgName 조직명
+     */
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
 
     /**
      * GETTER 공간명
