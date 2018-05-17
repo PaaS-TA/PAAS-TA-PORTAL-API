@@ -188,12 +188,12 @@ public class UserController extends Common {
 
     @GetMapping( V2_URL + "/user/name-by-id/{username}" )
     public String getUserId ( @PathVariable String username ) {
-        return userService.getUserId( username );
+        return userService.getUserIdByUsername( username );
     }
 
     @GetMapping( V2_URL + "/user/id-by-name/{userId}" )
     public String getUsername ( @PathVariable String userId ) {
-        return userService.getUsername( userId );
+        return userService.getUsernameByUserId( userId );
     }
 
     @GetMapping( V2_URL + "/user/summary/{userIdentifier}" )

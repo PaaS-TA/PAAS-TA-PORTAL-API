@@ -8,6 +8,11 @@ import org.cloudfoundry.identity.uaa.login.UaaResetPasswordService;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.cloudfoundry.uaa.authorizations.AuthorizeByAuthorizationCodeGrantApiRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByPasswordRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByPasswordResponse;
+import org.cloudfoundry.uaa.tokens.RefreshTokenRequest;
 import org.cloudfoundry.uaa.users.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
@@ -15,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -348,17 +354,20 @@ public class UserService extends Common {
      * @param username
      * @return User ID
      */
-    public String getUserId ( String username ) {
-        final List<UserId> userIdList = Common.uaaClient( connectionContext, adminTokenProvider )
-            .users().lookup( LookupUserIdsRequest.builder()
-                .filter( createUserLookupFilter( UaaUserLookupFilterType.Username, username ) )
-                .build() )
-            .block()
-            .getResources();
-        if ( userIdList.size() <= 0 )
-            throw new CloudFoundryException( HttpStatus.NOT_FOUND, "Username cannot find" );
+    public String getUserIdByUsername ( String username ) {
+        final List<User> userList =
+            Common.uaaClient( connectionContext, adminTokenProvider )
+                .users().list(
+                    ListUsersRequest.builder().filter(
+                        createUserLookupFilter( UaaUserLookupFilterType.Username, username )
+                    ).build()
+            ).block().getResources();
+        if ( userList.size() <= 0 ) {
+            //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User name cannot find" );
+            return null;
+        }
 
-        return userIdList.get( 0 ).getId();
+        return userList.get( 0 ).getId();
     }
 
     /**
@@ -367,16 +376,20 @@ public class UserService extends Common {
      * @param userId
      * @return User name
      */
-    public String getUsername ( String userId ) {
-        final LookupUserIdsResponse response = Common.uaaClient( connectionContext, adminTokenProvider )
-            .users().lookup( LookupUserIdsRequest.builder()
-                .filter( createUserLookupFilter( UaaUserLookupFilterType.Id, userId ) )
-                .build() )
-            .block();
-        if ( response.getResources().size() <= 0 )
-            throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User name cannot find" );
+    public String getUsernameByUserId ( String userId ) {
+        final List<User> userList =
+            Common.uaaClient( connectionContext, adminTokenProvider )
+                .users().list(
+                    ListUsersRequest.builder().filter(
+                        createUserLookupFilter( UaaUserLookupFilterType.Id, userId )
+                    ).build()
+            ).block().getResources();
+        if ( userList.size() <= 0 ) {
+            //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User ID cannot find" );
+            return null;
+        }
 
-        return response.getResources().get( 0 ).getUserName();
+        return userList.get( 0 ).getId();
     }
 
     private User getUserSummaryWithFilter ( UaaUserLookupFilterType filterType, String filterValue ) {

@@ -530,7 +530,6 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    // Org 
     public UpdateOrganizationResponse updateOrgQuota(String orgId, Org org, String token) {
         Objects.requireNonNull(org.getGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid.");
         Objects.requireNonNull(org.getQuotaGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid.");
@@ -543,6 +542,8 @@ public class OrgService extends Common {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().update(UpdateOrganizationRequest.builder().organizationId(orgGuid).quotaDefinitionId(quotaGuid).build()).block();
     }
 
+
+    //// Org-Role
     private enum OrgRole {
         OrgManager, BillingManager, OrgAuditor,
         ORGMANAGER, BILLINGMANAGER, ORGAUDITOR,
@@ -595,8 +596,8 @@ public class OrgService extends Common {
     public Map<String, Collection<UserRole>>  getOrgUserRoles ( String orgId, String token ) {
         Map<String, UserRole> userRoles = new HashMap<>( );
         listAllOrgUsers( orgId, token ).parallelStream()
-            .map( ur -> UserRole.builder().userId( ur.getMetadata().getId() )
-                    .userEmail( ur.getEntity().getUsername() )
+            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
+                    .userEmail( resource.getEntity().getUsername() )
                     .modifiableRoles( true ).build() )
             .forEach( ur -> userRoles.put( ur.getUserId(), ur ) );
 
@@ -618,7 +619,7 @@ public class OrgService extends Common {
         return result;
     }
 
-    public OrganizationUsers getOrgUserRolesByUsername( String orgName, String token ) {
+    public OrganizationUsers getOrgUserRolesByOrgName ( String orgName, String token ) {
         return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
             .userAdmin()
             .listOrganizationUsers(

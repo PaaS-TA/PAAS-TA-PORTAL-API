@@ -717,21 +717,27 @@ public class OrgController extends Common {
      * @param token
      * @return UserRole
      */
-    @GetMapping(V2_URL + "/orgs/user-roles/{orgName}/{userName}")
+    @GetMapping(V2_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}")
     public UserRole getOrgUserRoleByUsername ( @PathVariable String orgName,
                                                @PathVariable String userName,
                                                @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        OrganizationUsers users = orgService.getOrgUserRolesByUsername( orgName, token );
+        final String userId = userService.getUserIdByUsername( userName );
+        Objects.requireNonNull( userId, "Username cannot found" );
+
+        LOGGER.info( "getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : ",
+            orgName, userName, userId );
+        OrganizationUsers users = orgService.getOrgUserRolesByOrgName( orgName, token );
         final boolean isManager = users.getManagers().parallelStream().anyMatch( userName::equals );
         final boolean isBillingManager = users.getBillingManagers().parallelStream().anyMatch( userName::equals );
         final boolean isAuditor = users.getAuditors().parallelStream().anyMatch( userName::equals );
 
+
         return UserRole.builder()
             .userEmail( userName )
-            .userId( userName + "-(unknown-id)" )
-            .addRole( isManager? "OrgManager" : null )
-            .addRole( isBillingManager? "BillingManager" : null )
-            .addRole( isAuditor? "OrgAuditor" : null )
+            .userId( userId )
+            .addRole( isManager?         "OrgManager"       : null )
+            .addRole( isBillingManager?  "BillingManager"   : null )
+            .addRole( isAuditor?         "OrgAuditor"       : null )
             .build();
     }
 
