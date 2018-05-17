@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.service.CatalogService;
@@ -420,7 +421,7 @@ public class CatalogController extends Common {
      */
     //@RequestMapping(value = {"/getCatalogServicePlanList"}, method = RequestMethod.POST, consumes = "application/json")
     @GetMapping(V2_URL+"/serviceplan/{servicename}")
-    public Map<String, Object> getCatalogServicePlanList(@PathVariable String servicename, HttpServletRequest req) throws Exception {
+    public ListServicePlansResponse getCatalogServicePlanList(@PathVariable String servicename, HttpServletRequest req) throws Exception {
         return catalogService.getCatalogServicePlanList(servicename, req);
     }
 
@@ -482,21 +483,6 @@ public class CatalogController extends Common {
     @RequestMapping(value = {"/getCheckCatalogServiceInstanceNameExists"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> getCheckCatalogServiceInstanceNameExists(@RequestBody Catalog param, HttpServletRequest req, HttpServletResponse res) throws Exception {
         return catalogService.getCheckCatalogServiceInstanceNameExists(param, req, res);
-    }
-
-
-    /**
-     * 카탈로그 앱 URL 생성여부를 조회한다.
-     *
-     * @param domainid domainid(자바클래스)
-     * @param res   HttpServletResponse(자바클래스)
-     * @return Map(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    //@RequestMapping(value = {"/getCheckCatalogRouteExists"}, method = RequestMethod.POST, consumes = "application/json")
-    @GetMapping(V2_URL+"/catalogs/route/{domainid}")
-    public Map<String, Object> getCheckCatalogRouteExists(@PathVariable String domainid, @RequestParam String hostname, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) throws Exception {
-        return catalogService.getCheckCatalogRouteExists(domainid, hostname,token);
     }
 
 

@@ -8,10 +8,14 @@ import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
 import org.cloudfoundry.client.lib.domain.CloudServicePlan;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.v2.applications.CreateApplicationRequest;
-import org.cloudfoundry.client.v2.applications.UploadApplicationRequest;
+import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.services.ListServicesRequest;
+import org.cloudfoundry.client.v2.services.ListServicesResponse;
+import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.routes.CheckRouteRequest;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -605,7 +609,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
+    public ListServicePlansResponse getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
 
         ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
                 .services()
@@ -622,22 +626,7 @@ public class CatalogService extends Common {
                         .serviceId(serviceResource.get().getMetadata().getId())
                         .build())
                 .block();
-//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//        List<CloudServiceOffering> serviceOfferingsList = cloudFoundryClient.getServiceOfferings();
-//
-//        serviceOfferingsList.stream()
-//                .filter(cso -> of(param).map(Catalog::getServicePackName).orElse("").equals(cso.getName()))
-//                .flatMap(cos -> cos.getCloudServicePlans().stream())
-//                .collect(toList()).forEach(cloudServicePlan -> resultList.add(new HashMap<String, Object>() {{
-//            put("name", cloudServicePlan.getName());
-//            put("value", cloudServicePlan.getName());
-//            put("description", cloudServicePlan.getDescription());
-//            put("guid", cloudServicePlan.getMeta().getGuid());
-//        }}));
-
-        return new HashMap<String, Object>() {{
-            put("list", resultList);
-        }};
+        return listServicePlansResponse;
     }
 
 
