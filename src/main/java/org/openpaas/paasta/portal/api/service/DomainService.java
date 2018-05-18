@@ -1,10 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.ribbon.proxy.annotation.Http;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.PaginatedResponse;
-import org.cloudfoundry.client.v2.domains.DomainResource;
-import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
-import org.cloudfoundry.client.v2.domains.ListDomainsResponse;
+import org.cloudfoundry.client.v2.domains.*;
+import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.privatedomains.CreatePrivateDomainRequest;
 import org.cloudfoundry.client.v2.privatedomains.CreatePrivateDomainResponse;
 import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsRequest;
@@ -15,13 +15,16 @@ import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsRequest;
 import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsResponse;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,9 @@ import java.util.stream.Collectors;
 @Service
 public class DomainService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger( DomainService.class );
+
+    @Autowired
+    PasswordGrantTokenProvider adminTokenProvider;
 
     /**
      * 도메인 가져오기 - status 값을 받아 private, shared 중 선택하여 가져오거나 모두 가져올수 있음
@@ -115,7 +121,8 @@ public class DomainService extends Common {
 
         if ( !isShared && !stringNullCheck( orgId ) ) {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request",
-                "Required request body content is missing : Organization ID" );
+                "Required request body content is missing : Organization ID; " +
+                    "Creating shared domain will need a org id." );
         }
 
         boolean anyMatch = getAllDomains( connectionContext(), tokenProvider( token ) )
@@ -129,7 +136,7 @@ public class DomainService extends Common {
 
         if ( isShared ) {
             final CreateSharedDomainResponse response =
-                addSharedDomain( connectionContext(), tokenProvider( token ), domainName );
+                addSharedDomain( connectionContext(), adminTokenProvider, domainName );
             LOGGER.debug( "Response for adding shared domain is... {}", response);
             addedDomainName = response.getEntity().getName();
         } else {
@@ -184,7 +191,20 @@ public class DomainService extends Common {
 
         LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
         if (domains.size() > 0) {
-            return true;
+            final DeleteDomainResponse response = Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                .domains().delete(
+                    DeleteDomainRequest.builder().domainId(
+                        domains.get( 0 ).getMetadata().getId() ).build()
+            ).block();
+            Objects.requireNonNull(response, "Delete domain response");
+
+            if (response.getEntity().getErrorDetails() == null)
+                return true;
+            else {
+                final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
+                throw new CloudFoundryException(
+                    HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
+            }
         } else {
             LOGGER.error( "Cannot delete a domain! : {}", domainName );
             throw new CloudFoundryException(

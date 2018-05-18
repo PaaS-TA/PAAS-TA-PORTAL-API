@@ -4,6 +4,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.v2.PaginatedResponse;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.service.DomainService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 도메인 컨트롤러 - 도메인 정보를 조회, 수정, 삭제한다.
@@ -27,21 +29,31 @@ import java.util.Map;
 public class DomainController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainController.class);
-    private final String V2_URL = "/v2";
 
     @Autowired
     private DomainService domainService;
 
+    /**
+     * Gets domains for all.
+     *
+     * @param token  the token
+     * @return the domains
+     * @throws Exception the exception
+     */
+    @GetMapping( Constants.V2_URL + "/domains" )
+    public PaginatedResponse getDomains( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return domainService.getDomains(token, "all");
+    }
 
     /**
-     * Gets domains.
+     * Gets domains with status.
      *
      * @param token  the token
      * @param status the status
      * @return the domains
      * @throws Exception the exception
      */
-    @GetMapping( V2_URL + "/domains/{status}" )
+    @GetMapping( Constants.V2_URL + "/domains/{status}" )
     public PaginatedResponse getDomains( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                                          @PathVariable String status) throws Exception {
         return domainService.getDomains(token, status.toLowerCase());
@@ -55,16 +67,20 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @PostMapping( V2_URL + "/domains" )
+    @PostMapping( Constants.V2_URL + "/domains" )
     public boolean addDomain ( @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token,
                                @RequestBody Map<String, String> body ) throws Exception {
         final String domainName = body.get( "domainName" );
         final String orgId = body.get( "orgId" );
-        if ( body.containsKey( "isShared" ) )
-            return domainService.addDomain(
-                token, domainName, orgId, Boolean.valueOf( body.get( "isShared" ) ) );
-        else
+        Objects.requireNonNull(domainName, "Domain name");
+        Objects.requireNonNull(orgId, "Org Id");
+
+        if ( body.containsKey( "isShared" ) ) {
+            boolean isShared = Boolean.valueOf( body.get( "isShared" ) );
+            return domainService.addDomain( token, domainName, orgId, isShared );
+        } else {
             return domainService.addDomain( token, domainName, orgId );
+        }
     }
 
     /**
@@ -75,7 +91,7 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(V2_URL+"/domains")
+    @DeleteMapping( Constants.V2_URL + "/domains" )
     public boolean deleteDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                                 @RequestParam String domainName) throws Exception {
 
