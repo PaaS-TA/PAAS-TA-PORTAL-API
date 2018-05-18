@@ -81,7 +81,6 @@ public class Common {
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
 
-
     @Autowired
     private LoginService loginService;
 
@@ -436,5 +435,4 @@ public class Common {
     public static PasswordGrantTokenProvider tokenProvider(String username, String password) {
         return PasswordGrantTokenProvider.builder().password(password).username(username).build();
     }
-
 }

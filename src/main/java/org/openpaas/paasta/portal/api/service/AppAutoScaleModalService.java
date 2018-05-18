@@ -1,8 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.openpaas.paasta.portal.api.common.Common;
-
-//import org.openpaas.paasta.portal.api.mapper.portal.AppAutoScaleModalMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
-import java.util.Map;
+
+//import org.openpaas.paasta.portal.api.mapper.portal.AppAutoScaleModalMapper;
 
 /**
  * org.openpaas.paasta.portal.api.service.AppAutoScaleModalService.Class
@@ -121,11 +120,11 @@ public class AppAutoScaleModalService extends Common {
         LOGGER.info("SERVICE deleteAppAutoScale guid : ",  guid);
         HashMap autoScailInfo = new HashMap();
         autoScailInfo.put("guid", guid);
-        Map autoScaleInfo = (Map) getAppAutoScaleInfo(autoScailInfo).get("list");
+//        Map autoScaleInfo = (Map) getAppAutoScaleInfo(autoScailInfo).get("list");
 //        String org =String.valueOf(autoScaleInfo.get("org"));
 //        String space =String.valueOf(autoScaleInfo.get("space"));
 
-        LOGGER.info("SERVICE insertAppAutoScale map : ",  autoScaleInfo.toString());
+//        LOGGER.info("SERVICE insertAppAutoScale map : ",  autoScaleInfo.toString());
 
 //        String token = getCloudFoundryClient(adminUserName,adminPassword).login().getValue();
 //        orgService.unsetOrgRole(org, adminUserName, Constants.USERS, token);

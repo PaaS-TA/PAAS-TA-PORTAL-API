@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudUser;
+import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
@@ -10,14 +11,19 @@ import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQu
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
+import org.cloudfoundry.operations.useradmin.OrganizationUsers;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
+import org.openpaas.paasta.portal.api.model.UserRole;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,44 +45,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 @EnableAsync
 @Service
 public class OrgService extends Common {
-
     private final Logger LOGGER = getLogger(this.getClass());
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private SpaceService spaceService;
+
     @Autowired
-    private AsyncUtilService asyncUtilService;
-
-
-    /*
-     * role 문자를 변경한다.
-     *
-     * @param userRole
-     * @return
-     */
-    private String toStringRole(String userRole) {
-        String roleStr;
-
-        switch (userRole) {
-            case "users":
-                roleStr = "users";
-                break;
-            case "OrgManager":
-                roleStr = "managers";
-                break;
-            case "BillingManager":
-                roleStr = "billing_managers";
-                break;
-            case "OrgAuditor":
-                roleStr = "auditors";
-                break;
-            default:
-                throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Invalid userRole.");
-        }
-
-        return roleStr;
-    }
+    private PasswordGrantTokenProvider adminTokenProvider;
 
     /**
      * 권한별로 수집된 유저정보를 취합하여 하나의 객체로 만들어 리턴한다.
@@ -310,8 +288,20 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    public CreateOrganizationResponse createOrg(final String token, final String orgName) {
+    public CreateOrganizationResponse createOrg(final String orgName, final String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(orgName).build()).block();
+    }
+
+    public boolean isExistOrg(final String orgId) {
+        try {
+            return orgId.equals( getOrg( orgId ).getMetadata().getId() );
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public GetOrganizationResponse getOrg(final String orgId) {
+        return getOrg(orgId, null);
     }
 
     /**
@@ -325,7 +315,16 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public GetOrganizationResponse getOrg(final String orgId, final String token) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
+        Objects.requireNonNull( orgId, "Org Id" );
+
+        final TokenProvider internaltokenProvider;
+        if (null != token && !"".equals( token ))
+            internaltokenProvider = tokenProvider(token);
+        else
+            internaltokenProvider = adminTokenProvider;
+
+        return Common.cloudFoundryClient(connectionContext(), internaltokenProvider).organizations().get(GetOrganizationRequest
+            .builder().organizationId(orgId).build()).block();
     }
 
     /**
@@ -421,15 +420,15 @@ public class OrgService extends Common {
      * 사용자 포털에서 조직을 삭제한다. (Org Delete)<br>
      * 만약 false가 넘어올 경우, 권한이 없거나 혹은
      *
-     * @param org
-     * @param token
-     * @return
+     * @param orgId     the organization guid
+     * @param token     the client's token
+     * @return DeleteOrganizationResponse
      * @throws Exception
      * @author hgcho, ParkCheolhan
      * @version 2.1
      * @since 2018.5.2
      */
-    public DeleteOrganizationResponse deleteOrg(Org org, String token) throws Exception {
+    public DeleteOrganizationResponse deleteOrg(String orgId, boolean recursive, String token) throws Exception {
         boolean result = false;
 
         /*
@@ -454,9 +453,7 @@ public class OrgService extends Common {
         }
         */
 
-        Objects.requireNonNull(org.getGuid(), "Org GUID(guid) must not be null.");
-        final String orgId = org.getGuid().toString();
-        final boolean recursive = org.isRecursive();
+        Objects.requireNonNull(orgId, "Org GUID(guid) must not be null.");
         final SummaryOrganizationResponse orgSummary = getOrgSummary(orgId, token);
 
         //// Check Admin user
@@ -490,7 +487,8 @@ public class OrgService extends Common {
             if (countManagerUsers == 1) {
                 // 정확히 일치할 때
                 LOGGER.debug("Though user isn't admin, user can delete organization if user's role is OrgManager.");
-                LOGGER.debug("User : {}, To delete org : {}(GUID : {})", userInfoResponse.getUserId(), orgSummary.getName(), org.getGuid().toString());
+                LOGGER.debug("User : {}, To delete org : {}(GUID : {})", userInfoResponse.getUserId(), orgSummary
+                    .getName(), orgId);
                 return Common
                         //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
                         .cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(recursive).async(true).build()).block();
@@ -554,10 +552,10 @@ public class OrgService extends Common {
      * @param org
      * @param token
      * @return UpdateOrganizationResponse
+     * @author hgcho
      * @version 2.0
      * @since 2018.5.2
      */
-    // Org 
     public UpdateOrganizationResponse updateOrgQuota(String orgId, Org org, String token) {
         Objects.requireNonNull(org.getGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid.");
         Objects.requireNonNull(org.getQuotaGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid.");
@@ -569,4 +567,226 @@ public class OrgService extends Common {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().update(UpdateOrganizationRequest.builder().organizationId(orgGuid).quotaDefinitionId(quotaGuid).build()).block();
     }
+
+
+    //// Org-Role
+    private enum OrgRole {
+        OrgManager, BillingManager, OrgAuditor,
+        ORGMANAGER, BILLINGMANAGER, ORGAUDITOR,
+    }
+
+    private List<UserResource> listAllOrgUsers( String orgId, String token ) {
+        final ListOrganizationUsersResponse response =
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token) )
+                .organizations().listUsers(
+                ListOrganizationUsersRequest.builder().organizationId( orgId )
+                    .orderDirection( OrderDirection.ASCENDING ).build()
+            ).block();
+
+        return response.getResources();
+    }
+
+    private List<UserResource> listOrgManagerUsers( String orgId, String token ) {
+        final ListOrganizationManagersResponse response =
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token) )
+            .organizations().listManagers(
+                ListOrganizationManagersRequest.builder().organizationId( orgId )
+                    .orderDirection( OrderDirection.ASCENDING ).build()
+        ).block();
+
+        return response.getResources();
+    }
+
+    private List<UserResource> listBillingManagerUsers( String orgId, String token ) {
+        final ListOrganizationBillingManagersResponse response =
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token) )
+                .organizations().listBillingManagers(
+                    ListOrganizationBillingManagersRequest.builder().organizationId( orgId )
+                        .orderDirection( OrderDirection.ASCENDING ).build()
+            ).block();
+
+        return response.getResources();
+    }
+
+    private List<UserResource> listOrgAuditorUsers( String orgId, String token ) {
+        final ListOrganizationAuditorsResponse response =
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token) )
+                .organizations().listAuditors(
+                    ListOrganizationAuditorsRequest.builder().organizationId( orgId )
+                        .orderDirection( OrderDirection.ASCENDING ).build()
+            ).block();
+
+        return response.getResources();
+    }
+
+    public Map<String, Collection<UserRole>>  getOrgUserRoles ( String orgId, String token ) {
+        Map<String, UserRole> userRoles = new HashMap<>( );
+        listAllOrgUsers( orgId, token ).parallelStream()
+            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
+                    .userEmail( resource.getEntity().getUsername() )
+                    .modifiableRoles( true ).build() )
+            .forEach( ur -> userRoles.put( ur.getUserId(), ur ) );
+
+        listOrgManagerUsers( orgId, token ).parallelStream()
+            .map( ur -> userRoles.get( ur.getMetadata().getId() )  )
+            .forEach( ur -> ur.addRole( "OrgManager" ) );
+
+        listBillingManagerUsers( orgId, token ).parallelStream()
+            .map( ur -> userRoles.get( ur.getMetadata().getId() )  )
+            .forEach( ur -> ur.addRole( "BillingManager" ) );
+
+        listOrgAuditorUsers( orgId, token ).parallelStream()
+            .map( ur -> userRoles.get( ur.getMetadata().getId() )  )
+            .forEach( ur -> ur.addRole( "OrgAuditor" ) );
+        //roles.put( "all_users",  );
+
+        final Map<String, Collection<UserRole>> result = new HashMap<>();
+        result.put( "user_roles", userRoles.values() );
+        return result;
+    }
+
+    public OrganizationUsers getOrgUserRolesByOrgName ( String orgName, String token ) {
+        return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
+            .userAdmin()
+            .listOrganizationUsers(
+                org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder()
+                    .organizationName( orgName ).build()
+            ).block();
+    }
+
+
+    private AssociateOrganizationManagerResponse associateOrgManager(
+        String orgId, String userId ) {
+        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+            .organizations()
+            .associateManager( AssociateOrganizationManagerRequest.builder()
+                .organizationId( orgId ).managerId( userId ).build() )
+            .block();
+    }
+
+    private AssociateOrganizationBillingManagerResponse associateBillingManager(
+        String orgId, String userId ) {
+        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+            .organizations()
+            .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
+                .organizationId( orgId ).billingManagerId( userId ).build() )
+            .block();
+    }
+
+    private AssociateOrganizationAuditorResponse associateOrgAuditor(
+        String orgId, String userId ) {
+        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+            .organizations()
+            .associateAuditor( AssociateOrganizationAuditorRequest.builder()
+                .organizationId( orgId ).auditorId( userId ).build() )
+            .block();
+    }
+
+    /**
+     * 조직에 속한 유저에 대한 역할(Role)을 할당한다.
+     * @param orgId
+     * @param userId
+     * @param role
+     * @param token
+     * @return
+     */
+    public AbstractOrganizationResource associateOrgUserRole(
+        String orgId, String userId, String role, String token ) {
+        Objects.requireNonNull( orgId, "Org Id" );
+        Objects.requireNonNull( userId, "User Id");
+        Objects.requireNonNull( role, "role");
+
+        final OrgRole roleEnum;
+        try {
+            roleEnum = OrgRole.valueOf( role );
+        } catch (IllegalArgumentException e) {
+            LOGGER.error( "This role is invalid : {}", role );
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+        }
+
+        switch( roleEnum ) {
+            case OrgManager:
+            case ORGMANAGER:
+                return associateOrgManager( orgId, userId );
+            case BillingManager:
+            case BILLINGMANAGER:
+                return associateBillingManager( orgId, userId );
+            case OrgAuditor:
+            case ORGAUDITOR:
+                return associateOrgAuditor( orgId, userId );
+            default:
+                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+        }
+    }
+
+    private void removeOrgManager( String orgId, String userId ) {
+        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+            .organizations()
+            .removeManager( RemoveOrganizationManagerRequest.builder()
+                .organizationId( orgId ).managerId( userId ).build() )
+            .block();
+    }
+
+    private void removeBillingManager( String orgId, String userId ) {
+        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+            .organizations()
+            .removeBillingManager( RemoveOrganizationBillingManagerRequest.builder()
+                .organizationId( orgId ).billingManagerId( userId ).build() )
+            .block();
+    }
+
+    private void removeOrgAuditor( String orgId, String userId ) {
+        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+            .organizations()
+            .removeAuditor( RemoveOrganizationAuditorRequest.builder()
+                .organizationId( orgId ).auditorId( userId ).build() )
+            .block();
+    }
+
+    /**
+     * 조직에 속한 유저에 대한 역할(Role)을 제거한다.
+     * @param orgId
+     * @param userId
+     * @param role
+     * @param token (but ignore a token because of removing manager forced)
+     */
+    public void removeOrgUserRole( String orgId, String userId, String role, String token ) {
+        Objects.requireNonNull( orgId, "Org Id" );
+        Objects.requireNonNull( userId, "User Id");
+        Objects.requireNonNull( role, "role");
+
+        final OrgRole roleEnum;
+        try {
+            roleEnum = OrgRole.valueOf( role );
+        } catch (IllegalArgumentException e) {
+            LOGGER.error( "This role is invalid : {}", role );
+            return;
+        }
+
+        switch( roleEnum ) {
+            case OrgManager:
+            case ORGMANAGER:
+                removeOrgManager( orgId, userId );
+                break;
+            case BillingManager:
+            case BILLINGMANAGER:
+                removeBillingManager( orgId, userId );
+                break;
+            case OrgAuditor:
+            case ORGAUDITOR:
+                removeOrgAuditor( orgId, userId );
+                break;
+            default:
+                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+        }
+    }
+
+    // TODO invite user
+    public void inviteUser() { }
+
+    // TODO cancel invite user
+    public void cancelInvitionUser() { }
+
+    // TODO cancel member
+    public void cancelOrganizationMember() { }
 }

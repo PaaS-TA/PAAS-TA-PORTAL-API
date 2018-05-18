@@ -71,15 +71,15 @@ public class DomainController extends Common {
      * Delete domain boolean.
      *
      * @param token the token
-     * @param body  the body
+     * @param domainName the domain name
      * @return the boolean
      * @throws Exception the exception
      */
     @DeleteMapping(V2_URL+"/domains")
     public boolean deleteDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                @RequestBody Map<String, String> body) throws Exception {
+                                @RequestParam String domainName) throws Exception {
 
-        return domainService.deleteDomain(token, body.get("domainName"));
+        return domainService.deleteDomain(token, domainName);
     }
 
 

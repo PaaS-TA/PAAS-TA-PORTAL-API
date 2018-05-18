@@ -65,7 +65,8 @@ public class LoginController extends Common {
         user = new UserDetail();
 
         if ("Y".equals(user.getAdminYn())) auths.add("ROLE_ADMIN");
-
+        //USER_GUID
+        result.put("user_id", token.getAdditionalInformation().get("user_id"));
         result.put("scope", token.getScope());
         result.put("token_type", token.getTokenType());
         result.put("token", token.getValue());
@@ -73,6 +74,8 @@ public class LoginController extends Common {
         result.put("expireDate", token.getExpiration().getTime() - 10000);
         result.put("expire_in", token.getExpiresIn());
         result.put("expiredAt-cal", (token.getExpiration().getTime() - currentTime) / 1000);
+        //USER_ID -- UAA 통일
+        result.put("user_name", id);
         result.put("id", id);
         result.put("password", password);
         result.put("auth", auths);

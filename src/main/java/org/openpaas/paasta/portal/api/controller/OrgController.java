@@ -1,19 +1,15 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang.RandomStringUtils;
-
-
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
-import org.openpaas.paasta.portal.api.model.UserDetail;
+import org.openpaas.paasta.portal.api.model.UserRole;
 import org.openpaas.paasta.portal.api.service.OrgService;
 import org.openpaas.paasta.portal.api.service.SpaceService;
 import org.openpaas.paasta.portal.api.service.UserService;
@@ -25,9 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -42,8 +35,7 @@ import java.util.*;
 public class OrgController extends Common {
 
     /**
-     * V1 URL HEAD = (empty string)
-     */
+     * V1 URL HEAD = (empty string)*/
     private static final String V1_URL = Constants.V1_URL;
 
     /**
@@ -334,6 +326,7 @@ public class OrgController extends Common {
      */
     @RequestMapping(value = {V1_URL + "/invite/inviteEmailSend"}, method = RequestMethod.POST)
     public Map<String, Object> inviteEmailSend(@RequestBody Map<String, Object> body) throws Exception {
+        /*
         LOGGER.info("inviteUser ::"+body.toString());
         String token = RandomStringUtils.randomAlphanumeric(6).toUpperCase() + RandomStringUtils.randomAlphanumeric(2).toUpperCase();
         List dataList = (List) body.getOrDefault("dataList",new ArrayList());
@@ -344,7 +337,7 @@ public class OrgController extends Common {
         String orgId = null;
 
 
-        /** 초대 관련 데이터 입력**/
+        // 초대 관련 데이터 입력
         List inviteData = new ArrayList();
 
 
@@ -412,6 +405,10 @@ public class OrgController extends Common {
         map.put("rtnCnt", iRtn);
 //        orgService.inviteMemberEmail(body);
         return map;
+        */
+
+        // TODO invite users into org
+        return new HashMap<String, Object>();
     }
 
     /**
@@ -425,6 +422,7 @@ public class OrgController extends Common {
     @RequestMapping(value = {V1_URL + "/invitations/accept"})
     public Map<String, Object> inviteAccept(@RequestBody HashMap request) throws Exception {
 
+        /*
         String code = (null == request.get("code")) ? "" : request.get("code").toString();
         LOGGER.info("code : "+ code+" : request : ");
         Map<String, Object> result = new HashedMap();
@@ -443,6 +441,9 @@ public class OrgController extends Common {
             result.put("error",messageSource.getMessage("invite.info.noCnt", null, Locale.KOREA));
         }
         return  result;
+        */
+        // TODO
+        return new HashMap<String, Object>();
     }
 
     /**
@@ -454,7 +455,7 @@ public class OrgController extends Common {
      */
     @RequestMapping(value = {V1_URL + "/invitations/userInfo"})
     public Map<String, Object> inviteUserInfo(@RequestBody HashMap request) throws Exception {
-
+        /*
         String code = (null == request.get("code")) ? "" : request.get("code").toString();
         LOGGER.info("code : "+ code+" : request : " +request.toString());
         Map<String, Object> result = new HashedMap();
@@ -470,6 +471,9 @@ public class OrgController extends Common {
         result.put("listSize", list.size());
 
         return  result;
+        */
+        // TODO
+        return new HashMap<String, Object>();
     }
 
 
@@ -654,15 +658,16 @@ public class OrgController extends Common {
     
     /**
      * 사용자의 조직을 삭제한다.
-     * @param org organization id
+     * @param guid the organization id (guid)
      * @param token the token
      * @return boolean
      * @throws Exception the exception
      */
     @DeleteMapping(V2_URL+"/orgs")
     public DeleteOrganizationResponse deleteOrg(
-        @RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
-        return orgService.deleteOrg(org, token);
+        @RequestParam String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token )
+        throws Exception {
+        return orgService.deleteOrg(guid, recursive, token);
     }
     
     // space read-only
@@ -690,7 +695,119 @@ public class OrgController extends Common {
         LOGGER.info("Update quota of org {} / quota {}", org.getGuid(), org.getQuotaGuid());
         return orgService.updateOrgQuota( orgId, org, token );
     }
-    
+
+    /**
+     * 조직에 속한 유저들의 역할(Role)을 전부 조회한다.
+     * @param orgId
+     * @param token
+     * @return Users with roles that belong in the organization
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.5.16
+     */
+    @GetMapping(V2_URL + "/orgs/{orgId}/user-roles")
+    public Map<String, Collection<UserRole>> getOrgUserRoles ( @PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( orgId, "Org Id" );
+        Objects.requireNonNull( token, "token" );
+        if (orgService.isExistOrg( orgId ))
+            return orgService.getOrgUserRoles( orgId, token );
+        else {
+            return Collections.<String, Collection<UserRole>>emptyMap();
+        }
+
+    }
+
+    /**
+     * 조직 이름과 유저 이름으로 해당 조직에서 유저가 가진 역할(Role)을 조회한다.
+     * @param orgName (org name)
+     * @param userName (user email)
+     * @param token
+     * @return UserRole
+     */
+    @GetMapping(V2_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}")
+    public UserRole getOrgUserRoleByUsername ( @PathVariable String orgName,
+                                               @PathVariable String userName,
+                                               @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        final String userId = userService.getUserIdByUsername( userName );
+        Objects.requireNonNull( userId, "Username cannot found" );
+
+        LOGGER.info( "getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}",
+            orgName, userName, userId );
+        OrganizationUsers users = orgService.getOrgUserRolesByOrgName( orgName, token );
+        final boolean isManager = users.getManagers().parallelStream().anyMatch( userName::equals );
+        final boolean isBillingManager = users.getBillingManagers().parallelStream().anyMatch( userName::equals );
+        final boolean isAuditor = users.getAuditors().parallelStream().anyMatch( userName::equals );
+
+
+        return UserRole.builder()
+            .userEmail( userName )
+            .userId( userId )
+            .addRole( isManager?         "OrgManager"       : null )
+            .addRole( isBillingManager?  "BillingManager"   : null )
+            .addRole( isAuditor?         "OrgAuditor"       : null )
+            .build();
+    }
+
+    @GetMapping(V2_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}/is-manager")
+    public boolean isOrgManager(@PathVariable String orgName,
+                                @PathVariable String userName,
+                                @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
+        LOGGER.info( "isOrgManager : Org name : {} / User name : {}", orgName,
+            userName);
+        return orgService.getOrgUserRolesByOrgName( orgName, token )
+            .getManagers().parallelStream().anyMatch(userName::equals );
+    }
+
+    /**
+     * 조직에 속한 유저에게 역할을 할당한다.
+     * @param orgId
+     * @param body
+     * @param token
+     * @return User with role that belongs in the organization
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.5.16
+     */
+    @PutMapping(V2_URL + "/orgs/{orgId}/user-roles")
+    public AbstractOrganizationResource associateOrgUserRoles ( @PathVariable String orgId,
+                                        @RequestBody UserRole.RequestBody body,
+                                        @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( body.getUserId(), "User ID(userId) is required" );
+        Objects.requireNonNull( body.getRole(), "Org Role(role) is required" );
+        LOGGER.info("Associate organization role of user (Update) : {} / {}", body.getUserId(), body.getRole());
+        return orgService.associateOrgUserRole( orgId, body.getUserId(), body.getRole(), token );
+    }
+
+    /**
+     * 조직에 속한 유저의 역할을 제거한다.
+     * @param orgId
+     * @param userId
+     * @param role
+     * @param token
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.5.16
+     */
+    @DeleteMapping(V2_URL + "/orgs/{orgId}/user-roles")
+    public void removeOrgUserRoles ( @PathVariable String orgId,
+                                     @RequestParam String userId, @RequestParam String role,
+                                     @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( userId, "User ID(userId) is required" );
+        Objects.requireNonNull( role, "Org Role(role) is required" );
+        LOGGER.info("Remove organization role of user (Delete) : {} / {}", userId, role);
+        orgService.removeOrgUserRole( orgId, userId, role, token );
+    }
+
+    // TODO invite user
+    public void inviteUser() { }
+
+    // TODO cancel invite user
+    public void cancelInvitionUser() { }
+
+    // TODO cancel member
+    public void cancelOrganizationMember() { }
+
+
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
     //////   Document : http://v3-apidocs.cloudfoundry.org          //////

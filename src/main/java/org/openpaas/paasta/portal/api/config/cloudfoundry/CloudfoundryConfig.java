@@ -45,5 +45,4 @@ public class CloudfoundryConfig {
     ReactorUaaClient uaaClient(DefaultConnectionContext connectionContext, TokenProvider tokenProvider) {
         return Common.uaaClient(connectionContext, tokenProvider);
     }
-
 }

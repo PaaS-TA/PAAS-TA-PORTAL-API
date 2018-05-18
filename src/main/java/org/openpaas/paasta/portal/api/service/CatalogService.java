@@ -1,16 +1,24 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.velocity.runtime.directive.Foreach;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
 import org.cloudfoundry.client.lib.domain.CloudServicePlan;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.v2.applications.CreateApplicationRequest;
-import org.cloudfoundry.client.v2.applications.UploadApplicationRequest;
+import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.services.ListServicesRequest;
+import org.cloudfoundry.client.v2.services.ListServicesResponse;
+import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
+import org.cloudfoundry.operations.routes.CheckRouteRequest;
+import org.cloudfoundry.reactor.TokenProvider;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -66,14 +74,52 @@ public class CatalogService extends Common {
 
     @Autowired
     public CatalogService(
+//            CatalogMapper catalogMapper,
+//                          CatalogCcMapper catalogCcMapper,
             CommonCodeService commonCodeService, SpaceService spaceService,
+            // GlusterfsServiceImpl glusterfsService,
             DomainService domainService, AppService appService, CommonService commonService) throws Exception {
+//        this.catalogMapper = catalogMapper;
+//        this.catalogCcMapper = catalogCcMapper;
         this.commonCodeService = commonCodeService;
         this.spaceService = spaceService;
+//        this.glusterfsService = glusterfsService;
         this.domainService = domainService;
         this.appService = appService;
         this.commonService = commonService;
     }
+
+
+    /**
+     * 앱 개발환경 목록을 조회한다.
+     *
+     * @param req HttpServletRequest(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    @SuppressWarnings(value = "unchecked")
+    public Map<String, Object> getBuildPackList(HttpServletRequest req) throws Exception {
+//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey));
+//        Map<String, Map<String, Object>> buildPacksMap = customCloudFoundryClient.getBuildPacks();
+//        List<Map<String, Map<String, Object>>> resourcesList = (List<Map<String, Map<String, Object>>>) buildPacksMap.get("resources");
+//        List<Map<String, Object>> resultList = new ArrayList<>();
+//
+//        for (Map<String, Map<String, Object>> resource : resourcesList) {
+//            Map<String, Object> resourceMap = new HashMap<>();
+//
+//            resourceMap.put("name", resource.get("entity").get("name"));
+//            resourceMap.put("value", resource.get("entity").get("name"));
+//
+//            resultList.add(resourceMap);
+//        }
+//
+//        return new HashMap<String, Object>() {{
+//            put("list", resultList);
+//        }};
+
+        return null;
+    }
+
 
     /**
      * 서비스 목록을 조회한다.
@@ -103,6 +149,395 @@ public class CatalogService extends Common {
         }};
     }
 
+
+    /**
+     * 앱 개발환경 카탈로그 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getBuildPackCatalogList(Catalog param) {
+        return new HashMap<String, Object>() {{
+//            put("list", catalogMapper.getBuildPackCatalogList(param));
+            put("list", "");
+        }};
+    }
+
+
+    /**
+     * 서비스 카탈로그 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getServicePackCatalogList(Catalog param) {
+        return new HashMap<String, Object>() {{
+//            put("list", catalogMapper.getServicePackCatalogList(param));
+            put("list", "");
+        }};
+    }
+
+
+    /**
+     * 앱 개발환경 카탈로그 개수를 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param res   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getBuildPackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
+//        if (catalogMapper.getBuildPackCatalogCount(param) > 0) {
+        commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
+//        }
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 서비스 카탈로그 개수를 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param res   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getServicePackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
+//        if (catalogMapper.getServicePackCatalogCount(param) > 0) {
+        commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
+//        }
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 앱 개발환경 카탈로그를 저장한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> insertBuildPackCatalog(Catalog param) {
+//        catalogMapper.insertBuildPackCatalog(param);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 서비스 카탈로그를 저장한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> insertServicePackCatalog(Catalog param) {
+//        catalogMapper.insertServicePackCatalog(param);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 앱 개발환경 카탈로그를 수정한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> updateBuildPackCatalog(Catalog param) {
+//        catalogMapper.updateBuildPackCatalog(param);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 서비스 카탈로그를 수정한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> updateServicePackCatalog(Catalog param) {
+//        catalogMapper.updateServicePackCatalog(param);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 앱 개발환경 카탈로그를 삭제한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> deleteBuildPackCatalog(Catalog param) {
+//        catalogMapper.deleteBuildPackCatalog(param);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 서비스 카탈로그를 삭제한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> deleteServicePackCatalog(Catalog param) {
+//        catalogMapper.deleteServicePackCatalog(param);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 앱 개발환경 카탈로그를 삭제한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param res   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getCheckDeleteBuildPackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
+//        if (catalogMapper.getCheckDeleteBuildPackCatalogCount(param) > 0) {
+        commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.starter.delete");
+//        }
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 서비스 카탈로그를 삭제한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param res   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getCheckDeleteServicePackCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
+//        if (catalogMapper.getCheckDeleteServicePackCatalogCount(param) > 0) {
+        commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.starter.delete");
+//        }
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 앱 템플릿 카탈로그 개수를 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param res   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getStarterCatalogCount(Catalog param, HttpServletResponse res) throws Exception {
+//        if (catalogMapper.getStarterCatalogCount(param) > 0) {
+        commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
+//        }
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 앱 템플릿명 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getStarterNamesList(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        resultMap.put("list", catalogMapper.getStarterNamesList(param));
+        resultMap.put("list", "");
+        return resultMap;
+    }
+
+
+    /**
+     * 앱 개발환경명 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getBuildPackNamesList(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        resultMap.put("list", catalogMapper.getBuildPackNamesList(param));
+        resultMap.put("list", "");
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+    }
+
+
+    /**
+     * 서비스명 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getServicePackNamesList(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        resultMap.put("list", catalogMapper.getServicePackNamesList(param));
+        resultMap.put("list", "");
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+    }
+
+
+    /**
+     * 앱 템플릿 카탈로그 조회
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getOneStarterCatalog(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        List<Integer> paramForServices = catalogMapper.getSelectedServicePackList(param);
+//        Catalog paramForOneStarterCatalog = catalogMapper.getOneStarterCatalog(param);
+
+//        paramForOneStarterCatalog.setServicePackCategoryNoList(paramForServices);
+//        paramForOneStarterCatalog.setStarterCategoryNo(paramForOneStarterCatalog.getNo());
+
+//        resultMap.put("info", paramForOneStarterCatalog);
+        resultMap.put("info", "");
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+    }
+
+
+    /**
+     * 앱 템플릿 카탈로그 최대값울 조회한다.
+     *
+     * @return Map(자바클래스)
+     */
+    int getStarterCatalogMaxNumber() {
+        //return catalogMapper.getStarterCatalogMaxNumber();
+        return 0;
+    }
+
+
+    /**
+     * 앱 템플릿 카탈로그를 저장한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> insertStarterCatalog(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        catalogMapper.insertStarterCatalog(param);
+
+        for (int i = 0; i < param.getServicePackCategoryNoList().size(); i++) {
+//            catalogMapper.insertSelectedServicePackList(param.getServicePackCategoryNoList().get(i));
+        }
+
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+    }
+
+
+    /**
+     * 앱 템플릿 카탈로그를 수정한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> updateStarterCatalog(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        catalogMapper.updateStarterCatalog(param);
+//        catalogMapper.deleteSelectedServicePackList(param);
+
+        for (int i = 0; i < param.getServicePackCategoryNoList().size(); i++) {
+//            catalogMapper.insertSelectedServicePackListForUpdate(param, param.getServicePackCategoryNoList().get(i));
+        }
+
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+    }
+
+
+    /**
+     * 앱 템플릿 카탈로그를 삭제한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> deleteStarterCatalog(Catalog param) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+//        catalogMapper.deleteSelectedServicePackList(param);
+//        catalogMapper.deleteStarterCatalog(param);
+
+        resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+
+        return resultMap;
+    }
+
+
+    /**
+     * 파일을 업로드한다.
+     *
+     * @param multipartFile MultipartFile(Spring 클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> uploadFile(MultipartFile multipartFile) throws Exception {
+        return new HashMap<String, Object>() {{
+//            put("path", glusterfsService.upload(multipartFile));
+            put("path", "");
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
+    /**
+     * 파일을 삭제한다.
+     *
+     * @param fileUriPath String(파일 경로)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> deleteFile(String fileUriPath) {
+        //glusterfsService.delete(fileUriPath);
+
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
+
     /**
      * 카탈로그 좌측 메뉴 목록을 조회한다.
      *
@@ -117,6 +552,40 @@ public class CatalogService extends Common {
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
+
+
+    /**
+     * 카탈로그 내역 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @return Map(자바클래스)
+     */
+    public Map<String, Object> getCatalogHistoryList(Catalog param) {
+        param.setLimitSize(Constants.CATALOG_HISTORY_LIMIT_SIZE);
+
+        return new HashMap<String, Object>() {{
+//            put("list", catalogMapper.getCatalogHistoryList(param));
+            put("list", "");
+        }};
+    }
+
+
+    /**
+     * 카탈로그 공간 목록을 조회한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param req   HttpServletRequest(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getCatalogSpaceList(Catalog param, HttpServletRequest req) throws Exception {
+        return new HashMap<String, Object>() {{
+//            put("list", spaceService.getSpaces(new Org() {{
+//                setOrgName(param.getOrgName());
+//            }}, req.getHeader(cfAuthorizationHeaderKey)));
+        }};
+    }
+
 
     /**
      * 카탈로그 도메인 목록을 조회한다.
@@ -135,27 +604,29 @@ public class CatalogService extends Common {
     /**
      * 카탈로그 서비스 이용사양 목록을 조회한다.
      *
-     * @param param Catalog(모델클래스)
+     * @param servicename ServiceName(자바클래스)
      * @param req   HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> getCatalogServicePlanList(Catalog param, HttpServletRequest req) throws Exception {
-        List<Map<String, Object>> resultList = new ArrayList<>();
+    public ListServicePlansResponse getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
 
-        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-        List<CloudServiceOffering> serviceOfferingsList = cloudFoundryClient.getServiceOfferings();
-
-        serviceOfferingsList.stream().filter(cso -> of(param).map(Catalog::getServicePackName).orElse("").equals(cso.getName())).flatMap(cos -> cos.getCloudServicePlans().stream()).collect(toList()).forEach(cloudServicePlan -> resultList.add(new HashMap<String, Object>() {{
-            put("name", cloudServicePlan.getName());
-            put("value", cloudServicePlan.getName());
-            put("description", cloudServicePlan.getDescription());
-            put("guid", cloudServicePlan.getMeta().getGuid());
-        }}));
-
-        return new HashMap<String, Object>() {{
-            put("list", resultList);
-        }};
+        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .services()
+                .list(ListServicesRequest
+                        .builder()
+                        .build())
+                .block();
+        Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream()
+                .filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
+        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .servicePlans()
+                .list(ListServicePlansRequest
+                        .builder()
+                        .serviceId(serviceResource.get().getMetadata().getId())
+                        .build())
+                .block();
+        return listServicePlansResponse;
     }
 
 
@@ -206,6 +677,52 @@ public class CatalogService extends Common {
             put("list", resultList);
         }};
     }
+
+
+    /**
+     * 카탈로그 앱 목록을 조회한다.
+     *
+     * @param orgid String(자바클래스)
+     * @param spaceid String(자바클래스)
+     * @param req   HttpServletRequest(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+        return listApplicationsResponse;
+    }
+
+
+    /**
+     * 카탈로그 앱 이름 생성여부를 조회한다.
+     *
+     * @param name  name(앱 이름)
+     * @param req   HttpServletRequest(자바클래스)
+     * @param res   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
+
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
+                .applicationsV2().list(ListApplicationsRequest
+                        .builder()
+                        .organizationId(orgid)
+                        .spaceId(spaceid)
+                        .build())
+                .block();
+
+        for (ApplicationResource applicationResource: listApplicationsResponse.getResources()) {
+            if(applicationResource.getEntity().getName().equals(name))
+            {commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");}
+        }
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+
 
     /**
      * 카탈로그 서비스 이름 생성여부를 조회한다.
@@ -545,8 +1062,8 @@ public class CatalogService extends Common {
         CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
         String appName = param.getName();
         response.setContentType("application/octet-stream");
-        String fileNameForBrowser = getDisposition("sample-spring.war", getBrowser(req));
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
+        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
+        response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
 
         OutputStream os = response.getOutputStream();
         InputStream is = new URL(param.getAppSampleFilePath()).openStream();
@@ -690,10 +1207,22 @@ public class CatalogService extends Common {
                 routeMappings().create(CreateRouteMappingRequest.builder().routeId(routeid).applicationId(applicationid).build()).block();
     }
 
-    private void fileUpload(File file, String applicationid, String token) {
+    private  void fileUpload(File file, String applicationid, String token){
+        try{
         Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
+                applicationsV2().upload(
+                UploadApplicationRequest
+                        .builder()
+                        .applicationId(applicationid)
+                        .application(file.toPath())
+                        .build()
+        ).block();}
+        catch(Exception e){
+
+        }
+        finally{
         file.delete();
+        }
     }
 
     private File createTempFile(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
@@ -703,14 +1232,10 @@ public class CatalogService extends Common {
         response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
         File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
         InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
-        OutputStream outStream = new FileOutputStream(file);
-        byte[] buf = new byte[1024];
-        int len = 0;
-        while ((len = is.read(buf)) > 0) {
-            outStream.write(buf, 0, len);
-        }
-        outStream.close();
-        is.close();
+        OutputStream out = new FileOutputStream(file);
+        IOUtils.copy(is, out);
+        IOUtils.closeQuietly(is);
+        IOUtils.closeQuietly(out);
         return file;
     }
 

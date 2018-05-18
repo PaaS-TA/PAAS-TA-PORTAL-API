@@ -1,16 +1,32 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.TokenProvider;
+
+import org.cloudfoundry.identity.uaa.login.UaaResetPasswordService;
+import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
-import org.cloudfoundry.uaa.users.ChangeUserPasswordRequest;
+import org.cloudfoundry.uaa.authorizations.AuthorizeByAuthorizationCodeGrantApiRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByPasswordRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByPasswordResponse;
+import org.cloudfoundry.uaa.tokens.RefreshTokenRequest;
+import org.cloudfoundry.uaa.users.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +44,16 @@ import java.util.Map;
 @Transactional
 public class UserService extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger( UserService.class );
 
     @Autowired
     ReactorCloudFoundryClient reactorCloudFoundryClient;
 
+    @Autowired
+    ConnectionContext connectionContext;
+
+    @Autowired
+    TokenProvider adminTokenProvider;
 
     /**
      * 사용자 생성
@@ -41,10 +61,24 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    public int createUser(UserDetail userDetail) {
+    public Map createUser ( UserDetail userDetail ) {
+        LOGGER.info( "createUser ::: " + userDetail.getUserId() );
+        Map result = new HashMap();
+        try {
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( adminUserName, adminPassword ) );
+            reactorUaaClient.users().create( CreateUserRequest.builder().userName( userDetail.getUserId() ).password( userDetail.getPassword() ).email( Email.builder().value( userDetail.getUserId() ).primary( false ).build() ).build() ).block();
 
-        //return userDetailMapper.insert(userDetail);
-        return 0;
+            result.put( "result", true );
+            result.put( "msg", "You have successfully completed the task." );
+
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            result.put( "result", false );
+            result.put( "msg", e.getMessage() );
+        }
+
+
+        return result;
     }
 
 
@@ -54,10 +88,23 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    public int updateUser(UserDetail userDetail, String token) {
+    public int updateUser ( UserDetail userDetail, String token ) {
+        LOGGER.info( "updateUser ::: " + userDetail.getUserId() );
+        Map result = new HashMap();
+        try {
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( this.getToken() ) );
+            reactorUaaClient.users().update( UpdateUserRequest.builder().userName( userDetail.getUserId() ).phoneNumber( PhoneNumber.builder().value( userDetail.getTellPhone() ).build() ).email( Email.builder().value( userDetail.getUserName() ).build() ).build() ).block();
 
-        ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider(token));
-        uaaClient.users().changePassword(ChangeUserPasswordRequest.builder().build());
+            DefaultCloudFoundryOperations defaultCloudFoundryOperations = Common.cloudFoundryOperations( connectionContext(), tokenProvider( userDetail.getUserId(), userDetail.getPassword() ) );
+
+            //TODO : ORG 권한 부여
+            result.put( "result", true );
+            result.put( "msg", "You have successfully completed the task." );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            result.put( "result", false );
+            result.put( "msg", e.getMessage() );
+        }
 
         return 0;
     }
@@ -66,15 +113,31 @@ public class UserService extends Common {
     /**
      * 사용자 패스워드를 변경한다.
      *
-     * @param userId      the user id
+     * @param userGuid    the user id
      * @param oldPassword the user id
      * @param newPassword the user id
      * @return UserDetail user
      */
 
-    public void updateUserPassword(String userId, String oldPassword, String newPassword) {
+    public Map updateUserPassword ( String userGuid, String oldPassword, String newPassword, String token ) {
 
+        LOGGER.info( "updateUserPassword ::: " + userGuid );
+        LOGGER.info( "updateUserPassword ::: " + oldPassword );
+        LOGGER.info( "updateUserPassword ::: " + newPassword );
 
+        Map result = new HashMap();
+        try {
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( token ) );
+            reactorUaaClient.users().changePassword( ChangeUserPasswordRequest.builder().userId( userGuid ).oldPassword( oldPassword ).password( newPassword ).build() ).block();
+            result.put( "result", true );
+            result.put( "msg", "You have successfully completed the task." );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            result.put( "result", false );
+            result.put( "msg", e.getMessage() );
+        }
+
+        return result;
     }
 
     /**
@@ -82,26 +145,115 @@ public class UserService extends Common {
      * 패스워드를 입력안할경우 임의 값으로 패스워드를 변경한다.
      */
 
-    public Map resetPassword(String userId, String password) {
-        Map map = new HashMap();
-        map.put("userid", userId);
-        map.put("password", password);
+    public Map resetPassword ( String userId, String password ) {
+        LOGGER.info( "resetPassword ::: " + userId );
+        LOGGER.info( "resetPassword ::: " + password );
+
+        Map result = new HashMap();
+        try {
+//            result = uaaClient.resetPassword(userId, password);
+//            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(adminUserName,adminPassword)) ;
+//            CloudCredentials cc = new CloudCredentials(userId, password);
+//            OAuth2AccessToken token = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).updatePassword();
 
 
-        return map;
+            UaaResetPasswordService uaaResetPasswordService;
+
+
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( this.getToken() ) );
+            reactorUaaClient.users().expirePassword( ExpirePasswordRequest.builder().passwordChangeRequired( true ).userId( userId ).build() ).block();
+
+            result.put( "result", true );
+            result.put( "msg", "You have successfully completed the task." );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            result.put( "result", false );
+            result.put( "msg", e.getMessage() );
+        }
+
+        return result;
+    }
+
+    /**
+     * 사용자 패스워드를 만료시킨다.
+     * 패스워드를 사용자가 변경하게 수정한다.
+     */
+
+    public Map expiredPassword ( String userGuid ) {
+        LOGGER.info( "resetPassword ::: " + userGuid );
+
+        Map result = new HashMap();
+        try {
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( this.getToken() ) );
+            reactorUaaClient.users().expirePassword( ExpirePasswordRequest.builder().passwordChangeRequired( true ).userId( userGuid ).build() ).block();
+            result.put( "result", true );
+            result.put( "msg", "You have successfully completed the task." );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            result.put( "result", false );
+            result.put( "msg", e.getMessage() );
+        }
+
+        return result;
     }
 
 
     /**
      * CloudFoundry 사용자 삭제
      *
-     * @param userId    the user id
+     * @param userId the user id
      * @return 삭제 정보
      */
-    public int deleteUser(String userId) {
+    public Map deleteUser ( String userId ) {
+        LOGGER.info( "deleteUser ::: " + userId );
+
+        Map result = new HashMap();
+        try {
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( this.getToken() ) );
+            reactorUaaClient.users().delete( DeleteUserRequest.builder().userId( userId ).build() );
+            result.put( "result", true );
+            result.put( "msg", "You have successfully completed the task." );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            result.put( "result", false );
+            result.put( "msg", e.getMessage() );
+        }
+
+        return result;
+    }
 
 
-        return 0;
+    /**
+     * CloudFoundry 이용하여 사용자 정보 출력
+     *
+     * @return 삭제 정보
+     */
+    public UserInfoResponse getUser ( String userGuid, String token ) throws MalformedURLException, URISyntaxException {
+        LOGGER.info( "getUser ::: " );
+        ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( token ) );
+        UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo( UserInfoRequest.builder().build() ).block();
+
+        return userInfoResponse;
+    }
+
+
+    /**
+     * CloudFoundry 이용하여 사용자 전체 정보 출력
+     *
+     * @return 삭제 정보
+     */
+    public List<User> allUsers () {
+        List<User> users = new ArrayList<>();
+        try {
+            LOGGER.info( "allUsers ::: " );
+            ReactorUaaClient reactorUaaClient = Common.uaaClient( connectionContext( apiTarget, true ), tokenProvider( this.getToken() ) );
+            ListUsersResponse listUsersResponse = reactorUaaClient.users().list( ListUsersRequest.builder().build().builder().build() ).block();
+            users = listUsersResponse.getResources();
+            return users;
+        } catch ( Exception e ) {
+            return null;
+        }
+
     }
 
 
@@ -116,7 +268,7 @@ public class UserService extends Common {
      * @version 1.0
      * @since 2016.6.9 최초작성
      */
-    public List getListForTheUser(String keyOfRole, String token) throws Exception {
+    public List getListForTheUser ( String keyOfRole, String token ) throws Exception {
 
         List<Map> listOrgOrSpace = new ArrayList<>();
 
@@ -172,8 +324,6 @@ public class UserService extends Common {
     }
 
 
-
-
     /**
      * 메일인증된 CloundFoundry 회원을 생성한다.
      *
@@ -181,9 +331,83 @@ public class UserService extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    public boolean create(HashMap map) throws Exception {
+    public boolean create ( HashMap map ) throws Exception {
         Boolean bRtn = false;
         return bRtn;
     }
 
+
+    private enum UaaUserLookupFilterType {Username, Id, Origin}
+
+    private String createUserLookupFilter ( UaaUserLookupFilterType filterType, String filterValue ) {
+        Objects.requireNonNull( filterType, "User lookup FilterType" );
+        Objects.requireNonNull( filterValue, "User lookup FilterValue" );
+
+        StringBuilder builder = new StringBuilder();
+        builder.append( filterType.name() ).append( " eq \"" ).append( filterValue ).append( "\"" );
+        return builder.toString();
+    }
+
+    /**
+     * 유저 이름(user name)으로 유저의 GUID(user id)를 가져온다.
+     *
+     * @param username
+     * @return User ID
+     */
+    public String getUserIdByUsername ( String username ) {
+        final List<User> userList =
+            Common.uaaClient( connectionContext, adminTokenProvider )
+                .users().list(
+                    ListUsersRequest.builder().filter(
+                        createUserLookupFilter( UaaUserLookupFilterType.Username, username )
+                    ).build()
+            ).block().getResources();
+        if ( userList.size() <= 0 ) {
+            //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User name cannot find" );
+            return null;
+        }
+
+        return userList.get( 0 ).getId();
+    }
+
+    /**
+     * 유저 GUID(user id)로 유저의 이름(user name)을 가져온다.
+     *
+     * @param userId
+     * @return User name
+     */
+    public String getUsernameByUserId ( String userId ) {
+        final List<User> userList =
+            Common.uaaClient( connectionContext, adminTokenProvider )
+                .users().list(
+                    ListUsersRequest.builder().filter(
+                        createUserLookupFilter( UaaUserLookupFilterType.Id, userId )
+                    ).build()
+            ).block().getResources();
+        if ( userList.size() <= 0 ) {
+            //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User ID cannot find" );
+            return null;
+        }
+
+        return userList.get( 0 ).getId();
+    }
+
+    private User getUserSummaryWithFilter ( UaaUserLookupFilterType filterType, String filterValue ) {
+        final ListUsersResponse response = Common.uaaClient( connectionContext, adminTokenProvider )
+            .users().list( org.cloudfoundry.uaa.users.ListUsersRequest.builder()
+                .filter( createUserLookupFilter( filterType, filterValue ) ).build() )
+            .block();
+        if ( response.getResources().size() <= 0 )
+            throw new CloudFoundryException( HttpStatus.NOT_FOUND, ( filterType.name() + " of user cannot find" ) );
+
+        return response.getResources().get( 0 );
+    }
+
+    public User getUserSummary ( String userId ) {
+        return getUserSummaryWithFilter( UaaUserLookupFilterType.Id, userId );
+    }
+
+    public User getUserSummaryByUsername ( String userName ) {
+        return getUserSummaryWithFilter( UaaUserLookupFilterType.Username, userName );
+    }
 }
