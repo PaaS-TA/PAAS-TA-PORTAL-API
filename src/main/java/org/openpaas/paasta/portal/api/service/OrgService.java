@@ -15,6 +15,8 @@ import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -50,6 +52,9 @@ public class OrgService extends Common {
 
     @Autowired
     private SpaceService spaceService;
+
+    @Autowired
+    private PasswordGrantTokenProvider adminTokenProvider;
 
     /**
      * 권한별로 수집된 유저정보를 취합하여 하나의 객체로 만들어 리턴한다.
@@ -287,6 +292,18 @@ public class OrgService extends Common {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(orgName).build()).block();
     }
 
+    public boolean isExistOrg(final String orgId) {
+        try {
+            return orgId.equals( getOrg( orgId ).getMetadata().getId() );
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public GetOrganizationResponse getOrg(final String orgId) {
+        return getOrg(orgId, null);
+    }
+
     /**
      * 조직 Id를 이용해 조직 정보를 조회한다. (Org Read, fully info.)
      *
@@ -298,7 +315,16 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public GetOrganizationResponse getOrg(final String orgId, final String token) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
+        Objects.requireNonNull( orgId, "Org Id" );
+
+        final TokenProvider internaltokenProvider;
+        if (null != token && !"".equals( token ))
+            internaltokenProvider = tokenProvider(token);
+        else
+            internaltokenProvider = adminTokenProvider;
+
+        return Common.cloudFoundryClient(connectionContext(), internaltokenProvider).organizations().get(GetOrganizationRequest
+            .builder().organizationId(orgId).build()).block();
     }
 
     /**
@@ -630,8 +656,8 @@ public class OrgService extends Common {
 
 
     private AssociateOrganizationManagerResponse associateOrgManager(
-        String orgId, String userId, String token ) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+        String orgId, String userId ) {
+        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .associateManager( AssociateOrganizationManagerRequest.builder()
                 .organizationId( orgId ).managerId( userId ).build() )
@@ -639,8 +665,8 @@ public class OrgService extends Common {
     }
 
     private AssociateOrganizationBillingManagerResponse associateBillingManager(
-        String orgId, String userId, String token ) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+        String orgId, String userId ) {
+        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
                 .organizationId( orgId ).billingManagerId( userId ).build() )
@@ -648,8 +674,8 @@ public class OrgService extends Common {
     }
 
     private AssociateOrganizationAuditorResponse associateOrgAuditor(
-        String orgId, String userId, String token ) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+        String orgId, String userId ) {
+        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .associateAuditor( AssociateOrganizationAuditorRequest.builder()
                 .organizationId( orgId ).auditorId( userId ).build() )
@@ -666,40 +692,51 @@ public class OrgService extends Common {
      */
     public AbstractOrganizationResource associateOrgUserRole(
         String orgId, String userId, String role, String token ) {
-        final OrgRole roleEnum = OrgRole.valueOf( role );
+        Objects.requireNonNull( orgId, "Org Id" );
+        Objects.requireNonNull( userId, "User Id");
+        Objects.requireNonNull( role, "role");
+
+        final OrgRole roleEnum;
+        try {
+            roleEnum = OrgRole.valueOf( role );
+        } catch (IllegalArgumentException e) {
+            LOGGER.error( "This role is invalid : {}", role );
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+        }
+
         switch( roleEnum ) {
             case OrgManager:
             case ORGMANAGER:
-                return associateOrgManager( orgId, userId, token );
+                return associateOrgManager( orgId, userId );
             case BillingManager:
             case BILLINGMANAGER:
-                return associateBillingManager( orgId, userId, token );
+                return associateBillingManager( orgId, userId );
             case OrgAuditor:
             case ORGAUDITOR:
-                return associateOrgAuditor( orgId, userId, token );
+                return associateOrgAuditor( orgId, userId );
             default:
                 throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
         }
     }
 
-    private void removeOrgManager( String orgId, String userId, String token ) {
-        Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+    private void removeOrgManager( String orgId, String userId ) {
+        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeManager( RemoveOrganizationManagerRequest.builder()
                 .organizationId( orgId ).managerId( userId ).build() )
             .block();
     }
 
-    private void removeBillingManager( String orgId, String userId, String token ) {
-        Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+    private void removeBillingManager( String orgId, String userId ) {
+        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeBillingManager( RemoveOrganizationBillingManagerRequest.builder()
                 .organizationId( orgId ).billingManagerId( userId ).build() )
             .block();
     }
 
-    private void removeOrgAuditor( String orgId, String userId, String token ) {
-        Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+    private void removeOrgAuditor( String orgId, String userId ) {
+        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeAuditor( RemoveOrganizationAuditorRequest.builder()
                 .organizationId( orgId ).auditorId( userId ).build() )
@@ -714,19 +751,30 @@ public class OrgService extends Common {
      * @param token (but ignore a token because of removing manager forced)
      */
     public void removeOrgUserRole( String orgId, String userId, String role, String token ) {
-        final OrgRole roleEnum = OrgRole.valueOf( role );
+        Objects.requireNonNull( orgId, "Org Id" );
+        Objects.requireNonNull( userId, "User Id");
+        Objects.requireNonNull( role, "role");
+
+        final OrgRole roleEnum;
+        try {
+            roleEnum = OrgRole.valueOf( role );
+        } catch (IllegalArgumentException e) {
+            LOGGER.error( "This role is invalid : {}", role );
+            return;
+        }
+
         switch( roleEnum ) {
             case OrgManager:
             case ORGMANAGER:
-                removeOrgManager( orgId, userId, token );
+                removeOrgManager( orgId, userId );
                 break;
             case BillingManager:
             case BILLINGMANAGER:
-                removeBillingManager( orgId, userId, token );
+                removeBillingManager( orgId, userId );
                 break;
             case OrgAuditor:
             case ORGAUDITOR:
-                removeOrgAuditor( orgId, userId, token );
+                removeOrgAuditor( orgId, userId );
                 break;
             default:
                 throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
