@@ -1139,7 +1139,7 @@ public class CatalogService extends Common {
 //                applicationsV3().start(StartApplicationRequest.builder().applicationId(appid).build()).block();
 //
         Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
-
+        LOGGER.info("앱실행 완료");
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
@@ -1221,7 +1221,7 @@ public class CatalogService extends Common {
 
         }
         finally{
-        file.delete();
+            file.delete();
         }
     }
 
@@ -1296,5 +1296,25 @@ public class CatalogService extends Common {
 //            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 //        }};
         return null;
+    }
+
+
+    /**
+     * 조직 공간에 등록되어있는 앱 리스트를 가져옵니다.
+     *
+     * @param orgid String(자바클래스)
+     * @param spaceid   String(자바클래스)
+     * @return ListApplicationsResponse(자바클래스)
+     */
+    public ListApplicationsResponse getListApplications(String orgid, String spaceid, String token) {
+        ListApplicationsResponse listapplicationsresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                applicationsV2().list(
+                ListApplicationsRequest
+                        .builder()
+                        .organizationId(orgid)
+                        .spaceId(spaceid)
+                        .build()
+        ).block();
+        return listapplicationsresponse;
     }
 }

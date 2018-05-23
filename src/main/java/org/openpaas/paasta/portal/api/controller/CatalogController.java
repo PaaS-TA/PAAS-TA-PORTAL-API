@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
 import org.openpaas.paasta.portal.api.service.CatalogService;
 import org.slf4j.Logger;
@@ -28,7 +29,6 @@ public class CatalogController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CatalogController.class);
     private final CatalogService catalogService;
-    private final String V2_URL = "/v2";
     @Autowired
     public CatalogController(CatalogService catalogService) {
         this.catalogService = catalogService;
@@ -420,7 +420,7 @@ public class CatalogController extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@RequestMapping(value = {"/getCatalogServicePlanList"}, method = RequestMethod.POST, consumes = "application/json")
-    @GetMapping(V2_URL+"/serviceplan/{servicename}")
+    @GetMapping(Constants.V2_URL+"/serviceplan/{servicename}")
     public ListServicePlansResponse getCatalogServicePlanList(@PathVariable String servicename, HttpServletRequest req) throws Exception {
         return catalogService.getCatalogServicePlanList(servicename, req);
     }
@@ -449,7 +449,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @GetMapping(V2_URL + "/catalogs/apps/{orgid}/{spaceid}")
+    @GetMapping(Constants.V2_URL + "/catalogs/apps/{orgid}/{spaceid}")
     public ListApplicationsResponse getCatalogAppList(@PathVariable String orgid, @PathVariable String spaceid, HttpServletRequest req) throws Exception {
         return catalogService.getCatalogAppList(orgid, spaceid, req);
     }
@@ -465,7 +465,7 @@ public class CatalogController extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@RequestMapping(value = {"/getCheckCatalogApplicationNameExists"}, method = RequestMethod.POST, consumes = "application/json")
-    @GetMapping(V2_URL+"/catalogs/app/{name}")
+    @GetMapping(Constants.V2_URL+"/catalogs/app/{name}")
     public Map<String, Object> getCheckCatalogApplicationNameExists(@PathVariable String name, @RequestParam String orgid, @RequestParam String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
         return catalogService.getCheckCatalogApplicationNameExists(name,orgid,spaceid, req, res);
     }
@@ -604,8 +604,13 @@ public class CatalogController extends Common {
         return catalogService.procCatalogBindService(param, req);
     }
 
-    @PostMapping(V2_URL+"/catalogs/app")
+    @PostMapping(Constants.V2_URL+"/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
         return catalogService.createApp(param, req, response);
+    }
+
+    @GetMapping(Constants.V2_URL +"/catalogs/app/{orgid}/{spaceid}")
+    public ListApplicationsResponse getListApplications(@PathVariable String orgid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return catalogService.getListApplications(orgid, spaceid, token);
     }
 }
