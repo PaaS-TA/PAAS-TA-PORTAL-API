@@ -190,4 +190,9 @@ public class CatalogController extends Common {
     public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
         return catalogService.createApp(param, req, response);
     }
+
+    @GetMapping(Constants.V2_URL +"/catalogs/app/{orgid}/{spaceid}")
+    public ListApplicationsResponse getListApplications(@PathVariable String orgid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return catalogService.getListApplications(orgid, spaceid, token);
+    }
 }
