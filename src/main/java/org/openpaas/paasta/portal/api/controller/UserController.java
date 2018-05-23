@@ -30,7 +30,7 @@ import java.util.Map;
 @RestController
 @Transactional
 public class UserController extends Common {
-    private static final Logger LOGGER = LoggerFactory.getLogger( UserController.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -56,32 +56,31 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @PutMapping( value = { V2_URL + "/users/{guid}/password/update" } )
-    public Map updateUserPassword ( @PathVariable String guid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response ) throws Exception {
-        LOGGER.info( "> into updateUserPassword" );
-        String oldPassword = ( String ) body.get( "oldPassword" );
-        String newPassword = ( String ) body.get( "password" );
-        String token = request.getHeader( AUTHORIZATION_HEADER_KEY );
-        Map<String, Object> result = userService.updateUserPassword( guid, oldPassword, newPassword, request.getHeader( AUTHORIZATION_HEADER_KEY ) );
+    @PutMapping(value = {V2_URL + "/users/{guid}/password/update"})
+    public Map updateUserPassword(@PathVariable String guid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        LOGGER.info("> into updateUserPassword");
+        String oldPassword = (String) body.get("oldPassword");
+        String newPassword = (String) body.get("password");
+        String token = request.getHeader(AUTHORIZATION_HEADER_KEY);
+        Map<String, Object> result = userService.updateUserPassword(guid, oldPassword, newPassword, request.getHeader(AUTHORIZATION_HEADER_KEY));
         return result;
     }
 
 
     /**
      * Update user password map.
-     *
-     * @param userId   the user id
      * @param body     the body
      * @param request  the request
      * @param response the response
      * @return the map
      * @throws Exception the exception
      */
-    @PutMapping( value = { V2_URL + "/users/{userId}/password/reset" } )
-    public Map resetPassword ( @PathVariable String userId, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response ) throws Exception {
-        LOGGER.info( "> into resetPassword" );
-        String newPassword = ( String ) body.get( "password" );
-        Map<String, Object> result = userService.resetPassword( userId, newPassword );
+    @PostMapping(value = {V2_URL + "/users/password/reset"})
+    public Map resetPassword(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        LOGGER.info("> into resetPassword");
+        String newPassword = (String) body.get("password");
+        String userId = (String) body.get("userId");
+        Map<String, Object> result = userService.resetPassword(userId, newPassword);
         return result;
     }
 
@@ -95,10 +94,10 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @PutMapping( value = { V2_URL + "/users/{userGuid}/password/expired" } )
-    public Map expiredPassword ( @PathVariable String userGuid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response ) throws Exception {
-        LOGGER.info( "> into expiredPassword" );
-        Map<String, Object> result = userService.expiredPassword( userGuid );
+    @PutMapping(value = {V2_URL + "/users/{userGuid}/password/expired"})
+    public Map expiredPassword(@PathVariable String userGuid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        LOGGER.info("> into expiredPassword");
+        Map<String, Object> result = userService.expiredPassword(userGuid);
         return result;
     }
 
@@ -110,10 +109,10 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @DeleteMapping( value = { V2_URL + "/users/{guid}" } )
-    public Map deleteUser ( @PathVariable String guid, HttpServletRequest request, HttpServletResponse response ) throws Exception {
-        LOGGER.info( "> into deleteUser" );
-        Map result = userService.deleteUser( guid );
+    @DeleteMapping(value = {V2_URL + "/users/{guid}"})
+    public Map deleteUser(@PathVariable String guid, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        LOGGER.info("> into deleteUser");
+        Map result = userService.deleteUser(guid);
         return result;
     }
 
@@ -124,8 +123,8 @@ public class UserController extends Common {
      * @return map all user name
      * @throws Exception the exception
      */
-    @GetMapping( value = { V2_URL + "/users" } )
-    public List<User> getAllUserName ( HttpServletRequest request, HttpServletResponse response ) throws Exception {
+    @GetMapping(value = {V2_URL + "/users"})
+    public List<User> getAllUserName(HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<User> userInfo = userService.allUsers();
         Map<String, Object> resultMap = new HashMap();
         return userInfo;
@@ -138,9 +137,9 @@ public class UserController extends Common {
      * @return map all user name
      * @throws Exception the exception
      */
-    @GetMapping( value = { V2_URL + "/users/{userId}" } )
-    public UserInfoResponse getUser ( @PathVariable String userId, HttpServletRequest request, HttpServletResponse response ) throws Exception {
-        return userService.getUser( userId, request.getHeader( AUTHORIZATION_HEADER_KEY ) );
+    @GetMapping(value = {V2_URL + "/users/{userId}"})
+    public UserInfoResponse getUser(@PathVariable String userId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return userService.getUser(userId, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -151,10 +150,10 @@ public class UserController extends Common {
      * @param response   the response
      * @return map
      */
-    @PostMapping( value = V2_URL + "/users" )
+    @PostMapping(value = V2_URL + "/users")
     @ResponseBody
-    public Map<String, Object> addUser ( @RequestBody UserDetail userDetail, HttpServletRequest request, HttpServletResponse response ) {
-        Map result = userService.createUser( userDetail );
+    public Map<String, Object> addUser(@RequestBody UserDetail userDetail, HttpServletRequest request, HttpServletResponse response) {
+        Map result = userService.createUser(userDetail);
         return result;
     }
 
@@ -168,48 +167,46 @@ public class UserController extends Common {
      * @return the list for the user
      * @throws Exception the exception
      */
-    @RequestMapping( value = { "/getListForTheUser/{keyOfRole}" }, method = RequestMethod.POST )
-    public List<Map> getListForTheUser ( @PathVariable String keyOfRole, HttpServletRequest request, HttpServletResponse response ) throws Exception {
+    @RequestMapping(value = {"/getListForTheUser/{keyOfRole}"}, method = RequestMethod.POST)
+    public List<Map> getListForTheUser(@PathVariable String keyOfRole, HttpServletRequest request, HttpServletResponse response) throws Exception {
         //to return
         List<Map> listOrgOrSpace = new ArrayList<>();
 
-        listOrgOrSpace = userService.getListForTheUser( keyOfRole, request.getHeader( AUTHORIZATION_HEADER_KEY ) );
+        listOrgOrSpace = userService.getListForTheUser(keyOfRole, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         return listOrgOrSpace;
     }
 
-    @RequestMapping( value = { "/getUserInfo" }, method = RequestMethod.GET )
-    public Map<String, Object> getAllUserName () throws Exception {
+    @RequestMapping(value = {"/getUserInfo"}, method = RequestMethod.GET)
+    public Map<String, Object> getAllUserName() throws Exception {
 //        List<Map<String,String>> userInfo = userService.getUserInfo();
 //        Map<String, Object> resultMap = new HashMap();
 //        resultMap.put("userInfo", userInfo);
         return null;
     }
 
-    @GetMapping( V2_URL + "/user/name-by-id/{username}" )
-    public String getUserId ( @PathVariable String username ) {
-        return userService.getUserId( username );
+    @GetMapping(V2_URL + "/user/name-by-id/{username}")
+    public String getUserId(@PathVariable String username) {
+        return userService.getUserIdByUsername(username);
     }
 
-    @GetMapping( V2_URL + "/user/id-by-name/{userId}" )
-    public String getUsername ( @PathVariable String userId ) {
-        return userService.getUsername( userId );
+    @GetMapping(V2_URL + "/user/id-by-name/{userId}")
+    public String getUsername(@PathVariable String userId) {
+        return userService.getUsernameByUserId(userId);
     }
 
-    @GetMapping( V2_URL + "/user/summary/{userIdentifier}" )
-    public User getUserSummary ( @PathVariable String userIdentifier, @RequestParam String type ) {
+    @GetMapping(V2_URL + "/user/summary/{userIdentifier}")
+    public User getUserSummary(@PathVariable String userIdentifier, @RequestParam String type) {
         String filterType;
-        if ( null == type )
-            filterType = "default";
-        else
-            filterType = type;
+        if (null == type) filterType = "default";
+        else filterType = type;
 
-        switch ( filterType ) {
+        switch (filterType) {
             case "name":
-                return userService.getUserSummaryByUsername( userIdentifier );
+                return userService.getUserSummaryByUsername(userIdentifier);
             default:
             case "id":
-                return userService.getUserSummary( userIdentifier );
+                return userService.getUserSummary(userIdentifier);
         }
     }
 }

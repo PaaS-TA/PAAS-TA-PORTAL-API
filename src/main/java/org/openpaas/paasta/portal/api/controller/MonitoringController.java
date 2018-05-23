@@ -25,18 +25,18 @@ public class MonitoringController{
     }
 
     @RequestMapping(value = {"/{guid}/{idx}/cpuUsage"}, method = RequestMethod.GET)
-    public Map getCpuUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy) {
+    public Map getCpuUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type) {
         LOGGER.info("### get guid ::: {}, idx :::{}, defaultTimeRange :::{}, groupBy :::{}", guid, idx, defaultTimeRange, groupBy);
-        return monitoringService.getCpuUsage(guid, idx, defaultTimeRange, groupBy);
+        return monitoringService.getCpuUsage(guid, idx, defaultTimeRange, groupBy, type);
     }
 
     @RequestMapping(value = {"/{guid}/{idx}/memoryUsage"}, method = RequestMethod.GET)
-    public Map getMemoryUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy){
-        return monitoringService.getMemoryUsage(guid, idx, defaultTimeRange, groupBy);
+    public Map getMemoryUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type){
+        return monitoringService.getMemoryUsage(guid, idx, defaultTimeRange, groupBy, type);
     }
 
-    @RequestMapping(value = {"/{guid}/{idx}/networkIoKByte"}, method = RequestMethod.GET)
-    public Map getNetworkIoKByte(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy){
-        return monitoringService.getNetworkIoKByte(guid, idx, defaultTimeRange, groupBy);
+    @RequestMapping(value = {"/{guid}/{idx}/getNetworkByte"}, method = RequestMethod.GET)
+    public Map getNetworkByte(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type){
+        return monitoringService.getNetworkByte(guid, idx, defaultTimeRange, groupBy, type);
     }
 }
