@@ -131,13 +131,12 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/rename"}, method = RequestMethod.PUT)
-    public boolean renameApp(@PathVariable String guid, @RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map renameApp(@PathVariable String guid, @RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
-        appService.renameApp(app, this.getToken());
-
+        Map result = appService.renameApp(app,guid);
         LOGGER.info("Rename App End ");
-        return true;
+        return result;
     }
 
 
