@@ -616,6 +616,9 @@ public class OrgService extends Common {
     }
 
     public Map<String, Collection<UserRole>> getOrgUserRoles ( String orgId, String token ) {
+        if (null == token)
+            token = adminTokenProvider.getToken( connectionContext() ).block();
+
         Map<String, UserRole> userRoles = new HashMap<>();
         listAllOrgUsers( orgId, token ).stream()
             .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
@@ -650,9 +653,18 @@ public class OrgService extends Common {
             ).block();
     }
 
-    private boolean isOrgManager( String orgId, String token ) {
+    public boolean isOrgManagerUsingOrgName (String orgName, String token) {
+        final String orgId = getOrgId( orgName, token );
         final String userId = userService.getUser( token ).getUserId();
-        return getOrgUserRoles( orgId, token ).get( "user_roles" )
+        return isOrgManager( orgId, userId );
+    }
+    public boolean isOrgManagerUsingToken( String orgId, String token ) {
+        final String userId = userService.getUser( token ).getUserId();
+        return isOrgManager( orgId, userId );
+    }
+
+    public boolean isOrgManager( String orgId, String userId ) {
+        return getOrgUserRoles( orgId, null ).get( "user_roles" )
             .stream().filter(ur -> ur.getRoles().contains( "OrgManager" ))
             .anyMatch( ur -> ur.getUserId().equals( userId ) );
     }
@@ -798,14 +810,32 @@ public class OrgService extends Common {
     }
 
     // TODO invite user
-    public void inviteUser () {
+    public void inviteUser (String orgId, String userId, String token) {
+
     }
 
     // TODO cancel invite user
     public void cancelInvitionUser () {
+
     }
 
     // TODO cancel member
-    public void cancelOrganizationMember () {
+    public boolean cancelOrganizationMember ( String orgId, String userId, String token ) {
+        final boolean isManager = isOrgManager( orgId, userId );
+        LOGGER.info( "isOrgManager : {} / Org Guid : {} / User Guid : {}",
+            isManager, orgId, userId);
+
+        try {
+            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                .organizations().removeUser(
+                RemoveOrganizationUserRequest.builder()
+                    .organizationId( orgId ).userId( userId ).build()
+            ).block();
+            return true;
+        } catch (Exception ex) {
+            LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );
+            LOGGER.error( "Occured a exception because of canceling organization member...", ex );
+            return false;
+        }
     }
 }
