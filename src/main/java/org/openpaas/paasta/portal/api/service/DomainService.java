@@ -6,14 +6,8 @@ import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.PaginatedResponse;
 import org.cloudfoundry.client.v2.domains.*;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
-import org.cloudfoundry.client.v2.privatedomains.CreatePrivateDomainRequest;
-import org.cloudfoundry.client.v2.privatedomains.CreatePrivateDomainResponse;
-import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsRequest;
-import org.cloudfoundry.client.v2.privatedomains.ListPrivateDomainsResponse;
-import org.cloudfoundry.client.v2.shareddomains.CreateSharedDomainRequest;
-import org.cloudfoundry.client.v2.shareddomains.CreateSharedDomainResponse;
-import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsRequest;
-import org.cloudfoundry.client.v2.shareddomains.ListSharedDomainsResponse;
+import org.cloudfoundry.client.v2.privatedomains.*;
+import org.cloudfoundry.client.v2.shareddomains.*;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
@@ -194,32 +188,58 @@ public class DomainService extends Common {
 
         LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
         if (domains.size() > 0) {
-            final DeleteDomainResponse response = Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                .domains().delete(
-                    DeleteDomainRequest.builder().domainId(
-                        domains.get( 0 ).getMetadata().getId() ).build()
-            ).block();
-            // TODO response is null
+            final DomainResource domain = domains.get( 0 );
+            final boolean shared = domain.getEntity().getSharedOrganizations() != null
+                && domain.getEntity().getSharedOrganizations().size() > 0;
+            if (shared) {
+                /*
+                final DeleteSharedDomainResponse response =
+                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                    .sharedDomains().delete( DeleteSharedDomainRequest.builder()
+                        .sharedDomainId( domain.getMetadata().getId() ).build() ).block();
 
-            return true;
-            /*
-            //Objects.requireNonNull(response, "Delete domain response");
+                if (null == response) {
+                    return true;
+                } else {
+                    if ( response.getEntity().getErrorDetails() == null )
+                        return true;
+                    else {
+                        final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
+                        throw new CloudFoundryException(
+                            HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
+                    }
+                }
+                */
+                // cannot delete shared domain
+                LOGGER.error( "Cannot delete shared domain... {} ({})",
+                    domain.getMetadata().getId(), domain.getEntity().getName());
+                return false;
+            } else {
+                final DeletePrivateDomainResponse response =
+                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                    .privateDomains().delete( DeletePrivateDomainRequest.builder()
+                        .privateDomainId( domain.getMetadata().getId() ).build() ).block();
 
-            if (response.getEntity().getErrorDetails() == null)
-                return true;
-            else {
-                final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
-                throw new CloudFoundryException(
-                    HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
+                if (null == response) {
+                    return true;
+                } else {
+                    if ( response.getEntity().getErrorDetails() == null )
+                        return true;
+                    else {
+                        final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
+                        throw new CloudFoundryException(
+                            HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
+                    }
+                }
             }
-            */
         } else {
-            LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
-            return true;
             /*
             throw new CloudFoundryException(
                 HttpStatus.SERVICE_UNAVAILABLE, "Cannot delete", "Cannot find to delete a domain : " + domainName);
             */
+
+            LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
+            return true;
         }
     }
 }
