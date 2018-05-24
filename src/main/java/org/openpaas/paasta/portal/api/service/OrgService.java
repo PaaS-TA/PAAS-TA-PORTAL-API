@@ -650,6 +650,12 @@ public class OrgService extends Common {
             ).block();
     }
 
+    private boolean isOrgManager( String orgId, String token ) {
+        final String userId = userService.getUser( token ).getUserId();
+        return getOrgUserRoles( orgId, token ).get( "user_roles" )
+            .stream().filter(ur -> ur.getRoles().contains( "OrgManager" ))
+            .anyMatch( ur -> ur.getUserId().equals( userId ) );
+    }
 
     private AssociateOrganizationManagerResponse associateOrgManager (
         String orgId, String userId ) {
@@ -692,6 +698,12 @@ public class OrgService extends Common {
         Objects.requireNonNull( orgId, "Org Id" );
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
+
+        if (!isOrgManager(orgId, token)) {
+            final String email = userService.getUser( token ).getEmail();
+            throw new CloudFoundryException( HttpStatus.FORBIDDEN,
+                "This user is unauthorized to change role for this org : " + email );
+        }
 
         final OrgRole roleEnum;
         try {
@@ -752,6 +764,12 @@ public class OrgService extends Common {
         Objects.requireNonNull( orgId, "Org Id" );
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
+
+        if (!isOrgManager(orgId, token)) {
+            final String email = userService.getUser( token ).getEmail();
+            throw new CloudFoundryException( HttpStatus.FORBIDDEN,
+                "This user is unauthorized to change role for this org : " + email );
+        }
 
         final OrgRole roleEnum;
         try {

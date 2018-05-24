@@ -236,6 +236,10 @@ public class UserService extends Common {
         return result;
     }
 
+    public UserInfoResponse getUser(String token) {
+        return Common.uaaClient( connectionContext(apiTarget, true), tokenProvider( token ) )
+            .users().userInfo( UserInfoRequest.builder().build() ).block();
+    }
 
     /**
      * CloudFoundry 이용하여 사용자 정보 출력
@@ -243,6 +247,7 @@ public class UserService extends Common {
      * @return 삭제 정보
      */
     public UserInfoResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
+        // COMMENT : userGuid를 사용해서 사용자를 조회하는게 필요한데 구현을 못한건가요? (by hgcho)
         LOGGER.info("getUser ::: ");
         ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
         UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).block();
