@@ -45,8 +45,8 @@ public class Catalog {
     private String spaceName;
     private String spaceId;
     private String serviceInstanceName;
-    private UUID appGuid;
-    private UUID serviceInstanceGuid;
+    private String appGuid;
+    private String serviceInstanceGuid;
     private List<Catalog> servicePlanList;
     private int limitSize;
     private String hostName;
@@ -552,7 +552,7 @@ public class Catalog {
     /**
      * GETTER 조직명
      *
-     * @return 조직명
+     * @return  조직 guid
      */
     public String getOrgId() {
         return this.orgId;
@@ -561,7 +561,7 @@ public class Catalog {
     /**
      * SETTER 조직명
      *
-     * @param orgName 조직명
+     * @param orgId 조직 guid
      */
     public void setOrgId(String orgId) {
         this.orgId = orgId;
@@ -628,7 +628,7 @@ public class Catalog {
      *
      * @return 애플리케이션 GUID
      */
-    public UUID getAppGuid() {
+    public String getAppGuid() {
         return this.appGuid;
     }
 
@@ -637,7 +637,7 @@ public class Catalog {
      *
      * @param appGuid 애플리케이션 GUID
      */
-    public void setAppGuid(UUID appGuid) {
+    public void setAppGuid(String appGuid) {
         this.appGuid = appGuid;
     }
 
@@ -646,7 +646,7 @@ public class Catalog {
      *
      * @return 서비스 인스턴스 GUID
      */
-    public UUID getServiceInstanceGuid() {
+    public String getServiceInstanceGuid() {
         return this.serviceInstanceGuid;
     }
 
@@ -655,7 +655,7 @@ public class Catalog {
      *
      * @param serviceInstanceGuid 서비스 인스턴스 GUID
      */
-    public void setServiceInstanceGuid(UUID serviceInstanceGuid) {
+    public void setServiceInstanceGuid(String serviceInstanceGuid) {
         this.serviceInstanceGuid = serviceInstanceGuid;
     }
 

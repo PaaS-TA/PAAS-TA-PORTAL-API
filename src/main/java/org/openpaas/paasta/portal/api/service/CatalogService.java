@@ -8,14 +8,19 @@ import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
 import org.cloudfoundry.client.lib.domain.CloudServicePlan;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
+import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
+import org.cloudfoundry.client.v2.servicebindings.*;
+import org.cloudfoundry.client.v2.serviceinstances.*;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.services.ListServicesRequest;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
+import org.cloudfoundry.client.v3.servicebindings.CreateServiceBindingData;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.routes.CheckRouteRequest;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -117,6 +122,12 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
+        Catalog param = new Catalog();
+        ObjectMapper mapper = new ObjectMapper();
+        String jsn = "{\"age\":\"32\",\"name\":\"steave\",\"job\":\"baker\"}";
+        Map<String, Object> parameterMap = mapper.readValue(jsn, new TypeReference<Map<String, Object>>() {
+        });
+        LOGGER.info(parameterMap+"");
         ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
                 .applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
@@ -181,11 +192,11 @@ public class CatalogService extends Common {
             servicePlan.setOrgName(param.getOrgName());
             servicePlan.setSpaceName(param.getSpaceName());
             // CREATE SERVICE INSTANCE
-            Map<String, Object> tempMap = this.procCatalogCreateServiceInstanceV2(servicePlan, req);
+            //Map<String, Object> tempMap = this.procCatalogCreateServiceInstanceV2(servicePlan, req);
 
             // FOR TEST CASE
             Catalog bindParam = new Catalog();
-            bindParam.setServiceInstanceGuid(UUID.fromString(tempMap.get("SERVICE_INSTANCE_GUID").toString()));
+            //bindParam.setServiceInstanceGuid(UUID.fromString(tempMap.get("SERVICE_INSTANCE_GUID").toString()));
             serviceInstanceGuidList.add(bindParam);
 
             // BIND SERVICE
@@ -195,7 +206,7 @@ public class CatalogService extends Common {
                 bindParam.setAppName(param.getName());
                 bindParam.setApp_bind_parameter(servicePlan.getApp_bind_parameter());
 
-                this.procCatalogBindService(bindParam, req);
+                //this.procCatalogBindService(bindParam, req);
             }
         }
 
@@ -295,13 +306,13 @@ public class CatalogService extends Common {
         // BIND SERVICE
         if (Constants.USE_YN_Y.equals(param.getAppBindYn())) {
             Catalog bindParam = new Catalog();
-            bindParam.setServiceInstanceGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
+            //bindParam.setServiceInstanceGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
             bindParam.setOrgName(param.getOrgName());
             bindParam.setSpaceName(param.getSpaceName());
             bindParam.setAppName(param.getAppName());
             bindParam.setParameter(param.getParameter());
 
-            this.procCatalogBindService(bindParam, req);
+            //this.procCatalogBindService(bindParam, req);
         }
 
         return new HashMap<String, Object>() {{
@@ -321,21 +332,21 @@ public class CatalogService extends Common {
     public Map<String, Object> executeCatalogServicePackV2(Catalog param, HttpServletRequest req) throws Exception {
         try {
             // CREATE SERVICE INSTANCE
-            Map<String, Object> resultMap = this.procCatalogCreateServiceInstanceV2(param, req);
+            //Map<String, Object> resultMap = this.procCatalogCreateServiceInstanceV2(param, req);
 
             // BIND SERVICE
             if (Constants.USE_YN_Y.equals(param.getAppBindYn())) {
                 Catalog bindParam = new Catalog();
-                bindParam.setServiceInstanceGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
+                //bindParam.setServiceInstanceGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
                 bindParam.setOrgName(param.getOrgName());
                 bindParam.setSpaceName(param.getSpaceName());
                 bindParam.setAppName(param.getAppName());
                 bindParam.setParameter(param.getApp_bind_parameter());
 
-                this.procCatalogBindService(bindParam, req);
+                //this.app_bind_parameter(bindParam, req);
             }
             return new HashMap<String, Object>() {{
-                put("SERVICE_INSTANCE_GUID", resultMap.get("SERVICE_INSTANCE_GUID")); // FOR TEST CASE
+                //put("SERVICE_INSTANCE_GUID", resultMap.get("SERVICE_INSTANCE_GUID")); // FOR TEST CASE
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
 
@@ -596,11 +607,37 @@ public class CatalogService extends Common {
      * 카탈로그 서비스 인스턴스를 생성한다.
      *
      * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param token   String(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> procCatalogCreateServiceInstanceV2(Catalog param, HttpServletRequest req) throws Exception {
+    public CreateServiceBindingResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
+
+
+
+        CreateServiceInstanceResponse createserviceinstanceresponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                        serviceInstances().create(
+                        CreateServiceInstanceRequest
+                                .builder()
+                                .name(param.getName())
+                                .spaceId(param.getSpaceId())
+                                .servicePlanId(param.getServicePlan())
+                                .build()
+                ).block();
+
+
+
+        CreateServiceBindingResponse createservicebindingresponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                        serviceBindingsV2().create(
+                        CreateServiceBindingRequest
+                                .builder()
+                                .applicationId(param.getAppGuid())
+                                .serviceInstanceId(createserviceinstanceresponse.getMetadata().getId())
+                                .build()
+                ).block();
+
 //        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
 //
 //            String tempParameter = param.getParameter();
@@ -620,26 +657,25 @@ public class CatalogService extends Common {
 //                put("SERVICE_INSTANCE_GUID", tempSubMap.get("guid"));
 //                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 //            }};
-        return null;
+        return createservicebindingresponse;
     }
 
     /**
      * 카탈로그 앱 서비스를 바인드한다.
      *
      * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param token   String(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map<String, Object> procCatalogBindService(Catalog param, HttpServletRequest req) throws Exception {
+    public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
+
 //        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
 //
 //        String tempParameter = param.getApp_bind_parameter();
 //        if (null == tempParameter || "".equals(tempParameter)) param.setApp_bind_parameter("{}");
 //
-//        ObjectMapper mapper = new ObjectMapper();
-//        Map<String, Object> parameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
-//        });
+
 //
 //        // BIND SERVICE
 //        customCloudFoundryClient.bindServiceV2(param.getServiceInstanceGuid(), param.getAppName(), parameterMap);
@@ -650,23 +686,16 @@ public class CatalogService extends Common {
         return null;
     }
 
-
-    /**
-     * 조직 공간에 등록되어있는 앱 리스트를 가져옵니다.
-     *
-     * @param orgid String(자바클래스)
-     * @param spaceid   String(자바클래스)
-     * @return ListApplicationsResponse(자바클래스)
-     */
-    public ListApplicationsResponse getListApplications(String orgid, String spaceid, String token) {
-        ListApplicationsResponse listapplicationsresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                applicationsV2().list(
-                ListApplicationsRequest
-                        .builder()
-                        .organizationId(orgid)
-                        .spaceId(spaceid)
-                        .build()
-        ).block();
-        return listapplicationsresponse;
+    public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token){
+        ListServiceInstancesResponse listServiceInstancesResponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                        serviceInstances().list(
+                        ListServiceInstancesRequest
+                                .builder()
+                                .organizationId(orgid)
+                                .spaceId(spaceid)
+                                .build()
+                ).block();
+        return listServiceInstancesResponse;
     }
 }
