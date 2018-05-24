@@ -127,7 +127,7 @@ public class DomainService extends Common {
         }
 
         boolean anyMatch = getAllDomains( connectionContext(), tokenProvider( token ) )
-            .getResources().parallelStream()
+            .getResources().stream()
             .anyMatch( domainResource -> domainName.equals( domainResource.getEntity().getName() ) );
 
         if ( anyMatch )
@@ -187,7 +187,7 @@ public class DomainService extends Common {
         }
 
         List<DomainResource> domains = getAllDomains( connectionContext(), tokenProvider( token ) ).getResources()
-            .parallelStream().filter( domain -> domainName.equals( domain.getEntity().getName() ) )
+            .stream().filter( domain -> domainName.equals( domain.getEntity().getName() ) )
             .collect(Collectors.toList());
 
         LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
