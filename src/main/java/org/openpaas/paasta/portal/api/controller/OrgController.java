@@ -734,9 +734,9 @@ public class OrgController extends Common {
         LOGGER.info( "getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}",
             orgName, userName, userId );
         OrganizationUsers users = orgService.getOrgUserRolesByOrgName( orgName, token );
-        final boolean isManager = users.getManagers().parallelStream().anyMatch( userName::equals );
-        final boolean isBillingManager = users.getBillingManagers().parallelStream().anyMatch( userName::equals );
-        final boolean isAuditor = users.getAuditors().parallelStream().anyMatch( userName::equals );
+        final boolean isManager = users.getManagers().stream().anyMatch( userName::equals );
+        final boolean isBillingManager = users.getBillingManagers().stream().anyMatch( userName::equals );
+        final boolean isAuditor = users.getAuditors().stream().anyMatch( userName::equals );
 
 
         return UserRole.builder()
@@ -755,7 +755,7 @@ public class OrgController extends Common {
         LOGGER.info( "isOrgManager : Org name : {} / User name : {}", orgName,
             userName);
         return orgService.getOrgUserRolesByOrgName( orgName, token )
-            .getManagers().parallelStream().anyMatch(userName::equals );
+            .getManagers().stream().anyMatch(userName::equals );
     }
 
     /**

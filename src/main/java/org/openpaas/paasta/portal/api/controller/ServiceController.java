@@ -80,20 +80,13 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/renameInstanceService"}, method = RequestMethod.POST)
-    public boolean renameInstanceService(@RequestBody Service service, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("renameInstanceService Start : " + service.getGuid() );
-
-        //token setting
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
-
+    @RequestMapping(value = {Constants.V2_URL + "/service/{guid}/rename"}, method = RequestMethod.PUT)
+    public Map renameInstance(@PathVariable String guid,@RequestBody Service service, HttpServletRequest request) throws Exception {
+        LOGGER.info("Rename InstanceService Start : " + guid +  " : " + service.getName() + " : " + service.getNewName());
         //service call
-//        serviceService.renameInstanceService(service, client);
-
-        LOGGER.info("renameInstanceService End ");
-
-        return true;
+        Map result = serviceService.renameInstance(service,guid);
+        LOGGER.info("Rename InstanceService End ");
+        return result;
     }
 
 
@@ -105,20 +98,13 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/service/deleteInstanceService"}, method = RequestMethod.POST)
-    public boolean deleteInstanceService(@RequestBody Service service, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("deleteInstanceService Start : " + service.getGuid() );
-
-        //token setting
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
-
+    @RequestMapping(value = {Constants.V2_URL + "/service/{guid}"}, method = RequestMethod.DELETE)
+    public Map deleteInstance(@PathVariable String guid) throws Exception {
+        LOGGER.info("delete InstanceService Start : " + guid);
         //service call
-//        serviceService.deleteInstanceService(service, client);
-
-        LOGGER.info("deleteInstanceService End ");
-
-        return true;
+        Map result = serviceService.deleteInstance(guid);
+        LOGGER.info("delete InstanceService End ");
+        return result;
     }
 
 

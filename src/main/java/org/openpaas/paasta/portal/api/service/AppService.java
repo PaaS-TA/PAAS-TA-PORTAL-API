@@ -20,7 +20,6 @@ import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.LogsRequest;
-import org.cloudfoundry.operations.applications.RenameApplicationRequest;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
@@ -111,9 +110,27 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    public void renameApp(App app, String token) throws Exception {
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), app.getOrgName(), app.getSpaceName());
-        cloudFoundryOperations.applications().rename(RenameApplicationRequest.builder().name(app.getName()).newName(app.getNewName()).build());
+    public Map renameApp(App app, String token){
+        //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), app.getOrgName(), app.getSpaceName());
+        // cloudFoundryOperations.applications().rename(RenameApplicationRequest.builder().name(app.getName()).newName(app.getNewName()).build());
+        HashMap result = new HashMap();
+        try{
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            UpdateApplicationResponse response =
+                    cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getNewName()).build()).block();
+
+            LOGGER.info("Update app response :", response);
+
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        } catch (Exception e) {
+        e.printStackTrace();
+        result.put("result", false);
+        result.put("msg", e.getMessage());
+    }
+
+        return result;
+
     }
 
 

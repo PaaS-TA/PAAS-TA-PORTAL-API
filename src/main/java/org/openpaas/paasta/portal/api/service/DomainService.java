@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import com.netflix.ribbon.proxy.annotation.Http;
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.PaginatedResponse;
 import org.cloudfoundry.client.v2.domains.*;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
@@ -126,7 +127,7 @@ public class DomainService extends Common {
         }
 
         boolean anyMatch = getAllDomains( connectionContext(), tokenProvider( token ) )
-            .getResources().parallelStream()
+            .getResources().stream()
             .anyMatch( domainResource -> domainName.equals( domainResource.getEntity().getName() ) );
 
         if ( anyMatch )
@@ -186,7 +187,7 @@ public class DomainService extends Common {
         }
 
         List<DomainResource> domains = getAllDomains( connectionContext(), tokenProvider( token ) ).getResources()
-            .parallelStream().filter( domain -> domainName.equals( domain.getEntity().getName() ) )
+            .stream().filter( domain -> domainName.equals( domain.getEntity().getName() ) )
             .collect(Collectors.toList());
 
         LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
@@ -206,9 +207,12 @@ public class DomainService extends Common {
                     HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
             }
         } else {
-            LOGGER.error( "Cannot delete a domain! : {}", domainName );
+            LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
+            return true;
+            /*
             throw new CloudFoundryException(
-                HttpStatus.SERVICE_UNAVAILABLE, "Cannot delete", "Cannot delete a domain : " + domainName);
+                HttpStatus.SERVICE_UNAVAILABLE, "Cannot delete", "Cannot find to delete a domain : " + domainName);
+            */
         }
     }
 }

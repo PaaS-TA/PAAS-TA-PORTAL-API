@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
+import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Org;
@@ -196,15 +197,17 @@ public class SpaceService extends Common {
      * @throws Exception the exception
      */
     public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception{
-        ReactorCloudFoundryClient cloudFoundryClient  = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient =
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         GetSpaceSummaryResponse respSapceSummary =
-                cloudFoundryClient.spaces()
-                        .getSummary(GetSpaceSummaryRequest.builder()
-                                .spaceId(spaceId).build()
+            cloudFoundryClient.spaces()
+                .getSummary(GetSpaceSummaryRequest.builder()
+                    .spaceId(spaceId).build()
                 ).block();
 
         return respSapceSummary;
+
 
 //
 //        if(!stringNullCheck(orgName,spaceName)) {
@@ -295,12 +298,13 @@ public class SpaceService extends Common {
      * @since 2018.4.30
      */
     public ListSpaceServicesResponse getSpaceServices(String spaceId, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient =
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         ListSpaceServicesResponse respSpaceServices =
-                cloudFoundryClient.spaces()
+            cloudFoundryClient.spaces()
                 .listServices(ListSpaceServicesRequest.builder()
-                        .spaceId(spaceId).build()
+                    .spaceId(spaceId).build()
                 ).block();
 
         return respSpaceServices;
