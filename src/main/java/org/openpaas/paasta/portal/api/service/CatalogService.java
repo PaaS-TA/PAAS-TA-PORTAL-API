@@ -122,12 +122,6 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
-        Catalog param = new Catalog();
-        ObjectMapper mapper = new ObjectMapper();
-        String jsn = "{\"age\":\"32\",\"name\":\"steave\",\"job\":\"baker\"}";
-        Map<String, Object> parameterMap = mapper.readValue(jsn, new TypeReference<Map<String, Object>>() {
-        });
-        LOGGER.info(parameterMap+"");
         ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
                 .applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
@@ -502,7 +496,6 @@ public class CatalogService extends Common {
 //                applicationsV3().start(StartApplicationRequest.builder().applicationId(appid).build()).block();
 //
         Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
-        LOGGER.info("앱실행 완료");
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
@@ -539,19 +532,22 @@ public class CatalogService extends Common {
     public Map<String, Object> createApp(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
         String token = req.getHeader(cfAuthorizationHeaderKey);
         File file = createTempFile(param, req, response); // 임시파일을 생성합니다.
+        try {
+            String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
+            String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
 
-        String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
-        String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
+            routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
+            fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
 
-        routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
-        fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
-
-        if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-            return procCatalogStartApplication(param, token); //앱 시작
+            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
+                return procCatalogStartApplication(param, token); //앱 시작
+            }
+            return new HashMap<String, Object>() {{
+                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+            }};
+        }finally {
+            file.delete();
         }
-        return new HashMap<String, Object>() {{
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
     }
 
     private String createApplication(Catalog param, String token) {
@@ -571,7 +567,7 @@ public class CatalogService extends Common {
     }
 
     private  void fileUpload(File file, String applicationid, String token){
-        try{
+
         Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 applicationsV2().upload(
                 UploadApplicationRequest
@@ -579,13 +575,8 @@ public class CatalogService extends Common {
                         .applicationId(applicationid)
                         .application(file.toPath())
                         .build()
-        ).block();}
-        catch(Exception e){
+        ).block();
 
-        }
-        finally{
-            file.delete();
-        }
     }
 
     private File createTempFile(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
