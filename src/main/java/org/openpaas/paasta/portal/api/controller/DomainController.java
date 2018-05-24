@@ -93,9 +93,9 @@ public class DomainController extends Common {
      */
     @DeleteMapping( Constants.V2_URL + "/domains" )
     public boolean deleteDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
+                                @RequestParam String orgId,
                                 @RequestParam String domainName) throws Exception {
-
-        return domainService.deleteDomain(token, domainName);
+        return domainService.deleteDomain(token, orgId, domainName);
     }
 
 

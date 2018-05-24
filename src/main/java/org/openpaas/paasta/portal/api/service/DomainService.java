@@ -179,15 +179,17 @@ public class DomainService extends Common {
      * @author 조현구
      * @since 2018.5.15
      */
-    public boolean deleteDomain ( String token, String domainName ) throws Exception {
+    public boolean deleteDomain ( String token, String orgId, String domainName ) throws Exception {
         LOGGER.info( "Start deleteDomain service. domainName : " + domainName );
 
-        if ( !stringNullCheck( token, domainName ) ) {
+        if ( !stringNullCheck( token, orgId, domainName ) ) {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
         }
 
         List<DomainResource> domains = getAllDomains( connectionContext(), tokenProvider( token ) ).getResources()
-            .stream().filter( domain -> domainName.equals( domain.getEntity().getName() ) )
+            .stream()
+            .filter( domain -> orgId.equals( domain.getEntity().getOwningOrganizationId() ) )
+            .filter( domain -> domainName.equals( domain.getEntity().getName() ) )
             .collect(Collectors.toList());
 
         LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
@@ -197,7 +199,11 @@ public class DomainService extends Common {
                     DeleteDomainRequest.builder().domainId(
                         domains.get( 0 ).getMetadata().getId() ).build()
             ).block();
-            Objects.requireNonNull(response, "Delete domain response");
+            // TODO response is null
+
+            return true;
+            /*
+            //Objects.requireNonNull(response, "Delete domain response");
 
             if (response.getEntity().getErrorDetails() == null)
                 return true;
@@ -206,6 +212,7 @@ public class DomainService extends Common {
                 throw new CloudFoundryException(
                     HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
             }
+            */
         } else {
             LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
             return true;
