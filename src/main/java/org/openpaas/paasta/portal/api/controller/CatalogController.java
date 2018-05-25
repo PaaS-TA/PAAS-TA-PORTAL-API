@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -194,5 +195,10 @@ public class CatalogController extends Common {
     @GetMapping(Constants.V2_URL +"/catalogs/app/{orgid}/{spaceid}")
     public ListApplicationsResponse getListApplications(@PathVariable String orgid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         return catalogService.getListApplications(orgid, spaceid, token);
+    }
+
+    @GetMapping(Constants.V2_URL+"/services")
+    public ListServicesResponse getService() throws Exception {
+        return catalogService.getService();
     }
 }
