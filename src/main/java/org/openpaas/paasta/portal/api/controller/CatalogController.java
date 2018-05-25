@@ -6,6 +6,7 @@ import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingResponse;
 import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -206,5 +207,16 @@ public class CatalogController extends Common {
     @PostMapping(Constants.V2_URL+"/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
         return catalogService.createApp(param, req, response);
+    }
+
+    /**
+     * 서비스 목록을 가져온다.
+     *
+     * @return ListServicesResponse
+     * @throws Exception Exception(자바클래스)
+     */
+    @GetMapping(Constants.V2_URL+"/services")
+    public ListServicesResponse getService() throws Exception {
+        return catalogService.getService();
     }
 }
