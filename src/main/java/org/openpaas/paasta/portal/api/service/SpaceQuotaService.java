@@ -96,7 +96,7 @@ public class SpaceQuotaService extends Common {
                 .spaceQuotaDefinitions()
                 .delete(DeleteSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(guid)
-                        .async(true)  // background job : recommend
+                        .async(false)  // background async 처리 여부(recommend:true)
                         .build()
                 ).log()
                 .block();
