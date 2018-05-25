@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 
+import javax.annotation.PreDestroy;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -408,13 +409,59 @@ public class Common {
         ).build();
     }
 
-    public DefaultConnectionContext connectionContext() {
-        return DefaultConnectionContext.builder().apiHost(convertApiUrl(apiTarget)).skipSslValidation(cfskipSSLValidation).build();
+    private static final ThreadLocal<DefaultConnectionContext> connectionContextThreadLocal = new ThreadLocal<>();
+
+    private static DefaultConnectionContext peekConnectionContext() {
+        return connectionContextThreadLocal.get();
     }
 
+    private static void pushConnectionContext(DefaultConnectionContext connectionContext) {
+        connectionContextThreadLocal.set( connectionContext );
+        LOGGER.info( "Create connection context and push thread local : DefalutConnectionContext@{}",
+            Integer.toHexString( connectionContext.hashCode() ) );
+    }
+
+    private static void removeConnectionContext() {
+        disposeConnectionContext( connectionContextThreadLocal.get() );
+        connectionContextThreadLocal.remove();
+    }
+
+    public DefaultConnectionContext connectionContext() {
+        DefaultConnectionContext connectionContext = peekConnectionContext();
+        if (null == connectionContext) {
+            connectionContext = DefaultConnectionContext.builder()
+                .apiHost( convertApiUrl( apiTarget ) ).skipSslValidation( cfskipSSLValidation ).build();
+            pushConnectionContext( connectionContext );
+        }
+
+        return connectionContext;
+    }
+
+    private static void disposeConnectionContext ( DefaultConnectionContext connectionContext) {
+        try {
+            if (null != connectionContext )
+                connectionContext.dispose();
+        } catch ( Exception ignore ) { }
+    }
 
     public static DefaultConnectionContext connectionContext(String apiUrl, boolean skipSSLValidation) {
-        return DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).build();
+        DefaultConnectionContext connectionContext = peekConnectionContext();
+        if (null == connectionContext) {
+            connectionContext = DefaultConnectionContext.builder()
+                .apiHost( convertApiUrl( apiUrl ) ).skipSslValidation( skipSSLValidation ).build();
+            pushConnectionContext( connectionContext );
+        } else {
+            boolean isEqual = connectionContext.getApiHost().equals( convertApiUrl( apiUrl ) )
+                && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
+            if ( !isEqual ) {
+                removeConnectionContext();
+                connectionContext = DefaultConnectionContext.builder()
+                    .apiHost( convertApiUrl( apiUrl ) ).skipSslValidation( skipSSLValidation ).build();
+                pushConnectionContext( connectionContext );
+            }
+        }
+
+        return connectionContext;
     }
 
     public static TokenGrantTokenProvider tokenProvider(String token) {
@@ -434,5 +481,19 @@ public class Common {
      */
     public static PasswordGrantTokenProvider tokenProvider(String username, String password) {
         return PasswordGrantTokenProvider.builder().password(password).username(username).build();
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        // Remove connection context in thread local
+        final DefaultConnectionContext connectionContext = peekConnectionContext();
+        final String hashCode;
+        if (connectionContext != null)
+            hashCode = Integer.toHexString( connectionContext.hashCode() );
+        else
+            hashCode = "NULL";
+
+        LOGGER.info( "Pre-destroy connection context : ConnectionContext@{}", hashCode );
+        removeConnectionContext();
     }
 }

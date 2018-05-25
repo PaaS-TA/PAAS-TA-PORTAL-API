@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -734,9 +736,9 @@ public class OrgController extends Common {
         LOGGER.info( "getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}",
             orgName, userName, userId );
         OrganizationUsers users = orgService.getOrgUserRolesByOrgName( orgName, token );
-        final boolean isManager = users.getManagers().parallelStream().anyMatch( userName::equals );
-        final boolean isBillingManager = users.getBillingManagers().parallelStream().anyMatch( userName::equals );
-        final boolean isAuditor = users.getAuditors().parallelStream().anyMatch( userName::equals );
+        final boolean isManager = users.getManagers().stream().anyMatch( userName::equals );
+        final boolean isBillingManager = users.getBillingManagers().stream().anyMatch( userName::equals );
+        final boolean isAuditor = users.getAuditors().stream().anyMatch( userName::equals );
 
 
         return UserRole.builder()
@@ -755,7 +757,7 @@ public class OrgController extends Common {
         LOGGER.info( "isOrgManager : Org name : {} / User name : {}", orgName,
             userName);
         return orgService.getOrgUserRolesByOrgName( orgName, token )
-            .getManagers().parallelStream().anyMatch(userName::equals );
+            .getManagers().stream().anyMatch( userName::equals );
     }
 
     /**
@@ -799,13 +801,29 @@ public class OrgController extends Common {
     }
 
     // TODO invite user
-    public void inviteUser() { }
+    public void inviteUser() {
+
+    }
 
     // TODO cancel invite user
     public void cancelInvitionUser() { }
 
     // TODO cancel member
-    public void cancelOrganizationMember() { }
+    @DeleteMapping(V2_URL + "/orgs/{orgId}/member")
+    public void cancelOrganizationMember( @PathVariable String orgId,
+                                          @RequestParam String userId,
+                                          @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( orgId, "Organization ID is required" );
+        Objects.requireNonNull( userId, "User ID is required" );
+
+        boolean isSuccessed = orgService.cancelOrganizationMember( orgId, userId, token );
+        if (isSuccessed) {
+            LOGGER.info( "Success to cancel organization member : org ID {} / user ID {}", orgId, userId );
+        } else {
+            LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );
+            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Fail to cancel organization member" );
+        }
+    }
 
 
     //////////////////////////////////////////////////////////////////////

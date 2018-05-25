@@ -16,8 +16,7 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
-public class CloudfoundryConfig {
-
+public class CloudFoundryConfig {
     @Bean
     DefaultConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiHost,
                                                @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation) {

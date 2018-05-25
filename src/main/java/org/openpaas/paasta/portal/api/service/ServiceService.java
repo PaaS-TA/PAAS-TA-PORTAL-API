@@ -3,15 +3,19 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.v2.servicebrokers.*;
+import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import java.util.HashMap;
 import java.util.Map;
 
 //import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
@@ -53,30 +57,47 @@ public class ServiceService extends Common {
      * 서비스 인스턴스 이름을 변경한다.
      *
      * @param service the service
-     * @param client  the client
      * @return the boolean
      * @throws Exception the exception
      */
-//    public boolean renameInstanceService(org.openpaas.paasta.portal.api.model.Service service, CustomCloudFoundryClient client) throws Exception {
-//
-//        client.renameInstanceService(service.getGuid(), service.getNewName());
-//
-//        return true;
-//
-//    }
+    public Map renameInstance(Service service, String guid) throws Exception {
+        HashMap result = new HashMap();
+//        guid.renameInstanceService(service.getGuid(), service.getNewName());
+        try{
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            //cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(guid).name(service.getNewName()).build()).block();
+            cloudFoundryClient.serviceInstances().update(UpdateServiceInstanceRequest.builder().serviceInstanceId(guid).name(service.getNewName()).build()).block();
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        } catch (Exception e){
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
+    }
 
     /**
      * 서비스 인스턴스를 삭제한다.
      *
-     * @param service the service
-     * @param client  the client
+     * @param guid the service
      * @throws Exception the exception
      */
-//    public void deleteInstanceService(org.openpaas.paasta.portal.api.model.Service service,  CustomCloudFoundryClient client) throws Exception {
-//
+    public Map deleteInstance(String guid) throws Exception {
+        HashMap result = new HashMap();
 //        client.deleteInstanceService(service.getGuid());
-//
-//    }
+        try{
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).build()).block();
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        }catch (Exception e){
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
+    }
 
     /**
      * 유저 프로바이드 서비스를 조회한다.

@@ -1,8 +1,11 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
+import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
+import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingResponse;
+import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceResponse;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
-import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -44,7 +47,7 @@ public class CatalogController extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@RequestMapping(value = {"/getCatalogServicePlanList"}, method = RequestMethod.POST, consumes = "application/json")
-    @GetMapping(Constants.V2_URL+"/serviceplan/{servicename}")
+    @GetMapping(Constants.V2_URL+"/catalogs/serviceplan/{servicename}")
     public ListServicePlansResponse getCatalogServicePlanList(@PathVariable String servicename, HttpServletRequest req) throws Exception {
         return catalogService.getCatalogServicePlanList(servicename, req);
     }
@@ -74,7 +77,7 @@ public class CatalogController extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@RequestMapping(value = {"/getCheckCatalogApplicationNameExists"}, method = RequestMethod.POST, consumes = "application/json")
-    @GetMapping(Constants.V2_URL+"/catalogs/app/{name}")
+    @GetMapping(Constants.V2_URL+"/catalogs/apps/{name}")
     public Map<String, Object> getCheckCatalogApplicationNameExists(@PathVariable String name, @RequestParam String orgid, @RequestParam String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
         return catalogService.getCheckCatalogApplicationNameExists(name,orgid,spaceid, req, res);
     }
@@ -132,6 +135,11 @@ public class CatalogController extends Common {
         return catalogService.insertCatalogHistoryBuildPack(param);
     }
 
+    @GetMapping(Constants.V2_URL+"/catalogs/servicepack/{orgid}/{spaceid}")
+    public ListServiceInstancesResponse listServiceInstancesResponse(@PathVariable String orgid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return catalogService.listServiceInstancesResponse(orgid, spaceid, token);
+    }
+
 
     /**
      * 카탈로그 서비스를 실행한다.
@@ -173,32 +181,30 @@ public class CatalogController extends Common {
         return catalogService.insertCatalogHistoryServicePack(param);
     }
 
-
     /**
-     * 앱 서비스 바인드를 실행한다.
+     * 서비스 인스턴스와 앱 바인딩을생성한다.
      *
      * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param token   String(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @RequestMapping(value = {"/appBindServiceV2"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> appBindServiceV2(@RequestBody Catalog param, HttpServletRequest req) throws Exception {
-        return catalogService.procCatalogBindService(param, req);
+    @PostMapping(Constants.V2_URL+"/catalogs/serviceinstances")
+    public CreateServiceBindingResponse procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return catalogService.procCatalogCreateServiceInstanceV2(param, token);
     }
 
+    /**
+     * 앱을 생성한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param req   HttpServletRequest(자바클래스)
+     * @param response   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
     @PostMapping(Constants.V2_URL+"/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
         return catalogService.createApp(param, req, response);
-    }
-
-    @GetMapping(Constants.V2_URL +"/catalogs/app/{orgid}/{spaceid}")
-    public ListApplicationsResponse getListApplications(@PathVariable String orgid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return catalogService.getListApplications(orgid, spaceid, token);
-    }
-
-    @GetMapping(Constants.V2_URL+"/services")
-    public ListServicesResponse getService() throws Exception {
-        return catalogService.getService();
     }
 }
