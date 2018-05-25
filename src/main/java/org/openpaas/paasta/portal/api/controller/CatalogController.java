@@ -210,7 +210,7 @@ public class CatalogController extends Common {
     }
 
     /**
-     * 서비스 목록을 가져온다.
+     * 서비스 전체 목록을 가져온다.
      *
      * @return ListServicesResponse
      * @throws Exception Exception(자바클래스)

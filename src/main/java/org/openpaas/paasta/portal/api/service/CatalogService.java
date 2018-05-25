@@ -691,7 +691,7 @@ public class CatalogService extends Common {
     }
 
     /**
-     * 서비스 리스트를 가져온다.
+     * 서비스 전체 목록을 가져온다.
      *
      * @return ListServicesResponse
      */
