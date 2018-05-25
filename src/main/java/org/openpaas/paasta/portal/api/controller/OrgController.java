@@ -661,14 +661,14 @@ public class OrgController extends Common {
     /**
      * 사용자의 조직을 삭제한다.
      * @param guid the organization id (guid)
+     * @param recursive is recursive deleting org?
      * @param token the token
      * @return boolean
      * @throws Exception the exception
      */
     @DeleteMapping(V2_URL+"/orgs")
-    public DeleteOrganizationResponse deleteOrg(
-        @RequestParam String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token )
-        throws Exception {
+    public DeleteOrganizationResponse deleteOrg( @RequestParam String guid, @RequestParam boolean recursive,
+                                                 @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
         return orgService.deleteOrg(guid, recursive, token);
     }
     
