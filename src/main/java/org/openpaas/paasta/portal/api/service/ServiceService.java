@@ -252,16 +252,12 @@ public class ServiceService extends Common {
      * 서비스 브로커를 수정한다.
      *
      * @param serviceBroker the cloudServiceBroker
-//     * @param client        the client
+     * @param token
      * @return the boolean
      * @throws Exception the exception
      */
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
-        /* 서비스 이름만 변경을 위한 분기 처리 URL 생성할것
-           T0-Be : portal-user 에서 서비스 이름만 변경하는 기능 있는지 확인후 URL 분리 혹은 현 메소드에 분기 추가 처리
-           //if(serviceBroker.getUsername().isEmpty() && serviceBroker.getUrl().isEmpty()){
-           // 사용자 화면 개발 완료시 삭제 처리 필요
-        */
+
             return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                     .serviceBrokers()
                     .update(UpdateServiceBrokerRequest.builder()
@@ -272,24 +268,6 @@ public class ServiceService extends Common {
                             .brokerUrl(serviceBroker.getUrl())
                             .build()
                     ).block();
-    }
-
-    /**
-     * 서비스 브로커 이름을 변경한다.
-     *
-     * @param serviceBroker the serviceBroker
-     * @return the boolean
-     * @throws Exception the exception
-     */
-    public UpdateServiceBrokerResponse renameServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
-        // 서비스 브로커 이름변경 메소드를 CF Method 를 따로 제공하지 않으므로 update Method 를 사용하여 수정한다. 사용시 컨트롤단 생성 필요
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-                .serviceBrokers()
-                .update(UpdateServiceBrokerRequest.builder()
-                        .serviceBrokerId(serviceBroker.getGuid().toString())
-                        .name(serviceBroker.getName())
-                        .build()
-                ).block();
     }
 
     /**

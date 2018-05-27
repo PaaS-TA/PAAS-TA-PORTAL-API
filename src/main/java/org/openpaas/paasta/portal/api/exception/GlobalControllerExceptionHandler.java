@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.identity.uaa.error.UaaException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -75,31 +76,31 @@ public class GlobalControllerExceptionHandler {
         return false;
     }
 
-
-
-
-    @ExceptionHandler({CloudFoundryException.class})
+    @ExceptionHandler({ClientV2Exception.class})
     @ResponseBody
-    public boolean handleCloudFoundryException(CloudFoundryException ex, HttpServletResponse response) throws Exception {
+    public void handleClientV2Exception(ClientV2Exception ex, HttpServletResponse response) throws Exception {
 
         LOGGER.error("CloudFoundryException : " + ex );
 
-        String[] message;
+        //String[] message;
         String msg;
         try {
-            message = ex.getDescription().replace(" ", "_").split(":");
-            LOGGER.error("message : " + message[0] );
-            //msg = messageSource.getMessage(message[0], null, DEFAULT_LOCALE);
-            msg = getStackTraceString( ex );
+            msg = messageSource.getMessage( String.valueOf(ex.getCode()) , null, "Not Found Message." ,response.getLocale());
         }catch(Exception e){
-            //msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, DEFAULT_LOCALE);
             msg = getStackTraceString( e );
         }
 
-        response.sendError(ex.getStatusCode().value(), msg);
-        return false;
-    }
+        String message = "{\"message\":\""+msg+"\"" +
+                ",\"status\":\""+HttpServletResponse.SC_BAD_REQUEST+"\"" +
+                ",\"code\":\""+ex.getCode()+"\"}";
 
+        response.resetBuffer();
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader("Content-Type", "application/json;charset=utf-8");
+        response.setContentType("application/json; charset=UTF-8");
+        response.getWriter().print(message);
+        response.flushBuffer();
+    }
 
     @ExceptionHandler({UaaException.class})
     @ResponseBody
@@ -174,8 +175,8 @@ public class GlobalControllerExceptionHandler {
             .append( "Occured an exception : " ).append( throwable.getMessage() ).append( '\n' )
             .append( "Caused by... ").append( '\n' )
             .append( getStackTraceString( throwable ) );
-            
-        
+
+
         response.sendError(status.value(), buffer.toString());
         LOGGER.error("Http status : {}", status.value());
         LOGGER.error("Error message : {}", buffer.toString());
