@@ -21,6 +21,8 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
+import sun.tools.jstat.Token;
 
 import java.util.*;
 import java.net.MalformedURLException;
@@ -97,8 +99,6 @@ public class UserService extends Common {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(this.getToken()));
             reactorUaaClient.users().update(UpdateUserRequest.builder().userName(userDetail.getUserId()).phoneNumber(PhoneNumber.builder().value(userDetail.getTellPhone()).build()).email(Email.builder().value(userDetail.getUserName()).build()).build()).block();
 
-            DefaultCloudFoundryOperations defaultCloudFoundryOperations = Common.cloudFoundryOperations(connectionContext(), tokenProvider(userDetail.getUserId(), userDetail.getPassword()));
-
             //TODO : ORG 권한 부여
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -115,22 +115,26 @@ public class UserService extends Common {
     /**
      * 사용자 패스워드를 변경한다.
      *
-     * @param userGuid    the user id
+     * @param userId    the user id
      * @param oldPassword the user id
      * @param newPassword the user id
      * @return UserDetail user
      */
 
-    public Map updateUserPassword(String userGuid, String oldPassword, String newPassword, String token) {
+    public Map updateUserPassword(String userId, String oldPassword, String newPassword, String token) {
 
-        LOGGER.info("updateUserPassword ::: " + userGuid);
+        LOGGER.info("updateUserPassword ::: " + userId);
         LOGGER.info("updateUserPassword ::: " + oldPassword);
         LOGGER.info("updateUserPassword ::: " + newPassword);
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
-            reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userGuid).oldPassword(oldPassword).password(newPassword).build()).block();
+
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(userId,oldPassword));
+            UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).block();
+            ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userInfoResponse.getUserId()).oldPassword(oldPassword).password(newPassword).build()).block();
+            LOGGER.info("updateUserPassword status :: " + changeUserPasswordResponse.getStatus());
+
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
@@ -237,8 +241,7 @@ public class UserService extends Common {
     }
 
     public UserInfoResponse getUser(String token) {
-        return Common.uaaClient( connectionContext(apiTarget, true), tokenProvider( token ) )
-            .users().userInfo( UserInfoRequest.builder().build() ).block();
+        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token)).users().userInfo(UserInfoRequest.builder().build()).block();
     }
 
     /**

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HeaderParam;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,26 +50,26 @@ public class UserController extends Common {
     /**
      * Update user password map.
      *
-     * @param guid     the user id
+     * @param userId   the user id
      * @param body     the body
      * @param request  the request
      * @param response the response
      * @return the map
      * @throws Exception the exception
      */
-    @PutMapping(value = {V2_URL + "/users/{guid}/password/update"})
-    public Map updateUserPassword(@PathVariable String guid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @PutMapping(value = {V2_URL + "/users/{userId}/password/update"})
+    public Map updateUserPassword(@PathVariable String userId, @RequestBody Map<String, Object> body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOGGER.info("> into updateUserPassword");
         String oldPassword = (String) body.get("oldPassword");
         String newPassword = (String) body.get("password");
-        String token = request.getHeader(AUTHORIZATION_HEADER_KEY);
-        Map<String, Object> result = userService.updateUserPassword(guid, oldPassword, newPassword, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        Map<String, Object> result = userService.updateUserPassword(userId, oldPassword, newPassword, token);
         return result;
     }
 
 
     /**
      * Update user password map.
+     *
      * @param body     the body
      * @param request  the request
      * @param response the response
@@ -138,8 +139,8 @@ public class UserController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(value = {V2_URL + "/users/{userId}"})
-    public UserInfoResponse getUser(@PathVariable String userId, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return userService.getUser(userId, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    public UserInfoResponse getUser(@PathVariable String userId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return userService.getUser(userId, token);
     }
 
 
