@@ -748,6 +748,7 @@ public class OrgService extends Common {
     }
 
     private void removeOrgManager ( String orgId, String userId ) {
+        LOGGER.debug( "---->> Remove OrgManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeManager( RemoveOrganizationManagerRequest.builder()
@@ -756,6 +757,7 @@ public class OrgService extends Common {
     }
 
     private void removeBillingManager ( String orgId, String userId ) {
+        LOGGER.debug( "---->> Remove BillingManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeBillingManager( RemoveOrganizationBillingManagerRequest.builder()
@@ -764,11 +766,20 @@ public class OrgService extends Common {
     }
 
     private void removeOrgAuditor ( String orgId, String userId ) {
+        LOGGER.debug( "---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeAuditor( RemoveOrganizationAuditorRequest.builder()
                 .organizationId( orgId ).auditorId( userId ).build() )
             .block();
+    }
+
+    private void removeAllRoles ( String orgId, String userId ) {
+        LOGGER.debug( "--> Remove all member({})'s roles in org({}).", userId, orgId );
+        removeOrgManager( orgId, userId );
+        removeBillingManager( orgId, userId );
+        removeOrgAuditor( orgId, userId );
+        LOGGER.debug( "--> Done to remove all member({})'s roles in org({}).", userId, orgId );
     }
 
     /**
@@ -833,11 +844,13 @@ public class OrgService extends Common {
             isManager, orgId, userId);
 
         try {
+            removeAllRoles( orgId, userId );
             Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations().removeUser(
                 RemoveOrganizationUserRequest.builder()
                     .organizationId( orgId ).userId( userId ).build()
             ).block();
+
             return true;
         } catch (Exception ex) {
             LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );
