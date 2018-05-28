@@ -146,7 +146,7 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {Constants.V2_URL + "/apps/{guid}"})
+    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}"}, method = RequestMethod.DELETE)
     public Map deleteApp(@PathVariable String guid) throws Exception {
         LOGGER.info("delete App Start : " + guid);
         Map result = appService.deleteApp(guid);
