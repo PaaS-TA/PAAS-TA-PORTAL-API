@@ -129,7 +129,7 @@ public class OrgQuotaService extends Common {
                 .organizationQuotaDefinitions()
                 .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)
-                        .async(true) // background 처리 여부(recommend:true)
+                        .async(false) // background async 처리 여부(recommend:true)
                         .build()
                 ).log()
                 .block();

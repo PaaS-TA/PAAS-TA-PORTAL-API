@@ -689,4 +689,18 @@ public class CatalogService extends Common {
                 ).block();
         return listServiceInstancesResponse;
     }
+
+    /**
+     * 서비스 전체 목록을 가져온다.
+     *
+     * @return ListServicesResponse
+     */
+    public ListServicesResponse getService()throws Exception{
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+                .services()
+                .list(ListServicesRequest.builder()
+                        .build()
+                ).log()
+                .block();
+    }
 }

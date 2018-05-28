@@ -30,6 +30,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -624,18 +625,22 @@ public class OrgService extends Common {
             .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
                 .userEmail( resource.getEntity().getUsername() )
                 .modifiableRoles( true ).build() )
+            .filter( ur -> null != ur )
             .forEach( ur -> userRoles.put( ur.getUserId(), ur ) );
 
         listOrgManagerUsers( orgId, token ).stream()
             .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
+            .filter( ur -> null != ur )
             .forEach( ur -> ur.addRole( "OrgManager" ) );
 
         listBillingManagerUsers( orgId, token ).stream()
             .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
+            .filter( ur -> null != ur )
             .forEach( ur -> ur.addRole( "BillingManager" ) );
 
         listOrgAuditorUsers( orgId, token ).stream()
             .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
+            .filter( ur -> null != ur )
             .forEach( ur -> ur.addRole( "OrgAuditor" ) );
         //roles.put( "all_users",  );
 
@@ -664,9 +669,11 @@ public class OrgService extends Common {
     }
 
     public boolean isOrgManager( String orgId, String userId ) {
-        return getOrgUserRoles( orgId, null ).get( "user_roles" )
-            .stream().filter(ur -> ur.getRoles().contains( "OrgManager" ))
-            .anyMatch( ur -> ur.getUserId().equals( userId ) );
+        Stream<UserRole> userRoles = getOrgUserRoles( orgId, null ).get( "user_roles" )
+            .stream().filter(ur -> ur.getRoles().contains( "OrgManager" ));
+        boolean matches = userRoles.anyMatch( ur -> ur.getUserId().equals( userId ) );
+
+        return matches;
     }
 
     private AssociateOrganizationManagerResponse associateOrgManager (
@@ -711,7 +718,7 @@ public class OrgService extends Common {
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
 
-        if (!isOrgManager(orgId, token)) {
+        if (!isOrgManagerUsingToken( orgId, token )) {
             final String email = userService.getUser( token ).getEmail();
             throw new CloudFoundryException( HttpStatus.FORBIDDEN,
                 "This user is unauthorized to change role for this org : " + email );
@@ -777,7 +784,7 @@ public class OrgService extends Common {
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
 
-        if (!isOrgManager(orgId, token)) {
+        if (!isOrgManagerUsingToken(orgId, token)) {
             final String email = userService.getUser( token ).getEmail();
             throw new CloudFoundryException( HttpStatus.FORBIDDEN,
                 "This user is unauthorized to change role for this org : " + email );
