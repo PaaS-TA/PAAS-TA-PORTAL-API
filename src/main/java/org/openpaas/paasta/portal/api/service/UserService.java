@@ -3,13 +3,10 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
-
-import org.cloudfoundry.identity.uaa.login.UaaResetPasswordService;
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
-import org.cloudfoundry.uaa.authorizations.AuthorizeByAuthorizationCodeGrantApiRequest;
-import org.cloudfoundry.uaa.tokens.*;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.cloudfoundry.uaa.users.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
@@ -17,20 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import reactor.core.publisher.Mono;
-import sun.tools.jstat.Token;
 
-import java.util.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**

@@ -69,7 +69,9 @@ public class LoginController extends Common {
         result.put("user_id", token.getAdditionalInformation().get("user_id"));
         result.put("scope", token.getScope());
         result.put("token_type", token.getTokenType());
-        result.put("token", token.getValue());
+        //result.put("token", token.getValue());
+        result.put("token", token.getRefreshToken().getValue());
+        result.put("refresh_token_type", token.getTokenType());
         result.put("refresh_token", token.getRefreshToken().getValue());
         result.put("expireDate", token.getExpiration().getTime() - 10000);
         result.put("expire_in", token.getExpiresIn());
