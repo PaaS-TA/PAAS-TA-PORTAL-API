@@ -556,20 +556,6 @@ public class OrgController extends Common {
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
 
-    private String getCFAuthorization(final HttpServletRequest request) {
-    	return request.getHeader(AUTHORIZATION_HEADER_KEY);
-    }
-
-    /**
-     * JSON to Object mapping method
-     * @param obj a object
-     * @param clazz mapping class(type)
-     * @return Mapping object
-     */
-    private <T> T convertValue(Object obj, Class<T> clazz) {
-    	return new ObjectMapper().convertValue(obj, clazz);
-    }
-
     /**
      * 조직 정보를 조회한다.
      *
@@ -644,7 +630,20 @@ public class OrgController extends Common {
 
         return result;
     }
-    
+
+    @GetMapping(V2_URL + "/orgs/{orgName}/exist")
+    public boolean isExistOrgName(@PathVariable String orgName) {
+        return orgService.isExistOrgName( orgName );
+    }
+
+    /**
+     * 이름을 가지고 조직을 생성한다.
+     */
+    @PostMapping( V2_URL + "/orgs" )
+    public CreateOrganizationResponse createOrg ( @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        return orgService.createOrg( org, token );
+    }
+
     /**
      * 사용자의 조직의 이름을 변경한다.
      * @param org

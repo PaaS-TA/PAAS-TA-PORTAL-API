@@ -262,18 +262,27 @@ public class OrgService extends Common {
     //////////////////////////////////////////////////////////////////////
 
     /**
-     * 이름을 받아 조직을 생성한다. (Org Create)
+     * 이름과 할당량 GUID를 받아 조직을 생성한다. (Org Create)
      *
+     * @param org
      * @param token
-     * @param orgName
      * @return CreateOrganizationResponse
      * @version 2.0
      * @since 2018.5.2
      */
-    public CreateOrganizationResponse createOrg ( final String orgName, final String token ) {
+    public CreateOrganizationResponse createOrg ( final Org org, final String token ) {
         return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
             .organizations().create
-                ( CreateOrganizationRequest.builder().name( orgName ).build() ).block();
+                ( CreateOrganizationRequest.builder().name( org.getOrgName() ).quotaDefinitionId( org.getQuotaGuid() ).build() )
+            .block();
+    }
+
+    public boolean isExistOrgName ( final String orgName) {
+        try {
+            return orgName.equals( getOrgUsingName( orgName ).getName() );
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean isExistOrg ( final String orgId ) {
@@ -301,13 +310,13 @@ public class OrgService extends Common {
     public GetOrganizationResponse getOrg ( final String orgId, final String token ) {
         Objects.requireNonNull( orgId, "Org Id" );
 
-        final TokenProvider internaltokenProvider;
+        final TokenProvider internalTokenProvider;
         if ( null != token && !"".equals( token ) )
-            internaltokenProvider = tokenProvider( token );
+            internalTokenProvider = tokenProvider( token );
         else
-            internaltokenProvider = adminTokenProvider;
+            internalTokenProvider = adminTokenProvider;
 
-        return Common.cloudFoundryClient( connectionContext(), internaltokenProvider ).organizations()
+        return Common.cloudFoundryClient( connectionContext(), internalTokenProvider ).organizations()
             .get( GetOrganizationRequest.builder().organizationId( orgId ).build() ).block();
     }
 
@@ -382,8 +391,18 @@ public class OrgService extends Common {
         return getOrg( orgName, token ).getMetadata().getId();
     }
 
+    public OrganizationDetail getOrgUsingName ( final String name ) {
+        return getOrgUsingName( name, null );
+    }
+
     public OrganizationDetail getOrgUsingName ( final String name, final String token ) {
-        return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) ).organizations()
+        final TokenProvider internalTokenProvider;
+        if ( null != token && !"".equals( token ) )
+            internalTokenProvider = tokenProvider( token );
+        else
+            internalTokenProvider = adminTokenProvider;
+
+        return Common.cloudFoundryOperations( connectionContext(), internalTokenProvider ).organizations()
             .get( OrganizationInfoRequest.builder().name( name ).build() ).block();
     }
 
@@ -748,6 +767,7 @@ public class OrgService extends Common {
     }
 
     private void removeOrgManager ( String orgId, String userId ) {
+        LOGGER.debug( "---->> Remove OrgManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeManager( RemoveOrganizationManagerRequest.builder()
@@ -756,6 +776,7 @@ public class OrgService extends Common {
     }
 
     private void removeBillingManager ( String orgId, String userId ) {
+        LOGGER.debug( "---->> Remove BillingManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeBillingManager( RemoveOrganizationBillingManagerRequest.builder()
@@ -764,11 +785,20 @@ public class OrgService extends Common {
     }
 
     private void removeOrgAuditor ( String orgId, String userId ) {
+        LOGGER.debug( "---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .removeAuditor( RemoveOrganizationAuditorRequest.builder()
                 .organizationId( orgId ).auditorId( userId ).build() )
             .block();
+    }
+
+    private void removeAllRoles ( String orgId, String userId ) {
+        LOGGER.debug( "--> Remove all member({})'s roles in org({}).", userId, orgId );
+        removeOrgManager( orgId, userId );
+        removeBillingManager( orgId, userId );
+        removeOrgAuditor( orgId, userId );
+        LOGGER.debug( "--> Done to remove all member({})'s roles in org({}).", userId, orgId );
     }
 
     /**
@@ -833,11 +863,13 @@ public class OrgService extends Common {
             isManager, orgId, userId);
 
         try {
+            removeAllRoles( orgId, userId );
             Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations().removeUser(
                 RemoveOrganizationUserRequest.builder()
                     .organizationId( orgId ).userId( userId ).build()
             ).block();
+
             return true;
         } catch (Exception ex) {
             LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );

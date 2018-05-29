@@ -4,6 +4,7 @@ package org.openpaas.paasta.portal.api.service;
 import com.corundumstudio.socketio.SocketIOClient;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
+import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
@@ -329,7 +330,7 @@ public class AppService extends Common {
     public ListEventsResponse getAppEvents(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        ListEventsRequest.Builder requestBuilder = ListEventsRequest.builder().actee(guid);
+        ListEventsRequest.Builder requestBuilder = ListEventsRequest.builder().actee(guid).resultsPerPage(100).orderDirection(OrderDirection.DESCENDING);
         ListEventsResponse listEventsResponse = cloudFoundryClient.events().list(requestBuilder.build()).block();
 
         return listEventsResponse;
