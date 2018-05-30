@@ -497,10 +497,10 @@ public class AppController extends Common {
 
     public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName) {
         try {
+            LOGGER.info("Starting TailLog :::::");
             client = appService.socketTailLogs(client, appName, orgName, spaceName, this.getToken());
         } catch (Exception e) {
             LOGGER.error(e.toString());
-
         }
         return client;
     }

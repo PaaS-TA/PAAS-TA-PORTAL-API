@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
@@ -28,32 +30,51 @@ public class tailSocket implements CommandLineRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(tailSocket.class);
 
+    @Autowired
+    public Environment env;
+
+
     @Value("${tailsocket.port}")
     public Integer tailPort;
 
     @Autowired
-	private AppController appController;
+    private AppController appController;
 
     @Autowired
-	private AppService appService;
+    private AppService appService;
 
     @Override
-    public void run(String...args) throws Exception {
+    public void run(String... args) throws Exception {
         startServer();
     }
 
 
     public void startServer() {
-        Configuration config = new Configuration();
-
+        String active = "";
         String hostName = "";
-        try{
-            LOGGER.debug("InetAddress.getLocalHost().getHostName()="+ InetAddress.getLocalHost().getHostName() );
-            LOGGER.debug("InetAddress.getLocalHost().getHostAddress()="+  InetAddress.getLocalHost().getHostAddress() );
-            hostName = InetAddress.getLocalHost().getHostAddress();
-        } catch( UnknownHostException e ){
+
+        Configuration config = new Configuration();
+        try {
+            for (String str : env.getActiveProfiles()) {
+                active = str;
+            }
+
+            if (active.equals("local")) {
+                hostName = "localhost";
+            } else if (active.equals("dev")) {
+                LOGGER.debug("InetAddress.getLocalHost().getHostName()=" + InetAddress.getLocalHost().getHostName());
+                LOGGER.debug("InetAddress.getLocalHost().getHostAddress()=" + InetAddress.getLocalHost().getHostAddress());
+                hostName = InetAddress.getLocalHost().getHostAddress();
+            } else {
+                hostName = "localhost";
+            }
+
+        } catch (UnknownHostException e) {
             e.printStackTrace();
+            hostName = "localhost";
         }
+
+        LOGGER.info("Host ::: " + hostName);
 
         config.setHostname(hostName);
         config.setPort(tailPort);
@@ -62,12 +83,14 @@ public class tailSocket implements CommandLineRunner {
         server.addConnectListener(new ConnectListener() {
             @Override
             public void onConnect(SocketIOClient client) {
-                LOGGER.debug("onConnected");
 
+                LOGGER.debug("onConnected");
                 String referer = client.getHandshakeData().getHttpHeaders().get("Referer");
-                String appName = referer.substring(referer.indexOf("name=")+5, referer.indexOf("&org="));
-                String orgName = referer.substring(referer.indexOf("org=")+4, referer.indexOf("&space="));
-                String spaceName = referer.substring(referer.indexOf("space=")+6, referer.indexOf("&guid="));
+                LOGGER.debug(referer);
+                String appName = referer.substring(referer.indexOf("name=") + 5, referer.indexOf("&org="));
+                String orgName = referer.substring(referer.indexOf("org=") + 4, referer.indexOf("&space="));
+                String spaceName = referer.substring(referer.indexOf("space=") + 6, referer.indexOf("&guid="));
+
                 LOGGER.debug(appName);
                 LOGGER.debug(spaceName);
                 LOGGER.debug(orgName);
