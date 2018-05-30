@@ -88,7 +88,7 @@ public class ServiceService extends Common {
 //        client.deleteInstanceService(service.getGuid());
         try{
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
-            cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).build()).block();
+            cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).async(false).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         }catch (Exception e){
