@@ -10,14 +10,21 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import org.openpaas.paasta.portal.api.controller.AppController;
 import org.openpaas.paasta.portal.api.service.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Created by indra on 2018-05-09.
  */
 @Component
 public class tailSocket implements CommandLineRunner {
+
+    @Value("${tailsocket.port}")
+    public Integer tailPort;
 
     @Autowired
 	private AppController appController;
@@ -33,8 +40,18 @@ public class tailSocket implements CommandLineRunner {
 
     public void startServer() {
         Configuration config = new Configuration();
-        config.setHostname("localhost");
-        config.setPort(5555);
+
+        String hostName = "";
+        try{
+            System.out.println("InetAddress.getLocalHost().getHostName()="+ InetAddress.getLocalHost().getHostName() );
+            System.out.println("InetAddress.getLocalHost().getHostAddress()="+  InetAddress.getLocalHost().getHostAddress() );
+            hostName = InetAddress.getLocalHost().getHostAddress();
+        } catch( UnknownHostException e ){
+            e.printStackTrace();
+        }
+
+        config.setHostname(hostName);
+        config.setPort(tailPort);
         final SocketIOServer server = new SocketIOServer(config);
 
         server.addConnectListener(new ConnectListener() {
