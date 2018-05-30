@@ -11,6 +11,7 @@ import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
+import org.openpaas.paasta.portal.api.model.Client;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
 import org.openpaas.paasta.portal.api.service.AppService;
@@ -164,16 +165,26 @@ public class ServiceController extends Common {
      * @version 1.0
      * @since 2016.5.20 최초작성
      */
-    @RequestMapping(value = {"/service/createUserProvidedService"}, method = RequestMethod.POST)
-    public boolean createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                      @RequestBody Map<String, String> body) throws Exception {
+//
+//    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
+//    public boolean createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, String> body) throws Exception {
+//
+//        LOGGER.info("createUserProvided Start");
+//
+//        serviceService.createUserProvided(token, body);
+//
+//        LOGGER.info("createUserProvided End");
+//        return true;
+//    }
 
+    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
+    public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Service service) throws  Exception{
+        //String token = req.getHeader(cfAuthorizationHeaderKey);
         LOGGER.info("createUserProvided Start");
-
-        serviceService.createUserProvided(token, body);
-
+        //service call
+        Map result = serviceService.createUserProvided(token, service);
         LOGGER.info("createUserProvided End");
-        return true;
+        return result;
     }
 
     /**

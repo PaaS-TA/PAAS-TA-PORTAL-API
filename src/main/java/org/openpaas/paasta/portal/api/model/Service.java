@@ -41,6 +41,18 @@ public class Service {
     @JsonProperty("dashboard_use_yn")
     private String dashboardUseYn;
 
+    @JsonProperty("serviceInstanceName")
+    private String serviceInstanceName;
+
+    @JsonProperty("credentials")
+    private String credentials;
+
+    @JsonProperty("syslogDrainUrl")
+    private String syslogDrainUrl;
+
+    @JsonProperty("spaceGuid")
+    private String spaceGuid;
+
     public String getName() {
         return name;
     }
@@ -135,6 +147,38 @@ public class Service {
 
     public void setDashboardUseYn(String dashboardUseYn) {
         this.dashboardUseYn = dashboardUseYn;
+    }
+
+    public String getServiceInstanceName() {
+        return serviceInstanceName;
+    }
+
+    public void setServiceInstanceName(String serviceInstanceName) {
+        this.serviceInstanceName = serviceInstanceName;
+    }
+
+    public String getCredentials() {
+        return credentials;
+    }
+
+    public void setCredentials(String credentials) {
+        this.credentials = credentials;
+    }
+
+    public String getSyslogDrainUrl() {
+        return syslogDrainUrl;
+    }
+
+    public void setSyslogDrainUrl(String syslogDrainUrl) {
+        this.syslogDrainUrl = syslogDrainUrl;
+    }
+
+    public String getSpaceGuid() {
+        return spaceGuid;
+    }
+
+    public void setSpaceGuid(String spaceGuid) {
+        this.spaceGuid = spaceGuid;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
