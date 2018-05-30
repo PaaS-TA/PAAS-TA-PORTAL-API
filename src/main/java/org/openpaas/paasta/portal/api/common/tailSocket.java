@@ -9,9 +9,17 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import org.openpaas.paasta.portal.api.controller.AppController;
 import org.openpaas.paasta.portal.api.service.AppService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Created by indra on 2018-05-09.
@@ -19,39 +27,73 @@ import org.springframework.stereotype.Component;
 @Component
 public class tailSocket implements CommandLineRunner {
 
-    @Autowired
-	private AppController appController;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(tailSocket.class);
 
     @Autowired
-	private AppService appService;
+    public Environment env;
+
+
+    @Value("${tailsocket.port}")
+    public Integer tailPort;
+
+    @Autowired
+    private AppController appController;
+
+    @Autowired
+    private AppService appService;
 
     @Override
-    public void run(String...args) throws Exception {
+    public void run(String... args) throws Exception {
         startServer();
     }
 
 
     public void startServer() {
+        String active = "";
+        String hostName = "";
+
         Configuration config = new Configuration();
-        config.setHostname("localhost");
-        config.setPort(5555);
+        try {
+            for (String str : env.getActiveProfiles()) {
+                active = str;
+            }
+
+            if (active.equals("local")) {
+                hostName = "localhost";
+            } else if (active.equals("dev")) {
+                LOGGER.debug("InetAddress.getLocalHost().getHostName()=" + InetAddress.getLocalHost().getHostName());
+                LOGGER.debug("InetAddress.getLocalHost().getHostAddress()=" + InetAddress.getLocalHost().getHostAddress());
+                hostName = InetAddress.getLocalHost().getHostAddress();
+            } else {
+                hostName = "localhost";
+            }
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            hostName = "localhost";
+        }
+
+        LOGGER.info("Host ::: " + hostName);
+
+        config.setHostname(hostName);
+        config.setPort(tailPort);
         final SocketIOServer server = new SocketIOServer(config);
 
         server.addConnectListener(new ConnectListener() {
             @Override
             public void onConnect(SocketIOClient client) {
-                System.out.println("onConnected");
-//                System.out.println(client.getHandshakeData().getHttpHeaders().get("Referer"));
-//                System.out.println(client.getHandshakeData().getUrl());
-//                System.out.println(client.getHandshakeData().getUrlParams());
 
+                LOGGER.debug("onConnected");
                 String referer = client.getHandshakeData().getHttpHeaders().get("Referer");
-                String appName = referer.substring(referer.indexOf("name=")+5, referer.indexOf("&org="));
-                String orgName = referer.substring(referer.indexOf("org=")+4, referer.indexOf("&space="));
-                String spaceName = referer.substring(referer.indexOf("space=")+6, referer.indexOf("&guid="));
-                System.out.println(appName);
-                System.out.println(orgName);
-                System.out.println(spaceName);
+                LOGGER.debug(referer);
+                String appName = referer.substring(referer.indexOf("name=") + 5, referer.indexOf("&org="));
+                String orgName = referer.substring(referer.indexOf("org=") + 4, referer.indexOf("&space="));
+                String spaceName = referer.substring(referer.indexOf("space=") + 6, referer.indexOf("&guid="));
+
+                LOGGER.debug(appName);
+                LOGGER.debug(spaceName);
+                LOGGER.debug(orgName);
 
                 appController.socketTailLogs(client, appName, orgName, spaceName);
 
@@ -62,19 +104,19 @@ public class tailSocket implements CommandLineRunner {
         server.addDisconnectListener(new DisconnectListener() {
             @Override
             public void onDisconnect(SocketIOClient client) {
-                System.out.println("onDisconnected");
+                LOGGER.debug("onDisconnected");
             }
         });
         server.addEventListener("send", ChatObject.class, new DataListener<ChatObject>() {
 
             @Override
             public void onData(SocketIOClient client, ChatObject data, AckRequest ackSender) throws Exception {
-                System.out.println("onSend: " + data.toString());
+                LOGGER.debug("onSend: " + data.toString());
                 server.getBroadcastOperations().sendEvent("message", data);
             }
         });
-        System.out.println("Starting server...");
+        LOGGER.debug("Starting server...");
         server.start();
-        System.out.println("Server started");
+        LOGGER.debug("Server started");
     }
 }
