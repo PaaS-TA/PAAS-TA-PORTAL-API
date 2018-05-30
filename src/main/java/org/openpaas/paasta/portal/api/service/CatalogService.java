@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.runtime.directive.Foreach;
+import org.apache.velocity.runtime.log.Log;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
@@ -502,7 +503,7 @@ public class CatalogService extends Common {
 //                applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(applicationid).build()).block();
 //
   try {
-      Thread.sleep(500);
+      Thread.sleep(3000);
       Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
   }
   catch (Exception e){
@@ -592,8 +593,24 @@ public class CatalogService extends Common {
         catch(Exception e){
             LOGGER.info(e.toString());
         }
-
     }
+    private  void fileUpload2(File file, String applicationid, String token){
+        try {
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                    applicationsV2().uploadDroplet(
+                    UploadApplicationDropletRequest
+                            .builder()
+                            .applicationId(applicationid)
+                            .droplet(file.toPath())
+                            .build()
+            ).block();
+        }
+        catch(Exception e){
+            LOGGER.info(e.toString());
+        }
+    }
+
+
 
     private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
@@ -609,7 +626,6 @@ public class CatalogService extends Common {
         return file;
     }
 
-
     /**
      * 카탈로그 서비스 인스턴스를 생성한다.
      *
@@ -618,12 +634,11 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public CreateServiceBindingResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
+    public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
 
-//        ObjectMapper mapper = new ObjectMapper();
-//        Map.Entry<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
-//        });
-
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
+        });
         CreateServiceInstanceResponse createserviceinstanceresponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                         serviceInstances().create(
@@ -631,22 +646,15 @@ public class CatalogService extends Common {
                                 .builder()
                                 .name(param.getName())
                                 .spaceId(param.getSpaceId())
+                                .parameters(parameterMap)
                                 .servicePlanId(param.getServicePlan())
                                 .build()
                 ).block();
 
-
-
-        CreateServiceBindingResponse createservicebindingresponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                        serviceBindingsV2().create(
-                        CreateServiceBindingRequest
-                                .builder()
-                                .applicationId(param.getAppGuid())
-                                .serviceInstanceId(createserviceinstanceresponse.getMetadata().getId())
-                                .build()
-                ).block();
-
+        if(!param.getAppGuid().equals("(id_dummy)")) {
+            param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
+            procCatalogBindService(param, token);
+        }
 //        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
 //
 //            String tempParameter = param.getParameter();
@@ -666,7 +674,7 @@ public class CatalogService extends Common {
 //                put("SERVICE_INSTANCE_GUID", tempSubMap.get("guid"));
 //                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 //            }};
-        return createservicebindingresponse;
+        return createserviceinstanceresponse;
     }
 
     /**
@@ -678,21 +686,21 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
+        });
+        CreateServiceBindingResponse createservicebindingresponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                        serviceBindingsV2().create(
+                        CreateServiceBindingRequest
+                                .builder()
+                                .applicationId(param.getAppGuid())
+                                .serviceInstanceId(param.getServiceInstanceGuid())
+                                .parameters(bindparameterMap)
+                                .build()
+                ).block();
 
-//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//
-//        String tempParameter = param.getApp_bind_parameter();
-//        if (null == tempParameter || "".equals(tempParameter)) param.setApp_bind_parameter("{}");
-//
-
-//
-//        // BIND SERVICE
-//        customCloudFoundryClient.bindServiceV2(param.getServiceInstanceGuid(), param.getAppName(), parameterMap);
-//
-//        return new HashMap<String, Object>() {{
-//            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-//        }};
-        return null;
+        return createservicebindingresponse;
     }
 
     public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token){
