@@ -9,6 +9,8 @@ import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.CreateUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.CreateUserProvidedServiceInstanceResponse;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.UpdateUserProvidedServiceInstanceRequest;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.UpdateUserProvidedServiceInstanceResponse;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Service;
@@ -130,15 +132,15 @@ public class ServiceService extends Common {
     }
 
     /**
-     * 유저 프로바이드 서비스를 생성한다. (유저가 SpaceDeveloper role을 갖고 있을때만 가능)
+     * 유저프로바이드 서비스 인스턴스를 생성한다.
      *
-     * @param token   the token
-     * @param service the body
+     * @param token the token
+     * @param service  the body
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.4 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.30 최초작성
      */
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
@@ -148,13 +150,6 @@ public class ServiceService extends Common {
         String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
         String credentialsStr = service.getCredentials();//.get("credentials");
         String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl"); // null 또는 빈값 허용
-
-        LOGGER.info("orgName ::::" + orgName);
-        LOGGER.info("spaceName ::::" + spaceName);
-        LOGGER.info("spaceGuid ::::" + service.getSpaceGuid());
-        LOGGER.info("serviceInstanceName ::::" + serviceInstanceName);
-        LOGGER.info("credentialsStr ::::" + credentialsStr);
-        LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
 
         try {
             if (!stringNullCheck(orgName, spaceName, serviceInstanceName, credentialsStr)) {}
@@ -181,37 +176,54 @@ public class ServiceService extends Common {
     }
 
     /**
-     * 유저 프로바이드 서비스를 생성한다. (유저가 SpaceDeveloper role을 갖고 있을때만 가능)
+     * 유저프로바이드 서비스 인스턴스를 수정한다.
      *
      * @param token the token
-     * @param body  the body
+     * @param service  the body
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.4 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.30 최초작성
      */
-//    public boolean updateUserProvided(String token, Map<String, String> body) throws Exception {
-//
-//        String orgName = body.get("orgName");
-//        String spaceName = body.get("spaceName");
-//        String serviceInstanceName = body.get("serviceInstanceName");
-//        String newServiceInstanceName = body.get("newServiceInstanceName"); // null 또는 빈값 허용
-//        String credentialsStr = body.get("credentials");
-//        String syslogDrainUrl = body.get("syslogDrainUrl"); // null 또는 빈값 허용
-//
-//        if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-//        }
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
-//
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-//
-//        client.updateUserProvidedService(orgName, spaceName, serviceInstanceName, newServiceInstanceName, credentials, syslogDrainUrl);
-//        return true;
-//    }
+    public Map updateUserProvided(String guid, String token, Service service) throws Exception {
+
+        HashMap result = new HashMap();
+
+        String orgName = service.getOrgName();
+        String spaceName = service.getSpaceName();
+        String serviceInstanceName = service.getServiceInstanceName();
+        String newServiceInstanceName = service.getNewServiceInstanceName();
+        String credentialsStr = service.getCredentials();
+        String syslogDrainUrl = service.getSyslogDrainUrl();
+
+        LOGGER.info("orgName ::::" + orgName);
+        LOGGER.info("spaceName ::::" + spaceName);
+        LOGGER.info("spaceGuid ::::" + service.getSpaceGuid());
+        LOGGER.info("serviceInstanceName ::::" + serviceInstanceName);
+        LOGGER.info("newServiceInstanceName ::::" + newServiceInstanceName);
+        LOGGER.info("credentialsStr ::::" + credentialsStr);
+        LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
+
+        try{
+            if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {}
+
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword));
+            UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
+                    .update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credential("","").syslogDrainUrl("").build()).block();
+
+            LOGGER.info("Created :::: " + updateUserProvidedServiceInstanceResponse.getEntity().getName());
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.info("Error :::: " + e.getMessage());
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
+    }
 
 
     /**

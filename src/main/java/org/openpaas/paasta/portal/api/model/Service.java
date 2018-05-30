@@ -44,6 +44,9 @@ public class Service {
     @JsonProperty("serviceInstanceName")
     private String serviceInstanceName;
 
+    @JsonProperty("newServiceInstanceName")
+    private String newServiceInstanceName;
+
     @JsonProperty("credentials")
     private String credentials;
 
@@ -149,37 +152,25 @@ public class Service {
         this.dashboardUseYn = dashboardUseYn;
     }
 
-    public String getServiceInstanceName() {
-        return serviceInstanceName;
-    }
+    public String getServiceInstanceName() {return serviceInstanceName;}
 
-    public void setServiceInstanceName(String serviceInstanceName) {
-        this.serviceInstanceName = serviceInstanceName;
-    }
+    public void setServiceInstanceName(String serviceInstanceName) {this.serviceInstanceName = serviceInstanceName;}
 
-    public String getCredentials() {
-        return credentials;
-    }
+    public String getCredentials() {return credentials;}
 
-    public void setCredentials(String credentials) {
-        this.credentials = credentials;
-    }
+    public void setCredentials(String credentials) {this.credentials = credentials;}
 
-    public String getSyslogDrainUrl() {
-        return syslogDrainUrl;
-    }
+    public String getSyslogDrainUrl() {return syslogDrainUrl;}
 
-    public void setSyslogDrainUrl(String syslogDrainUrl) {
-        this.syslogDrainUrl = syslogDrainUrl;
-    }
+    public void setSyslogDrainUrl(String syslogDrainUrl) {this.syslogDrainUrl = syslogDrainUrl;}
 
-    public String getSpaceGuid() {
-        return spaceGuid;
-    }
+    public String getSpaceGuid() {return spaceGuid;}
 
-    public void setSpaceGuid(String spaceGuid) {
-        this.spaceGuid = spaceGuid;
-    }
+    public void setSpaceGuid(String spaceGuid) {this.spaceGuid = spaceGuid;}
+
+    public String getNewServiceInstanceName() {return newServiceInstanceName;}
+
+    public void setNewServiceInstanceName(String newServiceInstanceName) {this.newServiceInstanceName = newServiceInstanceName;}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public class ServicePlan {
