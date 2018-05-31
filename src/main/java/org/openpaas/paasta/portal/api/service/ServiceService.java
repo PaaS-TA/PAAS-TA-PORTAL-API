@@ -202,6 +202,7 @@ public class ServiceService extends Common {
         LOGGER.info("spaceGuid ::::" + service.getSpaceGuid());
         LOGGER.info("serviceInstanceName ::::" + serviceInstanceName);
         LOGGER.info("newServiceInstanceName ::::" + newServiceInstanceName);
+        LOGGER.info("serviceInstanceId ::::" + guid);
         LOGGER.info("credentialsStr ::::" + credentialsStr);
         LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
 

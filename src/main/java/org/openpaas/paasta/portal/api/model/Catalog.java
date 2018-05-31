@@ -51,6 +51,7 @@ public class Catalog {
     private int limitSize;
     private String hostName;
     private String domainName;
+    private String domainId;
     private String routeName;
     private String appSampleStartYn;
     private String appSampleFileName;
@@ -60,7 +61,7 @@ public class Catalog {
     private String parameter;
     private String app_bind_parameter;
     private int diskSize;
-    private int MemorySize;
+    private int memorySize;
     private String dashboardUseYn;
 
     /**
@@ -713,10 +714,30 @@ public class Catalog {
         this.hostName = hostName;
     }
 
+
+    /**
+     * GETTER 도메인 guid
+     *
+     * @return 도메인 guid
+     *
+     */
+    public String getDomainId() {
+        return this.domainId;
+    }
+
+    /**
+     * SETTER 도메인 guid
+     *
+     * @param domainId 도메인 guid
+     */
+    public void setDomainId(String domainId) {
+        this.domainId = domainId;
+    }
     /**
      * GETTER 도메인명
      *
      * @return 도메인명
+     *
      */
     public String getDomainName() {
         return this.domainName;
@@ -901,7 +922,7 @@ public class Catalog {
      * @return 메모리 크기
      */
     public int getMemorySize() {
-        return this.MemorySize;
+        return this.memorySize;
     }
 
     /**
@@ -910,7 +931,7 @@ public class Catalog {
      * @param memorySize 메모리 크기
      */
     public void setMemorySize(int memorySize) {
-        this.MemorySize = memorySize;
+        this.memorySize = memorySize;
     }
 
     /**
@@ -970,6 +991,7 @@ public class Catalog {
                 ", limitSize=" + limitSize +
                 ", hostName='" + hostName + '\'' +
                 ", domainName='" + domainName + '\'' +
+                ", domainId='" + domainId + '\'' +
                 ", routeName='" + routeName + '\'' +
                 ", appSampleStartYn='" + appSampleStartYn + '\'' +
                 ", appSampleFileName='" + appSampleFileName + '\'' +
@@ -979,7 +1001,7 @@ public class Catalog {
                 ", parameter='" + parameter + '\'' +
                 ", app_bind_parameter='" + app_bind_parameter + '\'' +
                 ", diskSize=" + diskSize +
-                ", MemorySize=" + MemorySize +
+                ", MemorySize=" + memorySize +
                 ", dashboardUseYn='" + dashboardUseYn + '\'' +
                 '}';
     }

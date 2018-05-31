@@ -56,6 +56,9 @@ public class Service {
     @JsonProperty("spaceGuid")
     private String spaceGuid;
 
+    @JsonProperty("serviceInstanceId")
+    private String serviceInstanceId;
+
     public String getName() {
         return name;
     }
@@ -171,6 +174,10 @@ public class Service {
     public String getNewServiceInstanceName() {return newServiceInstanceName;}
 
     public void setNewServiceInstanceName(String newServiceInstanceName) {this.newServiceInstanceName = newServiceInstanceName;}
+
+    public String getServiceInstanceId() {return serviceInstanceId;}
+
+    public void setServiceInstanceId(String serviceInstanceId) {this.serviceInstanceId = serviceInstanceId;}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public class ServicePlan {
