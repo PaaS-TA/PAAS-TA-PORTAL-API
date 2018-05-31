@@ -9,7 +9,6 @@ import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
-import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
@@ -271,10 +270,17 @@ public class OrgService extends Common {
      * @since 2018.5.2
      */
     public CreateOrganizationResponse createOrg ( final Org org, final String token ) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+        final CreateOrganizationResponse response =
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
             .organizations().create
                 ( CreateOrganizationRequest.builder().name( org.getOrgName() ).quotaDefinitionId( org.getQuotaGuid() ).build() )
             .block();
+
+        // Add role for OrgManager (with Space roles)
+        associateOrgManager( response.getMetadata().getId(),        // org id
+            userService.getUser( token ).getUserId() );             // user id
+        
+        return response;
     }
 
     public boolean isExistOrgName ( final String orgName) {
@@ -388,7 +394,7 @@ public class OrgService extends Common {
      * @since 2018.5.4
      */
     public String getOrgId ( String orgName, String token ) {
-        return getOrg( orgName, token ).getMetadata().getId();
+        return getOrgUsingName( orgName, token ).getId();
     }
 
     public OrganizationDetail getOrgUsingName ( final String name ) {
@@ -489,7 +495,8 @@ public class OrgService extends Common {
         final int countManagerUsers = managerResponse.getTotalResults();
 
         // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
-        final boolean existManagerRoleExactly = managerResponse.getResources().stream().filter( ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) ).count() == 1L;
+        final boolean existManagerRoleExactly = managerResponse.getResources().stream()
+            .filter( ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) ).count() > 0L;
 
         LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers );
         if ( existManagerRoleExactly ) {
@@ -497,7 +504,7 @@ public class OrgService extends Common {
             if ( countManagerUsers == 1 ) {
                 // 정확히 일치할 때
                 LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
-                LOGGER.debug( "User : {}, To delete org : {}(GUID : {})", userInfoResponse.getUserId(), orgSummary
+                LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", userInfoResponse.getUserId(), orgSummary
                     .getName(), orgId );
                 return Common
                     //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
@@ -530,8 +537,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public ListSpacesResponse getOrgSpaces ( String orgId, String token ) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).spaces()
-            .list( ListSpacesRequest.builder().organizationId( orgId ).build() ).block();
+        return spaceService.getSpaces(orgId, token);
     }
 
     //// Org's Quota setting : Read, Update
@@ -688,24 +694,49 @@ public class OrgService extends Common {
     }
 
     public boolean isOrgManager( String orgId, String userId ) {
-        Stream<UserRole> userRoles = getOrgUserRoles( orgId, null ).get( "user_roles" )
-            .stream().filter(ur -> ur.getRoles().contains( "OrgManager" ));
+        return hasOrgRole( orgId, userId, OrgRole.OrgManager.name() );
+    }
+
+    public boolean isBillingManager( String orgId, String userId ) {
+        return hasOrgRole( orgId, userId, OrgRole.BillingManager.name() );
+    }
+
+    public boolean isOrgAuditor( String orgId, String userId ) {
+        return hasOrgRole( orgId, userId, OrgRole.OrgAuditor.name() );
+    }
+
+
+    private enum SpaceRole {
+        SpaceManager, SpaceDeveloper, SpaceAuditor
+    }
+
+    private boolean hasOrgRole ( String orgId, String userId, String role ) {
+        Objects.requireNonNull( role, "role" );
+
+        final String roleKey = "user_roles";
+        Stream<UserRole> userRoles = getOrgUserRoles( orgId, null ).get( roleKey )
+            .stream().filter(ur -> ur.getRoles().contains( role ));
         boolean matches = userRoles.anyMatch( ur -> ur.getUserId().equals( userId ) );
 
         return matches;
     }
 
-    private AssociateOrganizationManagerResponse associateOrgManager (
-        String orgId, String userId ) {
+    private AssociateOrganizationManagerResponse associateOrgManager ( String orgId, String userId ) {
+        spaceService.associateAllSpaceUserRolesByOrgId(
+            orgId, userId, targetSpaceRole(OrgRole.OrgManager) );
+
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations()
-            .associateManager( AssociateOrganizationManagerRequest.builder()
-                .organizationId( orgId ).managerId( userId ).build() )
-            .block();
+                .organizations()
+                .associateManager( AssociateOrganizationManagerRequest.builder()
+                    .organizationId( orgId ).managerId( userId ).build() )
+                .block();
     }
 
-    private AssociateOrganizationBillingManagerResponse associateBillingManager (
-        String orgId, String userId ) {
+    private AssociateOrganizationBillingManagerResponse associateBillingManager ( String orgId, String userId ) {
+        // CHECK : Is needed to bill Org's Billing manager?
+        spaceService.associateAllSpaceUserRolesByOrgId(
+            orgId, userId, targetSpaceRole(OrgRole.BillingManager) );
+
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
@@ -715,6 +746,9 @@ public class OrgService extends Common {
 
     private AssociateOrganizationAuditorResponse associateOrgAuditor (
         String orgId, String userId ) {
+        spaceService.associateAllSpaceUserRolesByOrgId(
+            orgId, userId, targetSpaceRole(OrgRole.OrgAuditor) );
+
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
             .associateAuditor( AssociateOrganizationAuditorRequest.builder()
@@ -766,7 +800,38 @@ public class OrgService extends Common {
         }
     }
 
-    private void removeOrgManager ( String orgId, String userId ) {
+    private Set<String> targetSpaceRole(OrgRole orgRole) {
+        final Set<String> targetSpaceRole = new HashSet<>();
+        switch(orgRole) {
+            case OrgManager:
+            case ORGMANAGER:
+                targetSpaceRole.add( SpaceRole.SpaceManager.name() );
+            case OrgAuditor:
+            case ORGAUDITOR:
+                targetSpaceRole.add( SpaceRole.SpaceDeveloper.name() );
+            case BillingManager:
+            case BILLINGMANAGER:
+                targetSpaceRole.add( SpaceRole.SpaceAuditor.name() );
+                break;
+            default:
+                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + orgRole );
+        }
+
+        return targetSpaceRole;
+    }
+
+    private void removeOrgManager ( String orgId, String userId, boolean removeWithSpaceRole ) {
+        if (removeWithSpaceRole) {
+            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgManager );
+            if ( isOrgAuditor( orgId, userId ) ) {
+                removeSpaceRoles.remove( "SpaceDeveloper" );
+                removeSpaceRoles.remove( "SpaceAuditor" );
+            } else if ( isBillingManager( orgId, userId ) ) {
+                removeSpaceRoles.remove( "SpaceAuditor" );
+            }
+            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, removeSpaceRoles );
+        }
+
         LOGGER.debug( "---->> Remove OrgManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
@@ -775,7 +840,22 @@ public class OrgService extends Common {
             .block();
     }
 
-    private void removeBillingManager ( String orgId, String userId ) {
+    private void removeOrgManager ( String orgId, String userId ) {
+        removeOrgManager( orgId, userId, true );
+    }
+
+    private void removeBillingManager ( String orgId, String userId, boolean removeWithSpaceRole ) {
+        if (removeWithSpaceRole) {
+            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgManager );
+            if ( isOrgManager( orgId, userId ) ) {
+                removeSpaceRoles.clear();
+            } else if ( isOrgAuditor( orgId, userId ) ) {
+                removeSpaceRoles.remove( "SpaceDeveloper" );
+                removeSpaceRoles.remove( "SpaceAuditor" );
+            }
+            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, removeSpaceRoles );
+        }
+
         LOGGER.debug( "---->> Remove BillingManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
@@ -784,7 +864,21 @@ public class OrgService extends Common {
             .block();
     }
 
-    private void removeOrgAuditor ( String orgId, String userId ) {
+    private void removeBillingManager ( String orgId, String userId ) {
+        removeBillingManager( orgId, userId, true );
+    }
+
+    private void removeOrgAuditor ( String orgId, String userId, boolean removeWithSpaceRole ) {
+        if (removeWithSpaceRole) {
+            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgManager );
+            if ( isOrgManager( orgId, userId ) ) {
+                removeSpaceRoles.clear();
+            } else if ( isBillingManager( orgId, userId ) ) {
+                removeSpaceRoles.remove( "SpaceAuditor" );
+            }
+            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, removeSpaceRoles );
+        }
+
         LOGGER.debug( "---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .organizations()
@@ -793,11 +887,16 @@ public class OrgService extends Common {
             .block();
     }
 
+    private void removeOrgAuditor ( String orgId, String userId ) {
+        removeOrgAuditor( orgId, userId, true );
+    }
+
     private void removeAllRoles ( String orgId, String userId ) {
         LOGGER.debug( "--> Remove all member({})'s roles in org({}).", userId, orgId );
-        removeOrgManager( orgId, userId );
-        removeBillingManager( orgId, userId );
-        removeOrgAuditor( orgId, userId );
+        spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, targetSpaceRole( OrgRole.OrgManager ) );
+        removeOrgManager( orgId, userId, false );
+        removeBillingManager( orgId, userId, false );
+        removeOrgAuditor( orgId, userId, false );
         LOGGER.debug( "--> Done to remove all member({})'s roles in org({}).", userId, orgId );
     }
 

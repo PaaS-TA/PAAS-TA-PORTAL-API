@@ -471,6 +471,15 @@ public class Common {
         return new TokenGrantTokenProvider(token);
     }
 
+    public static TokenProvider tokenProviderWithDefault(String token, TokenProvider defaultTokenProvider) {
+        if (null == token)
+            return defaultTokenProvider;
+        else if (token.trim().length() <= 0)
+            return defaultTokenProvider;
+
+        return tokenProvider( token );
+    }
+
     /**
      * token을 제공하는 클레스 사용자 임의의 clientId를 사용하며,
      * user token, client token을 모두 얻을 수 있다.
