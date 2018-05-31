@@ -59,7 +59,27 @@ public class SpaceController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summary"}, method = RequestMethod.GET)
-    public Map getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
+    public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
+        LOGGER.info("Get SpaceSummary Start : " + spaceid);
+
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
+//        return spaceService.getSpaceSummary(spaceid,request.getHeader(AUTHORIZATION_HEADER_KEY));
+
+        LOGGER.info("Get SpaceSummary End ");
+
+        return respSapceSummary;
+    }
+
+    /**
+     * 공간 요약 정보 리스트를 조회한다.[dashboard]
+     *
+     * @param spaceid  the spaceId
+     * @param request the request
+     * @return Space respSpace
+     * @throws Exception the exception
+     */
+    @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summarylist"}, method = RequestMethod.GET)
+    public Map getSpaceSummary2(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
 
         GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
