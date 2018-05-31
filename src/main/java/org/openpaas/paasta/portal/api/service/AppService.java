@@ -105,7 +105,6 @@ public class AppService extends Common {
         return applicationStatisticsResponse;
     }
 
-
     /**
      * 앱을 변경한다.
      *
