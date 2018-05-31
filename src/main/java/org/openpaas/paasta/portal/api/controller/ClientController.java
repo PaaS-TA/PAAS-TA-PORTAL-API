@@ -1,19 +1,14 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.uaa.clients.GetClientResponse;
-import org.cloudfoundry.uaa.clients.ListClientsRequest;
-import org.cloudfoundry.uaa.clients.ListClientsResponse;
+import org.cloudfoundry.uaa.clients.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.model.Client;
-import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.ClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 
@@ -44,7 +39,7 @@ public class ClientController extends Common {
      * @return Map client
      * @throws Exception the exception
      */
-    @GetMapping(value = {"/clients/{clientId}"})
+    @GetMapping(value = {Constants.V2_URL+ "/clients/{clientId}"})
     public GetClientResponse getClient(@PathVariable String clientId) throws Exception {
         return clientService.getClient(clientId);
     }
@@ -52,16 +47,13 @@ public class ClientController extends Common {
     /**
      * 클라이언트 등록
      *
-     * @param client Client
+     * @param param Map
      * @return Map map
      * @throws Exception the exception
      */
-    @PostMapping(value = {"/clients"})
-    public Map<String, Object> registerClient(@RequestBody Client client) throws Exception {
-//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
-//        return clientService.registerClient(adminCcfc, param);
-
-        return null;
+    @PostMapping(value = {Constants.V2_URL+ "/clients"})
+    public CreateClientResponse registerClient(@RequestBody Map<String, Object> param) throws Exception {
+        return clientService.registerClient(param);
     }
 
     /**
@@ -71,27 +63,21 @@ public class ClientController extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/updateClient"}, method = RequestMethod.POST)
-    public Map<String, Object> updateClient(@RequestBody Map<String, Object> param) throws Exception {
-//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
-//        return clientService.updateClient(adminCcfc, param);
-
-        return null;
+    @PutMapping(value = {Constants.V2_URL+ "/clients"})
+    public UpdateClientResponse updateClient(@RequestBody Map<String, Object> param) throws Exception {
+        return clientService.updateClient(param);
     }
 
     /**
      * 클라이언트 삭제
      *
-     * @param param Map
+     * @param clientId
      * @return Map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {"/deleteClient"}, method = RequestMethod.POST)
-    public Map<String, Object> deleteClient(@RequestBody Map<String, Object> param) throws Exception {
-//        CustomCloudFoundryClient adminCcfc = getCustomCloudFoundryClient(uaaAdminClientId, uaaAdminClientSecret);
-//        return clientService.deleteClient(adminCcfc, param);
-
-        return null;
+    @DeleteMapping(value = {Constants.V2_URL+ "/clients/{clientId}"})
+    public DeleteClientResponse deleteClient(@PathVariable String clientId) throws Exception {
+        return clientService.deleteClient(clientId);
     }
 
 }
