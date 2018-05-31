@@ -7,6 +7,10 @@ import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.CreateUserProvidedServiceInstanceRequest;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.CreateUserProvidedServiceInstanceResponse;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.UpdateUserProvidedServiceInstanceRequest;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.UpdateUserProvidedServiceInstanceResponse;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Service;
@@ -63,13 +67,13 @@ public class ServiceService extends Common {
     public Map renameInstance(Service service, String guid) throws Exception {
         HashMap result = new HashMap();
 //        guid.renameInstanceService(service.getGuid(), service.getNewName());
-        try{
+        try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             //cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(guid).name(service.getNewName()).build()).block();
             cloudFoundryClient.serviceInstances().update(UpdateServiceInstanceRequest.builder().serviceInstanceId(guid).name(service.getNewName()).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);
             result.put("msg", e.getMessage());
@@ -86,12 +90,12 @@ public class ServiceService extends Common {
     public Map deleteInstance(String guid) throws Exception {
         HashMap result = new HashMap();
 //        client.deleteInstanceService(service.getGuid());
-        try{
+        try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).async(false).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);
             result.put("msg", e.getMessage());
@@ -128,72 +132,98 @@ public class ServiceService extends Common {
     }
 
     /**
-     * 유저 프로바이드 서비스를 생성한다. (유저가 SpaceDeveloper role을 갖고 있을때만 가능)
+     * 유저프로바이드 서비스 인스턴스를 생성한다.
      *
      * @param token the token
-     * @param body  the body
+     * @param service  the body
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.4 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.30 최초작성
      */
-    public boolean createUserProvided(String token, Map<String, String> body) throws Exception {
+    public Map createUserProvided(String token, Service service) throws Exception {
+        HashMap result = new HashMap();
 
-        String orgName = body.get("orgName");
-        String spaceName = body.get("spaceName");
-        String serviceInstanceName = body.get("serviceInstanceName");
-        String credentialsStr = body.get("credentials");
-        String syslogDrainUrl = body.get("syslogDrainUrl"); // null 또는 빈값 허용
-//
-//        if (!stringNullCheck(orgName, spaceName, serviceInstanceName, credentialsStr)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-//        }
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
-//
-//        CloudService service = new CloudService();
-//        service.setName(serviceInstanceName);
-//
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-//
-//        client.createUserProvidedService(service, credentials, syslogDrainUrl);
-        return true;
+        String orgName = service.getOrgName();//("orgName");
+        String spaceName = service.getSpaceName();//("spaceName");
+        String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
+        String credentialsStr = service.getCredentials();//.get("credentials");
+        String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl"); // null 또는 빈값 허용
+
+        try {
+            if (!stringNullCheck(orgName, spaceName, serviceInstanceName, credentialsStr)) {}
+
+            Map<String,Object> map = new HashMap<>();
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword));
+
+            CreateUserProvidedServiceInstanceResponse createUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
+                    .create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName)
+                            .spaceId(String.valueOf(service.getSpaceGuid())).credential("","").syslogDrainUrl("").build()).block();
+
+            LOGGER.info("Created :::: " + createUserProvidedServiceInstanceResponse.getEntity().getName());
+
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.info("Error :::: " + e.getMessage());
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
     }
 
     /**
-     * 유저 프로바이드 서비스를 생성한다. (유저가 SpaceDeveloper role을 갖고 있을때만 가능)
+     * 유저프로바이드 서비스 인스턴스를 수정한다.
      *
      * @param token the token
-     * @param body  the body
+     * @param service  the body
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.8.4 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.30 최초작성
      */
-//    public boolean updateUserProvided(String token, Map<String, String> body) throws Exception {
-//
-//        String orgName = body.get("orgName");
-//        String spaceName = body.get("spaceName");
-//        String serviceInstanceName = body.get("serviceInstanceName");
-//        String newServiceInstanceName = body.get("newServiceInstanceName"); // null 또는 빈값 허용
-//        String credentialsStr = body.get("credentials");
-//        String syslogDrainUrl = body.get("syslogDrainUrl"); // null 또는 빈값 허용
-//
-//        if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST,"Bad Request","Required request body content is missing");
-//        }
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//        Map<String, Object>  credentials =  mapper.readValue(credentialsStr, new TypeReference<Map<String, Object>>(){});
-//
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-//
-//        client.updateUserProvidedService(orgName, spaceName, serviceInstanceName, newServiceInstanceName, credentials, syslogDrainUrl);
-//        return true;
-//    }
+    public Map updateUserProvided(String guid, String token, Service service) throws Exception {
+
+        HashMap result = new HashMap();
+
+        String orgName = service.getOrgName();
+        String spaceName = service.getSpaceName();
+        String serviceInstanceName = service.getServiceInstanceName();
+        String newServiceInstanceName = service.getNewServiceInstanceName();
+        String credentialsStr = service.getCredentials();
+        String syslogDrainUrl = service.getSyslogDrainUrl();
+
+        LOGGER.info("orgName ::::" + orgName);
+        LOGGER.info("spaceName ::::" + spaceName);
+        LOGGER.info("spaceGuid ::::" + service.getSpaceGuid());
+        LOGGER.info("serviceInstanceName ::::" + serviceInstanceName);
+        LOGGER.info("newServiceInstanceName ::::" + newServiceInstanceName);
+        LOGGER.info("credentialsStr ::::" + credentialsStr);
+        LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
+
+        try{
+            if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {}
+
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword));
+            UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
+                    .update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credential("","").syslogDrainUrl("").build()).block();
+
+            LOGGER.info("Created :::: " + updateUserProvidedServiceInstanceResponse.getEntity().getName());
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.info("Error :::: " + e.getMessage());
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
+    }
 
 
     /**
@@ -204,7 +234,7 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
-        return  Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
                 .list(ListServiceBrokersRequest.builder().build())
                 .log()
@@ -258,16 +288,16 @@ public class ServiceService extends Common {
      */
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
 
-            return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-                    .serviceBrokers()
-                    .update(UpdateServiceBrokerRequest.builder()
-                            .serviceBrokerId(serviceBroker.getGuid().toString())
-                            .name(serviceBroker.getName())
-                            .authenticationUsername(serviceBroker.getUsername())
-                            .authenticationPassword(serviceBroker.getPassword())
-                            .brokerUrl(serviceBroker.getUrl())
-                            .build()
-                    ).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+                .serviceBrokers()
+                .update(UpdateServiceBrokerRequest.builder()
+                        .serviceBrokerId(serviceBroker.getGuid().toString())
+                        .name(serviceBroker.getName())
+                        .authenticationUsername(serviceBroker.getUsername())
+                        .authenticationPassword(serviceBroker.getPassword())
+                        .brokerUrl(serviceBroker.getUrl())
+                        .build()
+                ).block();
     }
 
     /**
@@ -305,7 +335,7 @@ public class ServiceService extends Common {
     }
 
     public ListServiceInstancesResponse getServicesInstances(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
         ListServiceInstancesResponse listServicesInstancesResponse =
                 cloudFoundryClient.serviceInstances().list(ListServiceInstancesRequest.builder().spaceId(guid).build()

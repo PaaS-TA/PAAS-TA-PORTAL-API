@@ -93,8 +93,6 @@ public class ServiceController extends Common {
     /**
      * 서비스 인스턴스를 삭제한다.
      *
-     * @param service the service
-     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
@@ -157,48 +155,41 @@ public class ServiceController extends Common {
      * 유저프로바이드 서비스 인스턴스를 생성한다.
      *
      * @param token the token
-     * @param body  the body
+     * @param service  the body
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.5.20 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.30 최초작성
      */
-    @RequestMapping(value = {"/service/createUserProvidedService"}, method = RequestMethod.POST)
-    public boolean createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                      @RequestBody Map<String, String> body) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
+    public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Service service) throws  Exception{
 
         LOGGER.info("createUserProvided Start");
-
-        serviceService.createUserProvided(token, body);
-
+        Map result = serviceService.createUserProvided(token, service);
         LOGGER.info("createUserProvided End");
-        return true;
+        return result;
     }
 
     /**
      * 유저프로바이드 서비스 인스턴스를 수정한다.
      *
      * @param token the token
-     * @param body  the body
+     * @param service  the body
      * @return boolean boolean
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.5.20 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.30 최초작성
      */
-    @RequestMapping(value = {"/service/updateUserProvidedService"}, method = RequestMethod.POST)
-    public boolean updateUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                      @RequestBody Map<String, String> body) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.PUT)
+    public Map updateUserProvided(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Service service) throws  Exception{
 
         LOGGER.info("updateUserProvidedService Start");
-
-//        serviceService.updateUserProvided(token, body);
-
+        Map result = serviceService.updateUserProvided(guid, token, service);
         LOGGER.info("updateUserProvidedService End");
-        return true;
+        return result;
     }
-
 
     /**
      * 서비스 브로커 리스트를 조회한다.
