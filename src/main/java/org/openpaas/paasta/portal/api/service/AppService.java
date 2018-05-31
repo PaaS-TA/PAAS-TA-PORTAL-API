@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import com.corundumstudio.socketio.SocketIOClient;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
@@ -21,6 +22,7 @@ import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.LogsRequest;
+import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
@@ -145,14 +147,18 @@ public class AppService extends Common {
     public void startApp(App app, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        cloudFoundryClient.applicationsV3()
-                .start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder()
-                        .applicationId(app.getGuid().toString())
-                        .build()
-                ).block();
+//        cloudFoundryClient.applicationsV3()
+//                .start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder()
+//                        .applicationId(app.getGuid().toString())
+//                        .build()
+//                ).block();
 
-//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-//        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build());
+//        cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state(CloudApplication.AppState.STARTED.toString()).build()).block();
+
+        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
+
+//        Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
     }
 
 

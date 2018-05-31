@@ -2,12 +2,15 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.runtime.directive.Foreach;
+import org.apache.velocity.runtime.log.Log;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
 import org.cloudfoundry.client.lib.domain.CloudServicePlan;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.lib.io.DynamicZipInputStream;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
@@ -17,9 +20,8 @@ import org.cloudfoundry.client.v2.servicebindings.*;
 import org.cloudfoundry.client.v2.serviceinstances.*;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
-import org.cloudfoundry.client.v2.services.ListServicesRequest;
-import org.cloudfoundry.client.v2.services.ListServicesResponse;
-import org.cloudfoundry.client.v2.services.ServiceResource;
+import org.cloudfoundry.client.v2.services.*;
+import org.cloudfoundry.client.v3.droplets.CopyDropletRequest;
 import org.cloudfoundry.client.v3.servicebindings.CreateServiceBindingData;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.routes.CheckRouteRequest;
@@ -419,8 +421,8 @@ public class CatalogService extends Common {
         CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
         String appName = param.getName();
         response.setContentType("application/octet-stream");
-        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
-        response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
+        //String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
+        //response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
 
         OutputStream os = response.getOutputStream();
         InputStream is = new URL(param.getAppSampleFilePath()).openStream();
@@ -428,8 +430,8 @@ public class CatalogService extends Common {
 
     }
 
-    private String getBrowser(HttpServletRequest request) {
-        String header = request.getHeader("User-Agent");
+    private String getBrowser(String header) {
+
         if (header.indexOf("MSIE") > -1) {
             return "MSIE";
         } else if (header.indexOf("Chrome") > -1) {
@@ -480,7 +482,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> procCatalogStartApplication(Catalog param, String token) throws Exception {
+    private Map<String, Object> procCatalogStartApplication(Catalog param,String applicationid, String token) throws Exception {
 //        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
 //        String appName = param.getName();
 //        // START APPLICATION
@@ -492,10 +494,19 @@ public class CatalogService extends Common {
 //        CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
 //        UUID resultAppGuid = cloudApplication.getMeta().getGuid();
 //
-//        Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).
-//                applicationsV3().start(StartApplicationRequest.builder().applicationId(appid).build()).block();
+//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(token, param.getOrgName(), param.getSpaceName());
+//        cloudFoundryClient.uploadApplication(param.getAppName(), appName, is);
+
+//        Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+//                applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(applicationid).build()).block();
 //
-        Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
+  try {
+      Thread.sleep(3000);
+      Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
+  }
+  catch (Exception e){
+      LOGGER.info(e.toString());
+  }
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
@@ -529,9 +540,10 @@ public class CatalogService extends Common {
     }
 
 
-    public Map<String, Object> createApp(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
-        String token = req.getHeader(cfAuthorizationHeaderKey);
-        File file = createTempFile(param, req, response); // 임시파일을 생성합니다.
+    public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
+
+        LOGGER.info(param.toString());
+        File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
             String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
             String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
@@ -540,7 +552,7 @@ public class CatalogService extends Common {
             fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
 
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                return procCatalogStartApplication(param, token); //앱 시작
+                return procCatalogStartApplication(param,applicationid, token); //앱 시작
             }
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -558,7 +570,7 @@ public class CatalogService extends Common {
 
     private String createRoute(Catalog param, String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                routes().create(CreateRouteRequest.builder().host(param.getAppName()).domainId(param.getDomainName()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
+                routes().create(CreateRouteRequest.builder().host(param.getAppName()).domainId(param.getDomainId()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
     }
 
     private void routeMapping(String applicationid, String routeid, String token) {
@@ -567,22 +579,24 @@ public class CatalogService extends Common {
     }
 
     private  void fileUpload(File file, String applicationid, String token){
-
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                applicationsV2().upload(
-                UploadApplicationRequest
-                        .builder()
-                        .applicationId(applicationid)
-                        .application(file.toPath())
-                        .build()
-        ).block();
-
+        try {
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                    applicationsV2().upload(
+                    UploadApplicationRequest
+                            .builder()
+                            .applicationId(applicationid)
+                            .application(file.toPath())
+                            .build()
+            ).block();
+        }
+        catch(Exception e){
+            LOGGER.info(e.toString());
+        }
     }
-
-    private File createTempFile(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
+   private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
         response.setContentType("application/octet-stream");
-        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
+        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
         response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
         File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
         InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
@@ -593,7 +607,6 @@ public class CatalogService extends Common {
         return file;
     }
 
-
     /**
      * 카탈로그 서비스 인스턴스를 생성한다.
      *
@@ -602,10 +615,11 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public CreateServiceBindingResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
+    public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
 
-
-
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
+        });
         CreateServiceInstanceResponse createserviceinstanceresponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                         serviceInstances().create(
@@ -613,22 +627,15 @@ public class CatalogService extends Common {
                                 .builder()
                                 .name(param.getName())
                                 .spaceId(param.getSpaceId())
+                                .parameters(parameterMap)
                                 .servicePlanId(param.getServicePlan())
                                 .build()
                 ).block();
 
-
-
-        CreateServiceBindingResponse createservicebindingresponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                        serviceBindingsV2().create(
-                        CreateServiceBindingRequest
-                                .builder()
-                                .applicationId(param.getAppGuid())
-                                .serviceInstanceId(createserviceinstanceresponse.getMetadata().getId())
-                                .build()
-                ).block();
-
+        if(!param.getAppGuid().equals("(id_dummy)")) {
+            param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
+            procCatalogBindService(param, token);
+        }
 //        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
 //
 //            String tempParameter = param.getParameter();
@@ -648,7 +655,7 @@ public class CatalogService extends Common {
 //                put("SERVICE_INSTANCE_GUID", tempSubMap.get("guid"));
 //                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 //            }};
-        return createservicebindingresponse;
+        return createserviceinstanceresponse;
     }
 
     /**
@@ -660,21 +667,21 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
+        });
+        CreateServiceBindingResponse createservicebindingresponse =
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                        serviceBindingsV2().create(
+                        CreateServiceBindingRequest
+                                .builder()
+                                .applicationId(param.getAppGuid())
+                                .serviceInstanceId(param.getServiceInstanceGuid())
+                                .parameters(bindparameterMap)
+                                .build()
+                ).block();
 
-//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//
-//        String tempParameter = param.getApp_bind_parameter();
-//        if (null == tempParameter || "".equals(tempParameter)) param.setApp_bind_parameter("{}");
-//
-
-//
-//        // BIND SERVICE
-//        customCloudFoundryClient.bindServiceV2(param.getServiceInstanceGuid(), param.getAppName(), parameterMap);
-//
-//        return new HashMap<String, Object>() {{
-//            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-//        }};
-        return null;
+        return createservicebindingresponse;
     }
 
     public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token){

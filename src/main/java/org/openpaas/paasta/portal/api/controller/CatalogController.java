@@ -191,7 +191,7 @@ public class CatalogController extends Common {
      * @throws Exception Exception(자바클래스)
      */
     @PostMapping(Constants.V2_URL+"/catalogs/serviceinstances")
-    public CreateServiceBindingResponse procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return catalogService.procCatalogCreateServiceInstanceV2(param, token);
     }
 
@@ -199,14 +199,14 @@ public class CatalogController extends Common {
      * 앱을 생성한다.
      *
      * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param token,token2   HttpServletRequest(자바클래스)
      * @param response   HttpServletResponse(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     @PostMapping(Constants.V2_URL+"/catalogs/app")
-    public Map<String, Object> createApp(@RequestBody Catalog param,   HttpServletRequest req, HttpServletResponse response) throws  Exception{
-        return catalogService.createApp(param, req, response);
+    public Map<String, Object> createApp(@RequestBody Catalog param,   @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws  Exception{
+        return catalogService.createApp(param, token, token2, response);
     }
 
     /**

@@ -62,8 +62,8 @@ public class tailSocket implements CommandLineRunner {
             if (active.equals("local")) {
                 hostName = "localhost";
             } else if (active.equals("dev")) {
-                LOGGER.debug("InetAddress.getLocalHost().getHostName()=" + InetAddress.getLocalHost().getHostName());
-                LOGGER.debug("InetAddress.getLocalHost().getHostAddress()=" + InetAddress.getLocalHost().getHostAddress());
+                LOGGER.info("InetAddress.getLocalHost().getHostName()=" + InetAddress.getLocalHost().getHostName());
+                LOGGER.info("InetAddress.getLocalHost().getHostAddress()=" + InetAddress.getLocalHost().getHostAddress());
                 hostName = InetAddress.getLocalHost().getHostAddress();
             } else {
                 hostName = "localhost";
@@ -84,16 +84,16 @@ public class tailSocket implements CommandLineRunner {
             @Override
             public void onConnect(SocketIOClient client) {
 
-                LOGGER.debug("onConnected");
+                LOGGER.info("onConnected");
                 String referer = client.getHandshakeData().getHttpHeaders().get("Referer");
-                LOGGER.debug(referer);
+                LOGGER.info(referer);
                 String appName = referer.substring(referer.indexOf("name=") + 5, referer.indexOf("&org="));
                 String orgName = referer.substring(referer.indexOf("org=") + 4, referer.indexOf("&space="));
                 String spaceName = referer.substring(referer.indexOf("space=") + 6, referer.indexOf("&guid="));
 
-                LOGGER.debug(appName);
-                LOGGER.debug(spaceName);
-                LOGGER.debug(orgName);
+                LOGGER.info(appName);
+                LOGGER.info(spaceName);
+                LOGGER.info(orgName);
 
                 appController.socketTailLogs(client, appName, orgName, spaceName);
 
@@ -104,19 +104,19 @@ public class tailSocket implements CommandLineRunner {
         server.addDisconnectListener(new DisconnectListener() {
             @Override
             public void onDisconnect(SocketIOClient client) {
-                LOGGER.debug("onDisconnected");
+                LOGGER.info("onDisconnected");
             }
         });
         server.addEventListener("send", ChatObject.class, new DataListener<ChatObject>() {
 
             @Override
             public void onData(SocketIOClient client, ChatObject data, AckRequest ackSender) throws Exception {
-                LOGGER.debug("onSend: " + data.toString());
+                LOGGER.info("onSend: " + data.toString());
                 server.getBroadcastOperations().sendEvent("message", data);
             }
         });
-        LOGGER.debug("Starting server...");
+        LOGGER.info("Starting server...");
         server.start();
-        LOGGER.debug("Server started");
+        LOGGER.info("Server started");
     }
 }
