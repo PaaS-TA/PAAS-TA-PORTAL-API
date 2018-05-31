@@ -506,7 +506,7 @@ public class SpaceService extends Common {
         }
     }
 
-    public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId(
+    public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId (
         String orgId, String userId, Iterable<String> roles) {
         final List<AbstractSpaceResource> responses = new LinkedList<>();
         final List<String> spaceIds = this.getSpaces( orgId, null ).getResources()

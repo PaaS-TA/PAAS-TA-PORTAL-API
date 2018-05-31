@@ -29,6 +29,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -53,6 +55,12 @@ public class OrgService extends Common {
 
     @Autowired
     private PasswordGrantTokenProvider adminTokenProvider;
+
+    private BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(2);
+
+    protected OrgService() {
+        blockingQueue.add( new Object() );
+    }
 
     /**
      * 권한별로 수집된 유저정보를 취합하여 하나의 객체로 만들어 리턴한다.
@@ -279,7 +287,7 @@ public class OrgService extends Common {
         // Add role for OrgManager (with Space roles)
         associateOrgManager( response.getMetadata().getId(),        // org id
             userService.getUser( token ).getUserId() );             // user id
-        
+
         return response;
     }
 
@@ -711,6 +719,7 @@ public class OrgService extends Common {
     }
 
     private boolean hasOrgRole ( String orgId, String userId, String role ) {
+
         Objects.requireNonNull( role, "role" );
 
         final String roleKey = "user_roles";
@@ -765,38 +774,51 @@ public class OrgService extends Common {
      * @param token
      * @return
      */
-    public AbstractOrganizationResource associateOrgUserRole (
-        String orgId, String userId, String role, String token ) {
-        Objects.requireNonNull( orgId, "Org Id" );
-        Objects.requireNonNull( userId, "User Id" );
-        Objects.requireNonNull( role, "role" );
-
-        if (!isOrgManagerUsingToken( orgId, token )) {
-            final String email = userService.getUser( token ).getEmail();
-            throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                "This user is unauthorized to change role for this org : " + email );
-        }
-
-        final OrgRole roleEnum;
+    public AbstractOrganizationResource associateOrgUserRole ( String orgId, String userId, String role, String token ) {
         try {
-            roleEnum = OrgRole.valueOf( role );
-        } catch ( IllegalArgumentException e ) {
-            LOGGER.error( "This role is invalid : {}", role );
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
-        }
+            final Object lock = blockingQueue.take();
 
-        switch ( roleEnum ) {
-            case OrgManager:
-            case ORGMANAGER:
-                return associateOrgManager( orgId, userId );
-            case BillingManager:
-            case BILLINGMANAGER:
-                return associateBillingManager( orgId, userId );
-            case OrgAuditor:
-            case ORGAUDITOR:
-                return associateOrgAuditor( orgId, userId );
-            default:
+            Objects.requireNonNull( orgId, "Org Id" );
+            Objects.requireNonNull( userId, "User Id" );
+            Objects.requireNonNull( role, "role" );
+
+            if ( !isOrgManagerUsingToken( orgId, token ) ) {
+                final String email = userService.getUser( token ).getEmail();
+                throw new CloudFoundryException( HttpStatus.FORBIDDEN,
+                    "This user is unauthorized to change role for this org : " + email );
+            }
+
+            final OrgRole roleEnum;
+            try {
+                roleEnum = OrgRole.valueOf( role );
+            } catch ( IllegalArgumentException e ) {
+                LOGGER.error( "This role is invalid : {}", role );
                 throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+            }
+
+            AbstractOrganizationResource response;
+            switch ( roleEnum ) {
+                case OrgManager:
+                case ORGMANAGER:
+                    response = associateOrgManager( orgId, userId );
+                    break;
+                case BillingManager:
+                case BILLINGMANAGER:
+                    response = associateBillingManager( orgId, userId );
+                    break;
+                case OrgAuditor:
+                case ORGAUDITOR:
+                    response = associateOrgAuditor( orgId, userId );
+                    break;
+                default:
+                    throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+            }
+
+            blockingQueue.put( lock );
+
+            return response;
+        } catch (InterruptedException e) {
+            throw new RuntimeException( e );
         }
     }
 
@@ -846,7 +868,7 @@ public class OrgService extends Common {
 
     private void removeBillingManager ( String orgId, String userId, boolean removeWithSpaceRole ) {
         if (removeWithSpaceRole) {
-            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgManager );
+            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.BillingManager );
             if ( isOrgManager( orgId, userId ) ) {
                 removeSpaceRoles.clear();
             } else if ( isOrgAuditor( orgId, userId ) ) {
@@ -870,7 +892,7 @@ public class OrgService extends Common {
 
     private void removeOrgAuditor ( String orgId, String userId, boolean removeWithSpaceRole ) {
         if (removeWithSpaceRole) {
-            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgManager );
+            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgAuditor );
             if ( isOrgManager( orgId, userId ) ) {
                 removeSpaceRoles.clear();
             } else if ( isBillingManager( orgId, userId ) ) {
@@ -892,12 +914,20 @@ public class OrgService extends Common {
     }
 
     private void removeAllRoles ( String orgId, String userId ) {
-        LOGGER.debug( "--> Remove all member({})'s roles in org({}).", userId, orgId );
-        spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, targetSpaceRole( OrgRole.OrgManager ) );
-        removeOrgManager( orgId, userId, false );
-        removeBillingManager( orgId, userId, false );
-        removeOrgAuditor( orgId, userId, false );
-        LOGGER.debug( "--> Done to remove all member({})'s roles in org({}).", userId, orgId );
+        try {
+            final Object lock = blockingQueue.take();
+
+            LOGGER.debug( "--> Remove all member({})'s roles in org({}).", userId, orgId );
+            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, targetSpaceRole( OrgRole.OrgManager ) );
+            removeOrgManager( orgId, userId, false );
+            removeBillingManager( orgId, userId, false );
+            removeOrgAuditor( orgId, userId, false );
+            LOGGER.debug( "--> Done to remove all member({})'s roles in org({}).", userId, orgId );
+
+            blockingQueue.put( lock );
+        } catch (InterruptedException e) {
+            throw new RuntimeException( e );
+        }
     }
 
     /**
@@ -909,39 +939,47 @@ public class OrgService extends Common {
      * @param token  (but ignore a token because of removing manager forced)
      */
     public void removeOrgUserRole ( String orgId, String userId, String role, String token ) {
-        Objects.requireNonNull( orgId, "Org Id" );
-        Objects.requireNonNull( userId, "User Id" );
-        Objects.requireNonNull( role, "role" );
-
-        if (!isOrgManagerUsingToken(orgId, token)) {
-            final String email = userService.getUser( token ).getEmail();
-            throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                "This user is unauthorized to change role for this org : " + email );
-        }
-
-        final OrgRole roleEnum;
         try {
-            roleEnum = OrgRole.valueOf( role );
-        } catch ( IllegalArgumentException e ) {
-            LOGGER.error( "This role is invalid : {}", role );
-            return;
-        }
+            final Object lock = blockingQueue.take();
 
-        switch ( roleEnum ) {
-            case OrgManager:
-            case ORGMANAGER:
-                removeOrgManager( orgId, userId );
-                break;
-            case BillingManager:
-            case BILLINGMANAGER:
-                removeBillingManager( orgId, userId );
-                break;
-            case OrgAuditor:
-            case ORGAUDITOR:
-                removeOrgAuditor( orgId, userId );
-                break;
-            default:
-                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+            Objects.requireNonNull( orgId, "Org Id" );
+            Objects.requireNonNull( userId, "User Id" );
+            Objects.requireNonNull( role, "role" );
+
+            if ( !isOrgManagerUsingToken( orgId, token ) ) {
+                final String email = userService.getUser( token ).getEmail();
+                throw new CloudFoundryException( HttpStatus.FORBIDDEN,
+                    "This user is unauthorized to change role for this org : " + email );
+            }
+
+            final OrgRole roleEnum;
+            try {
+                roleEnum = OrgRole.valueOf( role );
+            } catch ( IllegalArgumentException e ) {
+                LOGGER.error( "This role is invalid : {}", role );
+                return;
+            }
+
+            switch ( roleEnum ) {
+                case OrgManager:
+                case ORGMANAGER:
+                    removeOrgManager( orgId, userId );
+                    break;
+                case BillingManager:
+                case BILLINGMANAGER:
+                    removeBillingManager( orgId, userId );
+                    break;
+                case OrgAuditor:
+                case ORGAUDITOR:
+                    removeOrgAuditor( orgId, userId );
+                    break;
+                default:
+                    throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
+            }
+
+            blockingQueue.put( lock );
+        } catch (InterruptedException e) {
+            throw new RuntimeException( e );
         }
     }
 
