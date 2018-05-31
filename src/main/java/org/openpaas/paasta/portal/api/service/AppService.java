@@ -156,7 +156,7 @@ public class AppService extends Common {
 //        cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state(CloudApplication.AppState.STARTED.toString()).build()).block();
 
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build());
+        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
 
 //        Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
     }

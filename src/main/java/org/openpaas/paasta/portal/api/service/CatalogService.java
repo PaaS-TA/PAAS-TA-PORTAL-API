@@ -594,25 +594,7 @@ public class CatalogService extends Common {
             LOGGER.info(e.toString());
         }
     }
-    private  void fileUpload2(File file, String applicationid, String token){
-        try {
-            Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                    applicationsV2().uploadDroplet(
-                    UploadApplicationDropletRequest
-                            .builder()
-                            .applicationId(applicationid)
-                            .droplet(file.toPath())
-                            .build()
-            ).block();
-        }
-        catch(Exception e){
-            LOGGER.info(e.toString());
-        }
-    }
-
-
-
-    private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
+   private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
         response.setContentType("application/octet-stream");
         String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
