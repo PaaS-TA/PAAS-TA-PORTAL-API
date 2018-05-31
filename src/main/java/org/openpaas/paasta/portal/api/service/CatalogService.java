@@ -20,9 +20,7 @@ import org.cloudfoundry.client.v2.servicebindings.*;
 import org.cloudfoundry.client.v2.serviceinstances.*;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
-import org.cloudfoundry.client.v2.services.ListServicesRequest;
-import org.cloudfoundry.client.v2.services.ListServicesResponse;
-import org.cloudfoundry.client.v2.services.ServiceResource;
+import org.cloudfoundry.client.v2.services.*;
 import org.cloudfoundry.client.v3.droplets.CopyDropletRequest;
 import org.cloudfoundry.client.v3.servicebindings.CreateServiceBindingData;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
@@ -544,6 +542,7 @@ public class CatalogService extends Common {
 
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
 
+        LOGGER.info(param.toString());
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
             String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
@@ -571,7 +570,7 @@ public class CatalogService extends Common {
 
     private String createRoute(Catalog param, String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                routes().create(CreateRouteRequest.builder().host(param.getAppName()).domainId(param.getDomainName()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
+                routes().create(CreateRouteRequest.builder().host(param.getAppName()).domainId(param.getDomainId()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
     }
 
     private void routeMapping(String applicationid, String routeid, String token) {
