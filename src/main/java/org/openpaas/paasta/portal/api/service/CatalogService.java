@@ -563,6 +563,14 @@ public class CatalogService extends Common {
     }
 
     private String createApplication(Catalog param, String token) {
+        if(param.getBuildPackName().toLowerCase().contains(Constants.CATALOG_EGOV_BUILD_PACK_CHECK_STRING)){
+            return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                    applicationsV2().create(CreateApplicationRequest.builder().buildpack(param.getBuildPackName()).memory(param.getMemorySize()).name(param.getAppName()).diskQuota(param.getDiskSize()).spaceId(param.getSpaceId()).environmentJsons(new HashMap<String, Object>()
+            {{
+                put(Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_KEY, Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_VALUE);
+            }}).build()).block().getMetadata().getId();
+        }
+
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 applicationsV2().create(CreateApplicationRequest.builder().buildpack(param.getBuildPackName()).memory(param.getMemorySize()).name(param.getAppName()).diskQuota(param.getDiskSize()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
 
