@@ -374,6 +374,18 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public ListOrganizationsResponse getOrgsForUser ( final String token ) {
+        // TODO Admin 계정일 때 모든 조직을 다 가져와서 보여주는 것이 필요함.
+        /*
+        // Admin 계정인지 확인
+        final UserInfoResponse userInfoResponse = userService.getUser( token );
+        final boolean isAdmin = userInfoResponse.getUserName().equals( adminUserName );
+
+        if (isAdmin) {
+
+        } else {
+
+        }
+        */
         return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().list( ListOrganizationsRequest.builder().build() ).block();
     }
 
@@ -481,8 +493,7 @@ public class OrgService extends Common {
 
         //// Check Admin user
         // 현재 token의 유저 정보를 가져온다.
-        // TODO 특정 유저의 정보를 가져오는 메소드가 구현되어 있으면, 해당 메소드로 교체할 것. (hgcho)
-        final UserInfoResponse userInfoResponse = Common.uaaClient( connectionContext(), tokenProvider( token ) ).users().userInfo( UserInfoRequest.builder().build() ).block();
+        final UserInfoResponse userInfoResponse = userService.getUser( token );
 
         // Admin 계정인지 확인
         final boolean isAdmin = userInfoResponse.getUserName().equals( adminUserName );
@@ -504,30 +515,30 @@ public class OrgService extends Common {
 
         // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
         final boolean existManagerRoleExactly = managerResponse.getResources().stream()
-            .filter( ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) ).count() > 0L;
+            .filter( ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) ).count() == 1L;
 
         LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers );
-        if ( existManagerRoleExactly ) {
-            // OrgManager role을 가진 User가 2명 이상일 경우 무조건 작업 Cancel
-            if ( countManagerUsers == 1 ) {
-                // 정확히 일치할 때
-                LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
-                LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", userInfoResponse.getUserId(), orgSummary
-                    .getName(), orgId );
-                return Common
-                    //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                    .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
-                        DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
-            } else if ( countManagerUsers > 1 ) {
-                // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
-                return DeleteOrganizationResponse.builder().entity( JobEntity.builder().error( "OrgManager users is greater than 1. To delete org, you have to unset OrgManager role of other user(s)." ).errorDetails( ErrorDetails.builder().code( 409 ).build() ).build() ).build();
-            } else {
-                // 해당 유저를 포함하여 누구도 OrgManager Role이 없는 경우 (403 : Forbidden)
-                return DeleteOrganizationResponse.builder().entity( JobEntity.builder().error( "OrgManager users is zero. To delete org, you have to get OrgManager role." ).errorDetails( ErrorDetails.builder().code( 403 ).build() ).build() ).build();
-            }
+        if ( countManagerUsers >= 1 && existManagerRoleExactly ) {
+            // OrgManager 유저 수가 1명 이상이면서 본인이 OrgManager 일 때
+            LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
+            LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", userInfoResponse.getUserId(), orgSummary
+                .getName(), orgId );
+            return Common
+                //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
+                    DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
+
+            /*
+            // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
+            return DeleteOrganizationResponse.builder().entity( JobEntity.builder().error( "OrgManager users is greater than 1. To delete org, you have to unset OrgManager role of other user(s)." ).errorDetails( ErrorDetails.builder().code( 409 ).build() ).build() ).build();
+            */
         } else {
             // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
-            return DeleteOrganizationResponse.builder().entity( JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." ).errorDetails( ErrorDetails.builder().code( 403 ).build() ).build() ).build();
+            return DeleteOrganizationResponse.builder()
+                .entity(
+                    JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
+                        .errorDetails( ErrorDetails.builder().code( 403 ).build() )
+                .id( "httpstatus-403" ).build() ).build();
         }
     }
 
