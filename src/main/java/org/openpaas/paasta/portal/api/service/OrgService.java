@@ -16,6 +16,7 @@ import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.uaa.users.User;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -286,7 +287,7 @@ public class OrgService extends Common {
 
         // Add role for OrgManager (with Space roles)
         associateOrgManager( response.getMetadata().getId(),        // org id
-            userService.getUser( token ).getUserId() );             // user id
+            userService.getUser( token ).getId() );             // user id
 
         return response;
     }
@@ -493,10 +494,10 @@ public class OrgService extends Common {
 
         //// Check Admin user
         // 현재 token의 유저 정보를 가져온다.
-        final UserInfoResponse userInfoResponse = userService.getUser( token );
+        final User user = userService.getUser( token );
 
         // Admin 계정인지 확인
-        final boolean isAdmin = userInfoResponse.getUserName().equals( adminUserName );
+        final boolean isAdmin = user.getUserName().equals( adminUserName );
 
         if ( isAdmin ) {
             // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
@@ -515,14 +516,13 @@ public class OrgService extends Common {
 
         // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
         final boolean existManagerRoleExactly = managerResponse.getResources().stream()
-            .filter( ur -> ur.getMetadata().getId().equals( userInfoResponse.getUserId() ) ).count() == 1L;
+            .filter( ur -> ur.getMetadata().getId().equals( user.getId() ) ).count() == 1L;
 
         LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers );
         if ( countManagerUsers >= 1 && existManagerRoleExactly ) {
             // OrgManager 유저 수가 1명 이상이면서 본인이 OrgManager 일 때
             LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
-            LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", userInfoResponse.getUserId(), orgSummary
-                .getName(), orgId );
+            LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId );
             return Common
                 //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
                 .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
@@ -704,11 +704,11 @@ public class OrgService extends Common {
 
     public boolean isOrgManagerUsingOrgName (String orgName, String token) {
         final String orgId = getOrgId( orgName, token );
-        final String userId = userService.getUser( token ).getUserId();
+        final String userId = userService.getUser( token ).getId();
         return isOrgManager( orgId, userId );
     }
     public boolean isOrgManagerUsingToken( String orgId, String token ) {
-        final String userId = userService.getUser( token ).getUserId();
+        final String userId = userService.getUser( token ).getId();
         return isOrgManager( orgId, userId );
     }
 
@@ -794,9 +794,9 @@ public class OrgService extends Common {
             Objects.requireNonNull( role, "role" );
 
             if ( !isOrgManagerUsingToken( orgId, token ) ) {
-                final String email = userService.getUser( token ).getEmail();
+                final String username = userService.getUsernameFromToken( token );
                 throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                    "This user is unauthorized to change role for this org : " + email );
+                    "This user is unauthorized to change role for this org : " + username );
             }
 
             final OrgRole roleEnum;
@@ -958,7 +958,7 @@ public class OrgService extends Common {
             Objects.requireNonNull( role, "role" );
 
             if ( !isOrgManagerUsingToken( orgId, token ) ) {
-                final String email = userService.getUser( token ).getEmail();
+                final String email = userService.getUsernameFromToken( token );
                 throw new CloudFoundryException( HttpStatus.FORBIDDEN,
                     "This user is unauthorized to change role for this org : " + email );
             }

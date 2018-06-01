@@ -440,12 +440,12 @@ public class SpaceService extends Common {
 
     public boolean isSpaceManagerUsingName( String orgName, String spaceName, String token ) {
         final String spaceId = this.getSpaceUsingName( orgName, spaceName, token ).getMetadata().getId();
-        final String userId = userService.getUser( token ).getUserId();
+        final String userId = userService.getUser( token ).getId();
         return isSpaceManager( spaceId, userId );
     }
 
     public boolean isSpaceManagerUsingToken( String spaceId, String token ) {
-        final String userId = userService.getUser( token ).getUserId();
+        final String userId = userService.getUser( token ).getId();
         return isSpaceManager( spaceId, userId );
     }
 
