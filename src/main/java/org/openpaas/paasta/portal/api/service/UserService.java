@@ -230,8 +230,14 @@ public class UserService extends Common {
         return result;
     }
 
-    public UserInfoResponse getUser(String token) {
-        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token)).users().userInfo(UserInfoRequest.builder().build()).block();
+    public String getUsernameFromToken(String token) {
+        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token))
+            .getUsername().block();
+    }
+
+    public User getUser(String token) {
+        final String userName = getUsernameFromToken( token );
+        return this.getUserSummaryByUsername( userName );
     }
 
     /**
@@ -393,7 +399,8 @@ public class UserService extends Common {
     }
 
     private User getUserSummaryWithFilter(UaaUserLookupFilterType filterType, String filterValue) {
-        final ListUsersResponse response = Common.uaaClient(connectionContext, adminTokenProvider).users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
+        final ListUsersResponse response = Common.uaaClient(connectionContext, adminTokenProvider).users()
+            .list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
         if (response.getResources().size() <= 0)
             throw new CloudFoundryException(HttpStatus.NOT_FOUND, (filterType.name() + " of user cannot find"));
 

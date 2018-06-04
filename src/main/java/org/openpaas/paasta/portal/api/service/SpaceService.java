@@ -108,6 +108,13 @@ public class SpaceService extends Common {
         return response;
     }
 
+    private static final List<String> SPACE_ROLES_FOR_ORGMANAGER = Arrays.asList(
+        "SpaceAuditor", "SpaceDeveloper", "SpaceManager" );
+    private static final List<String> SPACE_ROLES_FOR_ORGAUDITOR = Arrays.asList(
+        "SpaceAuditor", "SpaceDeveloper" );
+    private static final List<String> SPACE_ROLES_FOR_BILLINGMANAGER = Arrays.asList(
+        "SpaceAuditor" );
+
     /**
      * 공간을 생성한다. (Space : Create)
      *
@@ -123,10 +130,16 @@ public class SpaceService extends Common {
         Objects.requireNonNull( space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
         Objects.requireNonNull( space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
-            .spaces().create(CreateSpaceRequest.builder()
-                .name(space.getSpaceName()).organizationId(space.getOrgGuid()).build())
-            .block();
+        final CreateSpaceResponse response =
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                .spaces().create( CreateSpaceRequest.builder()
+                .name( space.getSpaceName() ).organizationId( space.getOrgGuid() ).build() )
+                .block();
+
+        // Results for association roles will be disposed
+        associateSpaceUserRolesByOrgIdAndRole(response.getMetadata().getId(), space.getOrgGuid() );
+
+        return response;
     }
 
     /**
@@ -427,12 +440,12 @@ public class SpaceService extends Common {
 
     public boolean isSpaceManagerUsingName( String orgName, String spaceName, String token ) {
         final String spaceId = this.getSpaceUsingName( orgName, spaceName, token ).getMetadata().getId();
-        final String userId = userService.getUser( token ).getUserId();
+        final String userId = userService.getUser( token ).getId();
         return isSpaceManager( spaceId, userId );
     }
 
     public boolean isSpaceManagerUsingToken( String spaceId, String token ) {
-        final String userId = userService.getUser( token ).getUserId();
+        final String userId = userService.getUser( token ).getId();
         return isSpaceManager( spaceId, userId );
     }
 
@@ -520,6 +533,29 @@ public class SpaceService extends Common {
         }
 
         return responses;
+    }
+
+    public List<AbstractSpaceResource> associateSpaceUserRolesByOrgIdAndRole ( String spaceId, String orgId ) {
+        // set space role for all user in org
+        final List<AbstractSpaceResource> results = new LinkedList<>();
+        final Collection<UserRole> users = orgService.getOrgUserRoles( orgId, null ).get( "user_roles" );
+        for (UserRole user : users) {
+            final String userId = user.getUserId();
+            final Set<String> roles = user.getRoles();
+            List<String> spaceRoles = Collections.emptyList();
+            if (roles.contains( "OrgManager" ))
+                spaceRoles = SPACE_ROLES_FOR_ORGMANAGER;
+            else if (roles.contains( "OrgAuditor" ))
+                spaceRoles = SPACE_ROLES_FOR_ORGAUDITOR;
+            else if (roles.contains( "BillingManager" ))
+                spaceRoles = SPACE_ROLES_FOR_BILLINGMANAGER;
+
+            for (String spaceRole : spaceRoles) {
+                results.add( this.associateSpaceUserRole( spaceId, userId, spaceRole ) );
+            }
+        }
+
+        return results;
     }
 
     private void removeSpaceManager( String spaceId, String userId ) {
