@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.google.common.base.CaseFormat;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
@@ -153,23 +154,29 @@ public class SpaceService extends Common {
      * @since 2018.5.3
      */
     public GetSpaceResponse getSpace(String spaceId, String token) {
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-            .spaces().get( GetSpaceRequest.builder().spaceId( spaceId ).build() ).block();
-    }
+        Objects.requireNonNull( spaceId, "Space Id" );
 
-    /*
-    public void getSpaceId(String orgName, String spaceName, String token) {
-        return Common.cloudFoundryOp
-            .spaces().get( GetSpaceRequest.builder()..build() )
-    }
-    */
-
-    public SpaceResource getSpaceUsingName( String orgName, String spaceName, String token ) {
         final TokenProvider internalTokenProvider;
         if ( null != token && !"".equals( token ) )
             internalTokenProvider = tokenProvider( token );
         else
             internalTokenProvider = adminTokenProvider;
+
+        return Common.cloudFoundryClient( connectionContext(), internalTokenProvider )
+            .spaces().get( GetSpaceRequest.builder().spaceId( spaceId ).build() ).block();
+    }
+
+    public GetSpaceResponse getSpace(String spaceId) {
+        return getSpace(spaceId, null);
+    }
+
+    public SpaceResource getSpaceUsingName( String orgName, String spaceName, String token ) {
+        final TokenProvider internalTokenProvider;
+        if ( null != token && !"".equals( token ) ) {
+            internalTokenProvider = tokenProvider( token );
+        } else {
+            internalTokenProvider = adminTokenProvider;
+        }
 
 
         final ListSpacesResponse response = this.getSpacesWithOrgName( orgName, token );
@@ -185,6 +192,22 @@ public class SpaceService extends Common {
             return null;
 
         return spaces.get( 0 );
+    }
+
+    public boolean isExistSpaceName ( final String orgName, final String spaceName ) {
+        try {
+            return spaceName.equals( getSpaceUsingName(orgName, spaceName, null).getEntity().getName() );
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isExistSpace ( final String spaceId ) {
+        try {
+            return spaceId.equals( getSpace(spaceId).getMetadata().getId() );
+        } catch ( Exception e ) {
+            return false;
+        }
     }
 
     /**
@@ -262,83 +285,6 @@ public class SpaceService extends Common {
                 ).block();
 
         return respSapceSummary;
-
-
-//
-//        if(!stringNullCheck(orgName,spaceName)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-//        }
-//
-//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-//
-//        String spaceString = admin.getSpaceSummary(orgName, spaceName);
-//        Space respSpace = new ObjectMapper().readValue(spaceString, Space.class);
-//
-//        //LOGGER.info(spaceString);
-//        int memTotal = 0;
-//        int memUsageTotal = 0;
-//
-//        for (App app : respSpace.getApps()) {
-//
-//            memTotal += app.getMemory() * app.getInstances();
-//
-//            if (app.getState().equals("STARTED")) {
-//               // space.setAppCountStarted(space.getAppCountStarted() + 1);
-//
-//                memUsageTotal += app.getMemory() * app.getInstances();
-//
-//            } else if (app.getState().equals("STOPPED")) {
-//                //space.setAppCountStopped(space.getAppCountStopped() + 1);
-//            } else {
-//                //space.setAppCountCrashed(space.getAppCountCrashed() + 1);
-//            }
-//        }
-//
-//        respSpace.setMemoryLimit(memTotal);
-//        respSpace.setMemoryUsage(memUsageTotal);
-//
-//        return respSpace;
-
-
-//        GetSpaceSummaryResponse getSpaceSummaryResponse =
-//                Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
-//                        .spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        return objectMapper.convertValue(getSpaceSummaryResponse, Map.class);
-    }
-
-    /**
-     * 공간 정보를 조회한다.
-     *
-     * @param spaceName the space name
-     * @param orgId     the org id
-     * @return the spaces info
-     * @throws Exception the exception
-     */
-    @Deprecated
-    public List<Space> getSpacesInfo(String spaceName, String orgId) throws Exception{
-        Map map = new HashMap();
-        map.put("spaceName" , spaceName);
-        map.put("orgId" , orgId);
-//        List selectSpace = spaceMapper.getSpacesInfo(map);
-        List selectSpace = null;
-        return selectSpace;
-    }
-
-    /**
-     * 공간ID로 공간정보를 조회한다.
-     *
-     * @param spaceId the space id
-     * @return the spaces info by id
-     * @throws Exception the exception
-     */
-    @Deprecated
-    public List<Space> getSpacesInfoById(int spaceId) throws Exception{
-        Map map = new HashMap();
-        map.put("spaceId" , spaceId);
-//        List selectSpace = spaceMapper.getSpacesInfoById(map);
-        List selectSpace = null;
-        return selectSpace;
     }
 
     /**
@@ -419,7 +365,21 @@ public class SpaceService extends Common {
         listAllSpaceUsers( spaceId, token ).stream()
             .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
                 .userEmail( resource.getEntity().getUsername() )
-                .roles( resource.getEntity().getSpaceRoles() )
+                .roles(
+                    resource.getEntity().getSpaceRoles().stream()
+                        .map( roleStr -> CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.UPPER_CAMEL, roleStr ) ).collect(Collectors
+                        .toList()) )
+                .modifiableRoles( false )
+                .build()
+            ).filter( ur -> null != ur )
+            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
+
+        // add non-space users (retrived from org user list)
+        String orgId = getSpace( spaceId, token ).getEntity().getOrganizationId();
+        orgService.listAllOrgUsers( orgId, token ).stream()
+            .filter( resource -> false == userRoles.containsKey( resource.getMetadata().getId() ) )
+            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
+                .userEmail( resource.getEntity().getUsername() )
                 .modifiableRoles( false )
                 .build()
             ).filter( ur -> null != ur )
@@ -481,8 +441,7 @@ public class SpaceService extends Common {
             .block();
     }
 
-    public AbstractSpaceResource associateSpaceUserRole(
-        String spaceId, String userId, String role ) {
+    public AbstractSpaceResource associateSpaceUserRole( String spaceId, String userId, String role ) {
         Objects.requireNonNull( spaceId, "Space Id" );
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
@@ -519,8 +478,7 @@ public class SpaceService extends Common {
         }
     }
 
-    public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId (
-        String orgId, String userId, Iterable<String> roles) {
+    public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId ( String orgId, String userId, Iterable<String> roles) {
         final List<AbstractSpaceResource> responses = new LinkedList<>();
         final List<String> spaceIds = this.getSpaces( orgId, null ).getResources()
             .stream().map( space -> space.getMetadata().getId() ).filter( id -> null != id )

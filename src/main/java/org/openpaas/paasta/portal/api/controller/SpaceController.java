@@ -1,26 +1,27 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
+import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Space;
+import org.openpaas.paasta.portal.api.model.UserRole;
 import org.openpaas.paasta.portal.api.service.AppService;
 import org.openpaas.paasta.portal.api.service.OrgService;
 import org.openpaas.paasta.portal.api.service.SpaceService;
+import org.openpaas.paasta.portal.api.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 공간 컨트롤러 - 공간 목록 , 공간 이름 변경 , 공간 생성 및 삭제 등을 제공한다.
@@ -46,6 +47,9 @@ public class SpaceController extends Common {
      */
     @Autowired
     OrgService orgService;
+
+    @Autowired
+    UserService userService;
 
     @Autowired
     AppService appService;
@@ -209,111 +213,6 @@ public class SpaceController extends Common {
         return spaceService.createSpace(space, authHeader);
     }
 
-
-    /**
-     * 조직 role을 부여한다.
-     *
-     * @param token the token
-     * @param body  the body
-     * @return Map org role
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.8.10 최초작성
-     */
-    @RequestMapping(value = {"/space/setSpaceRole"}, method = RequestMethod.POST)
-    // TODO
-    public boolean setOrgRole(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, String> body) throws Exception {
-
-        LOGGER.info("setSpaceRole Start");
-
-//        spaceService.setSpaceRole(body.get("orgName"),body.get("spaceName"), body.get("userName"), body.get("userRole"), token);
-
-        LOGGER.info("setSpaceRole End");
-
-        return true;
-    }
-
-    /**
-     * 조직 role을 제거한다.
-     *
-     * @param token the token
-     * @param body  the body
-     * @return Map boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.8.10 최초작성
-     */
-    @RequestMapping(value = {"/space/unsetSpaceRole"}, method = RequestMethod.POST)
-    // TODO
-    public boolean unsetOrgRole(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, String> body) throws Exception {
-
-        LOGGER.info("unsetSpaceRole Start");
-
-//        spaceService.unsetSpaceRole(body.get("orgName"),body.get("spaceName"), body.get("userGuid"), body.get("userRole"), token);
-
-        LOGGER.info("unsetSpaceRole End");
-
-        return true;
-    }
-
-    /**
-     * 조직 role을 제거한다.
-     *
-     * @param token the token
-     * @param body  the body
-     * @return Map boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.9.1 최초작성
-     */
-    @RequestMapping(value = {"/space/getUsersForSpaceRole"}, method = RequestMethod.POST)
-    // TODO
-    public List<Map<String, Object>> getUsersForSpaceRole(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, Object> body) throws Exception {
-
-        LOGGER.info("getUsersForSpaceRole Start");
-        String gubun ="1";
-        String userId = (String) body.getOrDefault("userId","");
-        List userList = (List<Map<String, Object>>)body.get("userList");
-        for (int i=0;i<userList.size();i++){
-            Map map = (Map) userList.get(i);
-            String sInviteYn = (String)map.getOrDefault("inviteYn","N");
-            if("Y".equals(sInviteYn)){
-                userList.remove(i);
-            }
-        }
-        List<Map<String, Object>> inviteOrgUserList = orgService.getUsersByInvite(body.get("spaceName").toString(), userId, gubun);
-//        List<Map<String, Object>> spaceUserList = spaceService.getUsersForSpaceRole(body.get("orgName").toString(), body.get("spaceName").toString(), userList, token);
-//        spaceUserList.addAll(inviteOrgUserList);
-        LOGGER.info("getUsersForSpaceRole End");
-
-        return null;
-    }
-
-    /**
-     * 관리자 권한의 공간을 조회한다.
-     *
-     * @param body the body
-     * @return Map boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.9.1 최초작성
-     */
-    @RequestMapping(value = {"/space/getSpacesForAdmin"}, method = RequestMethod.POST)
-    // TODO
-    public Map<String, Object> getSpacesForAdmin(@RequestBody Map<String, String> body) throws Exception {
-
-        LOGGER.info("getSpacesForAdmin ::");
-
-        //List<Object> spaceList = spaceService.getSpacesForAdmin(body.get("orgName"));
-
-        //return new HashMap<String, Object>(){{put("spaceList", spaceList );}};
-        return null;
-    }
-
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{guid}/services"}, method = RequestMethod.GET)
     public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceServices Start : " + guid);
@@ -325,4 +224,46 @@ public class SpaceController extends Common {
         return respSpaceServices;
     }
 
+    /**
+     * 공간에 속한 유저들의 역할(Role)을 전부 조회한다. 단, 조직에 속해있지만 공간에 속하지 않은 유저는 빈 배열로 채운다.
+     * @param spaceId
+     * @param token
+     * @return Users with roles that belong in the organization
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.5.16
+     */
+    @GetMapping(V2_URL + "/spaces/{spaceId}/user-roles")
+    public Map<String, Collection<UserRole>> getSpaceUserRoles ( @PathVariable String spaceId, @RequestHeader
+        (AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( spaceId, "Space Id" );
+        // token can fill "NULL" value.
+        //Objects.requireNonNull( token, "token" );
+
+        if (spaceService.isExistSpace( spaceId )) {
+            return spaceService.getSpaceUserRoles( spaceId, token );
+        } else {
+            return Collections.<String, Collection<UserRole>>emptyMap();
+        }
+    }
+
+    @PutMapping(V2_URL + "/spaces/{spaceId}/user-roles")
+    public AbstractSpaceResource associateSpaceUserRoles( @PathVariable String spaceId,
+                                                          @RequestBody UserRole.RequestBody body,
+                                                          @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( body.getUserId(), "User ID(userId) is required" );
+        Objects.requireNonNull( body.getRole(), "Org Role(role) is required" );
+        LOGGER.info( "Associate organization role of user (Update) : {} / {}", body.getUserId(), body.getRole() );
+        return spaceService.associateSpaceUserRole( spaceId, body.getUserId(), body.getRole() );
+    }
+
+    @DeleteMapping(V2_URL + "/spaces/{spaceId}/user-roles")
+    public void removeSpaceUserRoles( @PathVariable String spaceId,
+                                                       @RequestParam String userId, @RequestParam String role,
+                                                       @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        Objects.requireNonNull( userId, "User ID(userId) is required" );
+        Objects.requireNonNull( role, "Org Role(role) is required" );
+        LOGGER.info("Remove organization role of user (Delete) : {} / {}", userId, role);
+        spaceService.removeSpaceUserRole( spaceId, userId, role );
+    }
 }
