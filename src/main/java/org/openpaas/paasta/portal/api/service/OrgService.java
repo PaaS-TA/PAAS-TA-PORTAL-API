@@ -1,8 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
@@ -17,10 +15,7 @@ import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.User;
-import org.cloudfoundry.uaa.users.UserInfoRequest;
-import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.model.InviteOrgSpace;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserRole;
 import org.slf4j.Logger;
@@ -62,207 +57,6 @@ public class OrgService extends Common {
     protected OrgService() {
         blockingQueue.add( new Object() );
     }
-
-    /**
-     * 권한별로 수집된 유저정보를 취합하여 하나의 객체로 만들어 리턴한다.
-     *
-     * @param userList
-     * @param managers
-     * @param billingManagers
-     * @param auditors
-     * @return orgUserList
-     * @throws Exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.9.05 최초작성
-     */
-    private List<Map<String, Object>> putUserList ( String orgName, List<Map<String, Object>> userList, Map<String, CloudUser> managers, Map<String, CloudUser> billingManagers, Map<String, CloudUser> auditors ) throws Exception {
-        List<Map<String, Object>> orgUserList = new ArrayList<>();
-
-        for ( Map<String, Object> userMap : userList ) {
-            List<String> userRoles = new ArrayList<>();
-            if ( managers.get( userMap.get( "userName" ) ) != null ) {
-                userRoles.add( "OrgManager" );
-            }
-            if ( billingManagers.get( userMap.get( "userName" ) ) != null ) {
-                userRoles.add( "BillingManager" );
-            }
-            if ( auditors.get( userMap.get( "userName" ) ) != null ) {
-                userRoles.add( "OrgAuditor" );
-            }
-
-            userMap.put( "orgName", orgName );
-            userMap.put( "userRoles", userRoles );
-            userMap.put( "inviteYn", "N" );
-            userMap.put( "token", "" );
-            orgUserList.add( userMap );
-        }
-        return orgUserList;
-    }
-
-    /**
-     * 조직 role를 조회한다.
-     *
-     * @param org   the org
-     * @param token the token
-     * @return the org role
-     * @throws Exception the exception
-     */
-    public List<CloudSpace> getOrgRole ( Org org, String token ) throws Exception {
-        /*List<CloudSpace> listSpace = spaceService.getSpaces(org, token);
-        return listSpace;*/
-        return null;
-    }
-
-    /**
-     * 조직과 공간의 초대 정보를 등록한다.
-     *
-     * @param map the map
-     * @return the int
-     * @throws Exception the exception
-     */
-    public int insertOrgSpaceUser ( HashMap map ) throws Exception {
-        // TODO
-        // int cnt = inviteOrgSpaceMapper.insertInviteOrgSpace(map);
-        int cnt = 0;
-        return cnt;
-    }
-
-    /**
-     * 조직과 공간의 초대 정보를 수한다.정
-     *
-     * @param map the map
-     * @return the int
-     * @throws Exception the exception
-     */
-    public int updateOrgSpaceUser ( HashMap map ) throws Exception {
-        // TODO
-        // int cnt = inviteOrgSpaceMapper.updateOrgSpaceUser(map);
-        int cnt = 0;
-        return cnt;
-    }
-
-    /**
-     * 조직과 공간의 초대 사용자를 조회한다.
-     *
-     * @param inviteOrgSpace the invite org space
-     * @return the list
-     * @throws Exception the exception
-     */
-    public List<InviteOrgSpace> selectOrgSpaceUser ( InviteOrgSpace inviteOrgSpace ) throws Exception {
-        // TODO
-//        List<InviteOrgSpace> list = inviteOrgSpaceMapper.selectOrgSpaceUser(inviteOrgSpace);
-//        return list;
-        return null;
-    }
-
-
-    /**
-     * 공간에 대한 초대를 완료하고 초대상태를 Y로 만들어준다.
-     *
-     * @param code 초대 토큰
-     * @return 상태를 Y 로 수정한 개수
-     */
-    public int updateInviteY ( String code ) {
-        Map map = new HashMap();
-        map.put( "token", code );
-//        int cnt = inviteOrgSpaceMapper.updateInviteY(map);
-        int cnt = 0;
-        return cnt;
-    }
-
-    /**
-     * 공간 초대 이메일을 통해 접근된 회수를 수정한다.
-     *
-     * @param code      the code
-     * @param accessCnt //접근회수
-     * @return 수정된 개수
-     */
-    public int updateAccessCnt ( String code, int accessCnt ) {
-        Map map = new HashMap();
-        map.put( "token", code );
-        map.put( "accessCnt", accessCnt );
-//        int cnt = inviteOrgSpaceMapper.updateAccessCnt(map);
-        int cnt = 0;
-        return cnt;
-    }
-
-    /**
-     * 공간에 초대한 이메일의 token을 가진 초대 정보를 가져온다.
-     *
-     * @param code the code
-     * @return List 초대 정보
-     */
-    public List selectInviteInfo ( String code ) {
-        Map map = new HashMap();
-        map.put( "token", code );
-//        List list = inviteOrgSpaceMapper.selectInviteInfo(map);
-        List list = null;
-        return list;
-    }
-
-
-    /**
-     * 사용자 탭의 getAllUsers 서비스에 데이터 추가할 데이터를 가져온다.
-     *
-     * @param orgName :공간 이름
-     * @param userId  : 로그인한 사용자 아이디
-     * @param gubun   the gubun
-     * @return 예 )[{userName: "lij", userGuid: "db040322-c831-4d51-b391-4f9ff8102dc9", inviteYn: "Y",…}]
-     */
-    public List<Map<String, Object>> getUsersByInvite ( String orgName, String userId, String gubun ) {
-        InviteOrgSpace inviteOrgSpace = new InviteOrgSpace();
-
-        inviteOrgSpace.setGubun( gubun );
-        inviteOrgSpace.setUserId( userId );
-        inviteOrgSpace.setInviteName( orgName );
-        //List<InviteOrgSpace> orgInviteList = inviteOrgSpaceMapper.getUsersByInvite(inviteOrgSpace);
-        List<InviteOrgSpace> orgInviteList = null;
-        List<Map<String, Object>> orgUserList = new ArrayList<>();
-        String voUserId = "";
-        for ( int i = 0; i < orgInviteList.size(); i++ ) {
-            InviteOrgSpace vo = orgInviteList.get( i );
-            if ( !vo.getInviteUserId().equals( voUserId ) ) {
-                Map voMap = new HashMap<>();
-                voUserId = vo.getInviteUserId();
-                //String voUserGuid = userMapper.getUserGuid(voUserId) == null ? "" : userMapper.getUserGuid(voUserId);
-                String voUserGuid = "";
-                voMap.put( "userName", voUserId );
-                voMap.put( "orgName", vo.getInviteName() );
-                voMap.put( "userGuid", voUserGuid );
-                voMap.put( "token", vo.getToken() );
-                voMap.put( "inviteYn", "Y" );
-                List list = new ArrayList();
-                String rolename = "";
-                for ( int j = 0; j < orgInviteList.size(); j++ ) {
-                    InviteOrgSpace vo1 = orgInviteList.get( i );
-                    if ( vo1.getInviteUserId().equals( voUserId ) ) {
-                        if ( !vo.getRoleName().equals( rolename ) ) {
-                            rolename = vo.getRoleName();
-                            list.add( rolename );
-                        }
-                    }
-                }
-                voMap.put( "userRoles", list );
-                orgUserList.add( voMap );
-            }
-        }
-        return orgUserList;
-    }
-
-
-    /**
-     * 초대한 token 정보를 가지고 초대취소를 수행한다.
-     *
-     * @param map the map
-     * @return int int
-     * @throws Exception the exception
-     */
-    public int cancelInvite ( Map map ) throws Exception {
-//        return inviteOrgSpaceMapper.deleteOrgSpaceUserToken(map);
-        return 0;
-    }
-
 
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
@@ -616,7 +410,7 @@ public class OrgService extends Common {
         ORGMANAGER, BILLINGMANAGER, ORGAUDITOR,
     }
 
-    private List<UserResource> listAllOrgUsers ( String orgId, String token ) {
+    protected List<UserResource> listAllOrgUsers ( String orgId, String token ) {
         final ListOrganizationUsersResponse response =
             Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
                 .organizations().listUsers(
