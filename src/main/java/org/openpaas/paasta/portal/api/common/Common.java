@@ -427,14 +427,7 @@ public class Common {
     }
 
     public DefaultConnectionContext connectionContext() {
-        DefaultConnectionContext connectionContext = peekConnectionContext();
-        if (null == connectionContext) {
-            connectionContext = DefaultConnectionContext.builder()
-                .apiHost( convertApiUrl( apiTarget ) ).skipSslValidation( cfskipSSLValidation ).build();
-            pushConnectionContext( connectionContext );
-        }
-
-        return connectionContext;
+        return connectionContext( apiTarget, cfskipSSLValidation );
     }
 
     private static void disposeConnectionContext ( DefaultConnectionContext connectionContext) {
@@ -445,20 +438,21 @@ public class Common {
     }
 
     public static DefaultConnectionContext connectionContext(String apiUrl, boolean skipSSLValidation) {
+        Objects.requireNonNull( apiUrl, "CF API URL" );
         DefaultConnectionContext connectionContext = peekConnectionContext();
-        if (null == connectionContext) {
-            connectionContext = DefaultConnectionContext.builder()
-                .apiHost( convertApiUrl( apiUrl ) ).skipSslValidation( skipSSLValidation ).build();
-            pushConnectionContext( connectionContext );
-        } else {
+        if (null != connectionContext) {
             boolean isEqual = connectionContext.getApiHost().equals( convertApiUrl( apiUrl ) )
                 && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
             if ( !isEqual ) {
                 removeConnectionContext();
-                connectionContext = DefaultConnectionContext.builder()
-                    .apiHost( convertApiUrl( apiUrl ) ).skipSslValidation( skipSSLValidation ).build();
-                pushConnectionContext( connectionContext );
+                connectionContext = null;
             }
+        }
+
+        if (null == connectionContext) {
+            connectionContext = DefaultConnectionContext.builder()
+                .apiHost( convertApiUrl( apiUrl ) ).skipSslValidation( skipSSLValidation ).build();
+            pushConnectionContext( connectionContext );
         }
 
         return connectionContext;
@@ -496,13 +490,12 @@ public class Common {
     public void preDestroy() {
         // Remove connection context in thread local
         final DefaultConnectionContext connectionContext = peekConnectionContext();
-        final String hashCode;
-        if (connectionContext != null)
-            hashCode = Integer.toHexString( connectionContext.hashCode() );
-        else
-            hashCode = "NULL";
-
-        LOGGER.info( "Pre-destroy connection context : ConnectionContext@{}", hashCode );
-        removeConnectionContext();
+        if (connectionContext != null) {
+            final String hashCode = Integer.toHexString( connectionContext.hashCode() );
+            removeConnectionContext();
+            LOGGER.info( "Remove Pre-destroy connection context : ConnectionContext@{}", hashCode );
+        } else {
+            LOGGER.info( "Try to remove Pre-destroy connection context, but cannot find ConnectionContext..." );
+        }
     }
 }
