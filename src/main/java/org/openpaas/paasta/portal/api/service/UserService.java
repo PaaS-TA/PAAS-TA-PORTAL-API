@@ -218,7 +218,8 @@ public class UserService extends Common {
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(this.getToken()));
-            reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build());
+            DeleteUserResponse deleteUserResponse =   reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build()).block();
+
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
