@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import org.cloudfoundry.client.v2.users.GetUserResponse;
 import org.cloudfoundry.uaa.users.User;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -139,7 +140,7 @@ public class UserController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(value = {V2_URL + "/users/{userId}"})
-    public UserInfoResponse getUser(@PathVariable String userId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public GetUserResponse getUser(@PathVariable String userId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
         return userService.getUser(userId, token);
     }
 
@@ -158,33 +159,6 @@ public class UserController extends Common {
         return result;
     }
 
-
-    /**
-     * Gets list for the user.
-     *
-     * @param keyOfRole the key of role
-     * @param request   the request
-     * @param response  the response
-     * @return the list for the user
-     * @throws Exception the exception
-     */
-    @RequestMapping(value = {"/getListForTheUser/{keyOfRole}"}, method = RequestMethod.POST)
-    public List<Map> getListForTheUser(@PathVariable String keyOfRole, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        //to return
-        List<Map> listOrgOrSpace = new ArrayList<>();
-
-        listOrgOrSpace = userService.getListForTheUser(keyOfRole, request.getHeader(AUTHORIZATION_HEADER_KEY));
-
-        return listOrgOrSpace;
-    }
-
-    @RequestMapping(value = {"/getUserInfo"}, method = RequestMethod.GET)
-    public Map<String, Object> getAllUserName() throws Exception {
-//        List<Map<String,String>> userInfo = userService.getUserInfo();
-//        Map<String, Object> resultMap = new HashMap();
-//        resultMap.put("userInfo", userInfo);
-        return null;
-    }
 
     @GetMapping(V2_URL + "/user/name-by-id/{username}")
     public String getUserId(@PathVariable String username) {
