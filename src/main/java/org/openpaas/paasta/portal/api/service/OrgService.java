@@ -9,10 +9,12 @@ import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQu
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.User;
 import org.json.simple.JSONArray;
@@ -420,12 +422,11 @@ public class OrgService extends Common {
 
     protected List<UserResource> listAllOrgUsers ( String orgId, String token ) {
         final ListOrganizationUsersResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations().listUsers(
                 ListOrganizationUsersRequest.builder().organizationId( orgId )
                     .orderDirection( OrderDirection.ASCENDING ).build()
             ).block();
-
         return response.getResources();
     }
 
@@ -588,7 +589,6 @@ public class OrgService extends Common {
      * @return
      */
     public AbstractOrganizationResource associateOrgUserRole ( String orgId, String userId, String role, String token ) {
-        System.out.println("=======associateOrgUserRole in!!");
         try {
             final Object lock = blockingQueue.take();
 
@@ -830,99 +830,112 @@ public class OrgService extends Common {
     }
 
     public boolean associateOrgUserRole2(Map body) {
-        Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
-        System.out.println(inviteAcceptMap);
-
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObj = null;
-
-        String orgGuid = inviteAcceptMap.get("orgGuid").toString();
-        String userEmail = inviteAcceptMap.get("userId").toString();
-        String userId = userService.getUserIdByUsername(userEmail);
-
         try {
-            jsonObj = (JSONObject) jsonParser.parse(inviteAcceptMap.get("role").toString());
-        } catch (org.json.simple.parser.ParseException e) {
-            e.printStackTrace();
-        }
+            Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
+            LOGGER.info(inviteAcceptMap.toString());
 
-        JSONArray orgArray = (JSONArray) jsonObj.get("org");
+            String orgGuid = inviteAcceptMap.get("orgGuid").toString();
+            String userEmail = inviteAcceptMap.get("userId").toString();
+            String userId = userService.getUserIdByUsername(userEmail);
 
-        for(int i=0 ; i<orgArray.size() ; i++){
-            JSONObject orgObj = (JSONObject) orgArray.get(i);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObj = null;
 
-            if(orgObj.get("om").toString().equals("true")) {
-                System.out.println("om");
-                AssociateOrganizationManagerResponse associateOrganizationManagerResponse =
-                        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                                .organizations()
-                                .associateManager( AssociateOrganizationManagerRequest.builder()
-                                        .organizationId( orgGuid ).managerId( userId ).build() )
-                                .block();
+            try {
+                jsonObj = (JSONObject) jsonParser.parse(inviteAcceptMap.get("role").toString());
+            } catch (org.json.simple.parser.ParseException e) {
+                e.printStackTrace();
             }
-            if(orgObj.get("bm").toString().equals("true")) {
-                System.out.println("bm");
-                AssociateOrganizationBillingManagerResponse associateOrganizationBillingManagerResponse =
-                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                            .organizations()
-                            .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
-                                    .organizationId( orgGuid ).billingManagerId( userId ).build() )
-                            .block();
+
+            JSONArray orgArray = (JSONArray) jsonObj.get("org");
+
+            for(int i=0 ; i<orgArray.size() ; i++){
+                JSONObject orgObj = (JSONObject) orgArray.get(i);
+
+                Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                        .organizations()
+                        .associateUser(AssociateOrganizationUserRequest.builder()
+                                .organizationId(orgGuid)
+                                .userId(userId)
+                                .build()
+                        ).block();
+
+                if(orgObj.get("om").toString().equals("true")) {
+                    LOGGER.info("om");
+                    AssociateOrganizationManagerResponse associateOrganizationManagerResponse =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .organizations()
+                                    .associateManager( AssociateOrganizationManagerRequest.builder()
+                                            .organizationId( orgGuid ).managerId( userId ).build() )
+                                    .block();
+                }
+                if(orgObj.get("bm").toString().equals("true")) {
+                    LOGGER.info("bm");
+                    AssociateOrganizationBillingManagerResponse associateOrganizationBillingManagerResponse =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .organizations()
+                                    .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
+                                            .organizationId( orgGuid ).billingManagerId( userId ).build() )
+                                    .block();
+                }
+                if(orgObj.get("oa").toString().equals("true")) {
+                    LOGGER.info("oa");
+                    AssociateOrganizationAuditorResponse associateOrganizationAuditorResponse =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .organizations()
+                                    .associateAuditor( AssociateOrganizationAuditorRequest.builder()
+                                            .organizationId( orgGuid ).auditorId( userId ).build() )
+                                    .block();
+                }
             }
-            if(orgObj.get("oa").toString().equals("true")) {
-                System.out.println("oa");
-                AssociateOrganizationAuditorResponse associateOrganizationAuditorResponse =
-                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                            .organizations()
-                            .associateAuditor( AssociateOrganizationAuditorRequest.builder()
-                                    .organizationId( orgGuid ).auditorId( userId ).build() )
-                            .block();
-            }
-        }
 
-        JSONArray spaceArray = (JSONArray) jsonObj.get("space");
+            JSONArray spaceArray = (JSONArray) jsonObj.get("space");
 
-        for(int j=0 ; j<spaceArray.size() ; j++){
-            JSONObject spaceObj = (JSONObject) spaceArray.get(j);
-            Set key = spaceObj.keySet();
-            Iterator<String> iter = key.iterator();
+            for(int j=0 ; j<spaceArray.size() ; j++){
+                JSONObject spaceObj = (JSONObject) spaceArray.get(j);
+                Set key = spaceObj.keySet();
+                Iterator<String> iter = key.iterator();
 
-            while(iter.hasNext()) {
-                String keyname = iter.next();
-//                System.out.println("key : "+keyname+" type : "+spaceObj.get(keyname).getClass());
-                JSONArray spaceArray2 = (JSONArray) spaceObj.get(keyname);
-                for(int k=0 ; k<spaceArray2.size() ; k++){
-                    JSONObject spaceObj2 = (JSONObject) spaceArray2.get(k);
+                while(iter.hasNext()) {
+                    String keyname = iter.next();
+                    JSONArray spaceArray2 = (JSONArray) spaceObj.get(keyname);
 
-                    if(spaceObj2.get("sm").toString().equals("true")) {
-                        System.out.println("sm");
-                        AssociateSpaceManagerResponse associateSpaceManagerResponse =
-                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                                    .spaces()
-                                    .associateManager( AssociateSpaceManagerRequest.builder()
-                                            .spaceId( keyname ).managerId( userId ).build() )
-                                    .block();
-                    }
-                    if(spaceObj2.get("sd").toString().equals("true")) {
-                        System.out.println("sd");
-                        AssociateSpaceDeveloperResponse associateSpaceDeveloperResponse =
-                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                                    .spaces()
-                                    .associateDeveloper( AssociateSpaceDeveloperRequest.builder()
-                                            .spaceId( keyname ).developerId( userId ).build() )
-                                    .block();
-                    }
-                    if(spaceObj2.get("sa").toString().equals("true")) {
-                        System.out.println("sa");
-                        AssociateSpaceAuditorResponse associateSpaceAuditorResponse =
-                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                                    .spaces()
-                                    .associateAuditor( AssociateSpaceAuditorRequest.builder()
-                                            .spaceId( keyname ).auditorId( userId ).build() )
-                                    .block();
+                    for(int k=0 ; k<spaceArray2.size() ; k++){
+                        JSONObject spaceObj2 = (JSONObject) spaceArray2.get(k);
+
+                        if(spaceObj2.get("sm").toString().equals("true")) {
+                            LOGGER.info("sm");
+                            AssociateSpaceManagerResponse associateSpaceManagerResponse =
+                                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                            .spaces()
+                                            .associateManager( AssociateSpaceManagerRequest.builder()
+                                                    .spaceId( keyname ).managerId( userId ).build() )
+                                            .block();
+                        }
+                        if(spaceObj2.get("sd").toString().equals("true")) {
+                            LOGGER.info("sd");
+                            AssociateSpaceDeveloperResponse associateSpaceDeveloperResponse =
+                                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                            .spaces()
+                                            .associateDeveloper( AssociateSpaceDeveloperRequest.builder()
+                                                    .spaceId( keyname ).developerId( userId ).build() )
+                                            .block();
+                        }
+                        if(spaceObj2.get("sa").toString().equals("true")) {
+                            LOGGER.info("sa");
+                            AssociateSpaceAuditorResponse associateSpaceAuditorResponse =
+                                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                            .spaces()
+                                            .associateAuditor( AssociateSpaceAuditorRequest.builder()
+                                                    .spaceId( keyname ).auditorId( userId ).build() )
+                                            .block();
+                        }
                     }
                 }
             }
+        } catch(Exception e) {
+            e.printStackTrace();
+            return false;
         }
 
         return true;
