@@ -342,6 +342,13 @@ public class OrgController extends Common {
         }
     }
 
+    @PutMapping(V2_URL + "/orgs/user-roles")
+    public Boolean associateOrgUserRoles2(@RequestBody Map body) {
+
+        orgService.associateOrgUserRole2(body);
+        return true;
+    }
+
 
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////

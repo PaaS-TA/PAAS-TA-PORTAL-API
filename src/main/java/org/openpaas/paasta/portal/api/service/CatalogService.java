@@ -477,32 +477,15 @@ public class CatalogService extends Common {
     /**
      * 카탈로그 앱을 시작한다.
      *
-     * @param param Catalog
+     * @param applicationid applicationid
      * @param token token
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> procCatalogStartApplication(Catalog param,String applicationid, String token) throws Exception {
-//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//        String appName = param.getName();
-//        // START APPLICATION
-//        appService.startApp(new App() {{
-//            setName(appName);
-//        }}, cloudFoundryClient);
-//
-//        // GET APP GUID (FOR TEST CASE)
-//        CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
-//        UUID resultAppGuid = cloudApplication.getMeta().getGuid();
-//
-//        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(token, param.getOrgName(), param.getSpaceName());
-//        cloudFoundryClient.uploadApplication(param.getAppName(), appName, is);
-
-//        Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-//                applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(applicationid).build()).block();
-//
+    private Map<String, Object> procCatalogStartApplication(String applicationid, String token) throws Exception {
   try {
-      Thread.sleep(3000);
-      Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
+      Thread.sleep(500);
+      Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
   }
   catch (Exception e){
       LOGGER.info(e.toString());
@@ -541,8 +524,6 @@ public class CatalogService extends Common {
 
 
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
-
-        LOGGER.info(param.toString());
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
             String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
@@ -552,7 +533,41 @@ public class CatalogService extends Common {
             fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
 
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                return procCatalogStartApplication(param,applicationid, token); //앱 시작
+                return procCatalogStartApplication(applicationid, token); //앱 시작
+            }
+            return new HashMap<String, Object>() {{
+                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+            }};
+        }finally {
+            file.delete();
+        }
+    }
+
+    public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
+        File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
+        try {
+            String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
+            String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
+
+            routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
+            fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
+
+            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
+                procCatalogStartApplication(applicationid, token); //앱 시작
+            }
+            LOGGER.info(param.toString());
+            if(param.getServicePlanList() != null){
+                param.getServicePlanList().forEach(serviceplan -> {
+                    try {
+                        serviceplan.setSpaceId(param.getSpaceId());
+                        if(!serviceplan.getAppGuid().equals("(id_dummy)")){
+                            serviceplan.setAppGuid(applicationid);
+                        }
+                        procCatalogCreateServiceInstanceV2(serviceplan, token);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -628,6 +643,7 @@ public class CatalogService extends Common {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
         });
+        LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + parameterMap + " : " + param.getServicePlan());
         CreateServiceInstanceResponse createserviceinstanceresponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                         serviceInstances().create(
@@ -644,25 +660,6 @@ public class CatalogService extends Common {
             param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
             procCatalogBindService(param, token);
         }
-//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//
-//            String tempParameter = param.getParameter();
-//            if (null == tempParameter || "".equals(tempParameter)) param.setParameter("{}");
-//
-//            ObjectMapper mapper = new ObjectMapper();
-//            Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
-//            });
-//
-//            // CREATE SERVICE INSTANCE
-//            String resultString = customCloudFoundryClient.createServiceV2(param.getServiceInstanceName(), param.getServicePlan(), param.getOrgName(), param.getSpaceName(), parameterMap);
-//
-//            Map<String, Object> tempMap = JsonUtil.convertJsonToMap(resultString);
-//            Map tempSubMap = (Map) tempMap.get("metadata"); // FOR TEST CASE
-//
-//            return new HashMap<String, Object>() {{
-//                put("SERVICE_INSTANCE_GUID", tempSubMap.get("guid"));
-//                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-//            }};
         return createserviceinstanceresponse;
     }
 

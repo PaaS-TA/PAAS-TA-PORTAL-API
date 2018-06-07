@@ -7,7 +7,7 @@ import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.*;
-import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
@@ -15,11 +15,16 @@ import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.uaa.users.User;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserRole;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.ParseException;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -48,6 +53,9 @@ public class OrgService extends Common {
 
     @Autowired
     private SpaceService spaceService;
+
+    @Autowired
+    private CommonService commonService;
 
     @Autowired
     private PasswordGrantTokenProvider adminTokenProvider;
@@ -580,6 +588,7 @@ public class OrgService extends Common {
      * @return
      */
     public AbstractOrganizationResource associateOrgUserRole ( String orgId, String userId, String role, String token ) {
+        System.out.println("=======associateOrgUserRole in!!");
         try {
             final Object lock = blockingQueue.take();
 
@@ -587,11 +596,11 @@ public class OrgService extends Common {
             Objects.requireNonNull( userId, "User Id" );
             Objects.requireNonNull( role, "role" );
 
-            if ( !isOrgManagerUsingToken( orgId, token ) ) {
-                final String username = userService.getUsernameFromToken( token );
-                throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                    "This user is unauthorized to change role for this org : " + username );
-            }
+//            if ( !isOrgManagerUsingToken( orgId, token ) ) {
+//                final String username = userService.getUsernameFromToken( token );
+//                throw new CloudFoundryException( HttpStatus.FORBIDDEN,
+//                    "This user is unauthorized to change role for this org : " + username );
+//            }
 
             final OrgRole roleEnum;
             try {
@@ -818,5 +827,104 @@ public class OrgService extends Common {
             LOGGER.error( "Occured a exception because of canceling organization member...", ex );
             return false;
         }
+    }
+
+    public boolean associateOrgUserRole2(Map body) {
+        Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
+        System.out.println(inviteAcceptMap);
+
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObj = null;
+
+        String orgGuid = inviteAcceptMap.get("orgGuid").toString();
+        String userEmail = inviteAcceptMap.get("userId").toString();
+        String userId = userService.getUserIdByUsername(userEmail);
+
+        try {
+            jsonObj = (JSONObject) jsonParser.parse(inviteAcceptMap.get("role").toString());
+        } catch (org.json.simple.parser.ParseException e) {
+            e.printStackTrace();
+        }
+
+        JSONArray orgArray = (JSONArray) jsonObj.get("org");
+
+        for(int i=0 ; i<orgArray.size() ; i++){
+            JSONObject orgObj = (JSONObject) orgArray.get(i);
+
+            if(orgObj.get("om").toString().equals("true")) {
+                System.out.println("om");
+                AssociateOrganizationManagerResponse associateOrganizationManagerResponse =
+                        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                .organizations()
+                                .associateManager( AssociateOrganizationManagerRequest.builder()
+                                        .organizationId( orgGuid ).managerId( userId ).build() )
+                                .block();
+            }
+            if(orgObj.get("bm").toString().equals("true")) {
+                System.out.println("bm");
+                AssociateOrganizationBillingManagerResponse associateOrganizationBillingManagerResponse =
+                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                            .organizations()
+                            .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
+                                    .organizationId( orgGuid ).billingManagerId( userId ).build() )
+                            .block();
+            }
+            if(orgObj.get("oa").toString().equals("true")) {
+                System.out.println("oa");
+                AssociateOrganizationAuditorResponse associateOrganizationAuditorResponse =
+                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                            .organizations()
+                            .associateAuditor( AssociateOrganizationAuditorRequest.builder()
+                                    .organizationId( orgGuid ).auditorId( userId ).build() )
+                            .block();
+            }
+        }
+
+        JSONArray spaceArray = (JSONArray) jsonObj.get("space");
+
+        for(int j=0 ; j<spaceArray.size() ; j++){
+            JSONObject spaceObj = (JSONObject) spaceArray.get(j);
+            Set key = spaceObj.keySet();
+            Iterator<String> iter = key.iterator();
+
+            while(iter.hasNext()) {
+                String keyname = iter.next();
+//                System.out.println("key : "+keyname+" type : "+spaceObj.get(keyname).getClass());
+                JSONArray spaceArray2 = (JSONArray) spaceObj.get(keyname);
+                for(int k=0 ; k<spaceArray2.size() ; k++){
+                    JSONObject spaceObj2 = (JSONObject) spaceArray2.get(k);
+
+                    if(spaceObj2.get("sm").toString().equals("true")) {
+                        System.out.println("sm");
+                        AssociateSpaceManagerResponse associateSpaceManagerResponse =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .spaces()
+                                    .associateManager( AssociateSpaceManagerRequest.builder()
+                                            .spaceId( keyname ).managerId( userId ).build() )
+                                    .block();
+                    }
+                    if(spaceObj2.get("sd").toString().equals("true")) {
+                        System.out.println("sd");
+                        AssociateSpaceDeveloperResponse associateSpaceDeveloperResponse =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .spaces()
+                                    .associateDeveloper( AssociateSpaceDeveloperRequest.builder()
+                                            .spaceId( keyname ).developerId( userId ).build() )
+                                    .block();
+                    }
+                    if(spaceObj2.get("sa").toString().equals("true")) {
+                        System.out.println("sa");
+                        AssociateSpaceAuditorResponse associateSpaceAuditorResponse =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .spaces()
+                                    .associateAuditor( AssociateSpaceAuditorRequest.builder()
+                                            .spaceId( keyname ).auditorId( userId ).build() )
+                                    .block();
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }
