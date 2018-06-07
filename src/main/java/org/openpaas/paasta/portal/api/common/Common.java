@@ -18,6 +18,8 @@ import org.cloudfoundry.reactor.tokenprovider.ClientCredentialsGrantTokenProvide
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.UaaClient;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
@@ -407,6 +409,19 @@ public class Common {
                 .clientSecret(clientSecret)
                 .build()
         ).build();
+    }
+
+    // UAA Admin Client
+    public static ReactorUaaClient uaaAdminClient(String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
+        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
+        GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse =
+                reactorUaaClient.tokens().getByClientCredentials(
+                        GetTokenByClientCredentialsRequest.builder()
+                                .clientId(uaaAdminClientId)
+                                .clientSecret(uaaAdminClientSecret)
+                                .build())
+                        .block();
+        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
 
     private static final ThreadLocal<DefaultConnectionContext> connectionContextThreadLocal = new ThreadLocal<>();

@@ -30,15 +30,12 @@ public class ClientService extends Common {
 
     //V2
     public ListClientsResponse getClientList() throws Exception {
-
-        return Common.uaaClient(connectionContext(),"yschoi2" ,"1qaz@WSX" )
-                        .clients()
-                        .list(ListClientsRequest.builder()
-                                .build())
-                        .log()
-                        .block();
-        /* ERROR io.netty.util.ResourceLeakDetector - LEAK: ByteBuf.release() was not called before it's garbage-collected. */
-        //ListClientsResponse listClientsResponse = Common.cloudFoundryOperations(connectionContext(), tokenProvider(token)).getUaaClient().clients().list(ListClientsRequest.builder().build()).block();
+        return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
+                .clients()
+                .list(ListClientsRequest.builder()
+                        .build())
+                .log()
+                .block();
     }
 
     /**
@@ -49,11 +46,11 @@ public class ClientService extends Common {
      * @throws Exception the exception
      */
     public GetClientResponse getClient(String clientId) throws Exception {
-        return Common.uaaClient(connectionContext(),"yschoi2" ,"1qaz@WSX" )
+        return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
                 .get(GetClientRequest.builder()
-                    .clientId(clientId)
-                    .build()
+                        .clientId(clientId)
+                        .build()
                 ).log()
                 .block();
     }
@@ -66,58 +63,29 @@ public class ClientService extends Common {
      * @throws Exception the exception
      */
     public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
-        // authorizedGrantTypes
-        List<GrantType> authorizedGrantTypesList = new ArrayList<>();
 
-        Iterator<String> keys = param.keySet().iterator();
-        while( keys.hasNext() ){
-            String key = keys.next();
-            Object value = param.get(key);
-            LOGGER.info( "key : " + key + ", value : " + value);
+        ClientService.ClientOption clientOption = new ClientService.ClientOption();
+        clientOption = clientOption.setClientOptionByMap(param);
 
-            //authorizedGrantTypes
-            if(key.equals("authorized_grant_types")){
-                if( value.getClass().equals(ArrayList.class)) {
-                    for(Object obj :  (ArrayList)value){
-                        switch ((String)obj) {
-                            case "client_credentials":
-                                authorizedGrantTypesList.add(GrantType.CLIENT_CREDENTIALS);
-                                break;
-                            case "authorization_code":
-                                authorizedGrantTypesList.add(GrantType.AUTHORIZATION_CODE);
-                                break;
-                            case "implicit":
-                                authorizedGrantTypesList.add(GrantType.IMPLICIT);
-                                break;
-                            case "password":
-                                authorizedGrantTypesList.add(GrantType.PASSWORD);
-                                break;
-                            case "refresh_token":
-                                authorizedGrantTypesList.add(GrantType.REFRESH_TOKEN);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+        LOGGER.info(clientOption.toString());
 
-        // Client ID
-        String clientId = (String)param.get("client_id");
-        // Client Secret
-        String clientSecret = (String)param.get("client_secret");
-
-        return Common.uaaClient(connectionContext(),"yschoi2" ,"1qaz@WSX" )
+        return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
                 .create(CreateClientRequest.builder()
-                    .clientId(clientId)
-                    .clientSecret(clientSecret)
-                    //.redirectUriPattern("http://aaaa/*")
-                    .scope("")
-                    //.scopes()
-                    .authorizedGrantTypes(authorizedGrantTypesList)
-                    .build()
+                        .clientId(clientOption.clientId)
+                        .clientSecret(clientOption.clientSecret)
+                        .name(clientOption.name)
+                        .scopes(clientOption.scopes)
+                        .authorities(clientOption.authorities)
+                        .resourceIds(clientOption.resourceIds)
+                        .authorizedGrantTypes(clientOption.authorizedGrantTypes)
+                        .redirectUriPatterns(clientOption.redirectUriPatterns)
+                        .autoApproves(clientOption.autoApproves)
+                        .tokenSalt(clientOption.tokenSalt)
+                        .allowedProviders(clientOption.allowedProviders)
+                        .accessTokenValidity(clientOption.accessTokenValidity)
+                        .refreshTokenValidity(clientOption.refreshTokenValidity)
+                        .build()
                 ).log()
                 .block();
     }
@@ -130,11 +98,29 @@ public class ClientService extends Common {
      * @throws Exception the exception
      */
     public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
-        return Common.uaaClient(connectionContext(),"yschoi2" ,"1qaz@WSX" )
+
+        ClientService.ClientOption clientOption = new ClientService.ClientOption();
+        clientOption = clientOption.setClientOptionByMap(param);
+
+        LOGGER.info(clientOption.toString());
+
+        //Secret, Token Validity 는 생성 이후 수정 불가
+        return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
                 .update(UpdateClientRequest.builder()
-                    .authority()
-                        .autoApprove()
+                        .clientId(clientOption.clientId)
+                        //.clientSecret(clientOption.clientSecret)
+                        .name(clientOption.name)
+                        .scopes(clientOption.scopes)
+                        .authorities(clientOption.authorities)
+                        .resourceIds(clientOption.resourceIds)
+                        .authorizedGrantTypes(clientOption.authorizedGrantTypes)
+                        .redirectUriPatterns(clientOption.redirectUriPatterns)
+                        .autoApproves(clientOption.autoApproves)
+                        .tokenSalt(clientOption.tokenSalt)
+                        .allowedProviders(clientOption.allowedProviders)
+                        //.accessTokenValidity(clientOption.accessTokenValidity)
+                        //.refreshTokenValidity(clientOption.refreshTokenValidity)
                         .build()
                 ).log()
                 .block();
@@ -148,7 +134,7 @@ public class ClientService extends Common {
      * @throws Exception the exception
      */
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
-        return Common.uaaClient(connectionContext(),"yschoi2" ,"1qaz@WSX" )
+        return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
                 .delete(DeleteClientRequest.builder()
                         .clientId(clientId)
@@ -157,4 +143,168 @@ public class ClientService extends Common {
                 .block();
     }
 
+    /**
+     * ClientOption Inner Class
+     * Client 생성/수정시 사용되는 Client Option 객체를 생성하기 위한 Inner Class
+     *
+     * @author CISS
+     * @version 1.0
+     * @since 2018.6.7 최초작성
+     */
+    private class ClientOption{
+
+        private List<GrantType> authorizedGrantTypes;
+        private List<String> authorities;
+        private List<String> scopes;
+        private List<String> resourceIds;
+        private String name;
+        private String clientId;
+        private String clientSecret;
+        private List<String> redirectUriPatterns;
+        private List<String> autoApproves;
+        private String tokenSalt;
+        private List<String> allowedProviders;
+        private long accessTokenValidity;
+        private long refreshTokenValidity;
+
+        /**
+         * 클라리언트 옵션 Set
+         * Map 으로 받은 Client Option 을 CreateClientRequest Argument 에 맞게 파싱처리
+         *
+         * @return Map map
+         * @see //docs.cloudfoundry.org/api/uaa/version/4.12.0/#create-6
+         */
+        public ClientOption setClientOptionByMap(Map<String, Object> param){
+
+            this.authorizedGrantTypes    = new ArrayList<>();
+            this.authorities             = new ArrayList<>();
+            this.scopes                  = new ArrayList<>();
+            this.resourceIds             = new ArrayList<>();
+            this.name                    = "";
+            this.clientId                = "";
+            this.clientSecret            = "";
+            this.redirectUriPatterns     = new ArrayList<>();
+            this.autoApproves            = new ArrayList<>();
+            this.tokenSalt               = "";
+            this.allowedProviders        = new ArrayList<>();
+            this.accessTokenValidity     = 0;
+            this.refreshTokenValidity    = 0;
+
+            Iterator<String> keys = param.keySet().iterator();
+            while( keys.hasNext() ){
+
+                String key = keys.next();
+                Object value = param.get(key);
+                //LOGGER.info( "key : " + key + ", value : " + value);
+
+                // Client ID
+                if(key.equals("client_id")) {
+                    clientId = (String)value;
+                }
+
+                // Client Secret
+                if(key.equals("client_secret")) {
+                    clientSecret = (String)value;
+                }
+
+                //authorizedGrantTypes
+                if(key.equals("authorized_grant_types")){
+                    if( value.getClass().equals(ArrayList.class)) {
+                        for(Object obj :  (ArrayList)value){
+                            switch ((String)obj) {
+                                case "client_credentials":
+                                    authorizedGrantTypes.add(GrantType.CLIENT_CREDENTIALS);
+                                    continue;
+                                case "authorization_code":
+                                    authorizedGrantTypes.add(GrantType.AUTHORIZATION_CODE);
+                                    continue;
+                                case "implicit":
+                                    authorizedGrantTypes.add(GrantType.IMPLICIT);
+                                    continue;
+                                case "password":
+                                    authorizedGrantTypes.add(GrantType.PASSWORD);
+                                    continue;
+                                case "refresh_token":
+                                    authorizedGrantTypes.add(GrantType.REFRESH_TOKEN);
+                                    continue;
+                                default:
+                                    continue;
+                            }
+                        }
+                    }
+                }
+
+                // List Item proc
+                if(key.equals("authorities") || key.equals("scope") || key.equals("resource_ids")
+                        || key.equals("redirect_uri") || key.equals("autoapprove") || key.equals("allowedproviders ")
+                        || key.equals("name")
+                        ){
+                    if( value.getClass().equals(ArrayList.class)) {
+
+                        for (Object obj : (ArrayList) value) {
+                            switch (key) {
+                                case "authorities": // authorities
+                                    authorities.add((String)obj);
+                                    continue;
+                                case "scope": // scope
+                                    scopes.add((String)obj);
+                                    continue;
+                                case "resource_ids": // resourceIds
+                                    resourceIds.add((String)obj);
+                                    continue;
+                                case "redirect_uri": // redirectUriPatterns
+                                    redirectUriPatterns.add((String)obj);
+                                    continue;
+                                case "autoapprove": // autoApproves
+                                    autoApproves.add((String)obj);
+                                    continue;
+                                case "allowedproviders": // allowedProviders
+                                    allowedProviders.add((String)obj);
+                                    continue;
+                                // 아래부터는 단건이지만 Front에서 List로 전달하고 있음
+                                case "name": // name
+                                    name = (String)obj;
+                                    break;
+                                case "token_salt": // tokenSalt
+                                    tokenSalt = (String)obj;
+                                    break;
+                                case "access_token_validity": // accessTokenValidity(unit: seconds)
+                                    accessTokenValidity = Long.parseLong((String)obj);
+                                    break;
+                                case "refresh_token_validity": // refreshTokenValidity(unit: seconds)
+                                    refreshTokenValidity = Long.parseLong((String)obj) ;
+                                    break;
+                                default:
+                                    continue;
+                            }
+
+                        }
+                    }
+                }
+
+            }
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return "ClientOption{"
+                    + "authorizedGrantTypes=" + authorizedGrantTypes
+                    + ", authorities=" + authorities
+                    + ", scopes=" + scopes
+                    + ", resourceIds=" + resourceIds
+                    + ", name=" + name
+                    + ", clientId=" + clientId
+                    + ", clientSecret=" + clientSecret
+                    + ", redirectUriPatterns=" + redirectUriPatterns
+                    + ", autoApproves=" + autoApproves
+                    + ", tokenSalt=" + tokenSalt
+                    + ", allowedProviders=" + allowedProviders
+                    + ", accessTokenValidity=" + accessTokenValidity
+                    + ", refreshTokenValidity=" + refreshTokenValidity
+                    + "}";
+        }
+    }
+
 }
+
