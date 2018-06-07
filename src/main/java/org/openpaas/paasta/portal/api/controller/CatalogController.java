@@ -210,6 +210,20 @@ public class CatalogController extends Common {
     }
 
     /**
+     * 앱 템플릿을 생성한다.
+     *
+     * @param param Catalog(모델클래스)
+     * @param token,token2   HttpServletRequest(자바클래스)
+     * @param response   HttpServletResponse(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    @PostMapping(Constants.V2_URL+"/catalogs/apptemplate")
+    public Map<String, Object> createAppTemplate(@RequestBody Catalog param,   @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws  Exception{
+        return catalogService.createAppTemplate(param, token, token2, response);
+    }
+
+    /**
      * 서비스 전체 목록을 가져온다.
      *
      * @return ListServicesResponse
