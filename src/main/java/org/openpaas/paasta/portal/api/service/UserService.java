@@ -1,6 +1,8 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.v2.users.GetUserRequest;
+import org.cloudfoundry.client.v2.users.GetUserResponse;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
@@ -105,7 +107,7 @@ public class UserService extends Common {
     /**
      * 사용자 패스워드를 변경한다.
      *
-     * @param userId    the user id
+     * @param userId      the user id
      * @param oldPassword the user id
      * @param newPassword the user id
      * @return UserDetail user
@@ -120,7 +122,7 @@ public class UserService extends Common {
         Map result = new HashMap();
         try {
 
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(userId,oldPassword));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(userId, oldPassword));
             UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).block();
             ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userInfoResponse.getUserId()).oldPassword(oldPassword).password(newPassword).build()).block();
             LOGGER.info("updateUserPassword status :: " + changeUserPasswordResponse.getStatus());
@@ -218,9 +220,10 @@ public class UserService extends Common {
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(this.getToken()));
-            reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build());
+            DeleteUserResponse deleteUserResponse = reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
+
         } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);
@@ -231,13 +234,12 @@ public class UserService extends Common {
     }
 
     public String getUsernameFromToken(String token) {
-        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token))
-            .getUsername().block();
+        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token)).getUsername().block();
     }
 
     public User getUser(String token) {
-        final String userName = getUsernameFromToken( token );
-        return this.getUserSummaryByUsername( userName );
+        final String userName = getUsernameFromToken(token);
+        return this.getUserSummaryByUsername(userName);
     }
 
     /**
@@ -245,13 +247,12 @@ public class UserService extends Common {
      *
      * @return 삭제 정보
      */
-    public UserInfoResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
-        // COMMENT : userGuid를 사용해서 사용자를 조회하는게 필요한데 구현을 못한건가요? (by hgcho)
-        LOGGER.info("getUser ::: ");
-        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
-        UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).block();
+    public GetUserResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
 
-        return userInfoResponse;
+        LOGGER.info("getUser ::: ");
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()));
+        GetUserResponse getUserResponse = cloudFoundryClient.users().get(GetUserRequest.builder().userId(userGuid).build()).block();
+        return getUserResponse;
     }
 
 
@@ -272,73 +273,6 @@ public class UserService extends Common {
             return null;
         }
 
-    }
-
-
-    /**
-     * role에 따른 조직 및 영역 조회
-     *
-     * @param keyOfRole the key of role
-     * @param token     the token
-     * @return Map  <p> keyOfRole값을 파라미터로 보내 유저가 해당 role을 가지고 있는 모든 org 또는 space 정보를 가져온다. ex: 'managed_organizations' 을 입력하여 해당 유저가 Org Manager role을 가지고 있는 모든 org를 확인할 수 있다. <p> 조직 role           keyOfRole 값 ORG MANAGER:        managed_organizations BILLING MANAGER:    billing_managed_organizations ORG AUDITOR:        audited_organizations ORG USER:           organizations <p> 영역 role SPACE MANAGER:      managed_spaces SPACE DEVELOPER:    spaces SPACE AUDITOR:      audited_spaces
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.6.9 최초작성
-     */
-    public List getListForTheUser(String keyOfRole, String token) throws Exception {
-
-        List<Map> listOrgOrSpace = new ArrayList<>();
-
-//        switch (keyOfRole) {
-//            case "managed_organizations":
-//                break;
-//            case "billing_managed_organizations":
-//                break;
-//            case "audited_organizations":
-//                break;
-//            case "organizations":
-//                break;
-//            case "managed_spaces":
-//                break;
-//            case "spaces":
-//                break;
-//            case "audited_spaces":
-//                break;
-//            default:
-//                throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Requested parameter is invalid");
-//        }
-//
-//        CustomCloudFoundryClient admin = getCustomCloudFoundryClient(adminUserName, adminPassword);
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-//
-//        String userGuid = client.getUserGuid();
-//
-//        Map<String, Object> allOrgOrSpace = admin.listAllOrgOrSpaceForTheUser(userGuid, keyOfRole);
-//
-//        //to return
-//        List<Map> resources = (List) allOrgOrSpace.get("resources");
-//
-//        if (keyOfRole.contains("organizations")) {
-//            for (Map<String, Map> resource : resources) {
-//                Map entityMap = new HashMap();
-//                entityMap.put("orgName", resource.get("entity").get("name"));
-//                entityMap.put("created", resource.get("metadata").get("created_at"));
-//                entityMap.put("updated", resource.get("metadata").get("updated_at"));
-//                listOrgOrSpace.add(entityMap);
-//            }
-//        } else if (keyOfRole.contains("spaces")) {
-//            for (Map<String, Map> resource : resources) {
-//                Map entityMap = new HashMap();
-//                entityMap.put("spaceName", resource.get("entity").get("name"));
-//                entityMap.put("created", resource.get("metadata").get("created_at"));
-//                entityMap.put("updated", resource.get("metadata").get("updated_at"));
-//                listOrgOrSpace.add(entityMap);
-//            }
-//        }
-//        LOGGER.info(listOrgOrSpace.toString());
-
-        return listOrgOrSpace;
     }
 
 
@@ -399,8 +333,7 @@ public class UserService extends Common {
     }
 
     private User getUserSummaryWithFilter(UaaUserLookupFilterType filterType, String filterValue) {
-        final ListUsersResponse response = Common.uaaClient(connectionContext, adminTokenProvider).users()
-            .list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
+        final ListUsersResponse response = Common.uaaClient(connectionContext, adminTokenProvider).users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
         if (response.getResources().size() <= 0)
             throw new CloudFoundryException(HttpStatus.NOT_FOUND, (filterType.name() + " of user cannot find"));
 
