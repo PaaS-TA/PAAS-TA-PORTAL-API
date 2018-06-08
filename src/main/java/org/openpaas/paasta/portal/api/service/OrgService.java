@@ -834,6 +834,7 @@ public class OrgService extends Common {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
             LOGGER.info(inviteAcceptMap.toString());
 
+            String id = inviteAcceptMap.get("id").toString();
             String orgGuid = inviteAcceptMap.get("orgGuid").toString();
             String userEmail = inviteAcceptMap.get("userId").toString();
             String userId = userService.getUserIdByUsername(userEmail);
@@ -933,6 +934,10 @@ public class OrgService extends Common {
                     }
                 }
             }
+
+            inviteAcceptMap.put("gubun", "success");
+
+            Map<String, Object> inviteAcceptUpdateMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAcceptUpdate", HttpMethod.POST, inviteAcceptMap, null);
         } catch(Exception e) {
             e.printStackTrace();
             return false;
