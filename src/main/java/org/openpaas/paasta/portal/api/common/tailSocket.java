@@ -19,7 +19,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 /**
  * Created by indra on 2018-05-09.
@@ -62,9 +65,30 @@ public class tailSocket implements CommandLineRunner {
             if (active.equals("local")) {
                 hostName = "localhost";
             } else if (active.equals("dev")) {
-                LOGGER.info("InetAddress.getLocalHost().getHostName()=" + InetAddress.getLocalHost().getHostName());
-                LOGGER.info("InetAddress.getLocalHost().getHostAddress()=" + InetAddress.getLocalHost().getHostAddress());
+
                 hostName = InetAddress.getLocalHost().getHostAddress();
+                try {
+
+                    Enumeration<NetworkInterface> nienum = NetworkInterface.getNetworkInterfaces();
+                    while (nienum.hasMoreElements()) {
+                        NetworkInterface ni = nienum.nextElement();
+                        Enumeration<InetAddress> kk = ni.getInetAddresses();
+                        while (kk.hasMoreElements()) {
+                            InetAddress inetAddress = kk.nextElement();
+                            if (!inetAddress.isLoopbackAddress() &&
+                                    !inetAddress.isLinkLocalAddress() &&
+                                    inetAddress.isSiteLocalAddress()) {
+                                hostName = inetAddress.getHostAddress().toString();
+                            }
+                        }
+                    }
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+
+                LOGGER.info("InetAddress.getLocalHost().getHostAddress()=" + hostName);
+
+
             } else {
                 hostName = "localhost";
             }
