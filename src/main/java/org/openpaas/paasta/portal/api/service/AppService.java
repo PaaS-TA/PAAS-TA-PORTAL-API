@@ -144,8 +144,11 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    public void startApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map startApp(App app, String token) throws Exception {
+        Map resultMap = new HashMap();
+
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
 //        cloudFoundryClient.applicationsV3()
 //                .start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder()
@@ -155,10 +158,18 @@ public class AppService extends Common {
 
 //        cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state(CloudApplication.AppState.STARTED.toString()).build()).block();
 
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-        cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
+            DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+            cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
 
 //        Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
 
@@ -169,17 +180,28 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    public void stopApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map stopApp(App app, String token) throws Exception {
+        Map resultMap = new HashMap();
 
-        cloudFoundryClient.applicationsV3()
-                .stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder()
-                        .applicationId(app.getGuid().toString())
-                        .build()
-                ).block();
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+            cloudFoundryClient.applicationsV3()
+                    .stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder()
+                            .applicationId(app.getGuid().toString())
+                            .build()
+                    ).block();
 
 //        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
 //        cloudFoundryOperations.applications().stop(StopApplicationRequest.builder().name(app.getName()).build());
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
 
@@ -228,17 +250,29 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    public void restageApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map restageApp(App app, String token) throws Exception {
+        Map resultMap = new HashMap();
 
-        cloudFoundryClient.applicationsV2()
-                .restage(RestageApplicationRequest.builder()
-                        .applicationId(app.getGuid().toString())
-                        .build()
-                ).block();
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+            cloudFoundryClient.applicationsV2()
+                    .restage(RestageApplicationRequest.builder()
+                            .applicationId(app.getGuid().toString())
+                            .build()
+                    ).block();
 
 //        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
 //        cloudFoundryOperations.applications().restage(RestageApplicationRequest.builder().name(app.getName()).build());
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
     /**
@@ -248,23 +282,35 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    public void updateApp(App app, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
-        if (app.getInstances() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build()).block();
+    public Map updateApp(App app, String token) throws Exception {
+        Map resultMap = new HashMap();
+
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            if (app.getInstances() > 0) {
+                cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build()).block();
+            }
+            if (app.getMemory() > 0) {
+                cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).memory(app.getMemory()).build()).block();
+            }
+            if (app.getDiskQuota() > 0) {
+                cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build()).block();
+            }
+            if (app.getName() != null && !app.getName().equals("")) {
+                cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getName()).build()).block();
+            }
+            if (app.getEnvironment() != null && app.getEnvironment().size() > 0) {
+                cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(app.getEnvironment()).build()).block();
+            }
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
         }
-        if (app.getMemory() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).memory(app.getMemory()).build()).block();
-        }
-        if (app.getDiskQuota() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).diskQuota(app.getDiskQuota()).build()).block();
-        }
-        if (app.getName() != null && !app.getName().equals("")) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getName()).build()).block();
-        }
-        if (app.getEnvironment() != null && app.getEnvironment().size() > 0) {
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(app.getEnvironment()).build()).block();
-        }
+
+        return resultMap;
     }
 
     /**
@@ -274,23 +320,35 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    public void bindService(Map body, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map bindService(Map body, String token) throws Exception {
+        Map resultMap = new HashMap();
 
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> parameterMap = mapper.readValue(body.get("parameter").toString(), new TypeReference<Map<String, Object>>() {
-        });
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        cloudFoundryClient.serviceBindingsV2()
-                .create(CreateServiceBindingRequest.builder()
-                        .applicationId(body.get("applicationId").toString())
-                        .serviceInstanceId(body.get("serviceInstanceId").toString())
-                        .parameters(parameterMap)
-                        .build()
-                ).block();
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> parameterMap = mapper.readValue(body.get("parameter").toString(), new TypeReference<Map<String, Object>>() {
+            });
+
+            cloudFoundryClient.serviceBindingsV2()
+                    .create(CreateServiceBindingRequest.builder()
+                            .applicationId(body.get("applicationId").toString())
+                            .serviceInstanceId(body.get("serviceInstanceId").toString())
+                            .parameters(parameterMap)
+                            .build()
+                    ).block();
+
+            resultMap.put("result", true);
 
 //        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
 //        cloudFoundryOperations.services().bind(BindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
 
@@ -302,27 +360,39 @@ public class AppService extends Common {
      * @param token             the client
      * @throws Exception the exception
      */
-    public void unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
+        Map resultMap = new HashMap();
 
-        ListServiceInstanceServiceBindingsResponse listServiceInstanceServiceBindingsResponse =
-                cloudFoundryClient.serviceInstances()
-                        .listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder()
-                                .applicationId(applicationId)
-                                .serviceInstanceId(serviceInstanceId)
-                                .build()
-                        ).block();
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
+            ListServiceInstanceServiceBindingsResponse listServiceInstanceServiceBindingsResponse =
+                    cloudFoundryClient.serviceInstances()
+                            .listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder()
+                                    .applicationId(applicationId)
+                                    .serviceInstanceId(serviceInstanceId)
+                                    .build()
+                            ).block();
 
-        DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2()
-                .delete(DeleteServiceBindingRequest.builder()
-                        .serviceBindingId(instancesServiceBindingGuid)
-                        .build()
-                ).block();
+            String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
+
+            DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2()
+                    .delete(DeleteServiceBindingRequest.builder()
+                            .serviceBindingId(instancesServiceBindingGuid)
+                            .build()
+                    ).block();
+
+            resultMap.put("result", true);
 
 //        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
 //        cloudFoundryOperations.services().unbind(UnbindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
     /**
@@ -452,7 +522,7 @@ public class AppService extends Common {
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("result", false);
-            resultMap.put("message", e);
+            resultMap.put("msg", e);
         }
 
         return resultMap;
@@ -470,53 +540,34 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    public boolean removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
+        Map resultMap = new HashMap();
 
-        cloudFoundryClient.applicationsV2()
-                .removeRoute(
-                        RemoveApplicationRouteRequest.builder()
-                                .applicationId(guid)
-                                .routeId(route_guid)
-                                .build()
-                ).block();
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        cloudFoundryClient.routes()
-                .delete(DeleteRouteRequest.builder()
-                        .routeId(route_guid)
-                        .build()
-                ).block();
+            cloudFoundryClient.applicationsV2()
+                    .removeRoute(
+                            RemoveApplicationRouteRequest.builder()
+                                    .applicationId(guid)
+                                    .routeId(route_guid)
+                                    .build()
+                    ).block();
 
+            cloudFoundryClient.routes()
+                    .delete(DeleteRouteRequest.builder()
+                            .routeId(route_guid)
+                            .build()
+                    ).block();
 
-//        cloudFoundryClient.routeMappings()
-//                .delete(DeleteRouteMappingRequest.builder()
-//                        .routeMappingId(body.get("routeMappingId").toString())
-//                        .build()
-//                ).block();
-//
-//        cloudFoundryClient.routes()
-//                .delete(DeleteRouteRequest.builder()
-//                        .routeId(body.get("routeId").toString())
-//                        .build()
-//                ).block();
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
 
-
-//        String orgName = app.getOrgName();
-//        String spaceName = app.getSpaceName();
-//        String appName = app.getName();
-//        String host = app.getHost();
-//        String domainName = app.getDomainName();
-//
-//        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-//        }
-//
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-//
-//        client.unbindRoute(host, domainName, appName);
-//        client.deleteRoute(host, domainName);
-
-        return true;
+        return resultMap;
     }
 
     /**
@@ -542,16 +593,28 @@ public class AppService extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    public void terminateInstance(String guid, String index, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map terminateInstance(String guid, String index, String token) throws Exception {
+        Map resultMap = new HashMap();
 
-        TerminateApplicationInstanceRequest.Builder requestBuilder = TerminateApplicationInstanceRequest.builder();
-        requestBuilder.applicationId(guid);
-        requestBuilder.index(index);
-        cloudFoundryClient.applicationsV2().terminateInstance(requestBuilder.build()).block();
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+            TerminateApplicationInstanceRequest.Builder requestBuilder = TerminateApplicationInstanceRequest.builder();
+            requestBuilder.applicationId(guid);
+            requestBuilder.index(index);
+            cloudFoundryClient.applicationsV2().terminateInstance(requestBuilder.build()).block();
+
+            resultMap.put("result", true);
 
 //        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(AUTHORIZATION_HEADER_KEY), param.getOrgName(), param.getSpaceName());
 //        customCloudFoundryClient.terminateAppInstanceByIndex(param.getGuid(), param.getAppInstanceIndex(), param.getOrgName(), param.getSpaceName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
 
