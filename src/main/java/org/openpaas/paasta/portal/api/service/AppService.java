@@ -127,10 +127,10 @@ public class AppService extends Common {
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
-        e.printStackTrace();
-        result.put("result", false);
-        result.put("msg", e.getMessage());
-    }
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
 
         return result;
 
@@ -426,59 +426,36 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    public boolean addApplicationRoute(Map body, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
-//        ReactorDopplerClient reactorDopplerClient  = Common.dopplerClient(connectionContext(), tokenProvider(token));
+    public Map addApplicationRoute(Map body, String token) throws Exception {
+        Map resultMap = new HashMap();
 
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-        CreateRouteResponse createRouteResponse =
-                cloudFoundryClient.routes()
-                        .create(CreateRouteRequest.builder()
-                                .host(body.get("host").toString())
-                                .domainId(body.get("domainId").toString())
-                                .spaceId(body.get("spaceId").toString())
-                                .build()
-                        ).block();
+            CreateRouteResponse createRouteResponse =
+                    cloudFoundryClient.routes()
+                            .create(CreateRouteRequest.builder()
+                                    .host(body.get("host").toString())
+                                    .domainId(body.get("domainId").toString())
+                                    .spaceId(body.get("spaceId").toString())
+                                    .build()
+                            ).block();
 
-        cloudFoundryClient.routeMappings()
-                .create(CreateRouteMappingRequest.builder()
-                        .applicationId(body.get("applicationId").toString())
-                        .routeId(createRouteResponse.getMetadata().getId())
-                        .build()
-                ).block();
+            cloudFoundryClient.routeMappings()
+                    .create(CreateRouteMappingRequest.builder()
+                            .applicationId(body.get("applicationId").toString())
+                            .routeId(createRouteResponse.getMetadata().getId())
+                            .build()
+                    ).block();
 
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("message", e);
+        }
 
-//        cloudFoundryClient.routes()
-//                .associateApplication(AssociateRouteApplicationRequest.builder()
-//                        .applicationId("")
-//                        .routeId("")
-//                        .build()
-//                ).block();
-
-//                AssociateApplicationRouteResponse associateApplicationRouteResponse =
-//                cloudFoundryClient.applicationsV2()
-//                        .associateRoute(AssociateApplicationRouteRequest.builder()
-//                                .applicationId("")
-//                                .routeId("")
-//                                .build()
-//                        ).block();
-
-
-//        String orgName = app.getOrgName();
-//        String spaceName = app.getSpaceName();
-//        String appName = app.getName();
-//        String host = app.getHost();
-//        String domainName = app.getDomainName();
-//
-//        if (!stringNullCheck(orgName, spaceName, appName, host, domainName)) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-//        }
-//
-//        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token, orgName, spaceName);
-//
-//        client.bindRoute(host, domainName, appName);
-
-        return true;
+        return resultMap;
     }
 
     /**

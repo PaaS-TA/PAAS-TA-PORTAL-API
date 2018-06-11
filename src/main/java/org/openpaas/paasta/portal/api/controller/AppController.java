@@ -359,14 +359,14 @@ public class AppController extends Common {
      * @since 2016.7.6 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/routes"}, method = RequestMethod.POST)
-    public boolean addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
+    public Map addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
 
-        appService.addApplicationRoute(body, this.getToken());
+        Map resultMap = appService.addApplicationRoute(body, this.getToken());
 
         LOGGER.info("addApplicationRoute End ");
 
-        return true;
+        return resultMap;
     }
 
 
