@@ -164,13 +164,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V3_URL + "/apps/startApp"}, method = RequestMethod.POST)
-    public boolean startApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map startApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("startApp Start ");
 
-        appService.startApp(app, this.getToken());
+        Map resultMap = appService.startApp(app, this.getToken());
 
         LOGGER.info("startApp End ");
-        return true;
+        return resultMap;
     }
 
 
@@ -183,13 +183,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V3_URL + "/apps/stopApp"}, method = RequestMethod.POST)
-    public boolean stopApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map stopApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("stopApp Start ");
 
-        appService.stopApp(app, this.getToken());
+        Map resultMap = appService.stopApp(app, this.getToken());
 
         LOGGER.info("stopApp End ");
-        return true;
+        return resultMap;
     }
 
 
@@ -202,13 +202,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/restageApp"}, method = RequestMethod.POST)
-    public boolean restageApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map restageApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("restageApp Start ");
 
-        appService.restageApp(app, this.getToken());
+        Map resultMap = appService.restageApp(app, this.getToken());
 
         LOGGER.info("restageApp End ");
-        return true;
+        return resultMap;
     }
 
 
@@ -221,27 +221,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/updateApp"}, method = RequestMethod.POST)
-    public boolean updateApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map updateApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+        LOGGER.info("updateApp Start ");
 
-        ApplicationStats applicationStats = null;
-
-
-        LOGGER.info("updateApp Start : " + app.getGuid());
-        LOGGER.info("getInstances : " + app.getInstances());
-        LOGGER.info("getMemory : " + app.getMemory());
-        LOGGER.info("getDiskQuota : " + app.getDiskQuota());
-        LOGGER.info("getName : " + app.getName());
-        LOGGER.info("getEnvironment : " + app.getEnvironment());
-
-        //token setting
-        //CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-
-        //service call
-        appService.updateApp(app, this.getToken());
+        Map resultMap = appService.updateApp(app, this.getToken());
 
         LOGGER.info("updateApp End ");
-
-        return true;
+        return resultMap;
     }
 
     /**
@@ -253,13 +239,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/service-bindings"}, method = RequestMethod.POST)
-    public boolean bindService(@RequestBody Map body, HttpServletRequest request) throws Exception {
+    public Map bindService(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("bindService Start ");
 
-        appService.bindService(body, this.getToken());
+        Map resultMap = appService.bindService(body, this.getToken());
 
         LOGGER.info("bindService End ");
-        return true;
+        return resultMap;
     }
 
 
@@ -271,13 +257,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
-    public boolean unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
+    public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
         LOGGER.info("unbindService Start ");
 
-        appService.unbindService(serviceInstanceId, applicationId, this.getToken());
+        Map resultMap = appService.unbindService(serviceInstanceId, applicationId, this.getToken());
 
         LOGGER.info("unbindService End ");
-        return true;
+        return resultMap;
     }
 
 
@@ -359,14 +345,13 @@ public class AppController extends Common {
      * @since 2016.7.6 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/routes"}, method = RequestMethod.POST)
-    public boolean addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
+    public Map addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
 
-        appService.addApplicationRoute(body, this.getToken());
+        Map resultMap = appService.addApplicationRoute(body, this.getToken());
 
         LOGGER.info("addApplicationRoute End ");
-
-        return true;
+        return resultMap;
     }
 
 
@@ -382,14 +367,13 @@ public class AppController extends Common {
      * @since 2016.7.6 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
-    public boolean removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid) throws Exception {
-
+    public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid) throws Exception {
         LOGGER.info("removeApplicationRoute Start ");
 
-        appService.removeApplicationRoute(guid, route_guid, this.getToken());
+        Map resultMap = appService.removeApplicationRoute(guid, route_guid, this.getToken());
 
         LOGGER.info("removeApplicationRoute End ");
-        return true;
+        return resultMap;
     }
 
     /**
@@ -423,11 +407,13 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
-    public boolean terminateInstance(@PathVariable String guid, @PathVariable String index) throws Exception {
+    public Map terminateInstance(@PathVariable String guid, @PathVariable String index) throws Exception {
         LOGGER.info("terminateInstance Start");
-        appService.terminateInstance(guid, index, this.getToken());
+
+        Map resultMap = appService.terminateInstance(guid, index, this.getToken());
+
         LOGGER.info("terminateInstance End");
-        return true;
+        return resultMap;
     }
 
 

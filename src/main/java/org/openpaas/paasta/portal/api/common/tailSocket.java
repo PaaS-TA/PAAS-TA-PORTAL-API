@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +77,7 @@ public class tailSocket implements CommandLineRunner {
                             if (!inetAddress.isLoopbackAddress() &&
                                     !inetAddress.isLinkLocalAddress() &&
                                     inetAddress.isSiteLocalAddress()) {
+
                                 hostName = inetAddress.getHostAddress().toString();
                             }
                         }
@@ -102,6 +102,7 @@ public class tailSocket implements CommandLineRunner {
 
         config.setHostname(hostName);
         config.setPort(tailPort);
+        config.setContext("/tailLog");
         final SocketIOServer server = new SocketIOServer(config);
 
         server.addConnectListener(new ConnectListener() {
@@ -120,9 +121,6 @@ public class tailSocket implements CommandLineRunner {
                 LOGGER.info(orgName);
 
                 appController.socketTailLogs(client, appName, orgName, spaceName);
-
-//                client.sendEvent("message", new ChatObject("", "Welcome to the chat!"));
-//				SocketIOClient client2 = appService.socketTailLogs(client, "");
             }
         });
         server.addDisconnectListener(new DisconnectListener() {
@@ -140,7 +138,16 @@ public class tailSocket implements CommandLineRunner {
             }
         });
         LOGGER.info("Starting server...");
+        ServerInfo(server);
         server.start();
-        LOGGER.info("Server started");
+        LOGGER.info("Server started...");
+    }
+
+    public void ServerInfo(SocketIOServer server){
+        LOGGER.info("HostName :::: " +server.getConfiguration().getHostname());
+        LOGGER.info("Context :::: " +server.getConfiguration().getContext());
+        LOGGER.info("Port :::: " + server.getConfiguration().getPort());
+        LOGGER.info("PingInterval :::: " +server.getConfiguration().getPingInterval());
+        LOGGER.info("PingTimeout :::: " +server.getConfiguration().getPingTimeout());
     }
 }

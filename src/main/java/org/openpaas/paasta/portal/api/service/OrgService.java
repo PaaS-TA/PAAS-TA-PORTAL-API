@@ -84,14 +84,14 @@ public class OrgService extends Common {
      */
     public CreateOrganizationResponse createOrg ( final Org org, final String token ) {
         final CreateOrganizationResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-            .organizations().create
-                ( CreateOrganizationRequest.builder().name( org.getOrgName() ).quotaDefinitionId( org.getQuotaGuid() ).build() )
-            .block();
+                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                        .organizations().create
+                        ( CreateOrganizationRequest.builder().name( org.getOrgName() ).quotaDefinitionId( org.getQuotaGuid() ).build() )
+                        .block();
 
         // Add role for OrgManager (with Space roles)
         associateOrgManager( response.getMetadata().getId(),        // org id
-            userService.getUser( token ).getId() );             // user id
+                userService.getUser( token ).getId() );             // user id
 
         return response;
     }
@@ -136,7 +136,7 @@ public class OrgService extends Common {
             internalTokenProvider = adminTokenProvider;
 
         return Common.cloudFoundryClient( connectionContext(), internalTokenProvider ).organizations()
-            .get( GetOrganizationRequest.builder().organizationId( orgId ).build() ).block();
+                .get( GetOrganizationRequest.builder().organizationId( orgId ).build() ).block();
     }
 
     /**
@@ -152,7 +152,7 @@ public class OrgService extends Common {
     // Org Read
     public SummaryOrganizationResponse getOrgSummary ( final String orgId, final String token ) {
         return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().summary(
-            SummaryOrganizationRequest.builder().organizationId( orgId ).build() ).block();
+                SummaryOrganizationRequest.builder().organizationId( orgId ).build() ).block();
     }
 
     /**
@@ -204,7 +204,7 @@ public class OrgService extends Common {
      */
     public ListOrganizationsResponse getOrgsForAdmin () {
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().list( ListOrganizationsRequest
-            .builder().build() ).block();
+                .builder().build() ).block();
     }
 
 
@@ -234,7 +234,7 @@ public class OrgService extends Common {
             internalTokenProvider = adminTokenProvider;
 
         return Common.cloudFoundryOperations( connectionContext(), internalTokenProvider ).organizations()
-            .get( OrganizationInfoRequest.builder().name( name ).build() ).block();
+                .get( OrganizationInfoRequest.builder().name( name ).build() ).block();
     }
 
     /**
@@ -252,7 +252,7 @@ public class OrgService extends Common {
         Objects.requireNonNull( org.getNewOrgName(), "New org name(newOrgName) must not be null." );
 
         return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().update( UpdateOrganizationRequest.builder()
-            .organizationId( org.getGuid().toString() ).name( org.getNewOrgName() ).build() ).block();
+                .organizationId( org.getGuid().toString() ).name( org.getNewOrgName() ).build() ).block();
     }
 
     /**
@@ -280,7 +280,7 @@ public class OrgService extends Common {
         ListOrganizationManagersResponse listOrganizationManagersResponse =
                 Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .organizations().listManagers(ListOrganizationManagersRequest.builder().organizationId(orgid).build()).block();
-        // 현재 유저가 
+        // 현재 유저가
         for (UserResource resource: listOrganizationManagersResponse.getResources()) {
             if(resource.getEntity().getUsername().equals(userInfoResponse.getUserName()))
             {
@@ -313,14 +313,14 @@ public class OrgService extends Common {
         // 지우려는 조직의 OrgManager Role이 주어진 유저를 찾는다.
         // TODO 특정 Role에 해당하는 유저를 찾는 메소드가 구현되면, 해당 메소드로 교체할 것. (hgcho)
         final ListOrganizationManagersResponse managerResponse =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() ).block();
+                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() ).block();
 
         // OrgManager role을 가진 유저 수 파악
         final int countManagerUsers = managerResponse.getTotalResults();
 
         // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
         final boolean existManagerRoleExactly = managerResponse.getResources().stream()
-            .filter( ur -> ur.getMetadata().getId().equals( user.getId() ) ).count() == 1L;
+                .filter( ur -> ur.getMetadata().getId().equals( user.getId() ) ).count() == 1L;
 
         LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers );
         if ( countManagerUsers >= 1 && existManagerRoleExactly ) {
@@ -328,9 +328,9 @@ public class OrgService extends Common {
             LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
             LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId );
             return Common
-                //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
-                    DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
+                    //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                    .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
+                            DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
 
             /*
             // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
@@ -339,10 +339,10 @@ public class OrgService extends Common {
         } else {
             // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
             return DeleteOrganizationResponse.builder()
-                .entity(
-                    JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
-                        .errorDetails( ErrorDetails.builder().code( 403 ).build() )
-                .id( "httpstatus-403" ).build() ).build();
+                    .entity(
+                            JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
+                                    .errorDetails( ErrorDetails.builder().code( 403 ).build() )
+                                    .id( "httpstatus-403" ).build() ).build();
         }
     }
 
@@ -381,9 +381,9 @@ public class OrgService extends Common {
         String quotaId = org.getEntity().getQuotaDefinitionId();
 
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizationQuotaDefinitions().get(
-                GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId( quotaId ).build()
-            ).block();
+                .organizationQuotaDefinitions().get(
+                        GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId( quotaId ).build()
+                ).block();
     }
 
     /**
@@ -408,9 +408,9 @@ public class OrgService extends Common {
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Org GUID in the path doesn't match org GUID in request body." );
 
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations().update(
-                UpdateOrganizationRequest.builder().organizationId( orgGuid ).quotaDefinitionId( quotaGuid ).build()
-            ).block();
+                .organizations().update(
+                        UpdateOrganizationRequest.builder().organizationId( orgGuid ).quotaDefinitionId( quotaGuid ).build()
+                ).block();
     }
 
 
@@ -422,43 +422,43 @@ public class OrgService extends Common {
 
     protected List<UserResource> listAllOrgUsers ( String orgId, String token ) {
         final ListOrganizationUsersResponse response =
-            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                .organizations().listUsers(
-                ListOrganizationUsersRequest.builder().organizationId( orgId )
-                    .orderDirection( OrderDirection.ASCENDING ).build()
-            ).block();
+                Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                        .organizations().listUsers(
+                        ListOrganizationUsersRequest.builder().organizationId( orgId )
+                                .orderDirection( OrderDirection.ASCENDING ).build()
+                ).block();
         return response.getResources();
     }
 
     private List<UserResource> listOrgManagerUsers ( String orgId, String token ) {
         final ListOrganizationManagersResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .organizations().listManagers(
-                ListOrganizationManagersRequest.builder().organizationId( orgId )
-                    .orderDirection( OrderDirection.ASCENDING ).build()
-            ).block();
+                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                        .organizations().listManagers(
+                        ListOrganizationManagersRequest.builder().organizationId( orgId )
+                                .orderDirection( OrderDirection.ASCENDING ).build()
+                ).block();
 
         return response.getResources();
     }
 
     private List<UserResource> listBillingManagerUsers ( String orgId, String token ) {
         final ListOrganizationBillingManagersResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .organizations().listBillingManagers(
-                ListOrganizationBillingManagersRequest.builder().organizationId( orgId )
-                    .orderDirection( OrderDirection.ASCENDING ).build()
-            ).block();
+                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                        .organizations().listBillingManagers(
+                        ListOrganizationBillingManagersRequest.builder().organizationId( orgId )
+                                .orderDirection( OrderDirection.ASCENDING ).build()
+                ).block();
 
         return response.getResources();
     }
 
     private List<UserResource> listOrgAuditorUsers ( String orgId, String token ) {
         final ListOrganizationAuditorsResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .organizations().listAuditors(
-                ListOrganizationAuditorsRequest.builder().organizationId( orgId )
-                    .orderDirection( OrderDirection.ASCENDING ).build()
-            ).block();
+                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                        .organizations().listAuditors(
+                        ListOrganizationAuditorsRequest.builder().organizationId( orgId )
+                                .orderDirection( OrderDirection.ASCENDING ).build()
+                ).block();
 
         return response.getResources();
     }
@@ -469,26 +469,26 @@ public class OrgService extends Common {
 
         Map<String, UserRole> userRoles = new HashMap<>();
         listAllOrgUsers( orgId, token ).stream()
-            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
-                .userEmail( resource.getEntity().getUsername() )
-                .modifiableRoles( true ).build() )
-            .filter( ur -> null != ur )
-            .forEach( ur -> userRoles.put( ur.getUserId(), ur ) );
+                .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
+                        .userEmail( resource.getEntity().getUsername() )
+                        .modifiableRoles( true ).build() )
+                .filter( ur -> null != ur )
+                .forEach( ur -> userRoles.put( ur.getUserId(), ur ) );
 
         listOrgManagerUsers( orgId, token ).stream()
-            .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
-            .filter( ur -> null != ur )
-            .forEach( ur -> ur.addRole( "OrgManager" ) );
+                .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
+                .filter( ur -> null != ur )
+                .forEach( ur -> ur.addRole( "OrgManager" ) );
 
         listBillingManagerUsers( orgId, token ).stream()
-            .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
-            .filter( ur -> null != ur )
-            .forEach( ur -> ur.addRole( "BillingManager" ) );
+                .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
+                .filter( ur -> null != ur )
+                .forEach( ur -> ur.addRole( "BillingManager" ) );
 
         listOrgAuditorUsers( orgId, token ).stream()
-            .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
-            .filter( ur -> null != ur )
-            .forEach( ur -> ur.addRole( "OrgAuditor" ) );
+                .map( ur -> userRoles.get( ur.getMetadata().getId() ) )
+                .filter( ur -> null != ur )
+                .forEach( ur -> ur.addRole( "OrgAuditor" ) );
         //roles.put( "all_users",  );
 
         final Map<String, Collection<UserRole>> result = new HashMap<>();
@@ -498,11 +498,11 @@ public class OrgService extends Common {
 
     public OrganizationUsers getOrgUserRolesByOrgName ( String orgName, String token ) {
         return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
-            .userAdmin()
-            .listOrganizationUsers(
-                org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder()
-                    .organizationName( orgName ).build()
-            ).block();
+                .userAdmin()
+                .listOrganizationUsers(
+                        org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder()
+                                .organizationName( orgName ).build()
+                ).block();
     }
 
     public boolean isOrgManagerUsingOrgName (String orgName, String token) {
@@ -538,7 +538,7 @@ public class OrgService extends Common {
 
         final String roleKey = "user_roles";
         Stream<UserRole> userRoles = getOrgUserRoles( orgId, null ).get( roleKey )
-            .stream().filter(ur -> ur.getRoles().contains( role ));
+                .stream().filter(ur -> ur.getRoles().contains( role ));
         boolean matches = userRoles.anyMatch( ur -> ur.getUserId().equals( userId ) );
 
         return matches;
@@ -546,37 +546,37 @@ public class OrgService extends Common {
 
     private AssociateOrganizationManagerResponse associateOrgManager ( String orgId, String userId ) {
         spaceService.associateAllSpaceUserRolesByOrgId(
-            orgId, userId, targetSpaceRole(OrgRole.OrgManager) );
+                orgId, userId, targetSpaceRole(OrgRole.OrgManager) );
 
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations()
                 .associateManager( AssociateOrganizationManagerRequest.builder()
-                    .organizationId( orgId ).managerId( userId ).build() )
+                        .organizationId( orgId ).managerId( userId ).build() )
                 .block();
     }
 
     private AssociateOrganizationBillingManagerResponse associateBillingManager ( String orgId, String userId ) {
         // CHECK : Is needed to bill Org's Billing manager?
         spaceService.associateAllSpaceUserRolesByOrgId(
-            orgId, userId, targetSpaceRole(OrgRole.BillingManager) );
+                orgId, userId, targetSpaceRole(OrgRole.BillingManager) );
 
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations()
-            .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
-                .organizationId( orgId ).billingManagerId( userId ).build() )
-            .block();
+                .organizations()
+                .associateBillingManager( AssociateOrganizationBillingManagerRequest.builder()
+                        .organizationId( orgId ).billingManagerId( userId ).build() )
+                .block();
     }
 
     private AssociateOrganizationAuditorResponse associateOrgAuditor (
-        String orgId, String userId ) {
+            String orgId, String userId ) {
         spaceService.associateAllSpaceUserRolesByOrgId(
-            orgId, userId, targetSpaceRole(OrgRole.OrgAuditor) );
+                orgId, userId, targetSpaceRole(OrgRole.OrgAuditor) );
 
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations()
-            .associateAuditor( AssociateOrganizationAuditorRequest.builder()
-                .organizationId( orgId ).auditorId( userId ).build() )
-            .block();
+                .organizations()
+                .associateAuditor( AssociateOrganizationAuditorRequest.builder()
+                        .organizationId( orgId ).auditorId( userId ).build() )
+                .block();
     }
 
     /**
@@ -670,10 +670,10 @@ public class OrgService extends Common {
 
         LOGGER.debug( "---->> Remove OrgManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations()
-            .removeManager( RemoveOrganizationManagerRequest.builder()
-                .organizationId( orgId ).managerId( userId ).build() )
-            .block();
+                .organizations()
+                .removeManager( RemoveOrganizationManagerRequest.builder()
+                        .organizationId( orgId ).managerId( userId ).build() )
+                .block();
     }
 
     private void removeOrgManager ( String orgId, String userId ) {
@@ -694,10 +694,10 @@ public class OrgService extends Common {
 
         LOGGER.debug( "---->> Remove BillingManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations()
-            .removeBillingManager( RemoveOrganizationBillingManagerRequest.builder()
-                .organizationId( orgId ).billingManagerId( userId ).build() )
-            .block();
+                .organizations()
+                .removeBillingManager( RemoveOrganizationBillingManagerRequest.builder()
+                        .organizationId( orgId ).billingManagerId( userId ).build() )
+                .block();
     }
 
     private void removeBillingManager ( String orgId, String userId ) {
@@ -717,10 +717,10 @@ public class OrgService extends Common {
 
         LOGGER.debug( "---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-            .organizations()
-            .removeAuditor( RemoveOrganizationAuditorRequest.builder()
-                .organizationId( orgId ).auditorId( userId ).build() )
-            .block();
+                .organizations()
+                .removeAuditor( RemoveOrganizationAuditorRequest.builder()
+                        .organizationId( orgId ).auditorId( userId ).build() )
+                .block();
     }
 
     private void removeOrgAuditor ( String orgId, String userId ) {
@@ -763,7 +763,7 @@ public class OrgService extends Common {
             if ( !isOrgManagerUsingToken( orgId, token ) ) {
                 final String email = userService.getUsernameFromToken( token );
                 throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                    "This user is unauthorized to change role for this org : " + email );
+                        "This user is unauthorized to change role for this org : " + email );
             }
 
             final OrgRole roleEnum;
@@ -811,14 +811,14 @@ public class OrgService extends Common {
     public boolean cancelOrganizationMember ( String orgId, String userId, String token ) {
         final boolean isManager = isOrgManager( orgId, userId );
         LOGGER.info( "isOrgManager : {} / Org Guid : {} / User Guid : {}",
-            isManager, orgId, userId);
+                isManager, orgId, userId);
 
         try {
             removeAllRoles( orgId, userId );
             Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                .organizations().removeUser(
-                RemoveOrganizationUserRequest.builder()
-                    .organizationId( orgId ).userId( userId ).build()
+                    .organizations().removeUser(
+                    RemoveOrganizationUserRequest.builder()
+                            .organizationId( orgId ).userId( userId ).build()
             ).block();
 
             return true;
@@ -833,6 +833,10 @@ public class OrgService extends Common {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
             LOGGER.info(inviteAcceptMap.toString());
+
+            if(inviteAcceptMap.get("result").toString().equals("false")){
+                return false;
+            }
 
             String id = inviteAcceptMap.get("id").toString();
             String orgGuid = inviteAcceptMap.get("orgGuid").toString();
