@@ -32,6 +32,7 @@ import org.openpaas.paasta.portal.api.model.Catalog;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -533,8 +534,9 @@ public class CatalogService extends Common {
             fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
 
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                return procCatalogStartApplication(applicationid, token); //앱 시작
+                procCatalogStartApplication(applicationid, token); //앱 시작
             }
+            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST,param,null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
@@ -569,6 +571,7 @@ public class CatalogService extends Common {
                     }
                 });
             }
+            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST,param,null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
@@ -639,7 +642,7 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
-
+        LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
         });
@@ -657,8 +660,13 @@ public class CatalogService extends Common {
                 ).block();
 
         if(!param.getAppGuid().equals("(id_dummy)")) {
+
+
             param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
             procCatalogBindService(param, token);
+        }
+        if(param.getCatalogType() != null){
+        commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST,param,null);
         }
         return createserviceinstanceresponse;
     }

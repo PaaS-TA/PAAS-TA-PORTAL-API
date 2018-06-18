@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -92,8 +94,8 @@ public class DomainService extends Common {
      * @return
      * @throws Exception
      */
-    public boolean addDomain ( String token, String domainName, String orgId ) throws Exception {
-        return addDomain( token, domainName, orgId,false );
+    public Map addDomain ( String token, String domainName, String orgId ) throws Exception {
+        return addDomain(token, domainName, orgId, false);
     }
 
     /**
@@ -107,46 +109,45 @@ public class DomainService extends Common {
      * @author 조현구
      * @since 2018.5.15
      */
-    public boolean addDomain ( String token, final String domainName, final String orgId, boolean isShared ) {
-        LOGGER.info( "Start addDomain service. domainName : " + domainName );
+    public Map addDomain ( String token, final String domainName, final String orgId, boolean isShared ) {
+        Map resultMap = new HashMap();
 
-        if ( !stringNullCheck( token, domainName ) )
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request",
-                "Required request body content is missing : token or domain name" );
+        try {
+            boolean anyMatch = getAllDomains( connectionContext(), tokenProvider( token ) )
+                    .getResources().stream()
+                    .anyMatch( domainResource -> domainName.equals( domainResource.getEntity().getName() ) );
 
-        if ( !isShared && !stringNullCheck( orgId ) ) {
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request",
-                "Required request body content is missing : Organization ID; " +
-                    "Creating shared domain will need a org id." );
+            if ( anyMatch )
+                throw new CloudFoundryException( HttpStatus.CONFLICT, "Conflict domains", "Domain name already exist." );
+
+            final String addedDomainName;
+
+            if ( isShared ) {
+                final CreateSharedDomainResponse response =
+                        addSharedDomain( connectionContext(), adminTokenProvider, domainName );
+                LOGGER.debug( "Response for adding shared domain is... {}", response);
+                addedDomainName = response.getEntity().getName();
+            } else {
+                final CreatePrivateDomainResponse response =
+                        addPrivateDomain( connectionContext(), tokenProvider( token ), domainName, orgId );
+                LOGGER.debug( "Response for adding private domain is... {}", response);
+                addedDomainName = response.getEntity().getName();
+            }
+
+            if (!addedDomainName.equals( domainName )) {
+                LOGGER.error( "It can't add domain with given domain name : {}", domainName );
+
+                resultMap.put("result", false);
+            } else {
+                resultMap.put("result", true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
         }
 
-        boolean anyMatch = getAllDomains( connectionContext(), tokenProvider( token ) )
-            .getResources().stream()
-            .anyMatch( domainResource -> domainName.equals( domainResource.getEntity().getName() ) );
-
-        if ( anyMatch )
-            throw new CloudFoundryException( HttpStatus.CONFLICT, "Conflict domains", "Domain name already exist." );
-
-        final String addedDomainName;
-
-        if ( isShared ) {
-            final CreateSharedDomainResponse response =
-                addSharedDomain( connectionContext(), adminTokenProvider, domainName );
-            LOGGER.debug( "Response for adding shared domain is... {}", response);
-            addedDomainName = response.getEntity().getName();
-        } else {
-            final CreatePrivateDomainResponse response =
-                addPrivateDomain( connectionContext(), tokenProvider( token ), domainName, orgId );
-            LOGGER.debug( "Response for adding private domain is... {}", response);
-            addedDomainName = response.getEntity().getName();
-        }
-
-        if (!addedDomainName.equals( domainName )) {
-            LOGGER.error( "It can't add domain with given domain name : {}", domainName );
-            return false;
-        } else {
-            return true;
-        }
+        return resultMap;
     }
 
     private CreateSharedDomainResponse addSharedDomain( ConnectionContext context, TokenProvider tokenProvider, String domainName ) {
@@ -173,25 +174,26 @@ public class DomainService extends Common {
      * @author 조현구
      * @since 2018.5.15
      */
-    public boolean deleteDomain ( String token, String orgId, String domainName ) throws Exception {
-        LOGGER.info( "Start deleteDomain service. domainName : " + domainName );
+    public Map deleteDomain ( String token, String orgId, String domainName ) throws Exception {
+        Map resultMap = new HashMap();
 
-        if ( !stringNullCheck( token, orgId, domainName ) ) {
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
-        }
+        try {
+            if ( !stringNullCheck( token, orgId, domainName ) ) {
+                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
+            }
 
-        List<DomainResource> domains = getAllDomains( connectionContext(), tokenProvider( token ) ).getResources()
-            .stream()
-            .filter( domain -> orgId.equals( domain.getEntity().getOwningOrganizationId() ) )
-            .filter( domain -> domainName.equals( domain.getEntity().getName() ) )
-            .collect(Collectors.toList());
+            List<DomainResource> domains = getAllDomains( connectionContext(), tokenProvider( token ) ).getResources()
+                    .stream()
+                    .filter( domain -> orgId.equals( domain.getEntity().getOwningOrganizationId() ) )
+                    .filter( domain -> domainName.equals( domain.getEntity().getName() ) )
+                    .collect(Collectors.toList());
 
-        LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
-        if (domains.size() > 0) {
-            final DomainResource domain = domains.get( 0 );
-            final boolean shared = domain.getEntity().getSharedOrganizations() != null
-                && domain.getEntity().getSharedOrganizations().size() > 0;
-            if (shared) {
+            LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
+            if (domains.size() > 0) {
+                final DomainResource domain = domains.get( 0 );
+                final boolean shared = domain.getEntity().getSharedOrganizations() != null
+                        && domain.getEntity().getSharedOrganizations().size() > 0;
+                if (shared) {
                 /*
                 final DeleteSharedDomainResponse response =
                     Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
@@ -210,36 +212,43 @@ public class DomainService extends Common {
                     }
                 }
                 */
-                // cannot delete shared domain
-                LOGGER.error( "Cannot delete shared domain... {} ({})",
-                    domain.getMetadata().getId(), domain.getEntity().getName());
-                return false;
-            } else {
-                final DeletePrivateDomainResponse response =
-                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                    .privateDomains().delete( DeletePrivateDomainRequest.builder()
-                        .privateDomainId( domain.getMetadata().getId() ).build() ).block();
-
-                if (null == response) {
-                    return true;
+                    // cannot delete shared domain
+                    LOGGER.error( "Cannot delete shared domain... {} ({})",
+                            domain.getMetadata().getId(), domain.getEntity().getName());
+                    resultMap.put("result", false);
                 } else {
-                    if ( response.getEntity().getErrorDetails() == null )
-                        return true;
-                    else {
-                        final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
-                        throw new CloudFoundryException(
-                            HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
+                    final DeletePrivateDomainResponse response =
+                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                                    .privateDomains().delete( DeletePrivateDomainRequest.builder()
+                                    .privateDomainId( domain.getMetadata().getId() ).build() ).block();
+
+                    if (null == response) {
+                        resultMap.put("result", true);
+                    } else {
+                        if ( response.getEntity().getErrorDetails() == null )
+                            resultMap.put("result", true);
+                        else {
+                            final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
+                            throw new CloudFoundryException(
+                                    HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
+                        }
                     }
                 }
-            }
-        } else {
+            } else {
             /*
             throw new CloudFoundryException(
                 HttpStatus.SERVICE_UNAVAILABLE, "Cannot delete", "Cannot find to delete a domain : " + domainName);
             */
 
-            LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
-            return true;
+                LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
+                resultMap.put("result", true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
         }
+
+        return resultMap;
     }
 }
