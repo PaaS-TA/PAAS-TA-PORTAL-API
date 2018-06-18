@@ -128,6 +128,16 @@ public class OrgController extends Common {
     	LOGGER.debug("Org list for admin");
     	return orgService.getOrgsForAdmin();
     }
+    /**
+     * 관리자 권한으로 조직 목록을 조회한다.
+     * @return
+     */
+    @GetMapping(V2_URL + "/orgs-admin/{number}")
+    public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
+        LOGGER.debug("Org list for admin");
+        return orgService.getOrgsForAdminAll(number);
+    }
+
 
     /**
      * 공간 목록을 조회한다.

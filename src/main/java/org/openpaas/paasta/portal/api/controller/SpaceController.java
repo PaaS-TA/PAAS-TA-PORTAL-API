@@ -208,7 +208,7 @@ public class SpaceController extends Common {
      * @since 2018.5.8
      */
     @PostMapping(V2_URL + "/spaces")
-    public CreateSpaceResponse createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String authHeader) throws Exception {
+    public Map createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String authHeader) throws Exception {
         LOGGER.info("Create Space : {}, {}", space.getSpaceName(), space.getOrgGuid());
         return spaceService.createSpace(space, authHeader);
     }

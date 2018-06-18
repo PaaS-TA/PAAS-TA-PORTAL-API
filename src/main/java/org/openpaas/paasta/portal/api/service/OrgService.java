@@ -88,10 +88,10 @@ public class OrgService extends Common {
                         .organizations().create
                         ( CreateOrganizationRequest.builder().name( org.getOrgName() ).quotaDefinitionId( org.getQuotaGuid() ).build() )
                         .block();
-
-        // Add role for OrgManager (with Space roles)
-        associateOrgManager( response.getMetadata().getId(),        // org id
-                userService.getUser( token ).getId() );             // user id
+//
+//        // Add role for OrgManager (with Space roles)
+//        associateOrgManager( response.getMetadata().getId(),        // org id
+//                userService.getUser( token ).getId() );             // user id
 
         return response;
     }
@@ -204,7 +204,7 @@ public class OrgService extends Common {
      */
     public ListOrganizationsResponse getOrgsForAdmin () {
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().list( ListOrganizationsRequest
-                .builder().build() ).block();
+                .builder().build()).block();
     }
 
 
@@ -949,4 +949,18 @@ public class OrgService extends Common {
 
         return true;
     }
+
+    /**
+     * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다. (Org Read for all)
+     *
+     * @return ListOrganizationsResponse
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.4.22
+     */
+    public ListOrganizationsResponse getOrgsForAdminAll (int number) {
+       return Common.cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().list( ListOrganizationsRequest
+                .builder().page(number).build()).block();
+    }
+
 }

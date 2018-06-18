@@ -3,7 +3,15 @@ package org.openpaas.paasta.portal.api.service;
 import com.google.common.base.CaseFormat;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
+import org.cloudfoundry.client.v2.spaces.CreateSpaceRequest;
+import org.cloudfoundry.client.v2.spaces.CreateSpaceResponse;
+import org.cloudfoundry.client.v2.spaces.GetSpaceRequest;
+import org.cloudfoundry.client.v2.spaces.GetSpaceResponse;
+import org.cloudfoundry.client.v2.spaces.ListSpacesRequest;
+import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.users.UserResource;
+import org.cloudfoundry.client.v3.spaces.*;
 import org.cloudfoundry.operations.useradmin.ListSpaceUsersRequest;
 import org.cloudfoundry.operations.useradmin.SpaceUsers;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -127,20 +135,26 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    public CreateSpaceResponse createSpace(Space space, String token) {
+    public Map createSpace(Space space, String token) {
         Objects.requireNonNull( space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
         Objects.requireNonNull( space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
-
-        final CreateSpaceResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .spaces().create( CreateSpaceRequest.builder()
-                .name( space.getSpaceName() ).organizationId( space.getOrgGuid() ).build() )
-                .block();
-
-        // Results for association roles will be disposed
-        associateSpaceUserRolesByOrgIdAndRole(response.getMetadata().getId(), space.getOrgGuid() );
-
-        return response;
+        Map<String, Object> msg = new HashMap<String,Object>();
+        try {
+            final CreateSpaceResponse response =
+                    Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+                            .spaces().create(CreateSpaceRequest.builder()
+                            .name(space.getSpaceName()).organizationId(space.getOrgGuid()).build())
+                            .block();
+            associateSpaceManager(response.getMetadata().getId(), space.getUserId());
+            associateSpaceDeveloper(response.getMetadata().getId(), space.getUserId());
+            associateSpaceAuditor(response.getMetadata().getId(), space.getUserId());
+            msg.put("result", true);
+        }
+        catch(Exception e){
+            msg.put("result", false);
+            msg.put("msg", e);
+        }
+        return msg;
     }
 
     /**
@@ -507,7 +521,6 @@ public class SpaceService extends Common {
                 spaceRoles = SPACE_ROLES_FOR_ORGAUDITOR;
             else if (roles.contains( "BillingManager" ))
                 spaceRoles = SPACE_ROLES_FOR_BILLINGMANAGER;
-
             for (String spaceRole : spaceRoles) {
                 results.add( this.associateSpaceUserRole( spaceId, userId, spaceRole ) );
             }
