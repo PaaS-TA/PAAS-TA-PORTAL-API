@@ -167,9 +167,13 @@ public class SpaceController extends Common {
      * @since 2018.5.8
      */
     @PutMapping(V2_URL + "/spaces")
-    public UpdateSpaceResponse renameSpace(@RequestBody Space space, HttpServletRequest request) throws Exception {
-        LOGGER.info("Rename Space : {}", space.getNewSpaceName());
-        return spaceService.renameSpace(space, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    public Map renameSpace(@RequestBody Space space, HttpServletRequest request) throws Exception {
+        LOGGER.info("renameSpace Start ");
+
+        Map resultMap = spaceService.renameSpace(space, request.getHeader(AUTHORIZATION_HEADER_KEY));
+
+        LOGGER.info("renameSpace End ");
+        return resultMap;
     }
 
 
@@ -177,23 +181,20 @@ public class SpaceController extends Common {
      * 공간을 삭제한다.
      *
      * @param guid   the space
-     * @param recursive is to delete recursive?
-     * @param authHeader a cloud foundry access token
+     * @param request the request
      * @return ModelAndView model
      * @version 2.0
      * @author hgcho
      * @since 2018.5.8
      */
-    @DeleteMapping(V2_URL + "/spaces")
-    public DeleteSpaceResponse deleteSpace(@RequestParam String guid, @RequestParam boolean recursive, @RequestHeader(
-        AUTHORIZATION_HEADER_KEY )
-        String authHeader) {
-        // Delete method cannot bind body. So space's information receives parameters.
-        final Space space = new Space();
-        space.setSpaceGuid(guid);
-        space.setRecursive(recursive);
-        LOGGER.info("Delete Space : {} / recursive deleting : {}", space.getGuid(), space.isRecursive());
-        return spaceService.deleteSpace(space, authHeader);
+    @DeleteMapping(V2_URL + "/spaces/{guid}")
+    public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, HttpServletRequest request) throws Exception {
+        LOGGER.info("deleteSpace Start ");
+
+        Map resultMap = spaceService.deleteSpace(guid, recursive, request.getHeader(AUTHORIZATION_HEADER_KEY));
+
+        LOGGER.info("deleteSpace End ");
+        return resultMap;
     }
 
      /**
@@ -209,8 +210,12 @@ public class SpaceController extends Common {
      */
     @PostMapping(V2_URL + "/spaces")
     public Map createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String authHeader) throws Exception {
-        LOGGER.info("Create Space : {}, {}", space.getSpaceName(), space.getOrgGuid());
-        return spaceService.createSpace(space, authHeader);
+        LOGGER.info("createSpace Start ");
+
+        Map resultMap = spaceService.createSpace(space, authHeader);
+
+        LOGGER.info("createSpace End ");
+        return resultMap;
     }
 
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{guid}/services"}, method = RequestMethod.GET)

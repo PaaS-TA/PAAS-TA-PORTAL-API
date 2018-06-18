@@ -358,6 +358,38 @@ public class OrgController extends Common {
         return orgService.associateOrgUserRole2(body);
     }
 
+    @GetMapping(V2_URL + "/orgList")
+    public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        LOGGER.debug("orgList Start");
+
+        Map resultMap = new HashMap();
+        List<Map> orgList = new ArrayList<Map>();
+
+        ListOrganizationsResponse listOrganizationsResponse = orgService.getOrgsForUser(token);
+
+        listOrganizationsResponse.getResources().forEach(orgs -> {
+            Map orgMap = new HashMap();
+
+            orgMap.put("org", orgs);
+
+            ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), token);
+            orgMap.put("space", listSpacesResponse);
+
+            Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), token);
+            orgMap.put("userRoles", userRoles);
+
+            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), token);
+            orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
+
+            orgList.add(orgMap);
+        });
+
+        resultMap.put("result", orgList);
+
+        LOGGER.debug("orgList End");
+        return resultMap;
+    }
+
 
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////
