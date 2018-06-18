@@ -8,6 +8,7 @@ import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -28,10 +29,8 @@ import java.util.UUID;
 
 /**
  * 서비스 컨트롤 - 서비스 목록 , 서비스 상세 정보, 서비스 인스턴스 추가, 서비스 인스턴스 수정, 서비스 인스턴스 삭제 등 서비스 인스턴스 관리를  제공한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
+ * @version 2.0
+ * @since 2018.2.20 최초작성
  */
 @RestController
 @Transactional
@@ -58,10 +57,10 @@ public class ServiceController extends Common {
     @RequestMapping(value = {"/service/getServiceInstance"}, method = RequestMethod.POST)
     public CloudServiceInstance getServiceInstance(@RequestBody Service service, HttpServletRequest request) throws Exception {
 
-        LOGGER.info("getServiceInstance Start : " + service.getGuid() );
+        LOGGER.info("getServiceInstance Start : " + service.getGuid());
 
         //token setting
-        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
+        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), service.getOrgName(), service.getSpaceName());
 
         //service call
         CloudServiceInstance cloudServiceInstance = serviceService.getServiceInstance(service, client);
@@ -81,10 +80,10 @@ public class ServiceController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/service/{guid}/rename"}, method = RequestMethod.PUT)
-    public Map renameInstance(@PathVariable String guid,@RequestBody Service service, HttpServletRequest request) throws Exception {
-        LOGGER.info("Rename InstanceService Start : " + guid +  " : " + service.getName() + " : " + service.getNewName());
+    public Map renameInstance(@PathVariable String guid, @RequestBody Service service, HttpServletRequest request) throws Exception {
+        LOGGER.info("Rename InstanceService Start : " + guid + " : " + service.getName() + " : " + service.getNewName());
         //service call
-        Map result = serviceService.renameInstance(service,guid);
+        Map result = serviceService.renameInstance(service, guid);
         LOGGER.info("Rename InstanceService End ");
         return result;
     }
@@ -116,7 +115,7 @@ public class ServiceController extends Common {
      */
     @RequestMapping(value = {"/service/deleteInstanceServiceForBoundApp"}, method = RequestMethod.POST)
     public boolean deleteInstanceServiceForBoundApp(@RequestBody Service service, HttpServletRequest request) throws Exception {
-        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
+        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), service.getOrgName(), service.getSpaceName());
 //        CustomCloudFoundryClient customClient = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
 
         // UNBIND SERVICE
@@ -131,31 +130,31 @@ public class ServiceController extends Common {
     /**
      * 유저프로바이드 서비스 인스턴스를 조회한다.
      *
-     * @param token the token
-     * @param body  the body
+     * @param token the token\
      * @return Map userProvidedServiceInstance
      * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.5.20 최초작성
+     * @author CSJ
+     * @version 2.0
+     * @since 2018.5.24 최초작성
      */
-    @RequestMapping(value = {"/service/getUserProvidedService"}, method = RequestMethod.POST)
-    public Map<String, Object> getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                               @RequestBody Map<String, String> body) throws Exception {
-
+//    @RequestMapping(value = {"/service/getUserProvidedService"}, method = RequestMethod.POST)
+//    public Map<String, Object> getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, String> body) throws Exception {
+//        LOGGER.info("getUserProvidedService Start");
+//        Map<String, Object> userProvidedServiceInstance = serviceService.getUserProvided(token, body);
+//        LOGGER.info("getUserProvidedService End");
+//        return userProvidedServiceInstance;
+//    }
+    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.GET)
+    public GetUserProvidedServiceInstanceResponse getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
         LOGGER.info("getUserProvidedService Start");
-
-        Map<String, Object> userProvidedServiceInstance = serviceService.getUserProvided(token, body);
-
-        LOGGER.info("getUserProvidedService End");
-        return userProvidedServiceInstance;
+        return serviceService.getUserProvided(token, guid);
     }
 
     /**
      * 유저프로바이드 서비스 인스턴스를 생성한다.
      *
-     * @param token the token
-     * @param service  the body
+     * @param token   the token
+     * @param service the body
      * @return boolean boolean
      * @throws Exception the exception
      * @author CSJ
@@ -163,7 +162,7 @@ public class ServiceController extends Common {
      * @since 2018.5.30 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
-    public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Service service) throws  Exception{
+    public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
         LOGGER.info("createUserProvided Start");
         Map result = serviceService.createUserProvided(token, service);
@@ -174,8 +173,8 @@ public class ServiceController extends Common {
     /**
      * 유저프로바이드 서비스 인스턴스를 수정한다.
      *
-     * @param token the token
-     * @param service  the body
+     * @param token   the token
+     * @param service the body
      * @return boolean boolean
      * @throws Exception the exception
      * @author CSJ
@@ -183,7 +182,7 @@ public class ServiceController extends Common {
      * @since 2018.5.30 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.PUT)
-    public Map updateUserProvided(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Service service) throws  Exception{
+    public Map updateUserProvided(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
         LOGGER.info("updateUserProvidedService Start");
         Map result = serviceService.updateUserProvided(guid, token, service);
@@ -193,7 +192,8 @@ public class ServiceController extends Common {
 
     /**
      * 서비스 브로커 리스트를 조회한다.
-     * @param request       the request
+     *
+     * @param request the request
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
@@ -211,10 +211,10 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}" })
-    public GetServiceBrokerResponse getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid  ,HttpServletRequest request) throws Exception {
+    @GetMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
+    public GetServiceBrokerResponse getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
-        return serviceService.getServiceBroker(serviceBroker,request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceService.getServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -229,8 +229,8 @@ public class ServiceController extends Common {
     @PostMapping(value = {Constants.V2_URL + "/servicebrokers"})
     public CreateServiceBrokerResponse createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
-        LOGGER.info("createServiceBroker Start : " + serviceBroker.getName() );
-        return serviceService.createServiceBroker(serviceBroker,request.getHeader(AUTHORIZATION_HEADER_KEY));
+        LOGGER.info("createServiceBroker Start : " + serviceBroker.getName());
+        return serviceService.createServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
@@ -243,27 +243,27 @@ public class ServiceController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
-    public UpdateServiceBrokerResponse updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid , HttpServletRequest request) throws Exception {
+    public UpdateServiceBrokerResponse updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
 
-        LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName() );
+        LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName());
         serviceBroker.setGuid(UUID.fromString(guid));
-        return serviceService.updateServiceBroker(serviceBroker,request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceService.updateServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 
     /**
      * 서비스 브로커를 삭제한다.
      *
-     * @param guid the cloudServiceBroker
-     * @param request       the request
+     * @param guid    the cloudServiceBroker
+     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @DeleteMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
-    public Map<String, Object>  deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public Map<String, Object> deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
-        LOGGER.info("deleteServiceBroker Start : " + guid );
-        serviceService.deleteServiceBroker(guid,request.getHeader(AUTHORIZATION_HEADER_KEY));
+        LOGGER.info("deleteServiceBroker Start : " + guid);
+        serviceService.deleteServiceBroker(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -285,8 +285,8 @@ public class ServiceController extends Common {
         return resultMap;
     }
 
-    @RequestMapping(value = {Constants.V2_URL+"/service-instances/space/{guid}"}, method = RequestMethod.GET)
-    public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid,HttpServletRequest request) throws Exception {
+    @RequestMapping(value = {Constants.V2_URL + "/service-instances/space/{guid}"}, method = RequestMethod.GET)
+    public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicesInstances Start ");
 
         ListServiceInstancesResponse respServicesInstances = serviceService.getServicesInstances(guid, this.getToken());
