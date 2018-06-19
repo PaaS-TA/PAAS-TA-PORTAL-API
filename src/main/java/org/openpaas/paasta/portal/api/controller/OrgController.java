@@ -337,7 +337,7 @@ public class OrgController extends Common {
 
     // TODO cancel member
     @DeleteMapping(V2_URL + "/orgs/{orgId}/member")
-    public void cancelOrganizationMember( @PathVariable String orgId,
+    public boolean cancelOrganizationMember( @PathVariable String orgId,
                                           @RequestParam String userId,
                                           @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         Objects.requireNonNull( orgId, "Organization ID is required" );
@@ -346,6 +346,7 @@ public class OrgController extends Common {
         boolean isSuccessed = orgService.cancelOrganizationMember( orgId, userId, token );
         if (isSuccessed) {
             LOGGER.info( "Success to cancel organization member : org ID {} / user ID {}", orgId, userId );
+            return true;
         } else {
             LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Fail to cancel organization member" );
