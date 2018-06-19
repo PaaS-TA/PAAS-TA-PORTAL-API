@@ -315,7 +315,11 @@ public class OrgService extends Common {
             if ( isAdmin ) {
                 // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
                 LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName() );
+                DeleteOrganizationResponse eleteOrganizationResponse =
                 Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().delete( DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( true ).async( true ).build() ).block();
+
+                resultMap.put("result", true);
+                return resultMap;
             }
 
             ///// Real user
@@ -336,10 +340,14 @@ public class OrgService extends Common {
                 // OrgManager 유저 수가 1명 이상이면서 본인이 OrgManager 일 때
                 LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
                 LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId );
-                Common
+                DeleteOrganizationResponse eleteOrganizationResponse =
+                        Common
                         //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
                         .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
                                 DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
+
+                resultMap.put("result", true);
+                return resultMap;
 
             /*
             // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
@@ -347,14 +355,16 @@ public class OrgService extends Common {
             */
             } else {
                 // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
-                DeleteOrganizationResponse.builder()
+                DeleteOrganizationResponse eleteOrganizationResponse =
+                        DeleteOrganizationResponse.builder()
                         .entity(
                                 JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
                                         .errorDetails( ErrorDetails.builder().code( 403 ).build() )
                                         .id( "httpstatus-403" ).build() ).build();
-            }
 
-            resultMap.put("result", true);
+                resultMap.put("result", true);
+                return resultMap;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("result", false);

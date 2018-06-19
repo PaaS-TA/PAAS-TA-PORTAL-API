@@ -200,11 +200,11 @@ public class OrgController extends Common {
      */
     @DeleteMapping(V2_URL+"/orgs/{guid}")
     public Map deleteOrg(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
-        LOGGER.info("deleteSpace Start ");
+        LOGGER.info("deleteOrg Start ");
 
         Map resultMap = orgService.deleteOrg(guid, recursive, token);
 
-        LOGGER.info("deleteSpace End ");
+        LOGGER.info("deleteOrg End ");
         return resultMap;
     }
     
@@ -384,18 +384,22 @@ public class OrgController extends Common {
         listOrganizationsResponse.getResources().forEach(orgs -> {
             Map orgMap = new HashMap();
 
-            orgMap.put("org", orgs);
+            try {
+                orgMap.put("org", orgs);
 
-            ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), token);
-            orgMap.put("space", listSpacesResponse);
+                ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), token);
+                orgMap.put("space", listSpacesResponse);
 
-            Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), token);
-            orgMap.put("userRoles", userRoles);
+                Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), token);
+                orgMap.put("userRoles", userRoles);
 
-            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), token);
-            orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
+                GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), token);
+                orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
 
-            orgList.add(orgMap);
+                orgList.add(orgMap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
 
         resultMap.put("result", orgList);
