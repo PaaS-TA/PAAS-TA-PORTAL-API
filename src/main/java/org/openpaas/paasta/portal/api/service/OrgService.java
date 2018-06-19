@@ -247,12 +247,21 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    public UpdateOrganizationResponse renameOrg ( Org org, String token ) {
-        Objects.requireNonNull( org.getGuid(), "Org GUID(guid) must not be null." );
-        Objects.requireNonNull( org.getNewOrgName(), "New org name(newOrgName) must not be null." );
+    public Map renameOrg (Org org, String token) {
+        Map resultMap = new HashMap();
 
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().update( UpdateOrganizationRequest.builder()
-                .organizationId( org.getGuid().toString() ).name( org.getNewOrgName() ).build() ).block();
+        try {
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().update( UpdateOrganizationRequest.builder()
+                    .organizationId( org.getGuid().toString() ).name( org.getNewOrgName() ).build() ).block();
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
     /**
@@ -267,8 +276,9 @@ public class OrgService extends Common {
      * @version 2.1
      * @since 2018.5.2
      */
-    public DeleteOrganizationResponse deleteOrg ( String orgId, boolean recursive, String token ) throws Exception {
-        boolean result = false;
+    public Map deleteOrg( String orgId, boolean recursive, String token ) throws Exception {
+        Map resultMap = new HashMap();
+//        boolean result = false;
 
         /*
         // 기존 구현 내용 (created by ParkCheolhan)
@@ -292,58 +302,66 @@ public class OrgService extends Common {
         }
         */
 
+        try {
+            final SummaryOrganizationResponse orgSummary = getOrgSummary( orgId, token );
 
-        Objects.requireNonNull( orgId, "Org GUID(guid) must not be null." );
-        final SummaryOrganizationResponse orgSummary = getOrgSummary( orgId, token );
+            //// Check Admin user
+            // 현재 token의 유저 정보를 가져온다.
+            final User user = userService.getUser( token );
 
-        //// Check Admin user
-        // 현재 token의 유저 정보를 가져온다.
-        final User user = userService.getUser( token );
+            // Admin 계정인지 확인
+            final boolean isAdmin = user.getUserName().equals( adminUserName );
 
-        // Admin 계정인지 확인
-        final boolean isAdmin = user.getUserName().equals( adminUserName );
+            if ( isAdmin ) {
+                // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
+                LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName() );
+                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().delete( DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( true ).async( true ).build() ).block();
+            }
 
-        if ( isAdmin ) {
-            // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
-            LOGGER.warn( "Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName() );
-            return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().delete( DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( true ).async( true ).build() ).block();
-        }
+            ///// Real user
+            // 지우려는 조직의 OrgManager Role이 주어진 유저를 찾는다.
+            // TODO 특정 Role에 해당하는 유저를 찾는 메소드가 구현되면, 해당 메소드로 교체할 것. (hgcho)
+            final ListOrganizationManagersResponse managerResponse =
+                    Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() ).block();
 
-        ///// Real user
-        // 지우려는 조직의 OrgManager Role이 주어진 유저를 찾는다.
-        // TODO 특정 Role에 해당하는 유저를 찾는 메소드가 구현되면, 해당 메소드로 교체할 것. (hgcho)
-        final ListOrganizationManagersResponse managerResponse =
-                Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().listManagers( ListOrganizationManagersRequest.builder().organizationId( orgId ).build() ).block();
+            // OrgManager role을 가진 유저 수 파악
+            final int countManagerUsers = managerResponse.getTotalResults();
 
-        // OrgManager role을 가진 유저 수 파악
-        final int countManagerUsers = managerResponse.getTotalResults();
+            // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
+            final boolean existManagerRoleExactly = managerResponse.getResources().stream()
+                    .filter( ur -> ur.getMetadata().getId().equals( user.getId() ) ).count() == 1L;
 
-        // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
-        final boolean existManagerRoleExactly = managerResponse.getResources().stream()
-                .filter( ur -> ur.getMetadata().getId().equals( user.getId() ) ).count() == 1L;
-
-        LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers );
-        if ( countManagerUsers >= 1 && existManagerRoleExactly ) {
-            // OrgManager 유저 수가 1명 이상이면서 본인이 OrgManager 일 때
-            LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
-            LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId );
-            return Common
-                    //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                    .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
-                            DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
+            LOGGER.debug( "existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers );
+            if ( countManagerUsers >= 1 && existManagerRoleExactly ) {
+                // OrgManager 유저 수가 1명 이상이면서 본인이 OrgManager 일 때
+                LOGGER.debug( "Though user isn't admin, user can delete organization if user's role is OrgManager." );
+                LOGGER.debug( "User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId );
+                Common
+                        //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                        .cloudFoundryClient( connectionContext(), adminTokenProvider ).organizations().delete(
+                                DeleteOrganizationRequest.builder().organizationId( orgId ).recursive( recursive ).async( true ).build() ).block();
 
             /*
             // 해당 유저 이외의 다른 유저가 OrgManager Role이 있는 경우 (409 : Conflict)
             return DeleteOrganizationResponse.builder().entity( JobEntity.builder().error( "OrgManager users is greater than 1. To delete org, you have to unset OrgManager role of other user(s)." ).errorDetails( ErrorDetails.builder().code( 409 ).build() ).build() ).build();
             */
-        } else {
-            // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
-            return DeleteOrganizationResponse.builder()
-                    .entity(
-                            JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
-                                    .errorDetails( ErrorDetails.builder().code( 403 ).build() )
-                                    .id( "httpstatus-403" ).build() ).build();
+            } else {
+                // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
+                DeleteOrganizationResponse.builder()
+                        .entity(
+                                JobEntity.builder().error( "You don't have a OrgManager role. To delete org, you have to get OrgManager role." )
+                                        .errorDetails( ErrorDetails.builder().code( 403 ).build() )
+                                        .id( "httpstatus-403" ).build() ).build();
+            }
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
         }
+
+        return resultMap;
     }
 
     //// Org's space : Read only (Space list)
@@ -398,19 +416,23 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    public UpdateOrganizationResponse updateOrgQuota ( String orgId, Org org, String token ) {
-        Objects.requireNonNull( org.getGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid." );
-        Objects.requireNonNull( org.getQuotaGuid(), "Org GUID must not be null. Require parameters; guid and quotaGuid." );
-        String orgGuid = org.getGuid().toString();
-        String quotaGuid = org.getQuotaGuid();
+    public Map updateOrgQuota ( String orgId, Org org, String token ) {
+        Map resultMap = new HashMap();
 
-        if ( !orgId.equals( orgGuid ) )
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Org GUID in the path doesn't match org GUID in request body." );
+        try {
+            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                    .organizations().update(
+                    UpdateOrganizationRequest.builder().organizationId( orgId ).quotaDefinitionId( org.getQuotaGuid() ).build()
+            ).block();
 
-        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                .organizations().update(
-                        UpdateOrganizationRequest.builder().organizationId( orgGuid ).quotaDefinitionId( quotaGuid ).build()
-                ).block();
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
 
