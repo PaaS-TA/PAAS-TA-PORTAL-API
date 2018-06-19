@@ -699,6 +699,7 @@ public class OrgService extends Common {
     }
 
     private void removeOrgManager ( String orgId, String userId ) {
+        LOGGER.info("이곳옴");
         removeOrgManager( orgId, userId, true );
     }
 
@@ -776,17 +777,9 @@ public class OrgService extends Common {
      */
     public void removeOrgUserRole ( String orgId, String userId, String role, String token ) {
         try {
-            final Object lock = blockingQueue.take();
-
             Objects.requireNonNull( orgId, "Org Id" );
             Objects.requireNonNull( userId, "User Id" );
             Objects.requireNonNull( role, "role" );
-
-            if ( !isOrgManagerUsingToken( orgId, token ) ) {
-                final String email = userService.getUsernameFromToken( token );
-                throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                        "This user is unauthorized to change role for this org : " + email );
-            }
 
             final OrgRole roleEnum;
             try {
@@ -812,9 +805,7 @@ public class OrgService extends Common {
                 default:
                     throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Request role is invalid : " + role );
             }
-
-            blockingQueue.put( lock );
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             throw new RuntimeException( e );
         }
     }
@@ -973,10 +964,9 @@ public class OrgService extends Common {
     }
 
     /**
-     * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다. (Org Read for all)
+     * 운영자 포털에서 조직목록을 요청했을때, 페이지별 조직목록을 응답한다.
      *
      * @return ListOrganizationsResponse
-     * @author hgcho
      * @version 2.0
      * @since 2018.4.22
      */

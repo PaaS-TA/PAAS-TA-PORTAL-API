@@ -330,13 +330,14 @@ public class OrgController extends Common {
      * @since 2018.5.16
      */
     @DeleteMapping(V2_URL + "/orgs/{orgId}/user-roles")
-    public void removeOrgUserRoles ( @PathVariable String orgId,
+    public boolean removeOrgUserRoles ( @PathVariable String orgId,
                                      @RequestParam String userId, @RequestParam String role,
                                      @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         Objects.requireNonNull( userId, "User ID(userId) is required" );
         Objects.requireNonNull( role, "Org Role(role) is required" );
         LOGGER.info("Remove organization role of user (Delete) : {} / {}", userId, role);
         orgService.removeOrgUserRole( orgId, userId, role, token );
+        return true;
     }
 
     // TODO invite user
