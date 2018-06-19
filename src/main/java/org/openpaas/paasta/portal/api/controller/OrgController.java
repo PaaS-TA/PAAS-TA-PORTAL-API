@@ -171,9 +171,13 @@ public class OrgController extends Common {
      * @return
      */
     @PutMapping( V2_URL + "/orgs" )
-    public UpdateOrganizationResponse renameOrg( 
-        @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        return orgService.renameOrg( org, token );
+    public Map renameOrg(@RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
+        LOGGER.info("renameOrg Start ");
+
+        Map resultMap = orgService.renameOrg(org, token);
+
+        LOGGER.info("renameOrg End ");
+        return resultMap;
     }
     
     /**
@@ -184,10 +188,14 @@ public class OrgController extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(V2_URL+"/orgs")
-    public DeleteOrganizationResponse deleteOrg( @RequestParam String guid, @RequestParam boolean recursive,
-                                                 @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
-        return orgService.deleteOrg(guid, recursive, token);
+    @DeleteMapping(V2_URL+"/orgs/{guid}")
+    public Map deleteOrg(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
+        LOGGER.info("deleteSpace Start ");
+
+        Map resultMap = orgService.deleteOrg(guid, recursive, token);
+
+        LOGGER.info("deleteSpace End ");
+        return resultMap;
     }
     
     // space read-only
@@ -211,9 +219,13 @@ public class OrgController extends Common {
     }
     
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")
-    public UpdateOrganizationResponse updateOrgQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        LOGGER.info("Update quota of org {} / quota {}", org.getGuid(), org.getQuotaGuid());
-        return orgService.updateOrgQuota( orgId, org, token );
+    public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        LOGGER.info("changeQuota Start ");
+
+        Map resultMap = orgService.updateOrgQuota( orgId, org, token );
+
+        LOGGER.info("changeQuota End ");
+        return resultMap;
     }
 
     /**
