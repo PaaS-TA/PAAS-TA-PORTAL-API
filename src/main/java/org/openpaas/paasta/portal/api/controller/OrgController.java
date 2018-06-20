@@ -128,6 +128,16 @@ public class OrgController extends Common {
     	LOGGER.debug("Org list for admin");
     	return orgService.getOrgsForAdmin();
     }
+    /**
+     * 관리자 권한으로 조직 목록을 조회한다.
+     * @return
+     */
+    @GetMapping(V2_URL + "/orgs-admin/{number}")
+    public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
+        LOGGER.debug("Org list for admin");
+        return orgService.getOrgsForAdminAll(number);
+    }
+
 
     /**
      * 공간 목록을 조회한다.
@@ -171,9 +181,13 @@ public class OrgController extends Common {
      * @return
      */
     @PutMapping( V2_URL + "/orgs" )
-    public UpdateOrganizationResponse renameOrg( 
-        @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        return orgService.renameOrg( org, token );
+    public Map renameOrg(@RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
+        LOGGER.info("renameOrg Start ");
+
+        Map resultMap = orgService.renameOrg(org, token);
+
+        LOGGER.info("renameOrg End ");
+        return resultMap;
     }
     
     /**
@@ -184,10 +198,14 @@ public class OrgController extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(V2_URL+"/orgs")
-    public DeleteOrganizationResponse deleteOrg( @RequestParam String guid, @RequestParam boolean recursive,
-                                                 @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
-        return orgService.deleteOrg(guid, recursive, token);
+    @DeleteMapping(V2_URL+"/orgs/{guid}")
+    public Map deleteOrg(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
+        LOGGER.info("deleteOrg Start ");
+
+        Map resultMap = orgService.deleteOrg(guid, recursive, token);
+
+        LOGGER.info("deleteOrg End ");
+        return resultMap;
     }
     
     // space read-only
@@ -211,9 +229,13 @@ public class OrgController extends Common {
     }
     
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")
-    public UpdateOrganizationResponse updateOrgQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        LOGGER.info("Update quota of org {} / quota {}", org.getGuid(), org.getQuotaGuid());
-        return orgService.updateOrgQuota( orgId, org, token );
+    public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        LOGGER.info("changeQuota Start ");
+
+        Map resultMap = orgService.updateOrgQuota( orgId, org, token );
+
+        LOGGER.info("changeQuota End ");
+        return resultMap;
     }
 
     /**
@@ -308,13 +330,14 @@ public class OrgController extends Common {
      * @since 2018.5.16
      */
     @DeleteMapping(V2_URL + "/orgs/{orgId}/user-roles")
-    public void removeOrgUserRoles ( @PathVariable String orgId,
+    public boolean removeOrgUserRoles ( @PathVariable String orgId,
                                      @RequestParam String userId, @RequestParam String role,
                                      @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         Objects.requireNonNull( userId, "User ID(userId) is required" );
         Objects.requireNonNull( role, "Org Role(role) is required" );
         LOGGER.info("Remove organization role of user (Delete) : {} / {}", userId, role);
         orgService.removeOrgUserRole( orgId, userId, role, token );
+        return true;
     }
 
     // TODO invite user
@@ -327,7 +350,7 @@ public class OrgController extends Common {
 
     // TODO cancel member
     @DeleteMapping(V2_URL + "/orgs/{orgId}/member")
-    public void cancelOrganizationMember( @PathVariable String orgId,
+    public boolean cancelOrganizationMember( @PathVariable String orgId,
                                           @RequestParam String userId,
                                           @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         Objects.requireNonNull( orgId, "Organization ID is required" );
@@ -336,6 +359,7 @@ public class OrgController extends Common {
         boolean isSuccessed = orgService.cancelOrganizationMember( orgId, userId, token );
         if (isSuccessed) {
             LOGGER.info( "Success to cancel organization member : org ID {} / user ID {}", orgId, userId );
+            return true;
         } else {
             LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Fail to cancel organization member" );
@@ -360,18 +384,22 @@ public class OrgController extends Common {
         listOrganizationsResponse.getResources().forEach(orgs -> {
             Map orgMap = new HashMap();
 
-            orgMap.put("org", orgs);
+            try {
+                orgMap.put("org", orgs);
 
-            ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), token);
-            orgMap.put("space", listSpacesResponse);
+                ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), token);
+                orgMap.put("space", listSpacesResponse);
 
-            Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), token);
-            orgMap.put("userRoles", userRoles);
+                Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), token);
+                orgMap.put("userRoles", userRoles);
 
-            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), token);
-            orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
+                GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), token);
+                orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
 
-            orgList.add(orgMap);
+                orgList.add(orgMap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
 
         resultMap.put("result", orgList);
