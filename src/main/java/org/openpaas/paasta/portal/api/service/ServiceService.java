@@ -111,9 +111,7 @@ public class ServiceService extends Common {
      * @since 2016.8.4 최초작성
      */
     public GetUserProvidedServiceInstanceResponse getUserProvided(String token, String userProvidedServiceInstanceId) throws Exception {
-
         try {
-
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
             GetUserProvidedServiceInstanceResponse getUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
@@ -128,7 +126,6 @@ public class ServiceService extends Common {
         } catch (Exception e) {
             return null;
         }
-
     }
 
 
@@ -140,16 +137,18 @@ public class ServiceService extends Common {
      * @since 2018.6.18 최초작성
      */
     private Map parsing(String str) {
-        Map returnMap = new HashMap();
 
-        str = str.replace("{", "").replace("}", "");
-        String datas[] = str.split(",");
-        for (String data : datas) {
-            String credentials[] = data.replace("\"","").split(":");
-            if (credentials.length > 0) {
-                String param = credentials[0];
-                String value = credentials[1];
-                returnMap.put(param, value);
+        Map returnMap = new HashMap();
+        if (str != null) {
+            str = str.replace("{", "").replace("}", "");
+            String datas[] = str.split(",");
+            for (String data : datas) {
+                String credentials[] = data.replace("\"", "").split(":");
+                if (credentials.length > 0) {
+                    String param = credentials[0];
+                    String value = credentials[1];
+                    returnMap.put(param, value);
+                }
             }
         }
         return returnMap;
@@ -181,9 +180,10 @@ public class ServiceService extends Common {
             //Todo credentialsStr parsing => map
             Map<String, Object> map = parsing(service.getCredentials());
 
+            if (!stringNullCheck(orgName, spaceName, serviceInstanceName, service.getCredentials().toString())) {
+            }
 
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
-
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             CreateUserProvidedServiceInstanceResponse createUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
                     .create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName)
                             .spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).build()).block();
@@ -234,15 +234,13 @@ public class ServiceService extends Common {
         LOGGER.info("newServiceInstanceName ::::" + newServiceInstanceName);
         LOGGER.info("serviceInstanceId ::::" + guid);
         LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
-        LOGGER.info("Credentials ::::" + service.getCredentials().toString());
+        LOGGER.info("Credentials ::::" + service.getCredentials());
 
         try {
             //Todo credentialsStr parsing => map
             Map<String, Object> map = parsing(service.getCredentials());
 
-//            if (!stringNullCheck(orgName, spaceName, serviceInstanceName,newServiceInstanceName, credentialsStr)) {}
-
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
                     .update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).build()).block();
 
