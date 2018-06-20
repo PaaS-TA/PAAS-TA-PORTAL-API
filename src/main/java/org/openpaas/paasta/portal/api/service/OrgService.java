@@ -709,7 +709,6 @@ public class OrgService extends Common {
     }
 
     private void removeOrgManager ( String orgId, String userId ) {
-        LOGGER.info("이곳옴");
         removeOrgManager( orgId, userId, true );
     }
 
