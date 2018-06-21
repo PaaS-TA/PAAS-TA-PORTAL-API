@@ -159,9 +159,13 @@ public class Service {
 
     public void setServiceInstanceName(String serviceInstanceName) {this.serviceInstanceName = serviceInstanceName;}
 
-    public String getCredentials() {return credentials;}
+    public String getCredentials() {
+        return credentials;
+    }
 
-    public void setCredentials(String credentials) {this.credentials = credentials;}
+    public void setCredentials(String credentials) {
+        this.credentials = credentials;
+    }
 
     public String getSyslogDrainUrl() {return syslogDrainUrl;}
 

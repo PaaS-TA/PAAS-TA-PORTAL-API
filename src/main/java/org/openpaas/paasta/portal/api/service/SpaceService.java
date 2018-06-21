@@ -127,20 +127,30 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    public CreateSpaceResponse createSpace(Space space, String token) {
-        Objects.requireNonNull( space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
-        Objects.requireNonNull( space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
+    public Map createSpace(Space space, String token) {
+        Map resultMap = new HashMap();
 
-        final CreateSpaceResponse response =
-            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                .spaces().create( CreateSpaceRequest.builder()
-                .name( space.getSpaceName() ).organizationId( space.getOrgGuid() ).build() )
-                .block();
+        try {
+            Objects.requireNonNull( space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
+            Objects.requireNonNull( space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid)." );
 
-        // Results for association roles will be disposed
-        associateSpaceUserRolesByOrgIdAndRole(response.getMetadata().getId(), space.getOrgGuid() );
+            final CreateSpaceResponse response =
+                    Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                            .spaces().create( CreateSpaceRequest.builder()
+                            .name( space.getSpaceName() ).organizationId( space.getOrgGuid() ).build() )
+                            .block();
 
-        return response;
+            // Results for association roles will be disposed
+            associateSpaceUserRolesByOrgIdAndRole(response.getMetadata().getId(), space.getOrgGuid() );
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
     }
 
     /**
@@ -221,25 +231,37 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    public UpdateSpaceResponse renameSpace(Space space, String token) throws Exception{
-        String spaceGuid = space.getGuid().toString();
-        String newSpaceName = space.getNewSpaceName();
-        Objects.requireNonNull( spaceGuid, "Space GUID(guid) must be not null. Request body is made space GUID(guid) and new space name(newSpaceName)." );
-        Objects.requireNonNull( newSpaceName, "New space name must be not null. Request body is made space GUID(guid) and new space name(newSpaceName)." );
-        if(!stringNullCheck(spaceGuid,newSpaceName)) {
-            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content(guid or newSpaceName) is missing.");
+    public Map renameSpace(Space space, String token){
+        Map resultMap = new HashMap();
+
+        try {
+            String spaceGuid = space.getGuid().toString();
+            String newSpaceName = space.getNewSpaceName();
+            Objects.requireNonNull( spaceGuid, "Space GUID(guid) must be not null. Request body is made space GUID(guid) and new space name(newSpaceName)." );
+            Objects.requireNonNull( newSpaceName, "New space name must be not null. Request body is made space GUID(guid) and new space name(newSpaceName)." );
+            if(!stringNullCheck(spaceGuid,newSpaceName)) {
+                throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content(guid or newSpaceName) is missing.");
+            }
+
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
+                    .spaces().update( UpdateSpaceRequest.builder().spaceId( spaceGuid )
+                    .name( newSpaceName ).build() )
+                    .block();
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
         }
 
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-            .spaces().update( UpdateSpaceRequest.builder().spaceId( spaceGuid )
-                .name( newSpaceName ).build() )
-            .block();
+        return resultMap;
     }
 
     /**
      * 공간을 삭제한다. (Space : Delete)
      *
-     * @param space the space
+     * @param guid the space
      * @param token the token
      * @return boolean boolean
      * @throws Exception the exception
@@ -247,23 +269,26 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    public DeleteSpaceResponse deleteSpace(Space space, String token) {
-        Objects.requireNonNull( space.getGuid(), "Space GUID must not be null. Require parameters; spaceGuid[, recursive]" );
+    public Map deleteSpace(String guid, boolean recursive, String token) {
+        Map resultMap = new HashMap();
 
-        String spaceGuid = space.getGuid().toString();
-        boolean recursive = space.isRecursive();
-        if ( !stringNullCheck( spaceGuid ) ) {
-            throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
+        try {
+            if ( !stringNullCheck( guid ) ) {
+                throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing" );
+            }
+
+            Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).spaces()
+                    .delete( DeleteSpaceRequest.builder().spaceId( guid )
+                            .recursive( recursive ).async( true ).build() ).block();
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
         }
 
-        /*
-        CustomCloudFoundryClient client = getCustomCloudFoundryClient(token);
-
-        client.deleteSpace(orgName, spaceName);
-        */
-        return Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).spaces()
-            .delete( DeleteSpaceRequest.builder().spaceId( spaceGuid )
-                .recursive( recursive ).async( true ).build() ).block();
+        return resultMap;
     }
 
     /**

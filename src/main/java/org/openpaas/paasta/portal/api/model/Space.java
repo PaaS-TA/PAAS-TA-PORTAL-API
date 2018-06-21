@@ -21,6 +21,8 @@ public class Space {
     private String spaceName;
     private String newSpaceName;
 
+
+    private String userId;
     private UUID guid;
     private String name;
 
@@ -227,6 +229,10 @@ public class Space {
             this.setGuid(UUID.fromString(spaceGuid));
         }
     }
+
+    public String getUserId() { return userId; }
+
+    public void setUserId(String userId) { this.userId = userId; }
     
     public String getOrgGuid() {
         return orgGuid;

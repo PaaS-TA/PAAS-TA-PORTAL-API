@@ -68,19 +68,19 @@ public class DomainController extends Common {
      * @throws Exception the exception
      */
     @PostMapping( Constants.V2_URL + "/domains" )
-    public boolean addDomain ( @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token,
-                               @RequestBody Map<String, String> body ) throws Exception {
-        final String domainName = body.get( "domainName" );
-        final String orgId = body.get( "orgId" );
-        Objects.requireNonNull(domainName, "Domain name");
-        Objects.requireNonNull(orgId, "Org Id");
+    public Map addDomain (@RequestBody Map<String, String> body, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) throws Exception {
+        LOGGER.info("addDomain Start ");
+        Map resultMap = null;
 
         if ( body.containsKey( "isShared" ) ) {
             boolean isShared = Boolean.valueOf( body.get( "isShared" ) );
-            return domainService.addDomain( token, domainName, orgId, isShared );
+            resultMap = domainService.addDomain(token, body.get("domainName").toString() , body.get("orgId").toString(), isShared);
         } else {
-            return domainService.addDomain( token, domainName, orgId );
+            resultMap = domainService.addDomain(token, body.get("domainName").toString(), body.get("orgId").toString());
         }
+
+        LOGGER.info("addDomain End ");
+        return resultMap;
     }
 
     /**
@@ -91,11 +91,14 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @DeleteMapping( Constants.V2_URL + "/domains" )
-    public boolean deleteDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
-                                @RequestParam String orgId,
-                                @RequestParam String domainName) throws Exception {
-        return domainService.deleteDomain(token, orgId, domainName);
+    @DeleteMapping( Constants.V2_URL + "/domains/{guid}" )
+    public Map deleteDomain(@PathVariable String guid, @RequestParam String domainName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        LOGGER.info("deleteDomain Start ");
+
+        Map resultMap = domainService.deleteDomain(token, guid, domainName);
+
+        LOGGER.info("deleteDomain End ");
+        return resultMap;
     }
 
 
