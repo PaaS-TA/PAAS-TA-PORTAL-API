@@ -689,17 +689,6 @@ public class OrgService extends Common {
     }
 
     private void removeOrgManager ( String orgId, String userId, boolean removeWithSpaceRole ) {
-        if (removeWithSpaceRole) {
-            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgManager );
-            if ( isOrgAuditor( orgId, userId ) ) {
-                removeSpaceRoles.remove( "SpaceDeveloper" );
-                removeSpaceRoles.remove( "SpaceAuditor" );
-            } else if ( isBillingManager( orgId, userId ) ) {
-                removeSpaceRoles.remove( "SpaceAuditor" );
-            }
-            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, removeSpaceRoles );
-        }
-
         LOGGER.debug( "---->> Remove OrgManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations()
@@ -713,17 +702,6 @@ public class OrgService extends Common {
     }
 
     private void removeBillingManager ( String orgId, String userId, boolean removeWithSpaceRole ) {
-        if (removeWithSpaceRole) {
-            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.BillingManager );
-            if ( isOrgManager( orgId, userId ) ) {
-                removeSpaceRoles.clear();
-            } else if ( isOrgAuditor( orgId, userId ) ) {
-                removeSpaceRoles.remove( "SpaceDeveloper" );
-                removeSpaceRoles.remove( "SpaceAuditor" );
-            }
-            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, removeSpaceRoles );
-        }
-
         LOGGER.debug( "---->> Remove BillingManager role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations()
@@ -737,16 +715,6 @@ public class OrgService extends Common {
     }
 
     private void removeOrgAuditor ( String orgId, String userId, boolean removeWithSpaceRole ) {
-        if (removeWithSpaceRole) {
-            Set<String> removeSpaceRoles = targetSpaceRole( OrgRole.OrgAuditor );
-            if ( isOrgManager( orgId, userId ) ) {
-                removeSpaceRoles.clear();
-            } else if ( isBillingManager( orgId, userId ) ) {
-                removeSpaceRoles.remove( "SpaceAuditor" );
-            }
-            spaceService.removeAllSpaceUserRolesByOrgId( orgId, userId, removeSpaceRoles );
-        }
-
         LOGGER.debug( "---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId );
         Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
                 .organizations()
@@ -797,7 +765,7 @@ public class OrgService extends Common {
                 LOGGER.error( "This role is invalid : {}", role );
                 return;
             }
-
+            LOGGER.info("여기옴");
             switch ( roleEnum ) {
                 case OrgManager:
                 case ORGMANAGER:

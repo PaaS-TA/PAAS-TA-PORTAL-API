@@ -604,7 +604,6 @@ public class SpaceService extends Common {
             LOGGER.error( "This role is invalid : {}", role );
             return;
         }
-
         switch ( roleEnum ) {
             case SpaceManager:
             case SPACEMANAGER:
