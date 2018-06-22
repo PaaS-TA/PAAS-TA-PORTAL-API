@@ -3,7 +3,6 @@ package org.openpaas.paasta.portal.api.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
@@ -52,8 +51,6 @@ public class AppService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
 
-    @Autowired
-    private AppAutoScaleModalService appAutoScaleModalService;
 
     @Autowired
     ReactorCloudFoundryClient reactorCloudFoundryClient;
@@ -207,9 +204,7 @@ public class AppService extends Common {
             //AutoScale 설정 삭제
             HashMap map = new HashMap();
             map.put("guid", String.valueOf(guid));
-            if (null != appAutoScaleModalService.getAppAutoScaleInfo(map).get("list")) {
-                appAutoScaleModalService.deleteAppAutoScale(String.valueOf(guid));
-            }
+
         } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);
