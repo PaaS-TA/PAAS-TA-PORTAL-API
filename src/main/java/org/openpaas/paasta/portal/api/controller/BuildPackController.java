@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -43,14 +42,10 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getBuildPacks")
     @GetMapping(value = {V2_URL + "/buildpacks"})
     public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start");
-
-        //token setting
-        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
         Map<String, Object> buildPacks = buildPackService.getBuildPacks();
@@ -70,7 +65,6 @@ public class BuildPackController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateBuildPack")
     @PutMapping(value = {V2_URL + "/buildpacks/{guid}"})
     public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
 

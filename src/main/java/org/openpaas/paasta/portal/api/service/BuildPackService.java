@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackRequest;
@@ -27,10 +28,8 @@ public class BuildPackService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getBuildPacks")
     public Map<String, Object> getBuildPacks() throws Exception {
-        // Old CF API Version
-        //return client.getBuildPacks();
-
         ListBuildpacksResponse listBuildpacksResponse =
         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .buildpacks()
@@ -47,9 +46,9 @@ public class BuildPackService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "updateBuildPack")
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
-        //client.updateBuildPack(buildPack.getGuid(), buildPack.getPosition(), buildPack.getEnable(), buildPack.getLock());
         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))
                 .buildpacks()
                 .update(UpdateBuildpackRequest.builder()

@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.identity.uaa.api.common.model.expr.FilterRequestBuilder;
 import org.cloudfoundry.identity.uaa.api.group.UaaGroupOperations;
 import org.cloudfoundry.identity.uaa.error.UaaException;
@@ -33,6 +34,7 @@ public class AuthorityGroupService extends Common{
      * @version 1.0
      * @since 2016.9.26 최초작성
      */
+    @HystrixCommand(fallbackMethod = "getAuthorityGroups")
     public Collection<ScimGroup> getAuthorityGroups() throws Exception {
         UaaGroupOperations operations = getUaaGroupOperations(uaaAdminClientId);
         FilterRequestBuilder builder = new FilterRequestBuilder();
@@ -50,6 +52,7 @@ public class AuthorityGroupService extends Common{
      * @throws Exception the exception
      * @since 2016.10.18 최초작성
      */
+    @HystrixCommand(fallbackMethod = "createAuthorityGroup")
     public ScimGroup createAuthorityGroup(String displayName,List<ScimGroupMember> memberList) throws Exception {
         if (!stringNullCheck(displayName)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);
@@ -69,9 +72,6 @@ public class AuthorityGroupService extends Common{
             }
             requestedGroup.setMembers(memberList);
         }
-
-        //현재 UAA 라이브러리 모델에 description이 정의되어 있지 않음
-        //requestedGroup.setDescription(description);
 
         ScimGroup group = new ScimGroup();
         try{
@@ -94,6 +94,7 @@ public class AuthorityGroupService extends Common{
      * @throws Exception the exception
      * @since 2016.10.19 최초작성
      */
+    @HystrixCommand(fallbackMethod = "deleteAuthorityGroup")
     public void deleteAuthorityGroup(String groupGuid) throws Exception{
         if (!stringNullCheck(groupGuid)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);
@@ -119,6 +120,7 @@ public class AuthorityGroupService extends Common{
      * @throws Exception the exception
      * @since 2016.10.19 최초작성
      */
+    @HystrixCommand(fallbackMethod = "addGroupMembers")
     public ScimGroup addGroupMembers(String groupGuid, List<String> memberUserNameList) throws Exception {
         if (!stringNullCheck(groupGuid)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);
@@ -153,6 +155,7 @@ public class AuthorityGroupService extends Common{
      * @return scim group
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteGroupMembers")
     public  ScimGroup deleteGroupMembers(String groupGuid, List<String> memberUserNameList) throws Exception{
         if (!stringNullCheck(groupGuid)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);

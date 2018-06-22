@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.uaa.clients.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -28,7 +27,6 @@ public class ClientController extends Common {
      * @return Map client list
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getClientList")
     @GetMapping(value = {Constants.V2_URL+ "/clients"})
     public ListClientsResponse getClientList() throws Exception {
         return clientService.getClientList();
@@ -41,7 +39,6 @@ public class ClientController extends Common {
      * @return Map client
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getClient")
     @GetMapping(value = {Constants.V2_URL+ "/clients/{clientId}"})
     public GetClientResponse getClient(@PathVariable String clientId) throws Exception {
         return clientService.getClient(clientId);
@@ -54,7 +51,6 @@ public class ClientController extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "registerClient")
     @PostMapping(value = {Constants.V2_URL+ "/clients"})
     public CreateClientResponse registerClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientService.registerClient(param);
@@ -67,7 +63,6 @@ public class ClientController extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateClient")
     @PutMapping(value = {Constants.V2_URL+ "/clients"})
     public UpdateClientResponse updateClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientService.updateClient(param);
@@ -80,7 +75,6 @@ public class ClientController extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteClient")
     @DeleteMapping(value = {Constants.V2_URL+ "/clients/{clientId}"})
     public DeleteClientResponse deleteClient(@PathVariable String clientId) throws Exception {
         return clientService.deleteClient(clientId);

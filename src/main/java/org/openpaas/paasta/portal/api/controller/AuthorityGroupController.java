@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.identity.uaa.scim.ScimGroup;
 import org.cloudfoundry.identity.uaa.scim.ScimGroupMember;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -38,7 +37,6 @@ public class AuthorityGroupController extends Common {
      * @author 김도준
      * @since 2016.09.19
      */
-    @HystrixCommand(fallbackMethod = "getAuthorityGroups")
     @GetMapping(V2_URL+"/authority")
     public Map<String, Object> getAuthorityGroups() throws Exception{
         Collection<ScimGroup> groups = authorityGroupService.getAuthorityGroups();
@@ -55,7 +53,6 @@ public class AuthorityGroupController extends Common {
      * @author 김도준
      * @since 2016.09.19
      */
-    @HystrixCommand(fallbackMethod = "createAuthorityGroup")
     @PostMapping(V2_URL+"/authority/group")
     public Map<String, Object> createAuthorityGroup(@RequestBody Map<String, Object> body) throws Exception{
         String displayName = (String)body.get("displayName");
@@ -74,7 +71,6 @@ public class AuthorityGroupController extends Common {
      * @author 김도준
      * @since 2016.09.19
      */
-    @HystrixCommand(fallbackMethod = "deleteAuthorityGroup")
     @DeleteMapping(V2_URL+"/authority/group/{groupguid}")
     public Map<String, Object> deleteAuthorityGroup(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception{
         authorityGroupService.deleteAuthorityGroup(groupguid);
@@ -100,7 +96,6 @@ public class AuthorityGroupController extends Common {
      * @return map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "addGroupMembers")
     @PostMapping(V2_URL+"/authority/member")
     public Map<String, Object> addGroupMembers(@RequestBody Map<String, Object> body) throws Exception {
         String groupGuid = (String)body.get("groupGuid");
@@ -117,7 +112,6 @@ public class AuthorityGroupController extends Common {
      * @return map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteGroupMembers")
     @DeleteMapping(V2_URL+"/authority/member/{groupguid}")
     public Map<String, Object> deleteGroupMembers(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception {
         List<String> memberUserNameList = (List<String>)body.get("memberUserNameList");

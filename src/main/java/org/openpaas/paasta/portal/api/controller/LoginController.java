@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
 import org.openpaas.paasta.portal.api.service.LoginService;
@@ -45,7 +44,6 @@ public class LoginController extends Common {
      * @throws Exception the exception
      */
     @CrossOrigin
-    @HystrixCommand(fallbackMethod = "login")
     @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> login(@RequestBody Map<String, Object> body) throws Exception {
         String id = (String) body.get("id");
@@ -86,7 +84,6 @@ public class LoginController extends Common {
         return result;
     }
 
-    @HystrixCommand(fallbackMethod = "refresh")
     @PostMapping("/token/refresh")
     public Map<String, Object> refresh(@RequestBody Map<String, Object> body) throws Exception {
         String tokenStr = (String) body.get("token");

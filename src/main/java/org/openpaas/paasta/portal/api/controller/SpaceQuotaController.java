@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.v2.spacequotadefinitions.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -38,7 +37,6 @@ public class SpaceQuotaController extends Common {
      * @return ListSpaceQuotaDefinitionsResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "listSpaceQuotaDefinitions")
     @GetMapping(Constants.V2_URL + "/spaces/quota-definitions")
     public ListSpaceQuotaDefinitionsResponse listSpaceQuotaDefinitions(HttpServletRequest request) throws Exception {
         LOGGER.info("listSpaceQuotaDefinitions Start : ");
@@ -53,7 +51,6 @@ public class SpaceQuotaController extends Common {
      * @return GetSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getSpaceQuotaDefinitions")
     @GetMapping(Constants.V2_URL + "/spaces/quota-definitions/{spaceQuotaId}")
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceQuotaDefinitions Start : ");
@@ -68,7 +65,6 @@ public class SpaceQuotaController extends Common {
      * @return CreateSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "createSpaceQuotaDefinitions")
     @PostMapping(Constants.V2_URL + "/spaces/quota-definitions")
     public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         LOGGER.info("summary Start : ");
@@ -83,7 +79,6 @@ public class SpaceQuotaController extends Common {
      * @return DeleteSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteSpaceQuotaDefinitions")
     @DeleteMapping(Constants.V2_URL + "/spaces/quota-definitions/{guid}")
     public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("deleteSpaceQuotaDefinitions Start : ");
@@ -102,7 +97,6 @@ public class SpaceQuotaController extends Common {
      * @return AssociateSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "associateSpaceQuotaDefinitions")
     @PutMapping(Constants.V2_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces/{spaceId}")
     public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId,
                                                                                 @RequestBody Quota quota, HttpServletRequest request) throws Exception {
@@ -120,7 +114,6 @@ public class SpaceQuotaController extends Common {
      * @return ListSpaceQuotaDefinitionSpacesResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getListSpaceUsedSpaceQuotaDefinitions")
     @GetMapping(Constants.V2_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces")
     public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
@@ -137,7 +130,6 @@ public class SpaceQuotaController extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getListSpaceUsedSpaceQuotaDefinitions")
     @DeleteMapping(Constants.V2_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces/{spaceId}")
     public boolean getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId,
                                                                                         @RequestBody Quota quota, HttpServletRequest request) throws Exception {
@@ -156,7 +148,6 @@ public class SpaceQuotaController extends Common {
      * @return UpdateSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateSpaceQuotaDefinitions")
     @PutMapping(Constants.V2_URL + "/spaces/quota-definitions/{spaceQuotaId}")
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @RequestBody Quota quota,
                                                                              HttpServletRequest request) throws Exception {

@@ -1,8 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
@@ -54,7 +52,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getAppSummary")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/summary"}, method = RequestMethod.GET)
     public SummaryApplicationResponse getAppSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getAppSummary Start : " + guid);
@@ -64,42 +61,6 @@ public class AppController extends Common {
         return respApp;
     }
 
-
-    /**
-     * 앱 실시간 상태를 조회한다.
-     *
-     * @param app     the app
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-//    @RequestMapping(value = {"/app/getAppStats"}, method = RequestMethod.POST)
-//    public String getAppStats(@RequestBody App app, HttpServletRequest request) throws Exception {
-//
-//        String respAppStats = null;
-//
-//        //LOGGER.info("getAppStats Start : " + app.getGuid());
-//        LOGGER.info("getAppStats Start : ");
-//
-//        //token setting
-//        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-//
-//        //service call
-//        //String token = loginService.login("yschoi", "1qaz@WSX").getValue();
-//
-////        respAppStats = appService.getAppStats(app, this.getToken());
-//
-//
-//        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-//        respAppStats = appService.getAppStats(app,client);
-//
-//
-//        LOGGER.info("stopApp End ");
-//
-//
-//        return respAppStats;
-//    }
-
     /**
      * 앱 실시간 상태를 조회한다.
      *
@@ -108,14 +69,10 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getAppStats")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/stats"}, method = RequestMethod.GET)
     public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("stopApp Start : " + guid);
-
-        //token setting
-        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
         ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, this.getToken());
@@ -133,7 +90,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "renameApp")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/rename"}, method = RequestMethod.PUT)
     public Map renameApp(@PathVariable String guid, @RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
@@ -150,7 +106,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteApp")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}"}, method = RequestMethod.DELETE)
     public Map deleteApp(@PathVariable String guid) throws Exception {
         LOGGER.info("delete App Start : " + guid);
@@ -168,7 +123,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "startApp")
     @RequestMapping(value = {Constants.V3_URL + "/apps/startApp"}, method = RequestMethod.POST)
     public Map startApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("startApp Start ");
@@ -188,7 +142,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "stopApp")
     @RequestMapping(value = {Constants.V3_URL + "/apps/stopApp"}, method = RequestMethod.POST)
     public Map stopApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("stopApp Start ");
@@ -208,7 +161,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "restageApp")
     @RequestMapping(value = {Constants.V2_URL + "/apps/restageApp"}, method = RequestMethod.POST)
     public Map restageApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("restageApp Start ");
@@ -228,7 +180,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateApp")
     @RequestMapping(value = {Constants.V2_URL + "/apps/updateApp"}, method = RequestMethod.POST)
     public Map updateApp(@RequestBody App app, HttpServletRequest request) throws Exception {
         LOGGER.info("updateApp Start ");
@@ -247,7 +198,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "bindService")
     @RequestMapping(value = {Constants.V2_URL + "/service-bindings"}, method = RequestMethod.POST)
     public Map bindService(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("bindService Start ");
@@ -266,7 +216,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "unbindService")
     @RequestMapping(value = {Constants.V2_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
     public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
         LOGGER.info("unbindService Start ");
@@ -286,7 +235,6 @@ public class AppController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getAppEvents")
     @RequestMapping(value = {Constants.V2_URL + "/apps/app-usage-events/{guid}"}, method = RequestMethod.GET)
     public ListEventsResponse getAppEvents(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getAppEvents Start : " + guid);
@@ -310,7 +258,6 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    @HystrixCommand(fallbackMethod = "getApplicationEnv")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/env"}, method = RequestMethod.GET)
     public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getApplicationEnv Start : " + guid);
@@ -323,31 +270,6 @@ public class AppController extends Common {
     }
 
     /**
-     * 앱 환경변수 중 사용자 정의 환경변수 추가,수정한다.
-     *
-     * @param app     the app
-     * @param request the request
-     * @return map boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.6.30 최초작성
-     */
-    @HystrixCommand(fallbackMethod = "updateApplicationEnv")
-    @RequestMapping(value = {"/app/updateApplicationEnv"}, method = RequestMethod.POST)
-    public boolean updateApplicationEnv(@RequestBody App app, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("updateApplicationEnv Start : " + app.getName());
-
-        appService.updateApplicationEnv(app, this.getToken());
-
-        LOGGER.info("updateApplicationEnv End ");
-
-        return true;
-    }
-
-
-    /**
      * 라우트 추가 및 라우트와 앱을 연결한다. (앱에 URI를 추가함)
      *
      * @param body
@@ -358,7 +280,6 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @HystrixCommand(fallbackMethod = "addApplicationRoute")
     @RequestMapping(value = {Constants.V2_URL + "/routes"}, method = RequestMethod.POST)
     public Map addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
@@ -381,7 +302,6 @@ public class AppController extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @HystrixCommand(fallbackMethod = "removeApplicationRoute")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
     public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid) throws Exception {
         LOGGER.info("removeApplicationRoute Start ");
@@ -393,29 +313,6 @@ public class AppController extends Common {
     }
 
     /**
-     * 앱 라우트를 삭제한다.
-     *
-     * @param token the token
-     * @param body  the body
-     * @return boolean boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.7.6 최초작성
-     */
-    @HystrixCommand(fallbackMethod = "removeApplicationRoute")
-    @RequestMapping(value = {"/app/deleteRoute"}, method = RequestMethod.POST)
-    public boolean removeApplicationRoute(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map body) throws Exception {
-
-        LOGGER.info("deleteRoute Start");
-
-        appService.deleteRoute(body.get("orgName").toString(), body.get("spaceName").toString(), (List) body.get("urls"), token);
-
-        LOGGER.info("deleteRoute End ");
-        return true;
-    }
-
-    /**
      * 인덱스에 의해 앱 인스턴스를 중지시킨다.
      *
      * @param guid
@@ -423,7 +320,6 @@ public class AppController extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "terminateInstance")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
     public Map terminateInstance(@PathVariable String guid, @PathVariable String index) throws Exception {
         LOGGER.info("terminateInstance Start");
@@ -436,23 +332,6 @@ public class AppController extends Common {
 
 
     /**
-     * 앱 이미지를 조회한다.
-     *
-     * @param app the app
-     * @return app image url
-     */
-    @HystrixCommand(fallbackMethod = "getAppImageUrl")
-    @RequestMapping(value = {"/app/getAppImageUrl"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> getAppImageUrl(@RequestBody App app) {
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("appImageUrl", appService.getAppImageUrl(app));
-
-        return resultMap;
-    }
-
-
-    /**
      * 앱 최근 로그
      *
      * @param guid
@@ -460,7 +339,6 @@ public class AppController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getSpaceSummary")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
     public Map getSpaceSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
@@ -481,7 +359,6 @@ public class AppController extends Common {
         return mapLog;
     }
 
-    @HystrixCommand(fallbackMethod = "getTailLogs")
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/taillogs"}, method = RequestMethod.GET)
     public Map getTailLogs(@PathVariable String guid, HttpServletRequest request) throws Exception {
 

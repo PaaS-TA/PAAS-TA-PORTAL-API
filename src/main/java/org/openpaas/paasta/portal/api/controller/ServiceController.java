@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.v2.servicebrokers.CreateServiceBrokerResponse;
@@ -80,7 +79,6 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "renameInstance")
     @RequestMapping(value = {Constants.V2_URL + "/service/{guid}/rename"}, method = RequestMethod.PUT)
     public Map renameInstance(@PathVariable String guid, @RequestBody Service service, HttpServletRequest request) throws Exception {
         LOGGER.info("Rename InstanceService Start : " + guid + " : " + service.getName() + " : " + service.getNewName());
@@ -97,7 +95,6 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteInstance")
     @RequestMapping(value = {Constants.V2_URL + "/service/{guid}"}, method = RequestMethod.DELETE)
     public Map deleteInstance(@PathVariable String guid) throws Exception {
         LOGGER.info("delete InstanceService Start : " + guid);
@@ -117,7 +114,6 @@ public class ServiceController extends Common {
      * @version 2.0
      * @since 2018.5.24 최초작성
      */
-    @HystrixCommand(fallbackMethod = "getUserProvided")
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.GET)
     public GetUserProvidedServiceInstanceResponse getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
         LOGGER.info("getUserProvidedService Start");
@@ -135,7 +131,6 @@ public class ServiceController extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @HystrixCommand(fallbackMethod = "createUserProvided")
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
     public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
@@ -156,7 +151,6 @@ public class ServiceController extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @HystrixCommand(fallbackMethod = "updateUserProvided")
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.PUT)
     public Map updateUserProvided(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
@@ -173,7 +167,6 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getServiceBrokers")
     @GetMapping(value = {Constants.V2_URL + "/servicebrokers"})
     public ListServiceBrokersResponse getServiceBrokers(HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBrokers Start:");
@@ -188,7 +181,6 @@ public class ServiceController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getServiceBroker")
     @GetMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
     public GetServiceBrokerResponse getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
@@ -204,7 +196,6 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "createServiceBroker")
     @PostMapping(value = {Constants.V2_URL + "/servicebrokers"})
     public CreateServiceBrokerResponse createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
@@ -221,7 +212,6 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateServiceBroker")
     @PutMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
     public UpdateServiceBrokerResponse updateServiceBroker(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
 
@@ -239,7 +229,6 @@ public class ServiceController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteServiceBroker")
     @DeleteMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
     public Map<String, Object> deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
@@ -257,7 +246,6 @@ public class ServiceController extends Common {
      * @param service the service
      * @return the menu list
      */
-    @HystrixCommand(fallbackMethod = "getServiceImageUrl")
     @RequestMapping(value = {"/service/getServiceImageUrl"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> getServiceImageUrl(@RequestBody Service service) {
         Map<String, Object> resultMap = new HashMap<>();
@@ -267,7 +255,6 @@ public class ServiceController extends Common {
         return resultMap;
     }
 
-    @HystrixCommand(fallbackMethod = "getServicesInstances")
     @RequestMapping(value = {Constants.V2_URL + "/service-instances/space/{guid}"}, method = RequestMethod.GET)
     public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicesInstances Start ");

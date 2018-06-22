@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.v2.users.GetUserResponse;
 import org.cloudfoundry.uaa.users.User;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
@@ -59,7 +58,6 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateUserPassword")
     @PutMapping(value = {V2_URL + "/users/{userId}/password/update"})
     public Map updateUserPassword(@PathVariable String userId, @RequestBody Map<String, Object> body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOGGER.info("> into updateUserPassword");
@@ -79,7 +77,6 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "resetPassword")
     @PostMapping(value = {V2_URL + "/users/password/reset"})
     public Map resetPassword(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOGGER.info("> into resetPassword");
@@ -99,7 +96,6 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "expiredPassword")
     @PutMapping(value = {V2_URL + "/users/{userGuid}/password/expired"})
     public Map expiredPassword(@PathVariable String userGuid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOGGER.info("> into expiredPassword");
@@ -115,7 +111,6 @@ public class UserController extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteUser")
     @DeleteMapping(value = {V2_URL + "/users/{guid}"})
     public Map deleteUser(@PathVariable String guid, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOGGER.info("> into deleteUser");
@@ -130,7 +125,6 @@ public class UserController extends Common {
      * @return map all user name
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getAllUserName")
     @GetMapping(value = {V2_URL + "/users"})
     public List<User> getAllUserName(HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<User> userInfo = userService.allUsers();
@@ -145,7 +139,6 @@ public class UserController extends Common {
      * @return map all user name
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getUser")
     @GetMapping(value = {V2_URL + "/users/{userId}"})
     public GetUserResponse getUser(@PathVariable String userId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
         return userService.getUser(userId, token);
@@ -159,7 +152,6 @@ public class UserController extends Common {
      * @param response   the response
      * @return map
      */
-    @HystrixCommand(fallbackMethod = "addUser")
     @PostMapping(value = V2_URL + "/users")
     @ResponseBody
     public Map<String, Object> addUser(@RequestBody UserDetail userDetail, HttpServletRequest request, HttpServletResponse response) {
@@ -168,19 +160,16 @@ public class UserController extends Common {
     }
 
 
-    @HystrixCommand(fallbackMethod = "getUserId")
     @GetMapping(V2_URL + "/user/name-by-id/{username}")
     public String getUserId(@PathVariable String username) {
         return userService.getUserIdByUsername(username);
     }
 
-    @HystrixCommand(fallbackMethod = "getUsername")
     @GetMapping(V2_URL + "/user/id-by-name/{userId}")
     public String getUsername(@PathVariable String userId) {
         return userService.getUsernameByUserId(userId);
     }
 
-    @HystrixCommand(fallbackMethod = "getUserSummary")
     @GetMapping(V2_URL + "/user/summary/{userIdentifier}")
     public User getUserSummary(@PathVariable String userIdentifier, @RequestParam String type) {
         String filterType;
