@@ -301,7 +301,7 @@ public class SpaceService extends Common {
      * @return space summary
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getSpaceSummary")
+    //@HystrixCommand(fallbackMethod = "getSpaceSummary")
     public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception{
         ReactorCloudFoundryClient cloudFoundryClient =
             Common.cloudFoundryClient(connectionContext(), tokenProvider(token));

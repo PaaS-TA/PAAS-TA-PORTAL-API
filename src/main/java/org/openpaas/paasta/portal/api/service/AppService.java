@@ -10,9 +10,12 @@ import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
+import org.cloudfoundry.client.v2.routemappings.DeleteRouteMappingRequest;
+import org.cloudfoundry.client.v2.routemappings.GetRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteResponse;
 import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
+import org.cloudfoundry.client.v2.routes.Route;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
@@ -77,7 +80,7 @@ public class AppService extends Common {
      * @param token the client
      * @return the app stats
      */
-    @HystrixCommand(fallbackMethod = "getAppStats")
+    //@HystrixCommand(fallbackMethod = "getAppStats")
     public ApplicationStatisticsResponse getAppStats(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -184,14 +187,17 @@ public class AppService extends Common {
      * @param guid the app
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteApp")
+    //@HystrixCommand(fallbackMethod = "deleteApp")
     public Map deleteApp(String guid) {
         HashMap result = new HashMap();
         try {
             //앱 삭제
             ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            List<Route> routes = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block().getRoutes();
+            for(Route route : routes) {
+                reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(route.getId()).build()).block();
+            }
             reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(guid).build()).block();
-
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
