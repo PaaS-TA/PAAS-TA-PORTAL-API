@@ -49,7 +49,7 @@ public class LoginService extends Common {
      * @throws MalformedURLException the malformed url exception
      * @throws URISyntaxException    the uri syntax exception
      */
-    @HystrixCommand(fallbackMethod = "login")
+
     public OAuth2AccessToken login(String id, String password) throws MalformedURLException, URISyntaxException {
         CloudCredentials cc = new CloudCredentials(id, password);
         OAuth2AccessToken token = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
