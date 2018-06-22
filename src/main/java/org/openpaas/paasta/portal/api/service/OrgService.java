@@ -9,6 +9,8 @@ import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.ListOrganizationQuotaDefinitionsResponse;
+import org.cloudfoundry.client.v2.organizationquotadefinitions.OrganizationQuotaDefinitionResource;
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
@@ -64,6 +66,9 @@ public class OrgService extends Common {
 
     @Autowired
     private PasswordGrantTokenProvider adminTokenProvider;
+
+    @Autowired
+    private OrgQuotaService orgQuotaService;
 
     private BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(2);
 
@@ -154,30 +159,50 @@ public class OrgService extends Common {
 
     @HystrixCommand(fallbackMethod = "getOrgSummaryMap")
     public Map getOrgSummaryMap(final String orgId, final String token) {
-
-
-        SummaryOrganizationResponse summaryOrganizationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
-        List<OrganizationSpaceSummary> organizationSpaceSummaries = summaryOrganizationResponse.getSpaces();
-        int memDevTotal = 0;
-        int memProTotal = 0;
-        int appTotal = 0;
-        int serviceTotal = 0;
-        for (OrganizationSpaceSummary organizationSpaceSummary : organizationSpaceSummaries) {
-
-            memDevTotal += organizationSpaceSummary.getMemoryDevelopmentTotal();
-            memProTotal += organizationSpaceSummary.getMemoryProductionTotal();
-            appTotal += organizationSpaceSummary.getApplicationCount();
-            serviceTotal += organizationSpaceSummary.getServiceCount();
-        }
-
-        List<Map> summaryOrganization = objectMapper.convertValue(organizationSpaceSummaries, List.class);
         Map map = new HashedMap();
-        map.put("entity", summaryOrganization);
-        map.put("memDevTotal", memDevTotal);
-        map.put("memProTotal", memProTotal);
-        map.put("applicationTotal", appTotal);
-        map.put("serviceTotal", serviceTotal);
+        try {
+            /*
+             * OrgSummary 정보 추출
+             */
+            SummaryOrganizationResponse summaryOrganizationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
+            List<OrganizationSpaceSummary> organizationSpaceSummaries = summaryOrganizationResponse.getSpaces();
+            int memDevTotal = 0;
+            int memProTotal = 0;
+            int appTotal = 0;
+            int serviceTotal = 0;
+            for (OrganizationSpaceSummary organizationSpaceSummary : organizationSpaceSummaries) {
 
+                memDevTotal += organizationSpaceSummary.getMemoryDevelopmentTotal();
+                memProTotal += organizationSpaceSummary.getMemoryProductionTotal();
+                appTotal += organizationSpaceSummary.getApplicationCount();
+                serviceTotal += organizationSpaceSummary.getServiceCount();
+            }
+
+            map.put("all_memoryDevelopmentTotal", memDevTotal);
+            map.put("all_memoryProductionTotal", memProTotal);
+            map.put("all_applicationTotal", appTotal);
+            map.put("all_serviceTotal", serviceTotal);
+
+
+            List<Map> summaryOrganization = objectMapper.convertValue(organizationSpaceSummaries, List.class);
+            map.put("resource", summaryOrganization);
+            /*
+             * Org quota 정보 추출
+             */
+            GetOrganizationResponse getOrganizationResponse = getOrg(orgId, token);
+            LOGGER.info("Org name :: " + getOrganizationResponse.getEntity().getName());
+            LOGGER.info("Org Quotaid :: " + getOrganizationResponse.getEntity().getQuotaDefinitionId());
+            String quotaDefinitionId = getOrganizationResponse.getEntity().getQuotaDefinitionId();
+
+            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgQuotaService.getOrgQuotaDefinitions(quotaDefinitionId, token);
+            Map quota = objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
+            quota.remove("metadata");
+            map.put("quota", quota.get("entity"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.clear();
+        }
         return map;
     }
 
