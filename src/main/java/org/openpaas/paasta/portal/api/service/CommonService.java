@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +109,7 @@ public class CommonService {
      * @param reqToken   the req token
      * @return map map
      */
+    @HystrixCommand(fallbackMethod = "procCommonApiRestTemplate")
     public Map<String, Object> procCommonApiRestTemplate(String reqUrl, HttpMethod httpMethod, Object obj, String reqToken) {
         restTemplate = new RestTemplate();
         HttpHeaders reqHeaders = new HttpHeaders();
@@ -132,6 +134,7 @@ public class CommonService {
      * @param reqToken   the req token
      * @return map map
      */
+    @HystrixCommand(fallbackMethod = "procStorageApiRestTemplate")
     public <T> ResponseEntity<T> procStorageApiRestTemplate(String reqUrl, HttpMethod httpMethod, Object bodyObject, String reqToken, Class<T> resClazz) {
         restTemplate = new RestTemplate();
 
