@@ -126,9 +126,6 @@ public class SpaceController extends Common {
                 mem = mem / cnt;
                 disk = disk / cnt;
 
-                System.out.println("cpu : "+Double.parseDouble(String.format("%.2f%n", cpu)));
-                System.out.println("mem : "+Math.round(mem));
-                System.out.println("disk : "+Math.round(disk));
                 resultMap2.put("guid", sapceApplicationSummary.getId());
                 resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
                 resultMap2.put("memPer", Math.round(mem));
