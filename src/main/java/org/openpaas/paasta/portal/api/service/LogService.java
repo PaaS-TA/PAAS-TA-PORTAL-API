@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.ApplicationLog;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -26,6 +27,7 @@ public class LogService extends Common {
      * @param client the client
      * @return ModelAndView model
      */
+    @HystrixCommand(fallbackMethod = "getLog")
     public List getLog(App app, CloudFoundryClient client) {
 
         String sAppName = app.getName();
