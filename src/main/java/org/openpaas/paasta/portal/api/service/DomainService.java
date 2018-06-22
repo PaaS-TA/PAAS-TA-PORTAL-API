@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.ribbon.proxy.annotation.Http;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.Metadata;
@@ -48,6 +49,7 @@ public class DomainService extends Common {
      * @author 박철한, 조현구
      * @since 2018.4.30
      */
+    @HystrixCommand(fallbackMethod = "getDomains")
     public PaginatedResponse getDomains ( String token, String status ) throws Exception {
         LOGGER.debug( "Start getDomains service. status : " + status );
         if ( !stringNullCheck( status ) ) {
@@ -66,21 +68,43 @@ public class DomainService extends Common {
         }
     }
 
+
+    /**
+     * 도메인 가져오기 - status 값을 받아 private, shared 중 선택하여 가져오거나 모두 가져올수 있음
+     *
+     * @param token  the token
+     * @param orguid the orguid
+     * @return domains response (V2)
+     * @throws Exception the exception
+     * @author 박철한, 조현구
+     * @since 2018.4.30
+     */
+    @HystrixCommand(fallbackMethod = "getOrgPrivateDomain")
+    public ListDomainsResponse getOrgPrivateDomain ( String token, String orguid ) throws Exception {
+        return Common.cloudFoundryClient( this.connectionContext(), tokenProvider(token) ).domains()
+                .list(ListDomainsRequest.builder().owningOrganizationId(orguid).build()).block();
+
+    }
+
+    @HystrixCommand(fallbackMethod = "getAllDomains")
     private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
         return Common.cloudFoundryClient( context, tokenProvider )
             .domains().list( ListDomainsRequest.builder().build() ).block();
     }
 
+    @HystrixCommand(fallbackMethod = "getAllDomains")
     private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider, final String[] names) {
         return Common.cloudFoundryClient( context, tokenProvider )
             .domains().list( ListDomainsRequest.builder().name( names ).build() ).block();
     }
 
+    @HystrixCommand(fallbackMethod = "getPrivateDomains")
     private ListPrivateDomainsResponse getPrivateDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
         return Common.cloudFoundryClient( context, tokenProvider )
             .privateDomains().list( ListPrivateDomainsRequest.builder().build() ).block();
     }
 
+    @HystrixCommand(fallbackMethod = "getSharedDomains")
     private ListSharedDomainsResponse getSharedDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
         return Common.cloudFoundryClient( context, tokenProvider )
             .sharedDomains().list( ListSharedDomainsRequest.builder().build() ).block();
@@ -94,6 +118,7 @@ public class DomainService extends Common {
      * @return
      * @throws Exception
      */
+    @HystrixCommand(fallbackMethod = "addDomain")
     public Map addDomain ( String token, String domainName, String orgId ) throws Exception {
         return addDomain(token, domainName, orgId, false);
     }
@@ -109,6 +134,7 @@ public class DomainService extends Common {
      * @author 조현구
      * @since 2018.5.15
      */
+    @HystrixCommand(fallbackMethod = "addDomain")
     public Map addDomain ( String token, final String domainName, final String orgId, boolean isShared ) {
         Map resultMap = new HashMap();
 
@@ -150,6 +176,7 @@ public class DomainService extends Common {
         return resultMap;
     }
 
+
     private CreateSharedDomainResponse addSharedDomain( ConnectionContext context, TokenProvider tokenProvider, String domainName ) {
         return Common.cloudFoundryClient( context, tokenProvider ).sharedDomains()
             .create( CreateSharedDomainRequest.builder().name( domainName ).build() )
@@ -174,6 +201,7 @@ public class DomainService extends Common {
      * @author 조현구
      * @since 2018.5.15
      */
+    @HystrixCommand(fallbackMethod = "deleteDomain")
     public Map deleteDomain ( String token, String orgId, String domainName ) throws Exception {
         Map resultMap = new HashMap();
 
@@ -194,25 +222,6 @@ public class DomainService extends Common {
                 final boolean shared = domain.getEntity().getSharedOrganizations() != null
                         && domain.getEntity().getSharedOrganizations().size() > 0;
                 if (shared) {
-                /*
-                final DeleteSharedDomainResponse response =
-                    Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
-                    .sharedDomains().delete( DeleteSharedDomainRequest.builder()
-                        .sharedDomainId( domain.getMetadata().getId() ).build() ).block();
-
-                if (null == response) {
-                    return true;
-                } else {
-                    if ( response.getEntity().getErrorDetails() == null )
-                        return true;
-                    else {
-                        final ErrorDetails errorDetails = response.getEntity().getErrorDetails();
-                        throw new CloudFoundryException(
-                            HttpStatus.CONFLICT, errorDetails.getDescription(), errorDetails.getErrorCode() );
-                    }
-                }
-                */
-                    // cannot delete shared domain
                     LOGGER.error( "Cannot delete shared domain... {} ({})",
                             domain.getMetadata().getId(), domain.getEntity().getName());
                     resultMap.put("result", false);
@@ -235,11 +244,6 @@ public class DomainService extends Common {
                     }
                 }
             } else {
-            /*
-            throw new CloudFoundryException(
-                HttpStatus.SERVICE_UNAVAILABLE, "Cannot delete", "Cannot find to delete a domain : " + domainName);
-            */
-
                 LOGGER.warn( "Cannot find to delete a domain! : {}", domainName );
                 resultMap.put("result", true);
             }

@@ -104,29 +104,6 @@ public class ServiceController extends Common {
         return result;
     }
 
-
-    /**
-     * 서비스 인스턴스를 삭제한다.
-     *
-     * @param service the service
-     * @param request the request
-     * @return boolean boolean
-     * @throws Exception the exception
-     */
-    @RequestMapping(value = {"/service/deleteInstanceServiceForBoundApp"}, method = RequestMethod.POST)
-    public boolean deleteInstanceServiceForBoundApp(@RequestBody Service service, HttpServletRequest request) throws Exception {
-        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), service.getOrgName(), service.getSpaceName());
-//        CustomCloudFoundryClient customClient = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY),service.getOrgName(),service.getSpaceName());
-
-        // UNBIND SERVICE
-        //CISS appService.unbindService(new App(){{setName(service.getName()); setServiceName(service.getServiceName());}}, client);
-
-        // DELETE SERVICE INSTANCE
-//        serviceService.deleteInstanceService(service, customClient);
-
-        return true;
-    }
-
     /**
      * 유저프로바이드 서비스 인스턴스를 조회한다.
      *
@@ -137,13 +114,6 @@ public class ServiceController extends Common {
      * @version 2.0
      * @since 2018.5.24 최초작성
      */
-//    @RequestMapping(value = {"/service/getUserProvidedService"}, method = RequestMethod.POST)
-//    public Map<String, Object> getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token,@RequestBody Map<String, String> body) throws Exception {
-//        LOGGER.info("getUserProvidedService Start");
-//        Map<String, Object> userProvidedServiceInstance = serviceService.getUserProvided(token, body);
-//        LOGGER.info("getUserProvidedService End");
-//        return userProvidedServiceInstance;
-//    }
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.GET)
     public GetUserProvidedServiceInstanceResponse getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
         LOGGER.info("getUserProvidedService Start");
@@ -267,21 +237,6 @@ public class ServiceController extends Common {
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        return resultMap;
-    }
-
-    /**
-     * 서비스 이미지를 조회한다.
-     *
-     * @param service the service
-     * @return the menu list
-     */
-    @RequestMapping(value = {"/service/getServiceImageUrl"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> getServiceImageUrl(@RequestBody Service service) {
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("serviceImageUrl", serviceService.getServiceImageUrl(service.getServiceName()));
-
         return resultMap;
     }
 

@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
@@ -62,42 +61,6 @@ public class AppController extends Common {
         return respApp;
     }
 
-
-    /**
-     * 앱 실시간 상태를 조회한다.
-     *
-     * @param app     the app
-     * @param request the request
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-//    @RequestMapping(value = {"/app/getAppStats"}, method = RequestMethod.POST)
-//    public String getAppStats(@RequestBody App app, HttpServletRequest request) throws Exception {
-//
-//        String respAppStats = null;
-//
-//        //LOGGER.info("getAppStats Start : " + app.getGuid());
-//        LOGGER.info("getAppStats Start : ");
-//
-//        //token setting
-//        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-//
-//        //service call
-//        //String token = loginService.login("yschoi", "1qaz@WSX").getValue();
-//
-////        respAppStats = appService.getAppStats(app, this.getToken());
-//
-//
-//        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), app.getOrgName(), app.getSpaceName());
-//        respAppStats = appService.getAppStats(app,client);
-//
-//
-//        LOGGER.info("stopApp End ");
-//
-//
-//        return respAppStats;
-//    }
-
     /**
      * 앱 실시간 상태를 조회한다.
      *
@@ -110,9 +73,6 @@ public class AppController extends Common {
     public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("stopApp Start : " + guid);
-
-        //token setting
-        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         //service call
         ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, this.getToken());
@@ -310,30 +270,6 @@ public class AppController extends Common {
     }
 
     /**
-     * 앱 환경변수 중 사용자 정의 환경변수 추가,수정한다.
-     *
-     * @param app     the app
-     * @param request the request
-     * @return map boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.6.30 최초작성
-     */
-    @RequestMapping(value = {"/app/updateApplicationEnv"}, method = RequestMethod.POST)
-    public boolean updateApplicationEnv(@RequestBody App app, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("updateApplicationEnv Start : " + app.getName());
-
-        appService.updateApplicationEnv(app, this.getToken());
-
-        LOGGER.info("updateApplicationEnv End ");
-
-        return true;
-    }
-
-
-    /**
      * 라우트 추가 및 라우트와 앱을 연결한다. (앱에 URI를 추가함)
      *
      * @param body
@@ -377,28 +313,6 @@ public class AppController extends Common {
     }
 
     /**
-     * 앱 라우트를 삭제한다.
-     *
-     * @param token the token
-     * @param body  the body
-     * @return boolean boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.7.6 최초작성
-     */
-    @RequestMapping(value = {"/app/deleteRoute"}, method = RequestMethod.POST)
-    public boolean removeApplicationRoute(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map body) throws Exception {
-
-        LOGGER.info("deleteRoute Start");
-
-        appService.deleteRoute(body.get("orgName").toString(), body.get("spaceName").toString(), (List) body.get("urls"), token);
-
-        LOGGER.info("deleteRoute End ");
-        return true;
-    }
-
-    /**
      * 인덱스에 의해 앱 인스턴스를 중지시킨다.
      *
      * @param guid
@@ -413,22 +327,6 @@ public class AppController extends Common {
         Map resultMap = appService.terminateInstance(guid, index, this.getToken());
 
         LOGGER.info("terminateInstance End");
-        return resultMap;
-    }
-
-
-    /**
-     * 앱 이미지를 조회한다.
-     *
-     * @param app the app
-     * @return app image url
-     */
-    @RequestMapping(value = {"/app/getAppImageUrl"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> getAppImageUrl(@RequestBody App app) {
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("appImageUrl", appService.getAppImageUrl(app));
-
         return resultMap;
     }
 

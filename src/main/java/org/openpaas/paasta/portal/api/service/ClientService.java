@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.uaa.clients.*;
 import org.cloudfoundry.uaa.tokens.GrantType;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -29,6 +30,7 @@ public class ClientService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);
 
     //V2
+    @HystrixCommand(fallbackMethod = "getClientList")
     public ListClientsResponse getClientList() throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
@@ -45,6 +47,7 @@ public class ClientService extends Common {
      * @return GetClientResponse
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getClient")
     public GetClientResponse getClient(String clientId) throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
@@ -62,6 +65,7 @@ public class ClientService extends Common {
      * @return CreateClientResponse
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "registerClient")
     public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -97,6 +101,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "updateClient")
     public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -133,6 +138,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteClient")
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()

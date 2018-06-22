@@ -59,6 +59,21 @@ public class DomainController extends Common {
         return domainService.getDomains(token, status.toLowerCase());
     }
 
+
+    /**
+     * Gets domains with guid.
+     *
+     * @param token  the token
+     * @param guid the guid
+     * @return the domains
+     * @throws Exception the exception
+     */
+    @GetMapping( Constants.V2_URL + "/{guid}/domains" )
+    public PaginatedResponse getOrgPrivateDomain( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
+                                         @PathVariable String guid) throws Exception {
+        return domainService.getOrgPrivateDomain(token, guid);
+    }
+
     /**
      * Add domain boolean.
      *

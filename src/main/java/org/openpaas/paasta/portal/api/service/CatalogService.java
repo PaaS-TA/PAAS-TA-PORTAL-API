@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.runtime.directive.Foreach;
 import org.apache.velocity.runtime.log.Log;
@@ -68,7 +69,6 @@ public class CatalogService extends Common {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CatalogService.class);
 
     private final CommonService commonService;
-    private final CommonCodeService commonCodeService;
     private final SpaceService spaceService;
     private final DomainService domainService;
     private final AppService appService;
@@ -77,10 +77,8 @@ public class CatalogService extends Common {
     private String cfAuthorizationHeaderKey;
 
     @Autowired
-    public CatalogService(
-            CommonCodeService commonCodeService, SpaceService spaceService,
-            DomainService domainService, AppService appService, CommonService commonService) throws Exception {
-        this.commonCodeService = commonCodeService;
+    public CatalogService(SpaceService spaceService, DomainService domainService, AppService appService, CommonService commonService) throws Exception {
+
         this.spaceService = spaceService;
         this.domainService = domainService;
         this.appService = appService;
@@ -91,42 +89,31 @@ public class CatalogService extends Common {
      * 카탈로그 서비스 이용사양 목록을 조회한다.
      *
      * @param servicename ServiceName(자바클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param req         HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "getCatalogServicePlanList")
     public ListServicePlansResponse getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
 
-        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
-                .services()
-                .list(ListServicesRequest
-                        .builder()
-                        .build())
-                .block();
-        Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream()
-                .filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
-        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
-                .servicePlans()
-                .list(ListServicePlansRequest
-                        .builder()
-                        .serviceId(serviceResource.get().getMetadata().getId())
-                        .build())
-                .block();
+        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).services().list(ListServicesRequest.builder().build()).block();
+        Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream().filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
+        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
         return listServicePlansResponse;
     }
 
     /**
      * 카탈로그 앱 목록을 조회한다.
      *
-     * @param orgid String(자바클래스)
+     * @param orgid   String(자바클래스)
      * @param spaceid String(자바클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param req     HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "getCatalogAppList")
     public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
-        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
-                .applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
     }
 
@@ -134,301 +121,25 @@ public class CatalogService extends Common {
     /**
      * 카탈로그 앱 이름 생성여부를 조회한다.
      *
-     * @param name  name(앱 이름)
-     * @param req   HttpServletRequest(자바클래스)
-     * @param res   HttpServletResponse(자바클래스)
+     * @param name name(앱 이름)
+     * @param req  HttpServletRequest(자바클래스)
+     * @param res  HttpServletResponse(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "getCheckCatalogApplicationNameExists")
     public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
 
-        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey)))
-                .applicationsV2().list(ListApplicationsRequest
-                        .builder()
-                        .organizationId(orgid)
-                        .spaceId(spaceid)
-                        .build())
-                .block();
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
 
-        for (ApplicationResource applicationResource: listApplicationsResponse.getResources()) {
-            if(applicationResource.getEntity().getName().equals(name))
-            {commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");}
-        }
-        return new HashMap<String, Object>() {{
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-
-    /**
-     * 카탈로그 앱 템플릿을 실행한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
-     * @return Map(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    public Map<String, Object> executeCatalogStarter(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
-        // CREATE APPLICATION
-        this.procCatalogCreateApplication(param, req);
-
-        // IF START APPLICATION
-        // UPLOAD APPLICATION
-        if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
-            // UPLOAD APPLICATION
-            this.procCatalogUploadApplication(param, req, response);
-        }
-
-        // CREATE SERVICE INSTANCE
-        // IF BIND SERVICE
-        List<Catalog> servicePlanList = param.getServicePlanList();
-        List<Catalog> serviceInstanceGuidList = new ArrayList<>();
-
-        for (Catalog servicePlan : servicePlanList) {
-            servicePlan.setServiceInstanceName(servicePlan.getServiceInstanceName());
-            servicePlan.setAppName(param.getName());
-            servicePlan.setOrgName(param.getOrgName());
-            servicePlan.setSpaceName(param.getSpaceName());
-            // CREATE SERVICE INSTANCE
-            //Map<String, Object> tempMap = this.procCatalogCreateServiceInstanceV2(servicePlan, req);
-
-            // FOR TEST CASE
-            Catalog bindParam = new Catalog();
-            //bindParam.setServiceInstanceGuid(UUID.fromString(tempMap.get("SERVICE_INSTANCE_GUID").toString()));
-            serviceInstanceGuidList.add(bindParam);
-
-            // BIND SERVICE
-            if (Constants.USE_YN_Y.equals(servicePlan.getAppBindYn())) {
-                bindParam.setOrgName(param.getOrgName());
-                bindParam.setSpaceName(param.getSpaceName());
-                bindParam.setAppName(param.getName());
-                bindParam.setApp_bind_parameter(servicePlan.getApp_bind_parameter());
-
-                //this.procCatalogBindService(bindParam, req);
+        for (ApplicationResource applicationResource : listApplicationsResponse.getResources()) {
+            if (applicationResource.getEntity().getName().equals(name)) {
+                commonService.getCustomSendError(res, HttpStatus.CONFLICT, "common.info.result.fail.duplicated");
             }
         }
-
-        // IF START APPLICATION
-        UUID resultAppGuid = null;
-        if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
-            // START APPLICATION
-            // Map<String, Object> resultMap = this.procCatalogStartApplication(param, req);
-            //resultAppGuid = (UUID) resultMap.get("APP_GUID");
-        }
-
-        UUID finalResultAppGuid = resultAppGuid;
-        return new HashMap<String, Object>() {{
-            put("APP_GUID", finalResultAppGuid);    // FOR TEST CASE
-            put("SERVICE_INSTANCE_GUID_LIST", serviceInstanceGuidList); // FOR TEST CASE
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-
-
-    /**
-     * 카탈로그 앱 템플릿 내역을 저장한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @return Map(자바클래스)
-     */
-    public Map<String, Object> insertCatalogHistoryStarter(Catalog param) {
-        param.setCatalogType(Constants.CATALOG_TYPE_STARTER);
-        //catalogMapper.insertCatalogHistory(param);
-
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
-    }
-
-
-    /**
-     * 카탈로그 앱 개발환경을 실행한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
-     * @return Map(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    public Map<String, Object> executeCatalogBuildPack(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
-        UUID resultAppGuid = null;
-
-        // CREATE APPLICATION
-        this.procCatalogCreateApplication(param, req);
-
-        // UPLOAD APPLICATION
-        if (!Constants.USE_YN_N.equals(param.getAppSampleFilePath()))
-            this.procCatalogUploadApplication(param, req, response);
-
-        if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
-            // START APPLICATION
-            //Map<String, Object> resultMap = this.procCatalogStartApplication(param, req);
-            //resultAppGuid = (UUID) resultMap.get("APP_GUID");
-        }
-
-        UUID finalResultAppGuid = resultAppGuid;
-        return new HashMap<String, Object>() {{
-            put("APP_GUID", finalResultAppGuid);    // FOR TEST CASE
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-
-
-    /**
-     * 카탈로그 앱 개발환경 내역을 저장한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @return Map(자바클래스)
-     */
-    public Map<String, Object> insertCatalogHistoryBuildPack(Catalog param) {
-        param.setCatalogType(Constants.CATALOG_TYPE_BUILD_PACK);
-        //catalogMapper.insertCatalogHistory(param);
-
-        return new HashMap<String, Object>() {{
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-
-
-    /**
-     * 카탈로그 서비스를 실행한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
-     * @return Map(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    public Map<String, Object> executeCatalogServicePack(Catalog param, HttpServletRequest req) throws Exception {
-        // CREATE SERVICE INSTANCE
-        Map<String, Object> resultMap = this.procCatalogCreateServiceInstance(param, req);
-
-        // BIND SERVICE
-        if (Constants.USE_YN_Y.equals(param.getAppBindYn())) {
-            Catalog bindParam = new Catalog();
-            //bindParam.setServiceInstanceGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
-            bindParam.setOrgName(param.getOrgName());
-            bindParam.setSpaceName(param.getSpaceName());
-            bindParam.setAppName(param.getAppName());
-            bindParam.setParameter(param.getParameter());
-
-            //this.procCatalogBindService(bindParam, req);
-        }
-
-        return new HashMap<String, Object>() {{
-            put("SERVICE_INSTANCE_GUID", resultMap.get("SERVICE_INSTANCE_GUID")); // FOR TEST CASE
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-
-    /**
-     * 카탈로그 서비스를 실행한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
-     * @return Map(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    public Map<String, Object> executeCatalogServicePackV2(Catalog param, HttpServletRequest req) throws Exception {
-        try {
-            // CREATE SERVICE INSTANCE
-            //Map<String, Object> resultMap = this.procCatalogCreateServiceInstanceV2(param, req);
-
-            // BIND SERVICE
-            if (Constants.USE_YN_Y.equals(param.getAppBindYn())) {
-                Catalog bindParam = new Catalog();
-                //bindParam.setServiceInstanceGuid(UUID.fromString(resultMap.get("SERVICE_INSTANCE_GUID").toString()));
-                bindParam.setOrgName(param.getOrgName());
-                bindParam.setSpaceName(param.getSpaceName());
-                bindParam.setAppName(param.getAppName());
-                bindParam.setParameter(param.getApp_bind_parameter());
-
-                //this.app_bind_parameter(bindParam, req);
-            }
-            return new HashMap<String, Object>() {{
-                //put("SERVICE_INSTANCE_GUID", resultMap.get("SERVICE_INSTANCE_GUID")); // FOR TEST CASE
-                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-            }};
-
-        } catch (Exception e) {
-            CloudFoundryException cfe = (CloudFoundryException) e;
-            LOGGER.error(cfe.getDescription());
-            return new HashMap<String, Object>() {{
-                put("SERVICE_INSTANCE_GUID", "");
-                put("ERROR_MSG", cfe.getDescription());
-                put("RESULT", Constants.RESULT_STATUS_FAIL);
-            }};
-        }
-    }
-
-    /**
-     * 카탈로그 서비스 실행 내역을 저장한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @return Map(자바클래스)
-     */
-    public Map<String, Object> insertCatalogHistoryServicePack(Catalog param) {
-        param.setCatalogType(Constants.CATALOG_TYPE_SERVICE_PACK);
-        //catalogMapper.insertCatalogHistory(param);
-
-        return new HashMap<String, Object>() {{
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-
-
-    /**
-     * 카탈로그 앱을 생성한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    private void procCatalogCreateApplication(Catalog param, HttpServletRequest req) throws Exception {
-        String appName = param.getName();
-        String buildPackName = (null != param.getBuildPackName()) ? param.getBuildPackName() : "";
-        Staging staging = new Staging(Constants.CREATE_APPLICATION_STAGING_COMMAND, buildPackName);
-        Integer disk = param.getDiskSize();
-        Integer memory = param.getMemorySize();
-        List<String> uris = new ArrayList<String>() {{
-            add(param.getHostName());
-        }};
-
-        if (disk == 0) disk = Constants.CREATE_APPLICATION_DISK_SIZE;
-        if (memory == 0) memory = Constants.CREATE_APPLICATION_MEMORY_SIZE;
-
-        // CREATE APPLICATION
-//        if (buildPackName.toLowerCase().contains(Constants.CATALOG_EGOV_BUILD_PACK_CHECK_STRING)) {
-//            CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//            customCloudFoundryClient.createApplicationV2(appName, staging, disk, memory, uris, new HashMap<String, Object>() {{
-//                put(Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_KEY, Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_VALUE);
-//            }});
-//
-//        } else {
-//            CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//            cloudFoundryClient.createApplication(appName, staging, disk, memory, uris, null);
-//
-//
-//        }
-
-    }
-
-
-    /**
-     * 카탈로그 앱을 업로드한다.
-     *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    private void procCatalogUploadApplication(Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
-        CloudFoundryClient cloudFoundryClient = getCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-        String appName = param.getName();
-        response.setContentType("application/octet-stream");
-        //String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(req));
-        //response.setHeader("Content-Disposition", "attachment; filename="+fileNameForBrowser);
-
-        OutputStream os = response.getOutputStream();
-        InputStream is = new URL(param.getAppSampleFilePath()).openStream();
-        cloudFoundryClient.uploadApplication(appName, appName, is);
-
     }
 
     private String getBrowser(String header) {
@@ -479,51 +190,32 @@ public class CatalogService extends Common {
      * 카탈로그 앱을 시작한다.
      *
      * @param applicationid applicationid
-     * @param token token
+     * @param token         token
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     private Map<String, Object> procCatalogStartApplication(String applicationid, String token) throws Exception {
-  try {
-      Thread.sleep(500);
-      Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
-  }
-  catch (Exception e){
-      LOGGER.info(e.toString());
-  }
+        try {
+            Thread.sleep(500);
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
+        } catch (Exception e) {
+            LOGGER.info(e.toString());
+        }
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
 
-
     /**
-     * 카탈로그 서비스 인스턴스를 생성한다.
+     * 카탈로그 앱을 생성한다.
      *
-     * @param param Catalog(모델클래스)
-     * @param req   HttpServletRequest(자바클래스)
+     * @param param  Catalog
+     * @param token  token
+     * @param token2 token
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> procCatalogCreateServiceInstance(Catalog param, HttpServletRequest req) throws Exception {
-//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(cfAuthorizationHeaderKey), param.getOrgName(), param.getSpaceName());
-//
-//        // CREATE SERVICE INSTANCE
-//        String resultString = customCloudFoundryClient.createService(param.getServiceInstanceName(), param.getServicePlan(), param.getOrgName(), param.getSpaceName());
-//
-//        Map<String, Object> tempMap = JsonUtil.convertJsonToMap(resultString);
-//        Map tempSubMap = (Map) tempMap.get("metadata"); // FOR TEST CASE
-//
-//
-//
-//        return new HashMap<String, Object>() {{
-//            put("SERVICE_INSTANCE_GUID", tempSubMap.get("guid"));
-//            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-//        }};
-        return null;
-    }
-
-
+    @HystrixCommand(fallbackMethod = "createApp")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
@@ -536,15 +228,26 @@ public class CatalogService extends Common {
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
                 procCatalogStartApplication(applicationid, token); //앱 시작
             }
-            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST,param,null);
+            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
-        }finally {
+        } finally {
             file.delete();
         }
     }
 
+
+    /**
+     * 카탈로그 앱 템플릿을 생성한다.
+     *
+     * @param param  Catalog
+     * @param token  token
+     * @param token2 token
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    @HystrixCommand(fallbackMethod = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
@@ -558,11 +261,11 @@ public class CatalogService extends Common {
                 procCatalogStartApplication(applicationid, token); //앱 시작
             }
             LOGGER.info(param.toString());
-            if(param.getServicePlanList() != null){
+            if (param.getServicePlanList() != null) {
                 param.getServicePlanList().forEach(serviceplan -> {
                     try {
                         serviceplan.setSpaceId(param.getSpaceId());
-                        if(!serviceplan.getAppGuid().equals("(id_dummy)")){
+                        if (!serviceplan.getAppGuid().equals("(id_dummy)")) {
                             serviceplan.setAppGuid(applicationid);
                         }
                         procCatalogCreateServiceInstanceV2(serviceplan, token);
@@ -571,20 +274,27 @@ public class CatalogService extends Common {
                     }
                 });
             }
-            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST,param,null);
+            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
-        }finally {
+        } finally {
             file.delete();
         }
     }
 
-    private String createApplication(Catalog param, String token) {
-        if(param.getBuildPackName().toLowerCase().contains(Constants.CATALOG_EGOV_BUILD_PACK_CHECK_STRING)){
+    /**
+     * 앱을 생성한다.
+     *
+     * @param param Catalog
+     * @param token token
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private String createApplication(Catalog param, String token) throws Exception {
+        if (param.getBuildPackName().toLowerCase().contains(Constants.CATALOG_EGOV_BUILD_PACK_CHECK_STRING)) {
             return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                    applicationsV2().create(CreateApplicationRequest.builder().buildpack(param.getBuildPackName()).memory(param.getMemorySize()).name(param.getAppName()).diskQuota(param.getDiskSize()).spaceId(param.getSpaceId()).environmentJsons(new HashMap<String, Object>()
-            {{
+                    applicationsV2().create(CreateApplicationRequest.builder().buildpack(param.getBuildPackName()).memory(param.getMemorySize()).name(param.getAppName()).diskQuota(param.getDiskSize()).spaceId(param.getSpaceId()).environmentJsons(new HashMap<String, Object>() {{
                 put(Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_KEY, Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_VALUE);
             }}).build()).block().getMetadata().getId();
         }
@@ -594,32 +304,60 @@ public class CatalogService extends Common {
 
     }
 
-    private String createRoute(Catalog param, String token) {
+    /**
+     * 라우트를 생성한다..
+     *
+     * @param param Catalog
+     * @param token token
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private String createRoute(Catalog param, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 routes().create(CreateRouteRequest.builder().host(param.getAppName()).domainId(param.getDomainId()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
     }
 
-    private void routeMapping(String applicationid, String routeid, String token) {
+    /**
+     * 라우트를 앱에 매핑한다.
+     *
+     * @param applicationid String
+     * @param routeid       String
+     * @param token         token
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private void routeMapping(String applicationid, String routeid, String token) throws Exception {
         Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 routeMappings().create(CreateRouteMappingRequest.builder().routeId(routeid).applicationId(applicationid).build()).block();
     }
 
-    private  void fileUpload(File file, String applicationid, String token){
+    /**
+     * 파일을 업로드한다.
+     *
+     * @param file          File
+     * @param applicationid String
+     * @param token         token
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private void fileUpload(File file, String applicationid, String token) throws Exception {
         try {
             Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                    applicationsV2().upload(
-                    UploadApplicationRequest
-                            .builder()
-                            .applicationId(applicationid)
-                            .application(file.toPath())
-                            .build()
-            ).block();
-        }
-        catch(Exception e){
+                    applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
+        } catch (Exception e) {
             LOGGER.info(e.toString());
         }
     }
-   private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
+
+    /**
+     * 임시 파일을 생성한다.
+     *
+     * @param param  Catalog(모델클래스)
+     * @param token2 String(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
         response.setContentType("application/octet-stream");
         String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
@@ -637,36 +375,28 @@ public class CatalogService extends Common {
      * 카탈로그 서비스 인스턴스를 생성한다.
      *
      * @param param Catalog(모델클래스)
-     * @param token   String(자바클래스)
+     * @param token String(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "procCatalogCreateServiceInstanceV2")
     public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
         LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
         });
         LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + parameterMap + " : " + param.getServicePlan());
-        CreateServiceInstanceResponse createserviceinstanceresponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                        serviceInstances().create(
-                        CreateServiceInstanceRequest
-                                .builder()
-                                .name(param.getName())
-                                .spaceId(param.getSpaceId())
-                                .parameters(parameterMap)
-                                .servicePlanId(param.getServicePlan())
-                                .build()
-                ).block();
+        CreateServiceInstanceResponse createserviceinstanceresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
 
-        if(!param.getAppGuid().equals("(id_dummy)")) {
+        if (!param.getAppGuid().equals("(id_dummy)")) {
 
 
             param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
             procCatalogBindService(param, token);
         }
-        if(param.getCatalogType() != null){
-        commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST,param,null);
+        if (param.getCatalogType() != null) {
+            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
         }
         return createserviceinstanceresponse;
     }
@@ -675,38 +405,33 @@ public class CatalogService extends Common {
      * 카탈로그 앱 서비스를 바인드한다.
      *
      * @param param Catalog(모델클래스)
-     * @param token   String(자바클래스)
+     * @param token String(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "procCatalogBindService")
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
         });
-        CreateServiceBindingResponse createservicebindingresponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                        serviceBindingsV2().create(
-                        CreateServiceBindingRequest
-                                .builder()
-                                .applicationId(param.getAppGuid())
-                                .serviceInstanceId(param.getServiceInstanceGuid())
-                                .parameters(bindparameterMap)
-                                .build()
-                ).block();
+        CreateServiceBindingResponse createservicebindingresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                serviceBindingsV2().create(CreateServiceBindingRequest.builder().applicationId(param.getAppGuid()).serviceInstanceId(param.getServiceInstanceGuid()).parameters(bindparameterMap).build()).block();
 
         return createservicebindingresponse;
     }
 
-    public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token){
-        ListServiceInstancesResponse listServiceInstancesResponse =
-                Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                        serviceInstances().list(
-                        ListServiceInstancesRequest
-                                .builder()
-                                .organizationId(orgid)
-                                .spaceId(spaceid)
-                                .build()
-                ).block();
+    /**
+     * 카탈로그 서비스 인스턴스를 생성한다.
+     *
+     * @param orgid String(자바클래스)
+     * @param token String(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    @HystrixCommand(fallbackMethod = "listServiceInstancesResponse")
+    public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token) {
+        ListServiceInstancesResponse listServiceInstancesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                serviceInstances().list(ListServiceInstancesRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listServiceInstancesResponse;
     }
 
@@ -715,12 +440,8 @@ public class CatalogService extends Common {
      *
      * @return ListServicesResponse
      */
-    public ListServicesResponse getService()throws Exception{
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
-                .services()
-                .list(ListServicesRequest.builder()
-                        .build()
-                ).log()
-                .block();
+    @HystrixCommand(fallbackMethod = "getService")
+    public ListServicesResponse getService() throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).services().list(ListServicesRequest.builder().build()).log().block();
     }
 }

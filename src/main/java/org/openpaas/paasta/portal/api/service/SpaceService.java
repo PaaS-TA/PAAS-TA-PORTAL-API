@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 import com.google.common.base.CaseFormat;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
@@ -51,11 +52,6 @@ public class SpaceService extends Common {
     @Autowired
     private PasswordGrantTokenProvider adminTokenProvider;
 
-//    @Autowired
-//    private SpaceMapper spaceMapper;
-//    @Autowired
-//    private OrgMapper orgMapper;
-
     /**
      * 공간(스페이스) 목록 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
@@ -66,6 +62,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
+    @HystrixCommand(fallbackMethod = "getSpaces")
     public ListSpacesResponse getSpaces(String orgId, String token) {
         ListSpacesResponse response = Common
             .cloudFoundryClient( connectionContext(), tokenProviderWithDefault( token, adminTokenProvider ) ).spaces()
@@ -74,6 +71,7 @@ public class SpaceService extends Common {
         return response;
     }
 
+    @HystrixCommand(fallbackMethod = "getSpacesWithOrgName")
     public ListSpacesResponse getSpacesWithOrgName(String orgName, String token) {
         final String orgId = orgService.getOrgId( orgName, token );
 
@@ -91,6 +89,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
+    @HystrixCommand(fallbackMethod = "getSpaces")
     public ListSpacesResponse getSpaces(Org org, String token) {
         String orgId = null;
         if (org.getGuid() != null) {
@@ -127,6 +126,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
+    @HystrixCommand(fallbackMethod = "createSpace")
     public Map createSpace(Space space, String token) {
         Map resultMap = new HashMap();
 
@@ -163,6 +163,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
+    @HystrixCommand(fallbackMethod = "getSpace")
     public GetSpaceResponse getSpace(String spaceId, String token) {
         Objects.requireNonNull( spaceId, "Space Id" );
 
@@ -175,11 +176,12 @@ public class SpaceService extends Common {
         return Common.cloudFoundryClient( connectionContext(), internalTokenProvider )
             .spaces().get( GetSpaceRequest.builder().spaceId( spaceId ).build() ).block();
     }
-
+    @HystrixCommand(fallbackMethod = "getSpace")
     public GetSpaceResponse getSpace(String spaceId) {
         return getSpace(spaceId, null);
     }
 
+    @HystrixCommand(fallbackMethod = "getSpaceUsingName")
     public SpaceResource getSpaceUsingName( String orgName, String spaceName, String token ) {
         final TokenProvider internalTokenProvider;
         if ( null != token && !"".equals( token ) ) {
@@ -204,14 +206,8 @@ public class SpaceService extends Common {
         return spaces.get( 0 );
     }
 
-    public boolean isExistSpaceName ( final String orgName, final String spaceName ) {
-        try {
-            return spaceName.equals( getSpaceUsingName(orgName, spaceName, null).getEntity().getName() );
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
+    @HystrixCommand(fallbackMethod = "isExistSpace")
     public boolean isExistSpace ( final String spaceId ) {
         try {
             return spaceId.equals( getSpace(spaceId).getMetadata().getId() );
@@ -231,6 +227,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
+    @HystrixCommand(fallbackMethod = "renameSpace")
     public Map renameSpace(Space space, String token){
         Map resultMap = new HashMap();
 
@@ -269,6 +266,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
+    @HystrixCommand(fallbackMethod = "deleteSpace")
     public Map deleteSpace(String guid, boolean recursive, String token) {
         Map resultMap = new HashMap();
 
@@ -299,6 +297,7 @@ public class SpaceService extends Common {
      * @return space summary
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getSpaceSummary")
     public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception{
         ReactorCloudFoundryClient cloudFoundryClient =
             Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
@@ -323,6 +322,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.4.30
      */
+    @HystrixCommand(fallbackMethod = "getSpaceServices")
     public ListSpaceServicesResponse getSpaceServices(String spaceId, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient =
             Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
@@ -342,6 +342,7 @@ public class SpaceService extends Common {
         SPACEMANAGER, SPACEDEVELOPER, SPACEAUDITOR,
     }
 
+    @HystrixCommand(fallbackMethod = "listAllSpaceUsers")
     private List<UserSpaceRoleResource> listAllSpaceUsers( String spaceId, String token ) {
         final ListSpaceUserRolesResponse response =
             Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
@@ -352,6 +353,7 @@ public class SpaceService extends Common {
         return response.getResources();
     }
 
+    @HystrixCommand(fallbackMethod = "listSpaceManagerUsers")
     private List<UserResource> listSpaceManagerUsers( String spaceId, String token ) {
         final ListSpaceManagersResponse response =
             Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
@@ -362,6 +364,7 @@ public class SpaceService extends Common {
         return response.getResources();
     }
 
+    @HystrixCommand(fallbackMethod = "listSpaceDeveloperUsers")
     private List<UserResource> listSpaceDeveloperUsers( String spaceId, String token ) {
         final ListSpaceDevelopersResponse response =
             Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
@@ -372,6 +375,7 @@ public class SpaceService extends Common {
         return response.getResources();
     }
 
+    @HystrixCommand(fallbackMethod = "listSpaceAuditorUsers")
     private List<UserResource> listSpaceAuditorUsers( String spaceId, String token ) {
         final ListSpaceAuditorsResponse response =
             Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
@@ -382,6 +386,7 @@ public class SpaceService extends Common {
         return response.getResources();
     }
 
+    @HystrixCommand(fallbackMethod = "getSpaceUserRoles")
     public Map<String, Collection<UserRole>> getSpaceUserRoles( String spaceId, String token ) {
         if (null == token)
             token = adminTokenProvider.getToken( connectionContext() ).block();
@@ -415,6 +420,7 @@ public class SpaceService extends Common {
         return result;
     }
 
+    @HystrixCommand(fallbackMethod = "getSpaceUserRolesBySpaceName")
     public SpaceUsers getSpaceUserRolesBySpaceName( String orgName, String spaceName, String token ) {
         return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
             .userAdmin()
@@ -423,17 +429,20 @@ public class SpaceService extends Common {
             ).block();
     }
 
+    @HystrixCommand(fallbackMethod = "isSpaceManagerUsingName")
     public boolean isSpaceManagerUsingName( String orgName, String spaceName, String token ) {
         final String spaceId = this.getSpaceUsingName( orgName, spaceName, token ).getMetadata().getId();
         final String userId = userService.getUser( token ).getId();
         return isSpaceManager( spaceId, userId );
     }
 
+    @HystrixCommand(fallbackMethod = "isSpaceManagerUsingToken")
     public boolean isSpaceManagerUsingToken( String spaceId, String token ) {
         final String userId = userService.getUser( token ).getId();
         return isSpaceManager( spaceId, userId );
     }
 
+    @HystrixCommand(fallbackMethod = "isSpaceManager")
     public boolean isSpaceManager( String spaceId, String userId ) {
         Stream<UserRole> userRoles = getSpaceUserRoles( spaceId, null ).get( "user_roles" )
             .stream().filter( ur -> ur.getRoles().contains( "SpaceManager" ) );
@@ -442,6 +451,7 @@ public class SpaceService extends Common {
         return matches;
     }
 
+    @HystrixCommand(fallbackMethod = "associateSpaceManager")
     private AssociateSpaceManagerResponse associateSpaceManager(String spaceId, String userId) {
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .spaces()
@@ -450,6 +460,7 @@ public class SpaceService extends Common {
             .block();
     }
 
+    @HystrixCommand(fallbackMethod = "associateSpaceDeveloper")
     private AssociateSpaceDeveloperResponse associateSpaceDeveloper(String spaceId, String userId) {
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .spaces()
@@ -458,6 +469,7 @@ public class SpaceService extends Common {
             .block();
     }
 
+    @HystrixCommand(fallbackMethod = "associateSpaceAuditor")
     private AssociateSpaceAuditorResponse associateSpaceAuditor(String spaceId, String userId) {
         return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
             .spaces()
@@ -466,6 +478,7 @@ public class SpaceService extends Common {
             .block();
     }
 
+    @HystrixCommand(fallbackMethod = "associateSpaceUserRole")
     public AbstractSpaceResource associateSpaceUserRole( String spaceId, String userId, String role ) {
         Objects.requireNonNull( spaceId, "Space Id" );
         Objects.requireNonNull( userId, "User Id" );
@@ -503,6 +516,7 @@ public class SpaceService extends Common {
         }
     }
 
+    @HystrixCommand(fallbackMethod = "associateAllSpaceUserRolesByOrgId")
     public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId ( String orgId, String userId, Iterable<String> roles) {
         final List<AbstractSpaceResource> responses = new LinkedList<>();
         final List<String> spaceIds = this.getSpaces( orgId, null ).getResources()
@@ -518,6 +532,7 @@ public class SpaceService extends Common {
         return responses;
     }
 
+    @HystrixCommand(fallbackMethod = "associateSpaceUserRolesByOrgIdAndRole")
     public List<AbstractSpaceResource> associateSpaceUserRolesByOrgIdAndRole ( String spaceId, String orgId ) {
         // set space role for all user in org
         final List<AbstractSpaceResource> results = new LinkedList<>();
@@ -540,6 +555,7 @@ public class SpaceService extends Common {
 
         return results;
     }
+
 
     private void removeSpaceManager( String spaceId, String userId ) {
         LOGGER.debug( "---->> Remove SpaceManager role of member({}) in space({}).", userId, spaceId );
@@ -583,6 +599,7 @@ public class SpaceService extends Common {
      * @param userId
      * @param role
      */
+    @HystrixCommand(fallbackMethod = "removeSpaceUserRole")
     public void removeSpaceUserRole ( String spaceId, String userId, String role ) {
         Objects.requireNonNull( spaceId, "Space Id" );
         Objects.requireNonNull( userId, "User Id" );
@@ -622,6 +639,7 @@ public class SpaceService extends Common {
         }
     }
 
+    @HystrixCommand(fallbackMethod = "removeAllSpaceUserRolesByOrgId")
     public void removeAllSpaceUserRolesByOrgId( String orgId, String userId, Iterable<String> roles ) {
         final List<String> spaceIds = this.getSpaces( orgId, null ).getResources()
             .stream().map( space -> space.getMetadata().getId() ).filter( id -> null != id )

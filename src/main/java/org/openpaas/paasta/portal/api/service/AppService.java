@@ -2,7 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import com.corundumstudio.socketio.SocketIOClient;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
@@ -39,9 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import org.openpaas.paasta.portal.api.mapper.cc.AppCcMapper;
-//import org.openpaas.paasta.portal.api.mapper.portal.AppMapper;
-
 /**
  * 앱 서비스 - 애플리케이션 정보 조회, 구동, 정지 등의 API 를 호출 하는 서비스이다.
  *
@@ -54,26 +51,13 @@ public class AppService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
 
-//    @Autowired
-//    private AppCcMapper appCcMapper;
-
-//    @Autowired
-//    private AppMapper appMapper;
-
-    @Autowired
-    private AppAutoScaleModalService appAutoScaleModalService;
 
     @Autowired
     ReactorCloudFoundryClient reactorCloudFoundryClient;
 
-    //ReactorCloudFoundryClient cloudFoundryClient  = cloudFoundryClient(connectionContext(),tokenProvider(token));
-    //DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
-    //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-
+    @HystrixCommand(fallbackMethod = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException {
 
-        //SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
-        // 로그 추가(이후 .log() 제거)
         SummaryApplicationResponse summaryApplicationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .applicationsV2()
                 .summary(SummaryApplicationRequest.builder()
@@ -93,9 +77,9 @@ public class AppService extends Common {
      * @param token the client
      * @return the app stats
      */
+    @HystrixCommand(fallbackMethod = "getAppStats")
     public ApplicationStatisticsResponse getAppStats(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
-        //ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(app.getGuid().toString()).build()).block();
 
         ApplicationStatisticsResponse applicationStatisticsResponse =
                 cloudFoundryClient.applicationsV2()
@@ -113,9 +97,8 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "renameApp")
     public Map renameApp(App app, String token){
-        //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), app.getOrgName(), app.getSpaceName());
-        // cloudFoundryOperations.applications().rename(RenameApplicationRequest.builder().name(app.getName()).newName(app.getNewName()).build());
         HashMap result = new HashMap();
         try{
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
@@ -144,24 +127,16 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "startApp")
     public Map startApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-//        cloudFoundryClient.applicationsV3()
-//                .start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder()
-//                        .applicationId(app.getGuid().toString())
-//                        .build()
-//                ).block();
-
-//        cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state(CloudApplication.AppState.STARTED.toString()).build()).block();
-
             DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
             cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
 
-//        Common.cloudFoundryOperations(connectionContext(), tokenProvider(token), param.getOrgName(), param.getSpaceName()).applications().start(StartApplicationRequest.builder().name(param.getAppName()).build()).block();
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -180,6 +155,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "stopApp")
     public Map stopApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -191,9 +167,6 @@ public class AppService extends Common {
                             .applicationId(app.getGuid().toString())
                             .build()
                     ).block();
-
-//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-//        cloudFoundryOperations.applications().stop(StopApplicationRequest.builder().name(app.getName()).build());
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,6 +184,7 @@ public class AppService extends Common {
      * @param guid the app
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteApp")
     public Map deleteApp(String guid) {
         HashMap result = new HashMap();
         try {
@@ -230,9 +204,7 @@ public class AppService extends Common {
             //AutoScale 설정 삭제
             HashMap map = new HashMap();
             map.put("guid", String.valueOf(guid));
-            if (null != appAutoScaleModalService.getAppAutoScaleInfo(map).get("list")) {
-                appAutoScaleModalService.deleteAppAutoScale(String.valueOf(guid));
-            }
+
         } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);
@@ -250,6 +222,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "restageApp")
     public Map restageApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -261,9 +234,6 @@ public class AppService extends Common {
                             .applicationId(app.getGuid().toString())
                             .build()
                     ).block();
-
-//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-//        cloudFoundryOperations.applications().restage(RestageApplicationRequest.builder().name(app.getName()).build());
 
             resultMap.put("result", true);
         } catch (Exception e) {
@@ -282,6 +252,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "updateApp")
     public Map updateApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -320,6 +291,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "bindService")
     public Map bindService(Map body, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -340,8 +312,6 @@ public class AppService extends Common {
 
             resultMap.put("result", true);
 
-//        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
-//        cloudFoundryOperations.services().bind(BindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("result", false);
@@ -360,6 +330,7 @@ public class AppService extends Common {
      * @param token             the client
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "unbindService")
     public Map unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -384,8 +355,6 @@ public class AppService extends Common {
 
             resultMap.put("result", true);
 
-//        DefaultCloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token),app.getOrgName(),app.getSpaceName());
-//        cloudFoundryOperations.services().unbind(UnbindServiceInstanceRequest.builder().applicationName(app.getName()).serviceInstanceName(app.getServiceName()).build());
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("result", false);
@@ -403,6 +372,7 @@ public class AppService extends Common {
      * @return the app events
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getAppEvents")
     public ListEventsResponse getAppEvents(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -423,6 +393,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
+    @HystrixCommand(fallbackMethod = "getApplicationEnv")
     public ApplicationEnvironmentResponse getApplicationEnv(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -437,55 +408,6 @@ public class AppService extends Common {
     }
 
     /**
-     * 앱 환경변수 중 사용자 정의 환경변수를 추가,수정한다.
-     *
-     * @param app   the app
-     * @param token the token
-     * @return the boolean
-     * @throws Exception the exception
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.6.30 최초작성
-     */
-    public boolean updateApplicationEnv(App app, String token) throws Exception {
-//        String orgName = app.getOrgName();
-//        String spaceName = app.getSpaceName();
-//        String appName = app.getName();
-//        Map<String, String> appEnvironment = app.getEnvironment();
-//
-//        if (!stringNullCheck(orgName, spaceName, appName) || appEnvironment == null) {
-//            throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
-//        }
-//
-//        CloudFoundryClient client = getCloudFoundryClient(token, orgName, spaceName);
-//
-//        client.updateApplicationEnv(appName, appEnvironment);
-
-        return true;
-
-    }
-
-
-    /**
-     * 앱 라우트를 조회한다.
-     *
-     * @param domainName,client
-     * @return map
-     * @author 김도준
-     * @version 1.0
-     * @since 2016.7.5 최초작성
-     */
-/*
-    public List<CloudRoute> getRoute(String domainName, CloudFoundryClient client) throws Exception {
-
-        List<CloudRoute> routes = client.getRoutes(domainName);
-
-        return routes;
-    }
-*/
-
-
-    /**
      * 라우트 추가 및 라우트와 앱을 연결한다. (앱에 URI를 추가함)
      *
      * @param body
@@ -496,6 +418,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
+    @HystrixCommand(fallbackMethod = "addApplicationRoute")
     public Map addApplicationRoute(Map body, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -540,6 +463,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
+    @HystrixCommand(fallbackMethod = "removeApplicationRoute")
     public Map removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -580,6 +504,7 @@ public class AppService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteRoute")
     public boolean deleteRoute(String orgName, String spaceName, List<String> urls, String token) throws Exception {
         return true;
     }
@@ -593,6 +518,7 @@ public class AppService extends Common {
      * @return the map
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "terminateInstance")
     public Map terminateInstance(String guid, String index, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -605,9 +531,6 @@ public class AppService extends Common {
             cloudFoundryClient.applicationsV2().terminateInstance(requestBuilder.build()).block();
 
             resultMap.put("result", true);
-
-//        CustomCloudFoundryClient customCloudFoundryClient = getCustomCloudFoundryClient(req.getHeader(AUTHORIZATION_HEADER_KEY), param.getOrgName(), param.getSpaceName());
-//        customCloudFoundryClient.terminateAppInstanceByIndex(param.getGuid(), param.getAppInstanceIndex(), param.getOrgName(), param.getSpaceName());
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("result", false);
@@ -617,41 +540,7 @@ public class AppService extends Common {
         return resultMap;
     }
 
-
-    /**
-     * 앱 이미지 URL를 조회한다.
-     *
-     * @param app the app
-     * @return the app image url
-     */
-    public String getAppImageUrl(App app) {
-
-//        String buildPack = appCcMapper.getAppBuildPack(String.valueOf(app.getGuid()));
-        String buildPack = "";
-//        String appImageUrl = appMapper.getAppImageUrl(buildPack);
-        String appImageUrl = "";
-        return appImageUrl;
-
-    }
-
-
-//    public List<ApplicationSummary> getAppSummery(DefaultCloudFoundryOperations cloudFoundryOperations) {
-//        return cloudFoundryOperations.applications().list().collectList().block();
-//    }
-//
-//    public ApplicationDetail getAppDetail(DefaultCloudFoundryOperations cloudFoundryOperations, String appName) {
-//        return cloudFoundryOperations.applications().get(GetApplicationRequest.builder().name(appName).build()).block();
-//    }
-//
-//    public Flux<Envelope> getRecentLog(ReactorDopplerClient reactorDopplerClient, String appId) {
-//
-//        RecentLogsRequest recentLogsRequest = RecentLogsRequest.builder().applicationId(appId).build();
-//
-//        Flux<Envelope> getRecentLog = reactorDopplerClient.recentLogs(recentLogsRequest);
-//
-//        return getRecentLog;
-//    }
-
+    @HystrixCommand(fallbackMethod = "getRecentLog")
     public List<Envelope> getRecentLog(String guid, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
         ReactorDopplerClient reactorDopplerClient = Common.dopplerClient(connectionContext(), tokenProvider);
@@ -663,15 +552,9 @@ public class AppService extends Common {
         return getRecentLog;
     }
 
+    @HystrixCommand(fallbackMethod = "getTailLog")
     public List<LogMessage> getTailLog(String guid, String token) {
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), "demo.org", "dev");
-//        CloudFoundryOperations cloudFoundryOperations  = cloudFoundryOperations(connectionContext(),tokenProvider(token));
-
-//        List<LogMessage> getTailLog = cloudFoundryOperations.applications()
-//                .logs(LogsRequest.builder()
-//                        .name("github-test-app2")
-//                        .build()
-//                ).collectList().block();
 
         cloudFoundryOperations.applications()
                 .logs(LogsRequest.builder()
@@ -690,20 +573,9 @@ public class AppService extends Common {
 
     private void printLog(LogMessage msg) {
         LOGGER.info(" [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
-//        System.out.println(
-//                new StringBuffer()
-//                        .append(new Timestamp(msg.getTimestamp()/1000000).toLocalDateTime())
-//                        .append(" [")
-//                        .append(msg.getSourceType())
-//                        .append("/")
-//                        .append(msg.getSourceInstance())
-//                        .append("] [")
-//                        .append(msg.getMessageType())
-//                        .append("] ")
-//                        .append(msg.getMessage())
-//        );
     }
 
+    @HystrixCommand(fallbackMethod = "socketTailLogs")
     public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName, String token) {
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), orgName, spaceName);
 
@@ -722,20 +594,4 @@ public class AppService extends Common {
         return client;
     }
 
-//    public Map test(){
-//        try {
-//            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(adminUserName, adminPassword));
-//            reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).phoneNumber(PhoneNumber.builder().value(userDetail.getTellPhone()).build()).email(Email.builder().value(userDetail.getUserName()).build()).build()).block();
-//
-//            DefaultCloudFoundryOperations defaultCloudFoundryOperations = Common.cloudFoundryOperations(connectionContext(), tokenProvider(userDetail.getUserId(), userDetail.getPassword()));
-//
-//            result.put("result", true);
-//            result.put("msg", "You have successfully completed the task.");
-//            //TODO : ORG 권한 부여
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            result.put("result", false);
-//            result.put("msg", e.getMessage());
-//        }
-//    }
 }

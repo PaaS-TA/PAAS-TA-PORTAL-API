@@ -47,9 +47,6 @@ public class BuildPackController extends Common {
 
         LOGGER.info("getBuildPacks Start");
 
-        //token setting
-        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
         //service call
         Map<String, Object> buildPacks = buildPackService.getBuildPacks();
 

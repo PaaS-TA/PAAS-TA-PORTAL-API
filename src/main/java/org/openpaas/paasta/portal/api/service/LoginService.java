@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
@@ -48,6 +49,7 @@ public class LoginService extends Common {
      * @throws MalformedURLException the malformed url exception
      * @throws URISyntaxException    the uri syntax exception
      */
+    @HystrixCommand(fallbackMethod = "login")
     public OAuth2AccessToken login(String id, String password) throws MalformedURLException, URISyntaxException {
         CloudCredentials cc = new CloudCredentials(id, password);
         OAuth2AccessToken token = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
@@ -55,7 +57,8 @@ public class LoginService extends Common {
 
         return token;
     }
-    
+
+    @HystrixCommand(fallbackMethod = "refresh")
     public OAuth2AccessToken refresh(String token, String refreshToken) throws MalformedURLException, URISyntaxException {
         CloudCredentials cc = new CloudCredentials(getOAuth2Token(token, refreshToken), true);
         OAuth2AccessToken newToken = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
@@ -63,6 +66,7 @@ public class LoginService extends Common {
         return newToken;
     }
 
+    @HystrixCommand(fallbackMethod = "refresh")
     public OAuth2AccessToken refresh(OAuth2AccessToken token) throws MalformedURLException, URISyntaxException {
         CloudCredentials cc = new CloudCredentials(token, true);
         OAuth2AccessToken newToken = new CloudFoundryClient(cc, getTargetURL(apiTarget), true).login();
@@ -70,6 +74,7 @@ public class LoginService extends Common {
         return newToken;
     }
 
+    @HystrixCommand(fallbackMethod = "refresh")
     public OAuth2AccessToken refresh(String oldToken) throws MalformedURLException, URISyntaxException {
         if (tokenCaches.containsKey(oldToken)) {
             OAuth2AccessToken oAuthToken = tokenCaches.get(oldToken);
@@ -86,14 +91,15 @@ public class LoginService extends Common {
         }
     }
 
-
+    @HystrixCommand(fallbackMethod = "getOAuth2Token")
     private final OAuth2AccessToken getOAuth2Token(String token, String refreshToken) {
         DefaultOAuth2AccessToken oAuthToken = new DefaultOAuth2AccessToken( token );
         oAuthToken.setRefreshToken( new DefaultOAuth2RefreshToken( refreshToken ) );
         
         return oAuthToken;
     }
-    
+
+    @HystrixCommand(fallbackMethod = "getOAuth2TokenFromTokenResponse")
     private final OAuth2AccessToken getOAuth2TokenFromTokenResponse(AbstractToken tokenResponse) {
         final Map<String, String> tokenMap = objectMapper.convertValue( tokenResponse, typeRef );
         return DefaultOAuth2AccessToken.valueOf( tokenMap );

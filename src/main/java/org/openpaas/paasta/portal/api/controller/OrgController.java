@@ -99,12 +99,12 @@ public class OrgController extends Common {
      * @return summary of the organization
      */
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
-    public SummaryOrganizationResponse getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+    public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("org summary : " + orgId);
 		if (orgId == null) {
 			throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
 		}
-		return orgService.getOrgSummary(orgId, token);
+		return orgService.getOrgSummaryMap(orgId, token);
     }
 
     /**
@@ -227,7 +227,7 @@ public class OrgController extends Common {
         LOGGER.info("Get quota of org {}" + orgId);
         return orgService.getOrgQuota(orgId, token);
     }
-    
+
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")
     public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         LOGGER.info("changeQuota Start ");
