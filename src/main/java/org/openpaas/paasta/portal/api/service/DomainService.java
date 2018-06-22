@@ -66,6 +66,23 @@ public class DomainService extends Common {
         }
     }
 
+
+    /**
+     * 도메인 가져오기 - status 값을 받아 private, shared 중 선택하여 가져오거나 모두 가져올수 있음
+     *
+     * @param token  the token
+     * @param orguid the orguid
+     * @return domains response (V2)
+     * @throws Exception the exception
+     * @author 박철한, 조현구
+     * @since 2018.4.30
+     */
+    public ListDomainsResponse getOrgPrivateDomain ( String token, String orguid ) throws Exception {
+        return Common.cloudFoundryClient( this.connectionContext(), tokenProvider(token) ).domains()
+                .list(ListDomainsRequest.builder().owningOrganizationId(orguid).build()).block();
+
+    }
+
     private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider ) {
         return Common.cloudFoundryClient( context, tokenProvider )
             .domains().list( ListDomainsRequest.builder().build() ).block();

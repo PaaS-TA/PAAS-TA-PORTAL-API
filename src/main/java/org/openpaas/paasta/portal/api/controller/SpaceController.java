@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
@@ -62,6 +63,7 @@ public class SpaceController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getSpaceSummary")
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summary"}, method = RequestMethod.GET)
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
@@ -82,6 +84,7 @@ public class SpaceController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getSpaceSummary2")
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summarylist"}, method = RequestMethod.GET)
     public Map getSpaceSummary2(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
@@ -149,6 +152,7 @@ public class SpaceController extends Common {
         return resultMap;
     }
 
+    @HystrixCommand(fallbackMethod = "getSpace")
     @GetMapping(V2_URL + "/spaces/{spaceid}")
     public GetSpaceResponse getSpace(@PathVariable String spaceId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String authHeader) {
         return spaceService.getSpace( spaceId, authHeader );
@@ -166,6 +170,7 @@ public class SpaceController extends Common {
      * @author hgcho
      * @since 2018.5.8
      */
+    @HystrixCommand(fallbackMethod = "renameSpace")
     @PutMapping(V2_URL + "/spaces")
     public Map renameSpace(@RequestBody Space space, HttpServletRequest request) throws Exception {
         LOGGER.info("renameSpace Start ");
@@ -187,6 +192,7 @@ public class SpaceController extends Common {
      * @author hgcho
      * @since 2018.5.8
      */
+    @HystrixCommand(fallbackMethod = "deleteSpace")
     @DeleteMapping(V2_URL + "/spaces/{guid}")
     public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, HttpServletRequest request) throws Exception {
         LOGGER.info("deleteSpace Start ");
@@ -208,6 +214,7 @@ public class SpaceController extends Common {
      * @author hgcho
      * @since 2018.5.8
      */
+     @HystrixCommand(fallbackMethod = "createSpace")
     @PostMapping(V2_URL + "/spaces")
     public Map createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String authHeader) throws Exception {
         LOGGER.info("createSpace Start ");
@@ -218,6 +225,7 @@ public class SpaceController extends Common {
         return resultMap;
     }
 
+    @HystrixCommand(fallbackMethod = "getSpaceServices")
     @RequestMapping(value = {Constants.V2_URL+"/spaces/{guid}/services"}, method = RequestMethod.GET)
     public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getSpaceServices Start : " + guid);
@@ -238,6 +246,7 @@ public class SpaceController extends Common {
      * @version 2.0
      * @since 2018.5.16
      */
+    @HystrixCommand(fallbackMethod = "getSpaceUserRoles")
     @GetMapping(V2_URL + "/spaces/{spaceId}/user-roles")
     public Map<String, Collection<UserRole>> getSpaceUserRoles ( @PathVariable String spaceId, @RequestHeader
         (AUTHORIZATION_HEADER_KEY ) String token ) {
@@ -252,6 +261,7 @@ public class SpaceController extends Common {
         }
     }
 
+    @HystrixCommand(fallbackMethod = "associateSpaceUserRoles")
     @PutMapping(V2_URL + "/spaces/{spaceId}/user-roles")
     public AbstractSpaceResource associateSpaceUserRoles( @PathVariable String spaceId,
                                                           @RequestBody UserRole.RequestBody body,
@@ -262,6 +272,7 @@ public class SpaceController extends Common {
         return spaceService.associateSpaceUserRole( spaceId, body.getUserId(), body.getRole() );
     }
 
+    @HystrixCommand(fallbackMethod = "removeSpaceUserRoles")
     @DeleteMapping(V2_URL + "/spaces/{spaceId}/user-roles")
     public void removeSpaceUserRoles( @PathVariable String spaceId,
                                                        @RequestParam String userId, @RequestParam String role,

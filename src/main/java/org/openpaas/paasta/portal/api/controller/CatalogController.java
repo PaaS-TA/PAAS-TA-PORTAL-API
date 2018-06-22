@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingResponse;
@@ -47,7 +48,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@RequestMapping(value = {"/getCatalogServicePlanList"}, method = RequestMethod.POST, consumes = "application/json")
+    @HystrixCommand(fallbackMethod = "getCatalogServicePlanList")
     @GetMapping(Constants.V2_URL+"/catalogs/serviceplan/{servicename}")
     public ListServicePlansResponse getCatalogServicePlanList(@PathVariable String servicename, HttpServletRequest req) throws Exception {
         return catalogService.getCatalogServicePlanList(servicename, req);
@@ -62,6 +63,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "getCatalogAppList")
     @GetMapping(Constants.V2_URL + "/catalogs/apps/{orgid}/{spaceid}")
     public ListApplicationsResponse getCatalogAppList(@PathVariable String orgid, @PathVariable String spaceid, HttpServletRequest req) throws Exception {
         return catalogService.getCatalogAppList(orgid, spaceid, req);
@@ -77,7 +79,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@RequestMapping(value = {"/getCheckCatalogApplicationNameExists"}, method = RequestMethod.POST, consumes = "application/json")
+    @HystrixCommand(fallbackMethod = "getCheckCatalogApplicationNameExists")
     @GetMapping(Constants.V2_URL+"/catalogs/apps/{name}")
     public Map<String, Object> getCheckCatalogApplicationNameExists(@PathVariable String name, @RequestParam String orgid, @RequestParam String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
         return catalogService.getCheckCatalogApplicationNameExists(name,orgid,spaceid, req, res);
@@ -93,6 +95,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "executeCatalogStarter")
     @RequestMapping(value = {"/executeCatalogStarter"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> executeCatalogStarter(@RequestBody Catalog param, HttpServletRequest req,HttpServletResponse response) throws Exception {
         return catalogService.executeCatalogStarter(param, req,response);
@@ -105,6 +108,7 @@ public class CatalogController extends Common {
      * @param param Catalog(모델클래스)
      * @return Map(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "insertCatalogHistoryStarter")
     @RequestMapping(value = {"/insertCatalogHistoryStarter"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> insertCatalogHistoryStarter(@RequestBody Catalog param) {
         return catalogService.insertCatalogHistoryStarter(param);
@@ -119,6 +123,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "executeCatalogBuildPack")
     @RequestMapping(value = {"/executeCatalogBuildPack"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> executeCatalogBuildPack(@RequestBody Catalog param, HttpServletRequest req, HttpServletResponse response) throws Exception {
         return catalogService.executeCatalogBuildPack(param, req, response);
@@ -131,11 +136,13 @@ public class CatalogController extends Common {
      * @param param Catalog(모델클래스)
      * @return Map(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "insertCatalogHistoryBuildPack")
     @RequestMapping(value = {"/insertCatalogHistoryBuildPack"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> insertCatalogHistoryBuildPack(@RequestBody Catalog param) {
         return catalogService.insertCatalogHistoryBuildPack(param);
     }
 
+    @HystrixCommand(fallbackMethod = "listServiceInstancesResponse")
     @GetMapping(Constants.V2_URL+"/catalogs/servicepack/{orgid}/{spaceid}")
     public ListServiceInstancesResponse listServiceInstancesResponse(@PathVariable String orgid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         return catalogService.listServiceInstancesResponse(orgid, spaceid, token);
@@ -150,6 +157,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "executeCatalogServicePack")
     @RequestMapping(value = {"/executeCatalogServicePack"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> executeCatalogServicePack(@RequestBody Catalog param, HttpServletRequest req) throws Exception {
         return catalogService.executeCatalogServicePack(param, req);
@@ -163,6 +171,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "executeCatalogServicePackV2")
     @RequestMapping(value = {"/executeCatalogServicePackV2"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> executeCatalogServicePackV2(@RequestBody Catalog param, HttpServletRequest req) throws Exception {
         LOGGER.info("executeCatalogServicePackV2");
@@ -177,6 +186,7 @@ public class CatalogController extends Common {
      * @param param Catalog(모델클래스)
      * @return Map(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "insertCatalogHistoryServicePack")
     @RequestMapping(value = {"/insertCatalogHistoryServicePack"}, method = RequestMethod.POST, consumes = "application/json")
     public Map<String, Object> insertCatalogHistoryServicePack(@RequestBody Catalog param) {
         return catalogService.insertCatalogHistoryServicePack(param);
@@ -190,6 +200,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "procCatalogCreateServiceInstanceV2")
     @PostMapping(Constants.V2_URL+"/catalogs/serviceinstances")
     public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return catalogService.procCatalogCreateServiceInstanceV2(param, token);
@@ -204,6 +215,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "createApp")
     @PostMapping(Constants.V2_URL+"/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param,   @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws  Exception{
         return catalogService.createApp(param, token, token2, response);
@@ -218,6 +230,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "createAppTemplate")
     @PostMapping(Constants.V2_URL+"/catalogs/apptemplate")
     public Map<String, Object> createAppTemplate(@RequestBody Catalog param,   @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws  Exception{
         return catalogService.createAppTemplate(param, token, token2, response);
@@ -229,6 +242,7 @@ public class CatalogController extends Common {
      * @return ListServicesResponse
      * @throws Exception Exception(자바클래스)
      */
+    @HystrixCommand(fallbackMethod = "getService")
     @GetMapping(Constants.V2_URL+"/services")
     public ListServicesResponse getService() throws Exception {
         return catalogService.getService();

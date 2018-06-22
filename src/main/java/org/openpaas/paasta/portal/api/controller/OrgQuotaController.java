@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -36,6 +37,7 @@ public class OrgQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getOrgQuotaDefinitions")
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions")
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(HttpServletRequest request) throws Exception {
         LOGGER.info("getOrgQuotaDefinitions Start : ");
@@ -50,6 +52,7 @@ public class OrgQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getOrgQuotaDefinition")
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getOrgQuotaDefinition Start : ");
@@ -63,6 +66,7 @@ public class OrgQuotaController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "createOrgQuotaDefinitions")
     @PostMapping(Constants.V2_URL + "/orgs/quota-definitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         LOGGER.info("createOrgQuotaDefinitions Start : ");
@@ -78,6 +82,7 @@ public class OrgQuotaController extends Common {
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "updateOrgQuotaDefinitions")
     @PutMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(@PathVariable String quotaId, @RequestBody Quota quota, HttpServletRequest request) throws Exception {
         LOGGER.info("updateOrgQuotaDefinitions Start : ");
@@ -93,6 +98,7 @@ public class OrgQuotaController extends Common {
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteOrgQuotaDefinitions")
     @DeleteMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("deleteOrgQuotaDefinitions Start : ");
@@ -106,6 +112,7 @@ public class OrgQuotaController extends Common {
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "setOrgQuotaDefinitions")
     @PutMapping(Constants.V2_URL + "/orgs/quota-definitions/associations")
     public boolean setOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         // Name : 사용자가 입력하는 값이기 떄문에 URL 값으로 받지 않음

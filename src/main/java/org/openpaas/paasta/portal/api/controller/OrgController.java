@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.apache.commons.collections.map.HashedMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
@@ -82,6 +83,7 @@ public class OrgController extends Common {
      * @param token
      * @return information of the organization
      */
+    @HystrixCommand(fallbackMethod = "getOrg")
     @GetMapping(V2_URL + "/orgs/{orgId}")
     public GetOrganizationResponse getOrg(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
     	LOGGER.info("get org start : " + orgId);
@@ -98,6 +100,7 @@ public class OrgController extends Common {
      * @param token the request
      * @return summary of the organization
      */
+    @HystrixCommand(fallbackMethod = "getOrgSummary")
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
     public SummaryOrganizationResponse getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("org summary : " + orgId);
@@ -113,6 +116,7 @@ public class OrgController extends Common {
      * @return the orgs for admin
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getOrgsForUser")
     @GetMapping(V2_URL + "/orgs")
     public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.debug("Org list by user");
@@ -123,6 +127,7 @@ public class OrgController extends Common {
      * 관리자 권한으로 조직 목록을 조회한다.
      * @return
      */
+    @HystrixCommand(fallbackMethod = "getOrgsForAdmin")
     @GetMapping(V2_URL + "/orgs-admin")
     public ListOrganizationsResponse getOrgsForAdmin() {
     	LOGGER.debug("Org list for admin");
@@ -132,6 +137,7 @@ public class OrgController extends Common {
      * 관리자 권한으로 조직 목록을 조회한다.
      * @return
      */
+    @HystrixCommand(fallbackMethod = "getOrgsForAdmin2")
     @GetMapping(V2_URL + "/orgs-admin/{number}")
     public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
         LOGGER.debug("Org list for admin");
@@ -151,6 +157,7 @@ public class OrgController extends Common {
      * @version 2.0
      * @since 2018.04.17 (modified)
      */
+    @HystrixCommand(fallbackMethod = "getSpaces")
     @GetMapping(V2_URL + "/orgs/{orgId}/spaces")
     public Map<?, ?> getSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
     	LOGGER.debug("Get Spaces " + orgId);
@@ -160,6 +167,7 @@ public class OrgController extends Common {
         return result;
     }
 
+    @HystrixCommand(fallbackMethod = "isExistOrgName")
     @GetMapping(V2_URL + "/orgs/{orgName}/exist")
     public boolean isExistOrgName(@PathVariable String orgName) {
         return orgService.isExistOrgName( orgName );
@@ -168,6 +176,7 @@ public class OrgController extends Common {
     /**
      * 이름을 가지고 조직을 생성한다.
      */
+    @HystrixCommand(fallbackMethod = "createOrg")
     @PostMapping( V2_URL + "/orgs" )
     public CreateOrganizationResponse createOrg ( @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         return orgService.createOrg( org, token );
@@ -180,6 +189,7 @@ public class OrgController extends Common {
      * @param token
      * @return
      */
+    @HystrixCommand(fallbackMethod = "renameOrg")
     @PutMapping( V2_URL + "/orgs" )
     public Map renameOrg(@RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
         LOGGER.info("renameOrg Start ");
@@ -198,6 +208,7 @@ public class OrgController extends Common {
      * @return boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteOrg")
     @DeleteMapping(V2_URL+"/orgs/{guid}")
     public Map deleteOrg(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token ) throws Exception {
         LOGGER.info("deleteOrg Start ");
@@ -222,12 +233,14 @@ public class OrgController extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getOrgQuota")
     @GetMapping(V2_URL + "/orgs/{orgId}/quota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("Get quota of org {}" + orgId);
         return orgService.getOrgQuota(orgId, token);
     }
-    
+
+    @HystrixCommand(fallbackMethod = "changeQuota")
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")
     public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         LOGGER.info("changeQuota Start ");
@@ -247,6 +260,7 @@ public class OrgController extends Common {
      * @version 2.0
      * @since 2018.5.16
      */
+    @HystrixCommand(fallbackMethod = "getOrgUserRoles")
     @GetMapping(V2_URL + "/orgs/{orgId}/user-roles")
     public Map<String, Collection<UserRole>> getOrgUserRoles ( @PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY ) String token ) {
         Objects.requireNonNull( orgId, "Org Id" );
@@ -265,6 +279,7 @@ public class OrgController extends Common {
      * @param token
      * @return UserRole
      */
+    @HystrixCommand(fallbackMethod = "getOrgUserRoleByUsername")
     @GetMapping(V2_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}")
     public UserRole getOrgUserRoleByUsername ( @PathVariable String orgName,
                                                @PathVariable String userName,
@@ -289,6 +304,7 @@ public class OrgController extends Common {
             .build();
     }
 
+    @HystrixCommand(fallbackMethod = "isOrgManager")
     @GetMapping(V2_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}/is-manager")
     public boolean isOrgManager(@PathVariable String orgName,
                                 @PathVariable String userName,
@@ -309,6 +325,7 @@ public class OrgController extends Common {
      * @version 2.0
      * @since 2018.5.16
      */
+    @HystrixCommand(fallbackMethod = "associateOrgUserRoles")
     @PutMapping(V2_URL + "/orgs/{orgId}/user-roles")
     public AbstractOrganizationResource associateOrgUserRoles ( @PathVariable String orgId,
                                         @RequestBody UserRole.RequestBody body,
@@ -329,6 +346,7 @@ public class OrgController extends Common {
      * @version 2.0
      * @since 2018.5.16
      */
+    @HystrixCommand(fallbackMethod = "removeOrgUserRoles")
     @DeleteMapping(V2_URL + "/orgs/{orgId}/user-roles")
     public boolean removeOrgUserRoles ( @PathVariable String orgId,
                                      @RequestParam String userId, @RequestParam String role,
@@ -349,6 +367,7 @@ public class OrgController extends Common {
     public void cancelInvitionUser() { }
 
     // TODO cancel member
+    @HystrixCommand(fallbackMethod = "cancelOrganizationMember")
     @DeleteMapping(V2_URL + "/orgs/{orgId}/member")
     public boolean cancelOrganizationMember( @PathVariable String orgId,
                                           @RequestParam String userId,
@@ -366,12 +385,14 @@ public class OrgController extends Common {
         }
     }
 
+    @HystrixCommand(fallbackMethod = "associateOrgUserRoles2")
     @PutMapping(V2_URL + "/orgs/user-roles")
     public Boolean associateOrgUserRoles2(@RequestBody Map body) {
         LOGGER.info("associateOrgUserRoles Start");
         return orgService.associateOrgUserRole2(body);
     }
 
+    @HystrixCommand(fallbackMethod = "orgList")
     @GetMapping(V2_URL + "/orgList")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.debug("orgList Start");

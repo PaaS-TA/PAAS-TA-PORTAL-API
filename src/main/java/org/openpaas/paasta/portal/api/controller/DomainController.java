@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.v2.PaginatedResponse;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -40,6 +41,7 @@ public class DomainController extends Common {
      * @return the domains
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getDomains")
     @GetMapping( Constants.V2_URL + "/domains" )
     public PaginatedResponse getDomains( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return domainService.getDomains(token, "all");
@@ -53,10 +55,27 @@ public class DomainController extends Common {
      * @return the domains
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getDomains")
     @GetMapping( Constants.V2_URL + "/domains/{status}" )
     public PaginatedResponse getDomains( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
                                          @PathVariable String status) throws Exception {
         return domainService.getDomains(token, status.toLowerCase());
+    }
+
+
+    /**
+     * Gets domains with guid.
+     *
+     * @param token  the token
+     * @param guid the guid
+     * @return the domains
+     * @throws Exception the exception
+     */
+    @HystrixCommand(fallbackMethod = "getOrgPrivateDomain")
+    @GetMapping( Constants.V2_URL + "/{guid}/domains" )
+    public PaginatedResponse getOrgPrivateDomain( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
+                                         @PathVariable String guid) throws Exception {
+        return domainService.getOrgPrivateDomain(token, guid);
     }
 
     /**
@@ -67,6 +86,7 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "addDomain")
     @PostMapping( Constants.V2_URL + "/domains" )
     public Map addDomain (@RequestBody Map<String, String> body, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) throws Exception {
         LOGGER.info("addDomain Start ");
@@ -91,6 +111,7 @@ public class DomainController extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteDomain")
     @DeleteMapping( Constants.V2_URL + "/domains/{guid}" )
     public Map deleteDomain(@PathVariable String guid, @RequestParam String domainName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("deleteDomain Start ");
