@@ -390,10 +390,4 @@ public class AppController extends Common {
     }
 
 
-    //TODO : 추후 재구현
-    @RequestMapping(value = {Constants.V2_URL + "/app/autoscaling"}, method = RequestMethod.GET)
-    public Map autoscaling() throws Exception {
-        return null;
-    }
-
 }
