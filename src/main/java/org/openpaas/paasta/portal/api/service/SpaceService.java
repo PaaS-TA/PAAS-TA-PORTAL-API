@@ -62,7 +62,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(fallbackMethod = "createUser")
+    @HystrixCommand(fallbackMethod = "getSpaces")
     public ListSpacesResponse getSpaces(String orgId, String token) {
         ListSpacesResponse response = Common
             .cloudFoundryClient( connectionContext(), tokenProviderWithDefault( token, adminTokenProvider ) ).spaces()
@@ -71,7 +71,7 @@ public class SpaceService extends Common {
         return response;
     }
 
-    @HystrixCommand(fallbackMethod = "createUser")
+    @HystrixCommand(fallbackMethod = "getSpacesWithOrgName")
     public ListSpacesResponse getSpacesWithOrgName(String orgName, String token) {
         final String orgId = orgService.getOrgId( orgName, token );
 
@@ -89,7 +89,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(fallbackMethod = "createUser")
+    @HystrixCommand(fallbackMethod = "getSpaces")
     public ListSpacesResponse getSpaces(Org org, String token) {
         String orgId = null;
         if (org.getGuid() != null) {
