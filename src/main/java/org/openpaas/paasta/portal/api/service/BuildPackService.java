@@ -6,7 +6,6 @@ import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.BuildPack;
-import org.openpaas.paasta.portal.api.util.ConvertUtil;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.Map;
@@ -36,7 +35,7 @@ public class BuildPackService extends Common {
                 .list(ListBuildpacksRequest.builder().build())
                 .block();
 
-        return ConvertUtil.getObjectMapper().convertValue(listBuildpacksResponse, Map.class);
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
     /**
