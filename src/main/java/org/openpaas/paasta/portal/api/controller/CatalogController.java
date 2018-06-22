@@ -109,6 +109,7 @@ public class CatalogController extends Common {
      */
     @PostMapping(Constants.V2_URL+"/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param,   @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws  Exception{
+        LOGGER.info(param.toString());
         return catalogService.createApp(param, token, token2, response);
     }
 

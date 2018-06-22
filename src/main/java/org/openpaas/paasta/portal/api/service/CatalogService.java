@@ -247,7 +247,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "createAppTemplate")
+    //@HystrixCommand(fallbackMethod = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {

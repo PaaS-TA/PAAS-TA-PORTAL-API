@@ -126,7 +126,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(fallbackMethod = "createSpace")
+    //@HystrixCommand(fallbackMethod = "createSpace")
     public Map createSpace(Space space, String token) {
         Map resultMap = new HashMap();
 
@@ -140,8 +140,12 @@ public class SpaceService extends Common {
                             .name( space.getSpaceName() ).organizationId( space.getOrgGuid() ).build() )
                             .block();
 
+            associateSpaceManager( response.getMetadata().getId(), space.getUserId() );
+            associateSpaceDeveloper( response.getMetadata().getId(), space.getUserId() );
+            associateSpaceAuditor( response.getMetadata().getId(), space.getUserId() );
+
             // Results for association roles will be disposed
-            associateSpaceUserRolesByOrgIdAndRole(response.getMetadata().getId(), space.getOrgGuid() );
+            //associateSpaceUserRolesByOrgIdAndRole(response.getMetadata().getId(), space.getOrgGuid() );
 
             resultMap.put("result", true);
         } catch (Exception e) {
