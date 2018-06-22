@@ -20,6 +20,7 @@ import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
@@ -86,6 +87,8 @@ public class Common {
 
     @Autowired
     private LoginService loginService;
+
+    public ObjectMapper objectMapper = new ObjectMapper();
 
     public String getToken() throws MalformedURLException, URISyntaxException {
         return loginService.login(adminUserName, adminPassword).getValue();

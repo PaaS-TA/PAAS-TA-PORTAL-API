@@ -155,6 +155,26 @@ public class OrgService extends Common {
                 SummaryOrganizationRequest.builder().organizationId( orgId ).build() ).block();
     }
 
+    // Org Read
+    public Map getOrgSummaryMap ( final String orgId, final String token) {
+
+        LOGGER.info("Start");
+        SummaryOrganizationResponse summaryOrganizationResponse= Common.cloudFoundryClient( connectionContext(), tokenProvider( token ) ).organizations().summary(
+                SummaryOrganizationRequest.builder().organizationId( orgId ).build() ).block();
+        List<OrganizationSpaceSummary> organizationSpaceSummaries = summaryOrganizationResponse.getSpaces();
+        int memUsageTotal = 0;
+        LOGGER.info("Start");
+        for (OrganizationSpaceSummary organizationSpaceSummary:organizationSpaceSummaries) {
+            memUsageTotal += organizationSpaceSummary.getMemoryDevelopmentTotal();
+        }
+        LOGGER.info("Start");
+        Map map = objectMapper.convertValue(organizationSpaceSummaries,Map.class);
+        map.put("memUsageTotal",memUsageTotal);
+
+        return map;
+    }
+
+
     /**
      * 조직 목록을 조회한다. 단, 내부의 resources만 추출해서 반환한다.
      *

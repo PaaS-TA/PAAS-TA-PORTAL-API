@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.v2.servicebrokers.*;
@@ -34,8 +35,6 @@ public class ServiceService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceService.class);
 
-//    @Autowired
-//    private ServiceMapper serviceMapper;
 
 
     /**
@@ -46,6 +45,7 @@ public class ServiceService extends Common {
      * @return the service instance
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getServiceInstance")
     public CloudServiceInstance getServiceInstance(org.openpaas.paasta.portal.api.model.Service service, CloudFoundryClient client) throws Exception {
 
         CloudServiceInstance cloudServiceInstance = client.getServiceInstance(service.getName());
@@ -61,12 +61,12 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "renameInstance")
     public Map renameInstance(Service service, String guid) throws Exception {
         HashMap result = new HashMap();
-//        guid.renameInstanceService(service.getGuid(), service.getNewName());
+
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
-            //cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(guid).name(service.getNewName()).build()).block();
             cloudFoundryClient.serviceInstances().update(UpdateServiceInstanceRequest.builder().serviceInstanceId(guid).name(service.getNewName()).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -84,9 +84,10 @@ public class ServiceService extends Common {
      * @param guid the service
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteInstance")
     public Map deleteInstance(String guid) throws Exception {
         HashMap result = new HashMap();
-//        client.deleteInstanceService(service.getGuid());
+
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).async(false).build()).block();
@@ -110,6 +111,7 @@ public class ServiceService extends Common {
      * @version 1.0
      * @since 2016.8.4 최초작성
      */
+    @HystrixCommand(fallbackMethod = "getUserProvided")
     public GetUserProvidedServiceInstanceResponse getUserProvided(String token, String userProvidedServiceInstanceId) throws Exception {
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
@@ -136,6 +138,7 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.6.18 최초작성
      */
+
     private Map parsing(String str) {
 
         Map returnMap = new HashMap();
@@ -166,19 +169,21 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
+    @HystrixCommand(fallbackMethod = "createUserProvided")
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
 
-        String orgName = service.getOrgName();//("orgName");
-        String spaceName = service.getSpaceName();//("spaceName");
-        String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
-        String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl");
 
-        LOGGER.info("Credentials :::: " + service.getCredentials().toString());
 
         try {
             //Todo credentialsStr parsing => map
             Map<String, Object> map = parsing(service.getCredentials());
+
+            String orgName = service.getOrgName();//("orgName");
+            String spaceName = service.getSpaceName();//("spaceName");
+            String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
+            String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl");
+
 
             if (!stringNullCheck(orgName, spaceName, serviceInstanceName, service.getCredentials().toString())) {
             }
@@ -188,9 +193,6 @@ public class ServiceService extends Common {
                     .create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName)
                             .spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).build()).block();
 
-            LOGGER.info("Created :::: " + createUserProvidedServiceInstanceResponse.getEntity().getName());
-
-            LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -216,46 +218,29 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
+    @HystrixCommand(fallbackMethod = "updateUserProvided")
     public Map updateUserProvided(String guid, String token, Service service) throws Exception {
 
         HashMap result = new HashMap();
-
-        String orgName = service.getOrgName();
-        String spaceName = service.getSpaceName();
-        String serviceInstanceName = service.getServiceInstanceName();
-        String newServiceInstanceName = service.getNewServiceInstanceName();
-
-        String syslogDrainUrl = service.getSyslogDrainUrl();
-
-        LOGGER.info("orgName ::::" + orgName);
-        LOGGER.info("spaceName ::::" + spaceName);
-        LOGGER.info("spaceGuid ::::" + service.getSpaceGuid());
-        LOGGER.info("serviceInstanceName ::::" + serviceInstanceName);
-        LOGGER.info("newServiceInstanceName ::::" + newServiceInstanceName);
-        LOGGER.info("serviceInstanceId ::::" + guid);
-        LOGGER.info("syslogDrainUrl ::::" + syslogDrainUrl);
-        LOGGER.info("Credentials ::::" + service.getCredentials());
-
         try {
             //Todo credentialsStr parsing => map
             Map<String, Object> map = parsing(service.getCredentials());
+            String syslogDrainUrl = service.getSyslogDrainUrl();
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
                     .update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).build()).block();
 
-            LOGGER.info("Created :::: " + updateUserProvidedServiceInstanceResponse.getEntity().getName());
+
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.info("Error :::: " + e.getMessage());
             result.put("result", false);
             result.put("msg", e.getMessage());
         }
         return result;
-//        return null;
     }
 
 
@@ -266,6 +251,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getServiceBrokers")
     public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
@@ -282,6 +268,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "getServiceBroker")
     public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
@@ -299,6 +286,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "createServiceBroker")
     public CreateServiceBrokerResponse createServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
@@ -319,6 +307,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "updateServiceBroker")
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -340,6 +329,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
+    @HystrixCommand(fallbackMethod = "deleteServiceBroker")
     public boolean deleteServiceBroker(String guid, String token) throws Exception {
 
         Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -352,21 +342,8 @@ public class ServiceService extends Common {
         return true;
     }
 
-    /**
-     * 서비스 이미지를 가져온다.
-     *
-     * @param serviceName the serviceName
-     * @return the boolean
-     * @throws Exception the exception
-     */
-    public String getServiceImageUrl(String serviceName) {
 
-//        String appImageUrl = serviceMapper.getServiceImageUrl(serviceName);
-        String appImageUrl = "";
-        return appImageUrl;
-
-    }
-
+    @HystrixCommand(fallbackMethod = "getServicesInstances")
     public ListServiceInstancesResponse getServicesInstances(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 

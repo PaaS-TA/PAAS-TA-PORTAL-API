@@ -18,9 +18,3 @@ eureka:
   instance:
     hostname: ${spring.cloud.client.hostname}
 
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
