@@ -54,14 +54,6 @@ public class AppService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
 
-//    @Autowired
-//    private AppCcMapper appCcMapper;
-
-//    @Autowired
-//    private AppMapper appMapper;
-
-    @Autowired
-    private AppAutoScaleModalService appAutoScaleModalService;
 
     @Autowired
     ReactorCloudFoundryClient reactorCloudFoundryClient;
@@ -228,11 +220,6 @@ public class AppService extends Common {
 
         try {
             //AutoScale 설정 삭제
-            HashMap map = new HashMap();
-            map.put("guid", String.valueOf(guid));
-            if (null != appAutoScaleModalService.getAppAutoScaleInfo(map).get("list")) {
-                appAutoScaleModalService.deleteAppAutoScale(String.valueOf(guid));
-            }
         } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);

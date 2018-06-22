@@ -251,21 +251,7 @@ public class ServiceController extends Common {
         return resultMap;
     }
 
-    /**
-     * 서비스 이미지를 조회한다.
-     *
-     * @param service the service
-     * @return the menu list
-     */
-    @HystrixCommand(fallbackMethod = "getServiceImageUrl")
-    @RequestMapping(value = {"/service/getServiceImageUrl"}, method = RequestMethod.POST, consumes = "application/json")
-    public Map<String, Object> getServiceImageUrl(@RequestBody Service service) {
-        Map<String, Object> resultMap = new HashMap<>();
 
-        resultMap.put("serviceImageUrl", serviceService.getServiceImageUrl(service.getServiceName()));
-
-        return resultMap;
-    }
 
     @HystrixCommand(fallbackMethod = "getServicesInstances")
     @RequestMapping(value = {Constants.V2_URL + "/service-instances/space/{guid}"}, method = RequestMethod.GET)

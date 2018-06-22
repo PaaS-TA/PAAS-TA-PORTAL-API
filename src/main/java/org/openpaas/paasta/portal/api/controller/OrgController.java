@@ -100,7 +100,7 @@ public class OrgController extends Common {
      * @param token the request
      * @return summary of the organization
      */
-    @HystrixCommand(fallbackMethod = "getOrgSummary")
+
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
     public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("org summary : " + orgId);
