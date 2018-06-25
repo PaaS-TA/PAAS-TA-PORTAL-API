@@ -65,7 +65,7 @@ public class ClientService extends Common {
      * @return CreateClientResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "registerClient")
+    //@HystrixCommand(fallbackMethod = "registerClient")
     public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -101,7 +101,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateClient")
+    //@HystrixCommand(fallbackMethod = "updateClient")
     public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -138,7 +138,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteClient")
+    //@HystrixCommand(fallbackMethod = "deleteClient")
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()

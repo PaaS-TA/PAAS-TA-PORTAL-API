@@ -52,7 +52,7 @@ public class AuthorityGroupService extends Common{
      * @throws Exception the exception
      * @since 2016.10.18 최초작성
      */
-    @HystrixCommand(fallbackMethod = "createAuthorityGroup")
+    //@HystrixCommand(fallbackMethod = "createAuthorityGroup")
     public ScimGroup createAuthorityGroup(String displayName,List<ScimGroupMember> memberList) throws Exception {
         if (!stringNullCheck(displayName)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);
@@ -94,7 +94,7 @@ public class AuthorityGroupService extends Common{
      * @throws Exception the exception
      * @since 2016.10.19 최초작성
      */
-    @HystrixCommand(fallbackMethod = "deleteAuthorityGroup")
+    //@HystrixCommand(fallbackMethod = "deleteAuthorityGroup")
     public void deleteAuthorityGroup(String groupGuid) throws Exception{
         if (!stringNullCheck(groupGuid)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);
@@ -120,7 +120,7 @@ public class AuthorityGroupService extends Common{
      * @throws Exception the exception
      * @since 2016.10.19 최초작성
      */
-    @HystrixCommand(fallbackMethod = "addGroupMembers")
+    //@HystrixCommand(fallbackMethod = "addGroupMembers")
     public ScimGroup addGroupMembers(String groupGuid, List<String> memberUserNameList) throws Exception {
         if (!stringNullCheck(groupGuid)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);
@@ -155,7 +155,7 @@ public class AuthorityGroupService extends Common{
      * @return scim group
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteGroupMembers")
+    //@HystrixCommand(fallbackMethod = "deleteGroupMembers")
     public  ScimGroup deleteGroupMembers(String groupGuid, List<String> memberUserNameList) throws Exception{
         if (!stringNullCheck(groupGuid)) {
             throw new UaaException("BAD_REQUEST","Required request body content is missing",400);

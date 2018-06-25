@@ -45,7 +45,7 @@ public class BuildPackService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateBuildPack")
+    //@HystrixCommand(fallbackMethod = "updateBuildPack")
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
         Common.cloudFoundryClient(connectionContext(), tokenProvider(adminUserName,adminPassword))

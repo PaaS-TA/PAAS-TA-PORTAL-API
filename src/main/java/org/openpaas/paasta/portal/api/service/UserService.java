@@ -58,7 +58,7 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    @HystrixCommand(fallbackMethod = "createUser")
+    //@HystrixCommand(fallbackMethod = "createUser")
     public Map createUser(UserDetail userDetail) {
         LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
@@ -86,7 +86,7 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    @HystrixCommand(fallbackMethod = "updateUser")
+    //@HystrixCommand(fallbackMethod = "updateUser")
     public int updateUser(UserDetail userDetail, String token) {
         LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
@@ -115,7 +115,7 @@ public class UserService extends Common {
      * @param newPassword the user id
      * @return UserDetail user
      */
-    @HystrixCommand(fallbackMethod = "updateUserPassword")
+    //@HystrixCommand(fallbackMethod = "updateUserPassword")
     public Map updateUserPassword(String userId, String oldPassword, String newPassword, String token) {
 
         LOGGER.info("updateUserPassword ::: " + userId);
@@ -145,7 +145,7 @@ public class UserService extends Common {
      * 사용자 패스워드를 초기화 한다.
      * 패스워드를 입력안할경우 임의 값으로 패스워드를 변경한다.
      */
-    @HystrixCommand(fallbackMethod = "resetPassword")
+    //@HystrixCommand(fallbackMethod = "resetPassword")
     public Map resetPassword(String userId, String password) {
         LOGGER.info("resetPassword ::: " + userId);
         LOGGER.info("resetPassword ::: " + password);
@@ -191,7 +191,7 @@ public class UserService extends Common {
      * 사용자 패스워드를 만료시킨다.
      * 패스워드를 사용자가 변경하게 수정한다.
      */
-    @HystrixCommand(fallbackMethod = "expiredPassword")
+    //@HystrixCommand(fallbackMethod = "expiredPassword")
     public Map expiredPassword(String userGuid) {
         LOGGER.info("resetPassword ::: " + userGuid);
 
@@ -217,7 +217,7 @@ public class UserService extends Common {
      * @param userId the user id
      * @return 삭제 정보
      */
-    @HystrixCommand(fallbackMethod = "deleteUser")
+    //@HystrixCommand(fallbackMethod = "deleteUser")
     public Map deleteUser(String userId) {
         LOGGER.info("deleteUser ::: " + userId);
 
@@ -289,7 +289,7 @@ public class UserService extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "create")
+    //@HystrixCommand(fallbackMethod = "create")
     public boolean create(HashMap map) throws Exception {
         Boolean bRtn = false;
         return bRtn;
@@ -297,7 +297,7 @@ public class UserService extends Common {
 
 
     private enum UaaUserLookupFilterType {Username, Id, Origin}
-    @HystrixCommand(fallbackMethod = "createUserLookupFilter")
+    //@HystrixCommand(fallbackMethod = "createUserLookupFilter")
     private String createUserLookupFilter(UaaUserLookupFilterType filterType, String filterValue) {
         Objects.requireNonNull(filterType, "User lookup FilterType");
         Objects.requireNonNull(filterValue, "User lookup FilterValue");

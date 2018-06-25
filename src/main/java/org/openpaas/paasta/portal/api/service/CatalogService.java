@@ -379,7 +379,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "procCatalogCreateServiceInstanceV2")
+    //@HystrixCommand(fallbackMethod = "procCatalogCreateServiceInstanceV2")
     public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
         LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
         ObjectMapper mapper = new ObjectMapper();
@@ -409,7 +409,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "procCatalogBindService")
+    //@HystrixCommand(fallbackMethod = "procCatalogBindService")
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
@@ -428,7 +428,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "listServiceInstancesResponse")
+    //@HystrixCommand(fallbackMethod = "listServiceInstancesResponse")
     public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token) {
         ListServiceInstancesResponse listServiceInstancesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 serviceInstances().list(ListServiceInstancesRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();

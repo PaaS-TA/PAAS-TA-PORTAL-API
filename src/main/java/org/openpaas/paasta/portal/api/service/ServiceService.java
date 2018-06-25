@@ -61,7 +61,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "renameInstance")
+    //@HystrixCommand(fallbackMethod = "renameInstance")
     public Map renameInstance(Service service, String guid) throws Exception {
         HashMap result = new HashMap();
 
@@ -84,7 +84,7 @@ public class ServiceService extends Common {
      * @param guid the service
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteInstance")
+    //@HystrixCommand(fallbackMethod = "deleteInstance")
     public Map deleteInstance(String guid) throws Exception {
         HashMap result = new HashMap();
 
@@ -169,7 +169,7 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @HystrixCommand(fallbackMethod = "createUserProvided")
+    //@HystrixCommand(fallbackMethod = "createUserProvided")
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
 
@@ -218,7 +218,7 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @HystrixCommand(fallbackMethod = "updateUserProvided")
+    //@HystrixCommand(fallbackMethod = "updateUserProvided")
     public Map updateUserProvided(String guid, String token, Service service) throws Exception {
 
         HashMap result = new HashMap();
@@ -286,7 +286,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "createServiceBroker")
+    //@HystrixCommand(fallbackMethod = "createServiceBroker")
     public CreateServiceBrokerResponse createServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
                 .serviceBrokers()
@@ -307,7 +307,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateServiceBroker")
+    //@HystrixCommand(fallbackMethod = "updateServiceBroker")
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -329,7 +329,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteServiceBroker")
+    //@HystrixCommand(fallbackMethod = "deleteServiceBroker")
     public boolean deleteServiceBroker(String guid, String token) throws Exception {
 
         Common.cloudFoundryClient(connectionContext(), tokenProvider(token))

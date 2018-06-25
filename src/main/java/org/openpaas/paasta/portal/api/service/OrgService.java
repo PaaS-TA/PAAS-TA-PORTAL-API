@@ -477,7 +477,6 @@ public class OrgService extends Common {
         return response.getResources();
     }
 
-    @HystrixCommand(fallbackMethod = "getOrgUserRoles")
     public Map<String, Collection<UserRole>> getOrgUserRoles(String orgId, String token) {
         if (null == token) token = adminTokenProvider.getToken(connectionContext()).block();
 
@@ -573,7 +572,6 @@ public class OrgService extends Common {
      * @param token
      * @return
      */
-    @HystrixCommand(fallbackMethod = "associateOrgUserRole")
     public AbstractOrganizationResource associateOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             final Object lock = blockingQueue.take();
