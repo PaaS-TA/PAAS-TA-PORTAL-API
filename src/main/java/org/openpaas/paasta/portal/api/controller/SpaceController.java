@@ -86,59 +86,64 @@ public class SpaceController extends Common {
     public Map getSpaceSummary2(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
 
-        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
-
         Map<String, Object> resultMap = new HashMap<>();
         List<Map<String, Object>> appArray = new ArrayList<>();
 //        appArray = respSapceSummary.getApplications();
 
-        resultMap.put("apps", respSapceSummary.getApplications());
-        resultMap.put("guid", respSapceSummary.getId());
-        resultMap.put("name", respSapceSummary.getName());
-        resultMap.put("services", respSapceSummary.getServices());
+            GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
+            resultMap.put("apps", respSapceSummary.getApplications());
+            resultMap.put("guid", respSapceSummary.getId());
+            resultMap.put("name", respSapceSummary.getName());
+            resultMap.put("services", respSapceSummary.getServices());
 
-        for(SpaceApplicationSummary sapceApplicationSummary : respSapceSummary.getApplications()) {
-            Map<String, Object> resultMap2 = new HashMap<>();
-            if(sapceApplicationSummary.getState().equals("STARTED")) {
-                ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(sapceApplicationSummary.getId(), this.getToken());
+            for (SpaceApplicationSummary sapceApplicationSummary : respSapceSummary.getApplications()) {
+                Map<String, Object> resultMap2 = new HashMap<>();
+                try{
+                    if (sapceApplicationSummary.getState().equals("STARTED")) {
+                        ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(sapceApplicationSummary.getId(), this.getToken());
 
-                Double cpu = 0.0;
-                Double mem = 0.0;
-                Double disk = 0.0;
-                int cnt = 0;
-                for(int i = 0; i < applicationStatisticsResponse.getInstances().size(); i++) {
-                    if(applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getState().equals("RUNNING")) {
-                        Double instanceCpu = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getCpu();
-                        Long instanceMem = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getMemory();
-                        Long instanceMemQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getMemoryQuota();
-                        Long instanceDisk = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getDisk();
-                        Long instanceDiskQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getDiskQuota();
+                        Double cpu = 0.0;
+                        Double mem = 0.0;
+                        Double disk = 0.0;
+                        int cnt = 0;
+                        for (int i = 0; i < applicationStatisticsResponse.getInstances().size(); i++) {
+                            if (applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getState().equals("RUNNING")) {
+                                Double instanceCpu = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getCpu();
+                                Long instanceMem = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getMemory();
+                                Long instanceMemQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getMemoryQuota();
+                                Long instanceDisk = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getDisk();
+                                Long instanceDiskQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getDiskQuota();
 
-                        if(instanceCpu != null) cpu = cpu + instanceCpu * 100;
-                        if(instanceMem != null) mem = mem + (double)instanceMem / (double)instanceMemQuota * 100;
-                        if(instanceDisk != null) disk = disk + (double)instanceDisk / (double)instanceDiskQuota * 100;
+                                if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
+                                if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;
+                                if (instanceDisk != null)
+                                    disk = disk + (double) instanceDisk / (double) instanceDiskQuota * 100;
 
-                        cnt++;
+                                cnt++;
+                            }
+                        }
+
+                        cpu = cpu / cnt;
+                        mem = mem / cnt;
+                        disk = disk / cnt;
+
+                        resultMap2.put("guid", sapceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
+                        resultMap2.put("memPer", Math.round(mem));
+                        resultMap2.put("diskPer", Math.round(disk));
+                    } else {
+                        resultMap2.put("guid", sapceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", 0);
+                        resultMap2.put("memPer", 0);
+                        resultMap2.put("diskPer", 0);
                     }
+
+                    appArray.add(resultMap2);
                 }
+                catch (Exception e){
 
-                cpu = cpu / cnt;
-                mem = mem / cnt;
-                disk = disk / cnt;
-
-                resultMap2.put("guid", sapceApplicationSummary.getId());
-                resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
-                resultMap2.put("memPer", Math.round(mem));
-                resultMap2.put("diskPer", Math.round(disk));
-            } else {
-                resultMap2.put("guid", sapceApplicationSummary.getId());
-                resultMap2.put("cpuPer", 0);
-                resultMap2.put("memPer", 0);
-                resultMap2.put("diskPer", 0);
+                }
             }
-
-            appArray.add(resultMap2);
-        }
         resultMap.put("appsPer", appArray);
 
         LOGGER.info("Get SpaceSummary End ");
