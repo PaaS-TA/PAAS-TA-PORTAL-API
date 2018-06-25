@@ -477,7 +477,7 @@ public class OrgService extends Common {
         return response.getResources();
     }
 
-    @HystrixCommand(fallbackMethod = "getOrgUserRoles")
+//    @HystrixCommand(fallbackMethod = "getOrgUserRoles")
     public Map<String, Collection<UserRole>> getOrgUserRoles(String orgId, String token) {
         if (null == token) token = adminTokenProvider.getToken(connectionContext()).block();
 
