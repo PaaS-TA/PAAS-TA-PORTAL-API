@@ -28,7 +28,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getSpaceQuotaDefinitionsList")
+    @HystrixCommand(commandKey = "getSpaceQuotaDefinitionsList")
     public ListSpaceQuotaDefinitionsResponse getSpaceQuotaDefinitionsList(String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -47,7 +47,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getSpaceQuotaDefinitions")
+    @HystrixCommand(commandKey = "getSpaceQuotaDefinitions")
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(String spaceQuotaId, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -67,7 +67,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "createSpaceQuotaDefinitions")
+    @HystrixCommand(commandKey = "createSpaceQuotaDefinitions")
     public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws ClientV2Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -94,7 +94,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteSpaceQuotaDefinitions")
+    @HystrixCommand(commandKey = "deleteSpaceQuotaDefinitions")
     public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -115,7 +115,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "associateSpaceQuotaDefinitions")
+    @HystrixCommand(commandKey = "associateSpaceQuotaDefinitions")
     public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
 
         /* required
@@ -140,7 +140,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getListSpaceUsedSpaceQuotaDefinitions")
+    @HystrixCommand(commandKey = "getListSpaceUsedSpaceQuotaDefinitions")
     public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -160,7 +160,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "removeSpaceQuotaDefinitionsFromSpace")
+    @HystrixCommand(commandKey = "removeSpaceQuotaDefinitionsFromSpace")
     public boolean removeSpaceQuotaDefinitionsFromSpace(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
 
          Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -181,7 +181,7 @@ public class SpaceQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateSpaceQuotaDefinitions")
+    @HystrixCommand(commandKey = "updateSpaceQuotaDefinitions")
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))

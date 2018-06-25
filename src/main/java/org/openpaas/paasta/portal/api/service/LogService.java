@@ -27,7 +27,7 @@ public class LogService extends Common {
      * @param client the client
      * @return ModelAndView model
      */
-    @HystrixCommand(fallbackMethod = "getLog")
+    @HystrixCommand(commandKey = "getLog")
     public List getLog(App app, CloudFoundryClient client) {
 
         String sAppName = app.getName();

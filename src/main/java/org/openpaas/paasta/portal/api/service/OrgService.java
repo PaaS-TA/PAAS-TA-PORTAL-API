@@ -65,9 +65,6 @@ public class OrgService extends Common {
     private CommonService commonService;
 
     @Autowired
-    private PasswordGrantTokenProvider adminTokenProvider;
-
-    @Autowired
     private OrgQuotaService orgQuotaService;
 
     private BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(2);
@@ -90,7 +87,7 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    @HystrixCommand(fallbackMethod = "createOrg")
+    @HystrixCommand(commandKey = "createOrg")
     public CreateOrganizationResponse createOrg(final Org org, final String token) {
         final CreateOrganizationResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
 
@@ -98,7 +95,7 @@ public class OrgService extends Common {
         return response;
     }
 
-    @HystrixCommand(fallbackMethod = "isExistOrgName")
+    @HystrixCommand(commandKey = "isExistOrgName")
     public boolean isExistOrgName(final String orgName) {
         try {
             return orgName.equals(getOrgUsingName(orgName).getName());
@@ -107,7 +104,7 @@ public class OrgService extends Common {
         }
     }
 
-    @HystrixCommand(fallbackMethod = "isExistOrg")
+    @HystrixCommand(commandKey = "isExistOrg")
     public boolean isExistOrg(final String orgId) {
         try {
             return orgId.equals(getOrg(orgId).getMetadata().getId());
@@ -116,7 +113,7 @@ public class OrgService extends Common {
         }
     }
 
-    @HystrixCommand(fallbackMethod = "getOrg")
+    @HystrixCommand(commandKey = "getOrg")
     public GetOrganizationResponse getOrg(final String orgId) {
         return getOrg(orgId, null);
     }
@@ -131,13 +128,13 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrg")
+    @HystrixCommand(commandKey = "getOrg")
     public GetOrganizationResponse getOrg(final String orgId, final String token) {
         Objects.requireNonNull(orgId, "Org Id");
 
         final TokenProvider internalTokenProvider;
         if (null != token && !"".equals(token)) internalTokenProvider = tokenProvider(token);
-        else internalTokenProvider = adminTokenProvider;
+        else internalTokenProvider = tokenProvider(this.getToken());
 
         return Common.cloudFoundryClient(connectionContext(), internalTokenProvider).organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
@@ -152,12 +149,12 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrgSummary")
+    @HystrixCommand(commandKey = "getOrgSummary")
     public SummaryOrganizationResponse getOrgSummary(final String orgId, final String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
 
-    @HystrixCommand(fallbackMethod = "getOrgSummaryMap")
+    @HystrixCommand(commandKey = "getOrgSummaryMap")
     public Map getOrgSummaryMap(final String orgId, final String token) {
         Map map = new HashedMap();
         try {
@@ -217,7 +214,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     @Deprecated
-    @HystrixCommand(fallbackMethod = "getOrgs")
+    @HystrixCommand(commandKey = "getOrgs")
     public List<OrganizationResource> getOrgs(String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block().getResources();
     }
@@ -231,7 +228,7 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrgsForUser")
+    @HystrixCommand(commandKey = "getOrgsForUser")
     public ListOrganizationsResponse getOrgsForUser(final String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block();
     }
@@ -244,9 +241,9 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrgsForAdmin")
+    @HystrixCommand(commandKey = "getOrgsForAdmin")
     public ListOrganizationsResponse getOrgsForAdmin() {
-        return Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().list(ListOrganizationsRequest.builder().build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().list(ListOrganizationsRequest.builder().build()).block();
     }
 
 
@@ -264,16 +261,16 @@ public class OrgService extends Common {
         return getOrgUsingName(orgName, token).getId();
     }
 
-    @HystrixCommand(fallbackMethod = "getOrgUsingName")
+    @HystrixCommand(commandKey = "getOrgUsingName")
     public OrganizationDetail getOrgUsingName(final String name) {
         return getOrgUsingName(name, null);
     }
 
-    @HystrixCommand(fallbackMethod = "getOrgUsingName")
+    @HystrixCommand(commandKey = "getOrgUsingName")
     public OrganizationDetail getOrgUsingName(final String name, final String token) {
         final TokenProvider internalTokenProvider;
         if (null != token && !"".equals(token)) internalTokenProvider = tokenProvider(token);
-        else internalTokenProvider = adminTokenProvider;
+        else internalTokenProvider = tokenProvider(this.getToken());
 
         return Common.cloudFoundryOperations(connectionContext(), internalTokenProvider).organizations().get(OrganizationInfoRequest.builder().name(name).build()).block();
     }
@@ -288,7 +285,7 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    @HystrixCommand(fallbackMethod = "renameOrg")
+    @HystrixCommand(commandKey = "renameOrg")
     public Map renameOrg(Org org, String token) {
         Map resultMap = new HashMap();
 
@@ -317,7 +314,7 @@ public class OrgService extends Common {
      * @version 2.1
      * @since 2018.5.2
      */
-    @HystrixCommand(fallbackMethod = "deleteOrg")
+    @HystrixCommand(commandKey = "deleteOrg")
     public Map deleteOrg(String orgId, boolean recursive, String token) throws Exception {
         Map resultMap = new HashMap();
         try {
@@ -357,7 +354,7 @@ public class OrgService extends Common {
                 LOGGER.debug("User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId);
                 DeleteOrganizationResponse eleteOrganizationResponse = Common
                         //.cloudFoundryClient( connectionContext(), tokenProvider( token ) )
-                        .cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(recursive).async(true).build()).block();
+                        .cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(recursive).async(true).build()).block();
 
                 resultMap.put("result", true);
                 return resultMap;
@@ -393,7 +390,7 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrgSpaces")
+    @HystrixCommand(commandKey = "getOrgSpaces")
     public ListSpacesResponse getOrgSpaces(String orgId, String token) {
         return spaceService.getSpaces(orgId, token);
     }
@@ -411,12 +408,12 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrgQuota")
+    @HystrixCommand(commandKey = "getOrgQuota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(String orgId, String token) {
         GetOrganizationResponse org = getOrg(orgId, token);
         String quotaId = org.getEntity().getQuotaDefinitionId();
 
-        return Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaId).build()).block();
     }
 
     /**
@@ -431,12 +428,12 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    @HystrixCommand(fallbackMethod = "updateOrgQuota")
+    @HystrixCommand(commandKey = "updateOrgQuota")
     public Map updateOrgQuota(String orgId, Org org, String token) {
         Map resultMap = new HashMap();
 
         try {
-            Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().update(UpdateOrganizationRequest.builder().organizationId(orgId).quotaDefinitionId(org.getQuotaGuid()).build()).block();
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().update(UpdateOrganizationRequest.builder().organizationId(orgId).quotaDefinitionId(org.getQuotaGuid()).build()).block();
 
             resultMap.put("result", true);
         } catch (Exception e) {
@@ -455,7 +452,7 @@ public class OrgService extends Common {
     }
 
     protected List<UserResource> listAllOrgUsers(String orgId, String token) {
-        final ListOrganizationUsersResponse response = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().listUsers(ListOrganizationUsersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
+        final ListOrganizationUsersResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().listUsers(ListOrganizationUsersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
         return response.getResources();
     }
 
@@ -477,9 +474,8 @@ public class OrgService extends Common {
         return response.getResources();
     }
 
-//    @HystrixCommand(fallbackMethod = "getOrgUserRoles")
     public Map<String, Collection<UserRole>> getOrgUserRoles(String orgId, String token) {
-        if (null == token) token = adminTokenProvider.getToken(connectionContext()).block();
+        if (null == token) token = tokenProvider(this.getToken()).getToken(connectionContext()).block();
 
         Map<String, UserRole> userRoles = new HashMap<>();
         listAllOrgUsers(orgId, token).stream().map(resource -> UserRole.builder().userId(resource.getMetadata().getId()).userEmail(resource.getEntity().getUsername()).modifiableRoles(true).build()).filter(ur -> null != ur).forEach(ur -> userRoles.put(ur.getUserId(), ur));
@@ -496,35 +492,35 @@ public class OrgService extends Common {
         return result;
     }
 
-    @HystrixCommand(fallbackMethod = "getOrgUserRolesByOrgName")
+    @HystrixCommand(commandKey = "getOrgUserRolesByOrgName")
     public OrganizationUsers getOrgUserRolesByOrgName(String orgName, String token) {
         return Common.cloudFoundryOperations(connectionContext(), tokenProvider(token)).userAdmin().listOrganizationUsers(org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder().organizationName(orgName).build()).block();
     }
 
-    @HystrixCommand(fallbackMethod = "isOrgManagerUsingOrgName")
+    @HystrixCommand(commandKey = "isOrgManagerUsingOrgName")
     public boolean isOrgManagerUsingOrgName(String orgName, String token) {
         final String orgId = getOrgId(orgName, token);
         final String userId = userService.getUser(token).getId();
         return isOrgManager(orgId, userId);
     }
 
-    @HystrixCommand(fallbackMethod = "isOrgManagerUsingToken")
+    @HystrixCommand(commandKey = "isOrgManagerUsingToken")
     public boolean isOrgManagerUsingToken(String orgId, String token) {
         final String userId = userService.getUser(token).getId();
         return isOrgManager(orgId, userId);
     }
 
-    @HystrixCommand(fallbackMethod = "isOrgManager")
+    @HystrixCommand(commandKey = "isOrgManager")
     public boolean isOrgManager(String orgId, String userId) {
         return hasOrgRole(orgId, userId, OrgRole.OrgManager.name());
     }
 
-    @HystrixCommand(fallbackMethod = "isBillingManager")
+    @HystrixCommand(commandKey = "isBillingManager")
     public boolean isBillingManager(String orgId, String userId) {
         return hasOrgRole(orgId, userId, OrgRole.BillingManager.name());
     }
 
-    @HystrixCommand(fallbackMethod = "isOrgAuditor")
+    @HystrixCommand(commandKey = "isOrgAuditor")
     public boolean isOrgAuditor(String orgId, String userId) {
         return hasOrgRole(orgId, userId, OrgRole.OrgAuditor.name());
     }
@@ -548,20 +544,20 @@ public class OrgService extends Common {
     private AssociateOrganizationManagerResponse associateOrgManager(String orgId, String userId) {
         spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgManager));
 
-        return Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
     }
 
     private AssociateOrganizationBillingManagerResponse associateBillingManager(String orgId, String userId) {
         // CHECK : Is needed to bill Org's Billing manager?
         spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.BillingManager));
 
-        return Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
     }
 
     private AssociateOrganizationAuditorResponse associateOrgAuditor(String orgId, String userId) {
         spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgAuditor));
 
-        return Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
     }
 
     /**
@@ -573,7 +569,6 @@ public class OrgService extends Common {
      * @param token
      * @return
      */
-    @HystrixCommand(fallbackMethod = "associateOrgUserRole")
     public AbstractOrganizationResource associateOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             final Object lock = blockingQueue.take();
@@ -638,7 +633,7 @@ public class OrgService extends Common {
 
     private void removeOrgManager(String orgId, String userId, boolean removeWithSpaceRole) {
         LOGGER.debug("---->> Remove OrgManager role of member({}) in org({}).", userId, orgId);
-        Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().removeManager(RemoveOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeManager(RemoveOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
     }
 
     private void removeOrgManager(String orgId, String userId) {
@@ -647,7 +642,7 @@ public class OrgService extends Common {
 
     private void removeBillingManager(String orgId, String userId, boolean removeWithSpaceRole) {
         LOGGER.debug("---->> Remove BillingManager role of member({}) in org({}).", userId, orgId);
-        Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().removeBillingManager(RemoveOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeBillingManager(RemoveOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
     }
 
     private void removeBillingManager(String orgId, String userId) {
@@ -656,7 +651,7 @@ public class OrgService extends Common {
 
     private void removeOrgAuditor(String orgId, String userId, boolean removeWithSpaceRole) {
         LOGGER.debug("---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId);
-        Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().removeAuditor(RemoveOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
+        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeAuditor(RemoveOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
     }
 
     private void removeOrgAuditor(String orgId, String userId) {
@@ -688,7 +683,7 @@ public class OrgService extends Common {
      * @param role
      * @param token  (but ignore a token because of removing manager forced)
      */
-    @HystrixCommand(fallbackMethod = "removeOrgUserRole")
+    @HystrixCommand(commandKey = "removeOrgUserRole")
     public void removeOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             Objects.requireNonNull(orgId, "Org Id");
@@ -735,14 +730,14 @@ public class OrgService extends Common {
     }
 
     // TODO cancel member
-    @HystrixCommand(fallbackMethod = "cancelOrganizationMember")
+    @HystrixCommand(commandKey = "cancelOrganizationMember")
     public boolean cancelOrganizationMember(String orgId, String userId, String token) {
         final boolean isManager = isOrgManager(orgId, userId);
         LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
 
         try {
             removeAllRoles(orgId, userId);
-            Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().removeUser(RemoveOrganizationUserRequest.builder().organizationId(orgId).userId(userId).build()).block();
+            Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeUser(RemoveOrganizationUserRequest.builder().organizationId(orgId).userId(userId).build()).block();
 
             return true;
         } catch (Exception ex) {
@@ -752,7 +747,7 @@ public class OrgService extends Common {
         }
     }
 
-    @HystrixCommand(fallbackMethod = "associateOrgUserRole2")
+    @HystrixCommand(commandKey = "associateOrgUserRole2")
     public boolean associateOrgUserRole2(Map body) {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
@@ -781,19 +776,19 @@ public class OrgService extends Common {
             for (int i = 0; i < orgArray.size(); i++) {
                 JSONObject orgObj = (JSONObject) orgArray.get(i);
 
-                Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateUser(AssociateOrganizationUserRequest.builder().organizationId(orgGuid).userId(userId).build()).block();
+                Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateUser(AssociateOrganizationUserRequest.builder().organizationId(orgGuid).userId(userId).build()).block();
 
                 if (orgObj.get("om").toString().equals("true")) {
                     LOGGER.info("om");
-                    AssociateOrganizationManagerResponse associateOrganizationManagerResponse = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgGuid).managerId(userId).build()).block();
+                    AssociateOrganizationManagerResponse associateOrganizationManagerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgGuid).managerId(userId).build()).block();
                 }
                 if (orgObj.get("bm").toString().equals("true")) {
                     LOGGER.info("bm");
-                    AssociateOrganizationBillingManagerResponse associateOrganizationBillingManagerResponse = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgGuid).billingManagerId(userId).build()).block();
+                    AssociateOrganizationBillingManagerResponse associateOrganizationBillingManagerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgGuid).billingManagerId(userId).build()).block();
                 }
                 if (orgObj.get("oa").toString().equals("true")) {
                     LOGGER.info("oa");
-                    AssociateOrganizationAuditorResponse associateOrganizationAuditorResponse = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgGuid).auditorId(userId).build()).block();
+                    AssociateOrganizationAuditorResponse associateOrganizationAuditorResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgGuid).auditorId(userId).build()).block();
                 }
             }
 
@@ -813,15 +808,15 @@ public class OrgService extends Common {
 
                         if (spaceObj2.get("sm").toString().equals("true")) {
                             LOGGER.info("sm");
-                            AssociateSpaceManagerResponse associateSpaceManagerResponse = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(keyname).managerId(userId).build()).block();
+                            AssociateSpaceManagerResponse associateSpaceManagerResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(keyname).managerId(userId).build()).block();
                         }
                         if (spaceObj2.get("sd").toString().equals("true")) {
                             LOGGER.info("sd");
-                            AssociateSpaceDeveloperResponse associateSpaceDeveloperResponse = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(keyname).developerId(userId).build()).block();
+                            AssociateSpaceDeveloperResponse associateSpaceDeveloperResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(keyname).developerId(userId).build()).block();
                         }
                         if (spaceObj2.get("sa").toString().equals("true")) {
                             LOGGER.info("sa");
-                            AssociateSpaceAuditorResponse associateSpaceAuditorResponse = Common.cloudFoundryClient(connectionContext(), adminTokenProvider).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(keyname).auditorId(userId).build()).block();
+                            AssociateSpaceAuditorResponse associateSpaceAuditorResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(keyname).auditorId(userId).build()).block();
                         }
                     }
                 }
@@ -845,9 +840,9 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(fallbackMethod = "getOrgsForAdminAll")
+    @HystrixCommand(commandKey = "getOrgsForAdminAll")
     public ListOrganizationsResponse getOrgsForAdminAll(int number) {
-        return Common.cloudFoundryClient(connectionContext(), adminTokenProvider).organizations().list(ListOrganizationsRequest.builder().page(number).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().list(ListOrganizationsRequest.builder().page(number).build()).block();
     }
 
 }
