@@ -39,15 +39,6 @@ public class UserService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    ReactorCloudFoundryClient reactorCloudFoundryClient;
-
-    @Autowired
-    ConnectionContext connectionContext;
-
-    @Autowired
-    TokenProvider adminTokenProvider;
-
 
     @Autowired
     RestTemplate restTemplate;
@@ -236,10 +227,12 @@ public class UserService extends Common {
 
         return result;
     }
+
     @HystrixCommand(commandKey = "getUsernameFromToken")
     public String getUsernameFromToken(String token) {
         return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token)).getUsername().block();
     }
+
     @HystrixCommand(commandKey = "getUser")
     public User getUser(String token) {
         final String userName = getUsernameFromToken(token);
@@ -297,6 +290,7 @@ public class UserService extends Common {
 
 
     private enum UaaUserLookupFilterType {Username, Id, Origin}
+
     @HystrixCommand(commandKey = "createUserLookupFilter")
     private String createUserLookupFilter(UaaUserLookupFilterType filterType, String filterValue) {
         Objects.requireNonNull(filterType, "User lookup FilterType");
@@ -315,7 +309,7 @@ public class UserService extends Common {
      */
     @HystrixCommand(commandKey = "getUserIdByUsername")
     public String getUserIdByUsername(String username) {
-        final List<User> userList = Common.uaaClient(connectionContext, adminTokenProvider).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Username, username)).build()).block().getResources();
+        final List<User> userList = Common.uaaClient(connectionContext(), tokenProvider(this.getToken())).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Username, username)).build()).block().getResources();
         if (userList.size() <= 0) {
             //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User name cannot find" );
             return null;
@@ -332,7 +326,7 @@ public class UserService extends Common {
      */
     @HystrixCommand(commandKey = "getUsernameByUserId")
     public String getUsernameByUserId(String userId) {
-        final List<User> userList = Common.uaaClient(connectionContext, adminTokenProvider).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Id, userId)).build()).block().getResources();
+        final List<User> userList = Common.uaaClient(connectionContext(), tokenProvider(this.getToken())).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Id, userId)).build()).block().getResources();
         if (userList.size() <= 0) {
             //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User ID cannot find" );
             return null;
@@ -342,7 +336,7 @@ public class UserService extends Common {
     }
 
     private User getUserSummaryWithFilter(UaaUserLookupFilterType filterType, String filterValue) {
-        final ListUsersResponse response = Common.uaaClient(connectionContext, adminTokenProvider).users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
+        final ListUsersResponse response = Common.uaaClient(connectionContext(), tokenProvider(this.getToken())).users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
         if (response.getResources().size() <= 0)
             throw new CloudFoundryException(HttpStatus.NOT_FOUND, (filterType.name() + " of user cannot find"));
 

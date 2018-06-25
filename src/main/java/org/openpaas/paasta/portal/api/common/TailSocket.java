@@ -27,10 +27,10 @@ import java.util.Enumeration;
  * Created by indra on 2018-05-09.
  */
 @Component
-public class tailSocket implements CommandLineRunner {
+public class TailSocket implements CommandLineRunner {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(tailSocket.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TailSocket.class);
 
     @Autowired
     public Environment env;

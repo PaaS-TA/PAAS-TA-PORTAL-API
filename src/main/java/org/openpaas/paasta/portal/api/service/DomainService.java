@@ -36,8 +36,6 @@ import java.util.stream.Collectors;
 public class DomainService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger( DomainService.class );
 
-    @Autowired
-    PasswordGrantTokenProvider adminTokenProvider;
 
     /**
      * 도메인 가져오기 - status 값을 받아 private, shared 중 선택하여 가져오거나 모두 가져올수 있음
@@ -150,7 +148,7 @@ public class DomainService extends Common {
 
             if ( isShared ) {
                 final CreateSharedDomainResponse response =
-                        addSharedDomain( connectionContext(), adminTokenProvider, domainName );
+                        addSharedDomain( connectionContext(), tokenProvider(this.getToken()), domainName );
                 LOGGER.debug( "Response for adding shared domain is... {}", response);
                 addedDomainName = response.getEntity().getName();
             } else {
@@ -227,7 +225,7 @@ public class DomainService extends Common {
                     resultMap.put("result", false);
                 } else {
                     final DeletePrivateDomainResponse response =
-                            Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+                            Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
                                     .privateDomains().delete( DeletePrivateDomainRequest.builder()
                                     .privateDomainId( domain.getMetadata().getId() ).build() ).block();
 

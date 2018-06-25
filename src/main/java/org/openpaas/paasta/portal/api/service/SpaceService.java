@@ -49,8 +49,7 @@ public class SpaceService extends Common {
     @Lazy // To resolve circular reference
     private OrgService orgService;
 
-    @Autowired
-    private PasswordGrantTokenProvider adminTokenProvider;
+
 
     /**
      * 공간(스페이스) 목록 조회한다.
@@ -65,7 +64,7 @@ public class SpaceService extends Common {
     @HystrixCommand(commandKey = "getSpaces")
     public ListSpacesResponse getSpaces(String orgId, String token) {
         ListSpacesResponse response = Common
-            .cloudFoundryClient( connectionContext(), tokenProviderWithDefault( token, adminTokenProvider ) ).spaces()
+            .cloudFoundryClient( connectionContext(), tokenProviderWithDefault( token, tokenProvider(this.getToken()) ) ).spaces()
             .list( ListSpacesRequest.builder().organizationId( orgId ).build() ).block();
 
         return response;
@@ -175,7 +174,7 @@ public class SpaceService extends Common {
         if ( null != token && !"".equals( token ) )
             internalTokenProvider = tokenProvider( token );
         else
-            internalTokenProvider = adminTokenProvider;
+            internalTokenProvider = tokenProvider(this.getToken());
 
         return Common.cloudFoundryClient( connectionContext(), internalTokenProvider )
             .spaces().get( GetSpaceRequest.builder().spaceId( spaceId ).build() ).block();
@@ -191,7 +190,7 @@ public class SpaceService extends Common {
         if ( null != token && !"".equals( token ) ) {
             internalTokenProvider = tokenProvider( token );
         } else {
-            internalTokenProvider = adminTokenProvider;
+            internalTokenProvider = tokenProvider(this.getToken());
         }
 
 
@@ -393,7 +392,7 @@ public class SpaceService extends Common {
     @HystrixCommand(commandKey = "getSpaceUserRoles")
     public Map<String, Collection<UserRole>> getSpaceUserRoles( String spaceId, String token ) {
         if (null == token)
-            token = adminTokenProvider.getToken( connectionContext() ).block();
+            token = tokenProvider(this.getToken()).getToken( connectionContext() ).block();
 
         Map<String, UserRole> userRoles = new HashMap<>();
         listAllSpaceUsers( spaceId, token ).stream()
@@ -457,7 +456,7 @@ public class SpaceService extends Common {
 
     @HystrixCommand(commandKey = "associateSpaceManager")
     private AssociateSpaceManagerResponse associateSpaceManager(String spaceId, String userId) {
-        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+        return Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
             .spaces()
             .associateManager( AssociateSpaceManagerRequest.builder()
                 .spaceId( spaceId ).managerId( userId ).build() )
@@ -466,7 +465,7 @@ public class SpaceService extends Common {
 
     @HystrixCommand(commandKey = "associateSpaceDeveloper")
     private AssociateSpaceDeveloperResponse associateSpaceDeveloper(String spaceId, String userId) {
-        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+        return Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
             .spaces()
             .associateDeveloper( AssociateSpaceDeveloperRequest.builder()
                 .spaceId( spaceId ).developerId( userId ).build() )
@@ -475,7 +474,7 @@ public class SpaceService extends Common {
 
     @HystrixCommand(commandKey = "associateSpaceAuditor")
     private AssociateSpaceAuditorResponse associateSpaceAuditor(String spaceId, String userId) {
-        return Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+        return Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
             .spaces()
             .associateAuditor( AssociateSpaceAuditorRequest.builder()
                 .spaceId( spaceId ).auditorId( userId ).build() )
@@ -563,7 +562,7 @@ public class SpaceService extends Common {
 
     private void removeSpaceManager( String spaceId, String userId ) {
         LOGGER.debug( "---->> Remove SpaceManager role of member({}) in space({}).", userId, spaceId );
-        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+        Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
             .spaces()
             .removeManager( RemoveSpaceManagerRequest.builder()
                 .spaceId( spaceId ).managerId( userId ).build() )
@@ -572,7 +571,7 @@ public class SpaceService extends Common {
 
     private void removeSpaceDeveloper( String spaceId, String userId ) {
         LOGGER.debug( "---->> Remove SpaceDeveloper role of member({}) in space({}).", userId, spaceId );
-        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+        Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
             .spaces()
             .removeDeveloper( RemoveSpaceDeveloperRequest.builder()
                 .spaceId( spaceId ).developerId( userId ).build() )
@@ -581,7 +580,7 @@ public class SpaceService extends Common {
 
     private void removeSpaceAuditor( String spaceId, String userId ) {
         LOGGER.debug( "---->> Remove SpaceAuditor role of member({}) in space({}).", userId, spaceId );
-        Common.cloudFoundryClient( connectionContext(), adminTokenProvider )
+        Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
             .spaces()
             .removeAuditor( RemoveSpaceAuditorRequest.builder()
                 .spaceId( spaceId ).auditorId( userId ).build() )

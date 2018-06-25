@@ -90,8 +90,12 @@ public class Common {
 
     public ObjectMapper objectMapper = new ObjectMapper();
 
-    public String getToken() throws MalformedURLException, URISyntaxException {
-        return loginService.login(adminUserName, adminPassword).getValue();
+    public String getToken() {
+        try {
+            return loginService.login(adminUserName, adminPassword).getValue();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public URL getTargetURL(String target) throws MalformedURLException, URISyntaxException {
@@ -182,7 +186,7 @@ public class Common {
         LOGGER.info("getPassword    :" + test.getPassword());
         LOGGER.info("getProxyUser   :" + test.getProxyUser());
         return test;
-//        return new CloudCredentials(id, password);
+
     }
 
     /**
@@ -240,9 +244,6 @@ public class Common {
         } else if (uaaClientId.equals(uaaLoginClientId)) {
             credentials.setClientSecret(uaaLoginClientSecret);
         }
-
-        //credentials.setUsername(adminUserName);
-        //credentials.setPassword(adminPassword);
         return credentials;
     }
 
@@ -309,27 +310,6 @@ public class Common {
         return getProcPropertyValue(key, Optional.ofNullable(configFileName).orElse(Constants.NONE_VALUE));
     }
 
-
-    public static int diffDay(Date d, Date accessDate) {
-        /**
-         * 날짜 계산
-         */
-        Calendar curC = Calendar.getInstance();
-        Calendar accessC = Calendar.getInstance();
-        curC.setTime(d);
-        accessC.setTime(accessDate);
-        accessC.compareTo(curC);
-        int diffCnt = 0;
-        while (!accessC.after(curC)) {
-            diffCnt++;
-            accessC.add(Calendar.DATE, 1); // 다음날로 바뀜
-
-            System.out.println(accessC.get(Calendar.YEAR) + "년 " + (accessC.get(Calendar.MONTH) + 1) + "월 " + accessC.get(Calendar.DATE) + "일");
-        }
-        System.out.println("기준일로부터 " + diffCnt + "일이 지났습니다.");
-        System.out.println(accessC.compareTo(curC));
-        return diffCnt;
-    }
 
     public static String convertApiUrl(String url) {
         return url.replace("https://", "").replace("http://", "");
@@ -407,23 +387,13 @@ public class Common {
     }
 
     public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, String clientId, String clientSecret) {
-        return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(ClientCredentialsGrantTokenProvider.builder()
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .build()
-        ).build();
+        return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(ClientCredentialsGrantTokenProvider.builder().clientId(clientId).clientSecret(clientSecret).build()).build();
     }
 
     // UAA Admin Client
     public static ReactorUaaClient uaaAdminClient(String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
         ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
-        GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse =
-                reactorUaaClient.tokens().getByClientCredentials(
-                        GetTokenByClientCredentialsRequest.builder()
-                                .clientId(uaaAdminClientId)
-                                .clientSecret(uaaAdminClientSecret)
-                                .build())
-                        .block();
+        GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
         return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
 
@@ -434,62 +404,61 @@ public class Common {
     }
 
     private static void pushConnectionContext(DefaultConnectionContext connectionContext) {
-        connectionContextThreadLocal.set( connectionContext );
-        LOGGER.info( "Create connection context and push thread local : DefalutConnectionContext@{}",
-            Integer.toHexString( connectionContext.hashCode() ) );
+        connectionContextThreadLocal.set(connectionContext);
+        LOGGER.info("Create connection context and push thread local : DefalutConnectionContext@{}", Integer.toHexString(connectionContext.hashCode()));
     }
 
     private static void removeConnectionContext() {
-        disposeConnectionContext( connectionContextThreadLocal.get() );
+        disposeConnectionContext(connectionContextThreadLocal.get());
         connectionContextThreadLocal.remove();
     }
 
     public DefaultConnectionContext connectionContext() {
-        return connectionContext( apiTarget, cfskipSSLValidation );
+        return connectionContext(apiTarget, cfskipSSLValidation);
     }
 
-    private static void disposeConnectionContext ( DefaultConnectionContext connectionContext) {
+    private static void disposeConnectionContext(DefaultConnectionContext connectionContext) {
         try {
-            if (null != connectionContext )
-                connectionContext.dispose();
-        } catch ( Exception ignore ) { }
+            if (null != connectionContext) connectionContext.dispose();
+        } catch (Exception ignore) {
+        }
     }
 
     public static DefaultConnectionContext connectionContext(String apiUrl, boolean skipSSLValidation) {
-        Objects.requireNonNull( apiUrl, "CF API URL" );
+        Objects.requireNonNull(apiUrl, "CF API URL");
         DefaultConnectionContext connectionContext = peekConnectionContext();
         if (null != connectionContext) {
-            boolean isEqual = connectionContext.getApiHost().equals( convertApiUrl( apiUrl ) )
-                && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
-            if ( !isEqual ) {
+            boolean isEqual = connectionContext.getApiHost().equals(convertApiUrl(apiUrl)) && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
+            if (!isEqual) {
                 removeConnectionContext();
                 connectionContext = null;
             }
         }
 
         if (null == connectionContext) {
-            connectionContext = DefaultConnectionContext.builder()
-                .apiHost( convertApiUrl( apiUrl ) ).skipSslValidation( skipSSLValidation ).build();
-            pushConnectionContext( connectionContext );
+            connectionContext = DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).build();
+            pushConnectionContext(connectionContext);
         }
 
         return connectionContext;
     }
 
     public static TokenGrantTokenProvider tokenProvider(String token) {
-        if (token.indexOf("bearer") < 0) {
-            token = "bearer " + token;
+        try {
+            if (token.indexOf("bearer") < 0) {
+                token = "bearer " + token;
+            }
+            return new TokenGrantTokenProvider(token);
+        } catch (Exception e) {
+            return null;
         }
-        return new TokenGrantTokenProvider(token);
     }
 
     public static TokenProvider tokenProviderWithDefault(String token, TokenProvider defaultTokenProvider) {
-        if (null == token)
-            return defaultTokenProvider;
-        else if (token.trim().length() <= 0)
-            return defaultTokenProvider;
+        if (null == token) return defaultTokenProvider;
+        else if (token.trim().length() <= 0) return defaultTokenProvider;
 
-        return tokenProvider( token );
+        return tokenProvider(token);
     }
 
     /**
@@ -509,11 +478,11 @@ public class Common {
         // Remove connection context in thread local
         final DefaultConnectionContext connectionContext = peekConnectionContext();
         if (connectionContext != null) {
-            final String hashCode = Integer.toHexString( connectionContext.hashCode() );
+            final String hashCode = Integer.toHexString(connectionContext.hashCode());
             removeConnectionContext();
-            LOGGER.info( "Remove Pre-destroy connection context : ConnectionContext@{}", hashCode );
+            LOGGER.info("Remove Pre-destroy connection context : ConnectionContext@{}", hashCode);
         } else {
-            LOGGER.info( "Try to remove Pre-destroy connection context, but cannot find ConnectionContext..." );
+            LOGGER.info("Try to remove Pre-destroy connection context, but cannot find ConnectionContext...");
         }
     }
 }

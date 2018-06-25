@@ -55,9 +55,6 @@ public class AppService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
 
 
-    @Autowired
-    ReactorCloudFoundryClient reactorCloudFoundryClient;
-
     @HystrixCommand(commandKey = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException {
 
