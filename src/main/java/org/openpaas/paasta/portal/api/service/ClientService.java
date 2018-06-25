@@ -30,7 +30,7 @@ public class ClientService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);
 
     //V2
-    @HystrixCommand(fallbackMethod = "getClientList")
+    @HystrixCommand(commandKey = "getClientList")
     public ListClientsResponse getClientList() throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
@@ -47,7 +47,7 @@ public class ClientService extends Common {
      * @return GetClientResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getClient")
+    @HystrixCommand(commandKey = "getClient")
     public GetClientResponse getClient(String clientId) throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()
@@ -65,7 +65,7 @@ public class ClientService extends Common {
      * @return CreateClientResponse
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "registerClient")
+    @HystrixCommand(commandKey = "registerClient")
     public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -101,7 +101,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "updateClient")
+    @HystrixCommand(commandKey = "updateClient")
     public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -138,7 +138,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "deleteClient")
+    @HystrixCommand(commandKey = "deleteClient")
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
         return Common.uaaAdminClient(apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret)
                 .clients()

@@ -26,7 +26,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getOrgQuotaDefinitionsList")
+    @HystrixCommand(commandKey = "getOrgQuotaDefinitionsList")
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitionsList(String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -44,7 +44,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getOrgQuotaDefinitions")
+    @HystrixCommand(commandKey = "getOrgQuotaDefinitions")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -64,7 +64,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "createOrgQuotaDefinitions")
+    @HystrixCommand(commandKey = "createOrgQuotaDefinitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         /* required
@@ -101,7 +101,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "updateOrgQuotaDefinitions")
+    @HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -128,7 +128,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "deleteOrgQuotaDefinitions")
+    @HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -147,7 +147,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "setOrgQuotaDefinitions")
+    @HystrixCommand(commandKey = "setOrgQuotaDefinitions")
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)

@@ -93,7 +93,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "getCatalogServicePlanList")
+    @HystrixCommand(commandKey = "getCatalogServicePlanList")
     public ListServicePlansResponse getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
 
         ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).services().list(ListServicesRequest.builder().build()).block();
@@ -111,7 +111,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "getCatalogAppList")
+    @HystrixCommand(commandKey = "getCatalogAppList")
     public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
         ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
@@ -127,7 +127,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(fallbackMethod = "getCheckCatalogApplicationNameExists")
+    @HystrixCommand(commandKey = "getCheckCatalogApplicationNameExists")
     public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
 
         ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
@@ -215,7 +215,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(fallbackMethod = "createApp")
+    @HystrixCommand(commandKey = "createApp")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
@@ -247,7 +247,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(fallbackMethod = "createAppTemplate")
+    @HystrixCommand(commandKey = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
@@ -379,7 +379,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(fallbackMethod = "procCatalogCreateServiceInstanceV2")
+    @HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
     public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
         LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
         ObjectMapper mapper = new ObjectMapper();
@@ -409,7 +409,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(fallbackMethod = "procCatalogBindService")
+    @HystrixCommand(commandKey = "procCatalogBindService")
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
@@ -428,7 +428,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(fallbackMethod = "listServiceInstancesResponse")
+    @HystrixCommand(commandKey = "listServiceInstancesResponse")
     public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token) {
         ListServiceInstancesResponse listServiceInstancesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 serviceInstances().list(ListServiceInstancesRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
@@ -440,7 +440,7 @@ public class CatalogService extends Common {
      *
      * @return ListServicesResponse
      */
-    @HystrixCommand(fallbackMethod = "getService")
+    @HystrixCommand(commandKey = "getService")
     public ListServicesResponse getService() throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).services().list(ListServicesRequest.builder().build()).log().block();
     }

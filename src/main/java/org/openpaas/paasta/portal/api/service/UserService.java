@@ -58,7 +58,7 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    //@HystrixCommand(fallbackMethod = "createUser")
+    @HystrixCommand(commandKey = "createUser")
     public Map createUser(UserDetail userDetail) {
         LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
@@ -86,7 +86,7 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    //@HystrixCommand(fallbackMethod = "updateUser")
+    @HystrixCommand(commandKey = "updateUser")
     public int updateUser(UserDetail userDetail, String token) {
         LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
@@ -115,7 +115,7 @@ public class UserService extends Common {
      * @param newPassword the user id
      * @return UserDetail user
      */
-    //@HystrixCommand(fallbackMethod = "updateUserPassword")
+    @HystrixCommand(commandKey = "updateUserPassword")
     public Map updateUserPassword(String userId, String oldPassword, String newPassword, String token) {
 
         LOGGER.info("updateUserPassword ::: " + userId);
@@ -145,7 +145,7 @@ public class UserService extends Common {
      * 사용자 패스워드를 초기화 한다.
      * 패스워드를 입력안할경우 임의 값으로 패스워드를 변경한다.
      */
-    //@HystrixCommand(fallbackMethod = "resetPassword")
+    @HystrixCommand(commandKey = "resetPassword")
     public Map resetPassword(String userId, String password) {
         LOGGER.info("resetPassword ::: " + userId);
         LOGGER.info("resetPassword ::: " + password);
@@ -191,7 +191,7 @@ public class UserService extends Common {
      * 사용자 패스워드를 만료시킨다.
      * 패스워드를 사용자가 변경하게 수정한다.
      */
-    //@HystrixCommand(fallbackMethod = "expiredPassword")
+    @HystrixCommand(commandKey = "expiredPassword")
     public Map expiredPassword(String userGuid) {
         LOGGER.info("resetPassword ::: " + userGuid);
 
@@ -217,7 +217,7 @@ public class UserService extends Common {
      * @param userId the user id
      * @return 삭제 정보
      */
-    //@HystrixCommand(fallbackMethod = "deleteUser")
+    @HystrixCommand(commandKey = "deleteUser")
     public Map deleteUser(String userId) {
         LOGGER.info("deleteUser ::: " + userId);
 
@@ -236,11 +236,11 @@ public class UserService extends Common {
 
         return result;
     }
-    @HystrixCommand(fallbackMethod = "getUsernameFromToken")
+    @HystrixCommand(commandKey = "getUsernameFromToken")
     public String getUsernameFromToken(String token) {
         return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token)).getUsername().block();
     }
-    @HystrixCommand(fallbackMethod = "getUser")
+    @HystrixCommand(commandKey = "getUser")
     public User getUser(String token) {
         final String userName = getUsernameFromToken(token);
         return this.getUserSummaryByUsername(userName);
@@ -251,7 +251,7 @@ public class UserService extends Common {
      *
      * @return 삭제 정보
      */
-    @HystrixCommand(fallbackMethod = "getUser")
+    @HystrixCommand(commandKey = "getUser")
     public GetUserResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
 
         LOGGER.info("getUser ::: ");
@@ -266,7 +266,7 @@ public class UserService extends Common {
      *
      * @return 삭제 정보
      */
-    @HystrixCommand(fallbackMethod = "allUsers")
+    @HystrixCommand(commandKey = "allUsers")
     public List<User> allUsers() {
         List<User> users = new ArrayList<>();
         try {
@@ -289,7 +289,7 @@ public class UserService extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "create")
+    @HystrixCommand(commandKey = "create")
     public boolean create(HashMap map) throws Exception {
         Boolean bRtn = false;
         return bRtn;
@@ -297,7 +297,7 @@ public class UserService extends Common {
 
 
     private enum UaaUserLookupFilterType {Username, Id, Origin}
-    //@HystrixCommand(fallbackMethod = "createUserLookupFilter")
+    @HystrixCommand(commandKey = "createUserLookupFilter")
     private String createUserLookupFilter(UaaUserLookupFilterType filterType, String filterValue) {
         Objects.requireNonNull(filterType, "User lookup FilterType");
         Objects.requireNonNull(filterValue, "User lookup FilterValue");
@@ -313,7 +313,7 @@ public class UserService extends Common {
      * @param username
      * @return User ID
      */
-    @HystrixCommand(fallbackMethod = "getUserIdByUsername")
+    @HystrixCommand(commandKey = "getUserIdByUsername")
     public String getUserIdByUsername(String username) {
         final List<User> userList = Common.uaaClient(connectionContext, adminTokenProvider).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Username, username)).build()).block().getResources();
         if (userList.size() <= 0) {
@@ -330,7 +330,7 @@ public class UserService extends Common {
      * @param userId
      * @return User name
      */
-    @HystrixCommand(fallbackMethod = "getUsernameByUserId")
+    @HystrixCommand(commandKey = "getUsernameByUserId")
     public String getUsernameByUserId(String userId) {
         final List<User> userList = Common.uaaClient(connectionContext, adminTokenProvider).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Id, userId)).build()).block().getResources();
         if (userList.size() <= 0) {

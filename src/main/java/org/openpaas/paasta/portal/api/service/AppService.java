@@ -58,7 +58,7 @@ public class AppService extends Common {
     @Autowired
     ReactorCloudFoundryClient reactorCloudFoundryClient;
 
-    @HystrixCommand(fallbackMethod = "getAppSummary")
+    @HystrixCommand(commandKey = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException {
 
         SummaryApplicationResponse summaryApplicationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -80,7 +80,7 @@ public class AppService extends Common {
      * @param token the client
      * @return the app stats
      */
-    //@HystrixCommand(fallbackMethod = "getAppStats")
+    @HystrixCommand(commandKey = "getAppStats")
     public ApplicationStatisticsResponse getAppStats(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -100,7 +100,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "renameApp")
+    @HystrixCommand(commandKey = "renameApp")
     public Map renameApp(App app, String token){
         HashMap result = new HashMap();
         try{
@@ -130,7 +130,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "startApp")
+    @HystrixCommand(commandKey = "startApp")
     public Map startApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -158,7 +158,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "stopApp")
+    @HystrixCommand(commandKey = "stopApp")
     public Map stopApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -187,7 +187,7 @@ public class AppService extends Common {
      * @param guid the app
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "deleteApp")
+    @HystrixCommand(commandKey = "deleteApp")
     public Map deleteApp(String guid) {
         HashMap result = new HashMap();
         try {
@@ -228,7 +228,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "restageApp")
+    @HystrixCommand(commandKey = "restageApp")
     public Map restageApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -258,7 +258,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "updateApp")
+    @HystrixCommand(commandKey = "updateApp")
     public Map updateApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -297,7 +297,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "bindService")
+    @HystrixCommand(commandKey = "bindService")
     public Map bindService(Map body, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -336,7 +336,7 @@ public class AppService extends Common {
      * @param token             the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "unbindService")
+    @HystrixCommand(commandKey = "unbindService")
     public Map unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -378,7 +378,7 @@ public class AppService extends Common {
      * @return the app events
      * @throws Exception the exception
      */
-    @HystrixCommand(fallbackMethod = "getAppEvents")
+    @HystrixCommand(commandKey = "getAppEvents")
     public ListEventsResponse getAppEvents(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -399,7 +399,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    @HystrixCommand(fallbackMethod = "getApplicationEnv")
+    @HystrixCommand(commandKey = "getApplicationEnv")
     public ApplicationEnvironmentResponse getApplicationEnv(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -424,7 +424,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    //@HystrixCommand(fallbackMethod = "addApplicationRoute")
+    @HystrixCommand(commandKey = "addApplicationRoute")
     public Map addApplicationRoute(Map body, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -469,7 +469,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    //@HystrixCommand(fallbackMethod = "removeApplicationRoute")
+    @HystrixCommand(commandKey = "removeApplicationRoute")
     public Map removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -510,7 +510,7 @@ public class AppService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "deleteRoute")
+    @HystrixCommand(commandKey = "deleteRoute")
     public boolean deleteRoute(String orgName, String spaceName, List<String> urls, String token) throws Exception {
         return true;
     }
@@ -524,7 +524,7 @@ public class AppService extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    //@HystrixCommand(fallbackMethod = "terminateInstance")
+    @HystrixCommand(commandKey = "terminateInstance")
     public Map terminateInstance(String guid, String index, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -546,7 +546,7 @@ public class AppService extends Common {
         return resultMap;
     }
 
-    @HystrixCommand(fallbackMethod = "getRecentLog")
+    @HystrixCommand(commandKey = "getRecentLog")
     public List<Envelope> getRecentLog(String guid, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
         ReactorDopplerClient reactorDopplerClient = Common.dopplerClient(connectionContext(), tokenProvider);
@@ -558,7 +558,7 @@ public class AppService extends Common {
         return getRecentLog;
     }
 
-    @HystrixCommand(fallbackMethod = "getTailLog")
+    @HystrixCommand(commandKey = "getTailLog")
     public List<LogMessage> getTailLog(String guid, String token) {
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), "demo.org", "dev");
 
@@ -581,7 +581,7 @@ public class AppService extends Common {
         LOGGER.info(" [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
     }
 
-    //@HystrixCommand(fallbackMethod = "socketTailLogs")
+    @HystrixCommand(commandKey = "socketTailLogs")
     public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName, String token) {
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), orgName, spaceName);
 
