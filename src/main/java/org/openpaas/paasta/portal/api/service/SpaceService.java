@@ -642,7 +642,7 @@ public class SpaceService extends Common {
         }
     }
 
-    @HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
+    //@HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
     public void removeAllSpaceUserRolesByOrgId( String orgId, String userId, Iterable<String> roles ) {
         final List<String> spaceIds = this.getSpaces( orgId, null ).getResources()
             .stream().map( space -> space.getMetadata().getId() ).filter( id -> null != id )

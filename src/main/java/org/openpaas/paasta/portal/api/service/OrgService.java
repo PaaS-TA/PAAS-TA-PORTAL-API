@@ -730,7 +730,7 @@ public class OrgService extends Common {
     }
 
     // TODO cancel member
-    @HystrixCommand(commandKey = "cancelOrganizationMember")
+    //@HystrixCommand(commandKey = "cancelOrganizationMember")
     public boolean cancelOrganizationMember(String orgId, String userId, String token) {
         final boolean isManager = isOrgManager(orgId, userId);
         LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
@@ -747,7 +747,7 @@ public class OrgService extends Common {
         }
     }
 
-    @HystrixCommand(commandKey = "associateOrgUserRole2")
+    //@HystrixCommand(commandKey = "associateOrgUserRole2")
     public boolean associateOrgUserRole2(Map body) {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
