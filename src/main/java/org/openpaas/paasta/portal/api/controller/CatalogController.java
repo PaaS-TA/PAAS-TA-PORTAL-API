@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -75,7 +76,7 @@ public class CatalogController extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @GetMapping(Constants.V2_URL+"/catalogs/apps/{name}")
+    @GetMapping(Constants.V2_URL+"/catalogs/apps/{name:.+}/")
     public Map<String, Object> getCheckCatalogApplicationNameExists(@PathVariable String name, @RequestParam String orgid, @RequestParam String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
         return catalogService.getCheckCatalogApplicationNameExists(name,orgid,spaceid, req, res);
     }
