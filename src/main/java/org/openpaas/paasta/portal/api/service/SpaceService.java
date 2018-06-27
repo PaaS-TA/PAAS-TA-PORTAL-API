@@ -4,6 +4,8 @@ import com.google.common.base.CaseFormat;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
+import org.cloudfoundry.client.v2.users.ListUserSpacesRequest;
+import org.cloudfoundry.client.v2.users.ListUserSpacesResponse;
 import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.operations.useradmin.ListSpaceUsersRequest;
 import org.cloudfoundry.operations.useradmin.SpaceUsers;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -390,37 +393,39 @@ public class SpaceService extends Common {
     }
 
     @HystrixCommand(commandKey = "getSpaceUserRoles")
-    public Map<String, Collection<UserRole>> getSpaceUserRoles( String spaceId, String token ) {
-        if (null == token)
-            token = tokenProvider(this.getToken()).getToken( connectionContext() ).block();
-
-        Map<String, UserRole> userRoles = new HashMap<>();
-        listAllSpaceUsers( spaceId, token ).stream()
-            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
-                .userEmail( resource.getEntity().getUsername() )
-                .roles(
-                    resource.getEntity().getSpaceRoles().stream()
-                        .map( roleStr -> CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.UPPER_CAMEL, roleStr ) ).collect(Collectors
-                        .toList()) )
-                .modifiableRoles( false )
-                .build()
-            ).filter( ur -> null != ur )
-            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
-
-        // add non-space users (retrived from org user list)
-        String orgId = getSpace( spaceId, token ).getEntity().getOrganizationId();
-        orgService.listAllOrgUsers( orgId, token ).stream()
-            .filter( resource -> false == userRoles.containsKey( resource.getMetadata().getId() ) )
-            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
-                .userEmail( resource.getEntity().getUsername() )
-                .modifiableRoles( false )
-                .build()
-            ).filter( ur -> null != ur )
-            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
-
-        final Map<String, Collection<UserRole>> result = new HashMap<>();
-        result.put( "user_roles", userRoles.values() );
-        return result;
+    public ListSpaceUserRolesResponse getSpaceUserRoles( String spaceId, String token ) {
+        return  Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces()
+                .listUserRoles(ListSpaceUserRolesRequest.builder().spaceId(spaceId).build()).block();
+//        if (null == token)
+//            token = tokenProvider(this.getToken()).getToken( connectionContext() ).block();
+//
+//        Map<String, UserRole> userRoles = new HashMap<>();
+//        listAllSpaceUsers( spaceId, token ).stream()
+//            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
+//                .userEmail( resource.getEntity().getUsername() )
+//                .roles(
+//                    resource.getEntity().getSpaceRoles().stream()
+//                        .map( roleStr -> CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.UPPER_CAMEL, roleStr ) ).collect(Collectors
+//                        .toList()) )
+//                .modifiableRoles( false )
+//                .build()
+//            ).filter( ur -> null != ur )
+//            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
+//
+//        // add non-space users (retrived from org user list)
+//        String orgId = getSpace( spaceId, token ).getEntity().getOrganizationId();
+//        orgService.listAllOrgUsers( orgId, token ).stream()
+//            .filter( resource -> false == userRoles.containsKey( resource.getMetadata().getId() ) )
+//            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
+//                .userEmail( resource.getEntity().getUsername() )
+//                .modifiableRoles( false )
+//                .build()
+//            ).filter( ur -> null != ur )
+//            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
+//
+//        final Map<String, Collection<UserRole>> result = new HashMap<>();
+//        result.put( "user_roles", userRoles.values() );
+//        return result;
     }
 
     @HystrixCommand(commandKey = "getSpaceUserRolesBySpaceName")
@@ -447,11 +452,11 @@ public class SpaceService extends Common {
 
     @HystrixCommand(commandKey = "isSpaceManager")
     public boolean isSpaceManager( String spaceId, String userId ) {
-        Stream<UserRole> userRoles = getSpaceUserRoles( spaceId, null ).get( "user_roles" )
-            .stream().filter( ur -> ur.getRoles().contains( "SpaceManager" ) );
-        boolean matches = userRoles.anyMatch( ur -> ur.getUserId().equals( userId ) );
+//        Stream<UserRole> userRoles = getSpaceUserRoles( spaceId, null ).getResources()
+//            .stream().filter( ur -> ur.getEntity().getOrganizationsUrl().contains( "SpaceManager" ) );
+//        boolean matches = userRoles.anyMatch( ur -> ur.getUserId().equals( userId ) );
 
-        return matches;
+        return true;
     }
 
     @HystrixCommand(commandKey = "associateSpaceManager")
@@ -486,15 +491,6 @@ public class SpaceService extends Common {
         Objects.requireNonNull( spaceId, "Space Id" );
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
-
-        /*
-        // Is needed action? Only do associate OrgManager
-        if (!isSpaceManagerUsingToken( spaceId, token )) {
-            final String email = userService.getUser( token ).getEmail();
-            throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                "This user is unauthorized to change role for this org : " + email );
-        }
-        */
 
         final SpaceRole roleEnum;
         try {
@@ -642,7 +638,7 @@ public class SpaceService extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
+    @HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
     public void removeAllSpaceUserRolesByOrgId( String orgId, String userId, Iterable<String> roles ) {
         final List<String> spaceIds = this.getSpaces( orgId, null ).getResources()
             .stream().map( space -> space.getMetadata().getId() ).filter( id -> null != id )
@@ -651,5 +647,56 @@ public class SpaceService extends Common {
             for ( String spaceId : spaceIds )
                 removeSpaceUserRole( spaceId, userId, role );
         }
+    }
+    @HystrixCommand(commandKey = "associateSpaceUserRoles")
+    public boolean associateSpaceUserRoles(String spaceid, List<UserRole> Roles, String token){
+        Roles.forEach(userRole -> {
+            boolean manager = true;
+            boolean audiotr = true;
+            boolean developer = true;
+            for(String spacerole : userRole.getRoles()) {
+               switch (spacerole){
+                   case "space_manager" : { manager = false;
+                       Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
+                               .spaces()
+                               .associateManager( AssociateSpaceManagerRequest.builder()
+                                       .spaceId( spaceid ).managerId( userRole.getUserId() ).build() )
+                               .block();
+                       break; }
+                   case "space_auditor" : { audiotr = false;
+                           Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
+                                   .spaces()
+                                   .associateDeveloper( AssociateSpaceDeveloperRequest.builder()
+                                           .spaceId( spaceid ).developerId( userRole.getUserId() ).build() )
+                                   .block();
+                           break; }
+                   case "space_developer" : { developer = false;
+                       Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
+                               .spaces()
+                               .associateAuditor( AssociateSpaceAuditorRequest.builder()
+                                       .spaceId( spaceid ).auditorId( userRole.getUserId() ).build() )
+                               .block();
+                       break; }
+               }};
+            if(manager){
+                Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
+                        .spaces()
+                        .removeManager( RemoveSpaceManagerRequest.builder()
+                                .spaceId( spaceid ).managerId(  userRole.getUserId() ).build() )
+                        .block();
+            }if(audiotr){
+                Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
+                        .spaces()
+                        .removeAuditor( RemoveSpaceAuditorRequest.builder()
+                                .spaceId( spaceid ).auditorId(  userRole.getUserId() ).build() )
+                        .block();
+            }if(developer){
+                Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
+                        .spaces()
+                        .removeDeveloper( RemoveSpaceDeveloperRequest.builder()
+                                .spaceId( spaceid ).developerId(  userRole.getUserId() ).build() )
+                        .block();
+            }});
+        return true;
     }
 }

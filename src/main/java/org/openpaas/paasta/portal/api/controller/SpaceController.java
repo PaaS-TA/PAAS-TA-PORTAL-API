@@ -243,27 +243,20 @@ public class SpaceController extends Common {
      * @since 2018.5.16
      */
     @GetMapping(V2_URL + "/spaces/{spaceId}/user-roles")
-    public Map<String, Collection<UserRole>> getSpaceUserRoles ( @PathVariable String spaceId, @RequestHeader
+    public ListSpaceUserRolesResponse getSpaceUserRoles ( @PathVariable String spaceId, @RequestHeader
         (AUTHORIZATION_HEADER_KEY ) String token ) {
         Objects.requireNonNull( spaceId, "Space Id" );
         // token can fill "NULL" value.
         //Objects.requireNonNull( token, "token" );
+        return spaceService.getSpaceUserRoles( spaceId, token );
 
-        if (spaceService.isExistSpace( spaceId )) {
-            return spaceService.getSpaceUserRoles( spaceId, token );
-        } else {
-            return Collections.<String, Collection<UserRole>>emptyMap();
-        }
     }
 
     @PutMapping(V2_URL + "/spaces/{spaceId}/user-roles")
-    public AbstractSpaceResource associateSpaceUserRoles( @PathVariable String spaceId,
-                                                          @RequestBody UserRole.RequestBody body,
+    public boolean associateSpaceUserRoles( @PathVariable String spaceId,
+                                                          @RequestBody List<UserRole> Roles,
                                                           @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        Objects.requireNonNull( body.getUserId(), "User ID(userId) is required" );
-        Objects.requireNonNull( body.getRole(), "Org Role(role) is required" );
-        LOGGER.info( "Associate organization role of user (Update) : {} / {}", body.getUserId(), body.getRole() );
-        return spaceService.associateSpaceUserRole( spaceId, body.getUserId(), body.getRole() );
+        return spaceService.associateSpaceUserRoles( spaceId, Roles, token );
     }
 
     @DeleteMapping(V2_URL + "/spaces/{spaceId}/user-roles")
