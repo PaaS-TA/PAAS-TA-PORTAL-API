@@ -1,71 +1,10 @@
-# Spring properties
 spring:
   application:
-    name: PortalApi  # Service registers under this name
-  security:
-    username: admin
-    password: openpaasta
+      name: PortalApi
   cloud:
-    discovery:
-      enabled: false
     config:
-      enabled: false
-    admin:
-      enable: false
+      uri: http://10.30.80.50:8004
 
-# HTTP Server
 server:
-  port: ${PORT:2222}   # HTTP (Tomcat) port
+  port: ${PORT:2221}
 
-tailsocket:
-  port: 5555
-
-
-
-# CloudFoundry API Url
-cloudfoundry:
-  cc:
-    api:
-      url: https://api.115.68.46.187.xip.io
-      uaaUrl: https://uaa.115.68.46.187.xip.io
-      sslSkipValidation: true
-  # CloudFoundry Login information
-  user:
-    admin:
-      username: admin
-      password: 'admin'
-    uaaClient:
-      clientId: login
-      clientSecret: login-secret
-      adminClientId: admin
-      adminClientSecret: admin-secret
-      loginClientId: login
-      loginClientSecret: login-secret
-      skipSSLValidation: true
-  authorization: cf-Authorization
-
-
-abacus:
-  url: http://paasta-usage-reporting.115.68.46.187.xip.io/v1
-
-# 포탈 상세 모니터링
-monitoring:
-  api:
-    url: http://monitapi.211.239.163.240.xip.io
-
-multipart:
-  maxFileSize: 1000Mb
-  maxRequestSize: 1000Mb
-
-
-paasta:
-  portal:
-    api:
-      authorization:
-        base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
-      zuulUrl:
-        cfapi: http://localhost:2225/portalapi
-        commonapi: http://localhost:2225/commonapi
-        storageapi: http://localhost:2225/storageapi
-    storageapi:
-      type: swift

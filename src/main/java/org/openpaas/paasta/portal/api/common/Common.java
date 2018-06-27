@@ -436,6 +436,7 @@ public class Common {
         }
 
         if (null == connectionContext) {
+            LOGGER.info(apiUrl);
             connectionContext = DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).build();
             pushConnectionContext(connectionContext);
         }
