@@ -225,7 +225,7 @@ public class DomainService extends Common {
                     resultMap.put("result", false);
                 } else {
                     final DeletePrivateDomainResponse response =
-                            Common.cloudFoundryClient( connectionContext(), tokenProvider(this.getToken()) )
+                            Common.cloudFoundryClient( connectionContext(), tokenProvider(token) )
                                     .privateDomains().delete( DeletePrivateDomainRequest.builder()
                                     .privateDomainId( domain.getMetadata().getId() ).build() ).block();
 

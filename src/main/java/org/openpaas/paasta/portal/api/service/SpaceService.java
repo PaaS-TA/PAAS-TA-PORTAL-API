@@ -396,67 +396,6 @@ public class SpaceService extends Common {
     public ListSpaceUserRolesResponse getSpaceUserRoles( String spaceId, String token ) {
         return  Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces()
                 .listUserRoles(ListSpaceUserRolesRequest.builder().spaceId(spaceId).build()).block();
-//        if (null == token)
-//            token = tokenProvider(this.getToken()).getToken( connectionContext() ).block();
-//
-//        Map<String, UserRole> userRoles = new HashMap<>();
-//        listAllSpaceUsers( spaceId, token ).stream()
-//            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
-//                .userEmail( resource.getEntity().getUsername() )
-//                .roles(
-//                    resource.getEntity().getSpaceRoles().stream()
-//                        .map( roleStr -> CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.UPPER_CAMEL, roleStr ) ).collect(Collectors
-//                        .toList()) )
-//                .modifiableRoles( false )
-//                .build()
-//            ).filter( ur -> null != ur )
-//            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
-//
-//        // add non-space users (retrived from org user list)
-//        String orgId = getSpace( spaceId, token ).getEntity().getOrganizationId();
-//        orgService.listAllOrgUsers( orgId, token ).stream()
-//            .filter( resource -> false == userRoles.containsKey( resource.getMetadata().getId() ) )
-//            .map( resource -> UserRole.builder().userId( resource.getMetadata().getId() )
-//                .userEmail( resource.getEntity().getUsername() )
-//                .modifiableRoles( false )
-//                .build()
-//            ).filter( ur -> null != ur )
-//            .forEach( ur -> userRoles.put( ur.getUserId(), ur) );
-//
-//        final Map<String, Collection<UserRole>> result = new HashMap<>();
-//        result.put( "user_roles", userRoles.values() );
-//        return result;
-    }
-
-    @HystrixCommand(commandKey = "getSpaceUserRolesBySpaceName")
-    public SpaceUsers getSpaceUserRolesBySpaceName( String orgName, String spaceName, String token ) {
-        return Common.cloudFoundryOperations( connectionContext(), tokenProvider( token ) )
-            .userAdmin()
-            .listSpaceUsers(
-                ListSpaceUsersRequest.builder().organizationName( orgName ).spaceName( spaceName ).build()
-            ).block();
-    }
-
-    @HystrixCommand(commandKey = "isSpaceManagerUsingName")
-    public boolean isSpaceManagerUsingName( String orgName, String spaceName, String token ) {
-        final String spaceId = this.getSpaceUsingName( orgName, spaceName, token ).getMetadata().getId();
-        final String userId = userService.getUser( token ).getId();
-        return isSpaceManager( spaceId, userId );
-    }
-
-    @HystrixCommand(commandKey = "isSpaceManagerUsingToken")
-    public boolean isSpaceManagerUsingToken( String spaceId, String token ) {
-        final String userId = userService.getUser( token ).getId();
-        return isSpaceManager( spaceId, userId );
-    }
-
-    @HystrixCommand(commandKey = "isSpaceManager")
-    public boolean isSpaceManager( String spaceId, String userId ) {
-//        Stream<UserRole> userRoles = getSpaceUserRoles( spaceId, null ).getResources()
-//            .stream().filter( ur -> ur.getEntity().getOrganizationsUrl().contains( "SpaceManager" ) );
-//        boolean matches = userRoles.anyMatch( ur -> ur.getUserId().equals( userId ) );
-
-        return true;
     }
 
     @HystrixCommand(commandKey = "associateSpaceManager")
@@ -531,30 +470,6 @@ public class SpaceService extends Common {
         return responses;
     }
 
-    @HystrixCommand(commandKey = "associateSpaceUserRolesByOrgIdAndRole")
-    public List<AbstractSpaceResource> associateSpaceUserRolesByOrgIdAndRole ( String spaceId, String orgId ) {
-        // set space role for all user in org
-        final List<AbstractSpaceResource> results = new LinkedList<>();
-        final Collection<UserRole> users = orgService.getOrgUserRoles( orgId, null ).get( "user_roles" );
-        for (UserRole user : users) {
-            final String userId = user.getUserId();
-            final Set<String> roles = user.getRoles();
-            List<String> spaceRoles = Collections.emptyList();
-            if (roles.contains( "OrgManager" ))
-                spaceRoles = SPACE_ROLES_FOR_ORGMANAGER;
-            else if (roles.contains( "OrgAuditor" ))
-                spaceRoles = SPACE_ROLES_FOR_ORGAUDITOR;
-            else if (roles.contains( "BillingManager" ))
-                spaceRoles = SPACE_ROLES_FOR_BILLINGMANAGER;
-
-            for (String spaceRole : spaceRoles) {
-                results.add( this.associateSpaceUserRole( spaceId, userId, spaceRole ) );
-            }
-        }
-
-        return results;
-    }
-
 
     private void removeSpaceManager( String spaceId, String userId ) {
         LOGGER.debug( "---->> Remove SpaceManager role of member({}) in space({}).", userId, spaceId );
@@ -603,15 +518,6 @@ public class SpaceService extends Common {
         Objects.requireNonNull( spaceId, "Space Id" );
         Objects.requireNonNull( userId, "User Id" );
         Objects.requireNonNull( role, "role" );
-
-        /*
-        // Is needed action? Only do associate OrgManager
-        if (!isSpaceManagerUsingToken(spaceId, token)) {
-            final String email = userService.getUser( token ).getEmail();
-            throw new CloudFoundryException( HttpStatus.FORBIDDEN,
-                "This user is unauthorized to change role for this org : " + email );
-        }
-        */
 
         final SpaceRole roleEnum;
         try {

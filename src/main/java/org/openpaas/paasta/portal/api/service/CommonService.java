@@ -156,11 +156,4 @@ public class CommonService {
         return resEntity;
     }
 
-    public ResponseEntity<String> procStorageApiRestTemplateText(String reqUrl, HttpMethod httpMethod, Object bodyObject, String reqToken) {
-        return procStorageApiRestTemplate( reqUrl, httpMethod, bodyObject, reqToken, String.class );
-    }
-
-    public ResponseEntity<byte[]> procStorageApiRestTemplateBinary(String reqUrl, HttpMethod httpMethod, Object bodyObject, String reqToken) {
-        return procStorageApiRestTemplate( reqUrl, httpMethod, bodyObject, reqToken, byte[].class );
-    }
 }

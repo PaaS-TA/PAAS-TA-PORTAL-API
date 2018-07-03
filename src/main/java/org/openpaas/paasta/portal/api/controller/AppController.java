@@ -340,7 +340,7 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
-    public Map getSpaceSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public Map getRecentLog(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("getRecentLog Start : " + guid);
 

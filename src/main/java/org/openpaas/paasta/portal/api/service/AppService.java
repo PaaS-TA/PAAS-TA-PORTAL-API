@@ -498,21 +498,6 @@ public class AppService extends Common {
     }
 
     /**
-     * 라우트를 삭제한다.
-     *
-     * @param orgName   the org name
-     * @param spaceName the space name
-     * @param urls      the urls
-     * @param token     the token
-     * @return the boolean
-     * @throws Exception the exception
-     */
-    @HystrixCommand(commandKey = "deleteRoute")
-    public boolean deleteRoute(String orgName, String spaceName, List<String> urls, String token) throws Exception {
-        return true;
-    }
-
-    /**
      * 인덱스로 앱 인스턴스를 종료한다.
      *
      * @param guid

@@ -64,7 +64,7 @@ public class DomainController extends Common {
      * Gets domains with guid.
      *
      * @param token  the token
-     * @param guid the guid
+     * @param guid the Org guid
      * @return the domains
      * @throws Exception the exception
      */

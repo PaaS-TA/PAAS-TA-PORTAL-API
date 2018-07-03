@@ -89,16 +89,16 @@ public class CatalogService extends Common {
      * 카탈로그 서비스 이용사양 목록을 조회한다.
      *
      * @param servicename ServiceName(자바클래스)
-     * @param req         HttpServletRequest(자바클래스)
+     * @param token         HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     @HystrixCommand(commandKey = "getCatalogServicePlanList")
-    public ListServicePlansResponse getCatalogServicePlanList(String servicename, HttpServletRequest req) throws Exception {
+    public ListServicePlansResponse getCatalogServicePlanList(String servicename, String token) throws Exception {
 
-        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).services().list(ListServicesRequest.builder().build()).block();
+        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).services().list(ListServicesRequest.builder().build()).block();
         Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream().filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
-        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
+        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
         return listServicePlansResponse;
     }
 
@@ -107,13 +107,13 @@ public class CatalogService extends Common {
      *
      * @param orgid   String(자바클래스)
      * @param spaceid String(자바클래스)
-     * @param req     HttpServletRequest(자바클래스)
+     * @param token     HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     @HystrixCommand(commandKey = "getCatalogAppList")
-    public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, HttpServletRequest req) throws Exception {
-        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+    public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, String token) throws Exception {
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
     }
 
@@ -122,15 +122,15 @@ public class CatalogService extends Common {
      * 카탈로그 앱 이름 생성여부를 조회한다.
      *
      * @param name name(앱 이름)
-     * @param req  HttpServletRequest(자바클래스)
+     * @param token  HttpServletRequest(자바클래스)
      * @param res  HttpServletResponse(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     @HystrixCommand(commandKey = "getCheckCatalogApplicationNameExists")
-    public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, HttpServletRequest req, HttpServletResponse res) throws Exception {
+    public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, String token, HttpServletResponse res) throws Exception {
 
-        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(req.getHeader(cfAuthorizationHeaderKey))).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+        ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
 
         for (ApplicationResource applicationResource : listApplicationsResponse.getResources()) {
             if (applicationResource.getEntity().getName().equals(name)) {
@@ -421,10 +421,11 @@ public class CatalogService extends Common {
     }
 
     /**
-     * 카탈로그 서비스 인스턴스를 생성한다.
+     * 서비스 인스턴스 목록들을 가져온다.
      *
-     * @param orgid String(자바클래스)
-     * @param token String(자바클래스)
+     * @param orgid org guid(조직 Guid)
+     * @param spaceid space guid(공간 Guid)
+     * @param token   HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
