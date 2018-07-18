@@ -45,33 +45,7 @@ public class ServiceController extends Common {
     @Autowired
     private ServiceService serviceService;
 
-
-    /**
-     * 서비스 인스턴스를 조회한다.
-     *
-     * @param service the service
-     * @param request the request
-     * @return CloudServiceInstance cloudServiceInstance
-     * @throws Exception the exception
-     */
-    @RequestMapping(value = {"/service/getServiceInstance"}, method = RequestMethod.POST)
-    public CloudServiceInstance getServiceInstance(@RequestBody Service service, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("getServiceInstance Start : " + service.getGuid());
-
-        //token setting
-        CloudFoundryClient client = getCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY), service.getOrgName(), service.getSpaceName());
-
-        //service call
-        CloudServiceInstance cloudServiceInstance = serviceService.getServiceInstance(service, client);
-
-        LOGGER.info("getServiceInstance End ");
-
-        return cloudServiceInstance;
-    }
-
-
-    /**
+     /**
      * 서비스 인스턴스 이름을 변경한다.
      *
      * @param service the service

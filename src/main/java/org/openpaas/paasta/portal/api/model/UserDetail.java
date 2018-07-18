@@ -18,7 +18,7 @@ public class UserDetail {
     private String addressDetail;
     private String adminYn;
     private String imgPath;
-
+    private boolean active;
     private int count;
 
     private String password;
@@ -151,6 +151,14 @@ public class UserDetail {
 
     public void setAuthAccessCnt(int authAccessCnt) {
         this.authAccessCnt = authAccessCnt;
+    }
+
+    public boolean getActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
 }

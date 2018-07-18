@@ -631,32 +631,22 @@ public class OrgService extends Common {
         return targetSpaceRole;
     }
 
-    private void removeOrgManager(String orgId, String userId, boolean removeWithSpaceRole) {
+    private void removeOrgManager(String orgId, String userId) {
         LOGGER.debug("---->> Remove OrgManager role of member({}) in org({}).", userId, orgId);
         Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeManager(RemoveOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
     }
 
-    private void removeOrgManager(String orgId, String userId) {
-        removeOrgManager(orgId, userId, true);
-    }
 
-    private void removeBillingManager(String orgId, String userId, boolean removeWithSpaceRole) {
+    private void removeBillingManager(String orgId, String userId) {
         LOGGER.debug("---->> Remove BillingManager role of member({}) in org({}).", userId, orgId);
         Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeBillingManager(RemoveOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
     }
 
-    private void removeBillingManager(String orgId, String userId) {
-        removeBillingManager(orgId, userId, true);
-    }
-
-    private void removeOrgAuditor(String orgId, String userId, boolean removeWithSpaceRole) {
+    private void removeOrgAuditor(String orgId, String userId) {
         LOGGER.debug("---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId);
         Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().removeAuditor(RemoveOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
     }
 
-    private void removeOrgAuditor(String orgId, String userId) {
-        removeOrgAuditor(orgId, userId, true);
-    }
 
     private void removeAllRoles(String orgId, String userId) {
         try {
@@ -664,9 +654,9 @@ public class OrgService extends Common {
 
             LOGGER.debug("--> Remove all member({})'s roles in org({}).", userId, orgId);
             spaceService.removeAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgManager));
-            removeOrgManager(orgId, userId, false);
-            removeBillingManager(orgId, userId, false);
-            removeOrgAuditor(orgId, userId, false);
+            removeOrgManager(orgId, userId);
+            removeBillingManager(orgId, userId);
+            removeOrgAuditor(orgId, userId);
             LOGGER.debug("--> Done to remove all member({})'s roles in org({}).", userId, orgId);
 
             blockingQueue.put(lock);
@@ -697,7 +687,6 @@ public class OrgService extends Common {
                 LOGGER.error("This role is invalid : {}", role);
                 return;
             }
-            LOGGER.info("여기옴");
             switch (roleEnum) {
                 case OrgManager:
                 case ORGMANAGER:
