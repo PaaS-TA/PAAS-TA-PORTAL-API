@@ -36,25 +36,7 @@ public class ServiceService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceService.class);
 
 
-
-    /**
-     * 서비스 인스턴스를 조회한다.
-     *
-     * @param service the service
-     * @param client  the client
-     * @return the service instance
-     * @throws Exception the exception
-     */
-    @HystrixCommand(commandKey = "getServiceInstance")
-    public CloudServiceInstance getServiceInstance(org.openpaas.paasta.portal.api.model.Service service, CloudFoundryClient client) throws Exception {
-
-        CloudServiceInstance cloudServiceInstance = client.getServiceInstance(service.getName());
-
-        return cloudServiceInstance;
-
-    }
-
-    /**
+     /**
      * 서비스 인스턴스 이름을 변경한다.
      *
      * @param service the service
