@@ -13,6 +13,7 @@ import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.cloudfoundry.uaa.users.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
+import org.openpaas.paasta.portal.api.model.UserManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class UserService extends Common {
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(adminUserName, adminPassword));
-            reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
+            reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).active(userDetail.getActive()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -350,4 +351,15 @@ public class UserService extends Common {
     public User getUserSummaryByUsername(String userName) {
         return getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userName);
     }
+
+    public UpdateUserResponse UpdateUserActive(String userGuid) {
+         ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(this.getToken()));
+         User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
+         Name name = Name.builder().familyName(user.getName().getFamilyName()==null?"familyName":user.getName().getFamilyName()).givenName(user.getName().getGivenName()==null?"givenName":user.getName().getGivenName()).build();
+
+         LOGGER.info(user.toString());
+         UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(false).build()).block();
+        return null;
+    }
+
 }

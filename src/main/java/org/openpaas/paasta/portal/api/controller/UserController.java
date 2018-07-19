@@ -1,11 +1,13 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.users.GetUserResponse;
+import org.cloudfoundry.uaa.users.UpdateUserResponse;
 import org.cloudfoundry.uaa.users.User;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.UserDetail;
+import org.openpaas.paasta.portal.api.model.UserManagement;
 import org.openpaas.paasta.portal.api.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,5 +185,17 @@ public class UserController extends Common {
             case "id":
                 return userService.getUserSummary(userIdentifier);
         }
+    }
+
+    /**
+     * 사용자 포탈 접속 가능 유무 수정
+     *
+     * @param userid     userId
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    @PutMapping(V2_URL + "/user/{userid}/active")
+    public UpdateUserResponse UpdateUserActive(@PathVariable String userid) throws Exception {
+        return userService.UpdateUserActive(userid);
     }
 }
