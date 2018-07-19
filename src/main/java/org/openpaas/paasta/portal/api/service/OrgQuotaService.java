@@ -26,10 +26,9 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getOrgQuotaDefinitionsList")
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitionsList(String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
                 .organizationQuotaDefinitions()
                 .list(ListOrganizationQuotaDefinitionsRequest.builder()
                         .build()
@@ -47,7 +46,7 @@ public class OrgQuotaService extends Common {
     @HystrixCommand(commandKey = "getOrgQuotaDefinitions")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
                .organizationQuotaDefinitions()
                 .get(GetOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)
@@ -78,7 +77,7 @@ public class OrgQuotaService extends Common {
         예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
         */
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
                 .organizationQuotaDefinitions()
                 .create(CreateOrganizationQuotaDefinitionRequest.builder()
                         .name(quota.getName())
@@ -104,7 +103,7 @@ public class OrgQuotaService extends Common {
     @HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
                 .organizationQuotaDefinitions()
                 .update(UpdateOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quota.getGuid().toString())
@@ -131,7 +130,7 @@ public class OrgQuotaService extends Common {
     @HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
                 .organizationQuotaDefinitions()
                 .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)
@@ -151,7 +150,7 @@ public class OrgQuotaService extends Common {
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)
-        Common.cloudFoundryOperations(connectionContext(), tokenProvider(adminUserName,adminPassword))
+        Common.cloudFoundryOperations(connectionContext(), tokenProvider(this.getToken()))
             .organizationAdmin()
             .setQuota(SetQuotaRequest.builder()
                     .quotaName(quota.getName())
