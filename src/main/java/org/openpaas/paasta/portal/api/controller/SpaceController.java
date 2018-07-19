@@ -60,15 +60,11 @@ public class SpaceController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summary"}, method = RequestMethod.GET)
+    @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summary")
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
-
         GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
-//        return spaceService.getSpaceSummary(spaceid,request.getHeader(AUTHORIZATION_HEADER_KEY));
-
         LOGGER.info("Get SpaceSummary End ");
-
         return respSapceSummary;
     }
 
@@ -80,7 +76,7 @@ public class SpaceController extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL+"/spaces/{spaceid}/summarylist"}, method = RequestMethod.GET)
+    @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
 

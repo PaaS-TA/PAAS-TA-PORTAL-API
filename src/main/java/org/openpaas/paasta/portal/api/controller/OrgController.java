@@ -101,11 +101,21 @@ public class OrgController extends Common {
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
     public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("org summary : " + orgId);
-		if (orgId == null) {
-			throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
-		}
-		return orgService.getOrgSummaryMap(orgId, token);
+        if (orgId == null) {
+            throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
+        }
+        return orgService.getOrgSummaryMap(orgId, token);
     }
+
+    @GetMapping(V2_URL + "/orgs/{orgId}/summary-admin")
+    public Map getOrgSummaryAdmin(@PathVariable String orgId) {
+        LOGGER.info("org summary : " + orgId);
+        if (orgId == null) {
+            throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
+        }
+        return orgService.getOrgSummaryMap(orgId, this.getToken());
+    }
+
 
     /**
      * 관리자/사용자 권한으로 조직 목록을 조회한다.
@@ -159,6 +169,16 @@ public class OrgController extends Common {
 
         return result;
     }
+
+    @GetMapping(V2_URL + "/orgs/{orgId}/spaces-admin")
+    public Map<?, ?> getSpacesAdmin(@PathVariable String orgId) {
+        LOGGER.debug("Get Spaces " + orgId);
+        final Map<String, Object> result = new HashMap<>();
+        result.put("spaceList", orgService.getOrgSpaces(orgId, this.getToken()));
+
+        return result;
+    }
+
 
     @GetMapping(V2_URL + "/orgs/{orgName}/exist")
     public boolean isExistOrgName(@PathVariable String orgName) {
@@ -226,6 +246,12 @@ public class OrgController extends Common {
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("Get quota of org {}" + orgId);
         return orgService.getOrgQuota(orgId, token);
+    }
+
+    @GetMapping(V2_URL + "/orgs/{orgId}/quota-admin")
+    public GetOrganizationQuotaDefinitionResponse getOrgQuotaAdmin(@PathVariable String orgId) {
+        LOGGER.info("Get quota of org {}" + orgId);
+        return orgService.getOrgQuota(orgId, this.getToken());
     }
 
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")

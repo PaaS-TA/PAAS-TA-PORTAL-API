@@ -91,7 +91,7 @@ public class DomainService extends Common {
     }
 
     @HystrixCommand(commandKey = "getAllDomains")
-    private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider, final String[] names) {
+    private ListDomainsResponse getAllDomains( final ConnectionContext context, final TokenProvider tokenProvider, final String names) {
         return Common.cloudFoundryClient( context, tokenProvider )
             .domains().list( ListDomainsRequest.builder().name( names ).build() ).block();
     }

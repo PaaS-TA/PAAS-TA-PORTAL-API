@@ -70,6 +70,7 @@ public class LoginController extends Common {
         result.put("scope", token.getScope());
         result.put("token_type", token.getTokenType());
         //result.put("token", token.getValue());
+        LOGGER.info(token.getRefreshToken().getValue());
         result.put("token", token.getRefreshToken().getValue());
         result.put("refresh_token_type", token.getTokenType());
         result.put("refresh_token", token.getRefreshToken().getValue());

@@ -355,11 +355,10 @@ public class UserService extends Common {
     public UpdateUserResponse UpdateUserActive(String userGuid) {
          ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(this.getToken()));
          User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
-         Name name = Name.builder().familyName(user.getName().getFamilyName()==null?"familyName":user.getName().getFamilyName()).givenName(user.getName().getGivenName()==null?"givenName":user.getName().getGivenName()).build();
-
-         LOGGER.info(user.toString());
-         UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(false).build()).block();
-        return null;
+         Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?"familyName":user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?"givenName":user.getName().getGivenName()).build();
+         final boolean active = !user.getActive();
+         UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(active).build()).block();
+         return updateUserResponse;
     }
 
 }

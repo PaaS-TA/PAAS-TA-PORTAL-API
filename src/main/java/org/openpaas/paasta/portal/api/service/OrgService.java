@@ -228,7 +228,6 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    @HystrixCommand(commandKey = "getOrgsForUser")
     public ListOrganizationsResponse getOrgsForUser(final String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block();
     }

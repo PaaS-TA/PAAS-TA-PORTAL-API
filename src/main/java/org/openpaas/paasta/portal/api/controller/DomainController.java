@@ -61,6 +61,34 @@ public class DomainController extends Common {
 
 
     /**
+     * Gets domains for all.
+     *
+     * @param token  the token
+     * @return the domains
+     * @throws Exception the exception
+     */
+    @GetMapping( Constants.V2_URL + "/domains-admin" )
+    public PaginatedResponse getDomainsAdmin( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return domainService.getDomains(this.getToken(), "all");
+    }
+
+    /**
+     * Gets domains with status.
+     *
+     * @param token  the token
+     * @param status the status
+     * @return the domains
+     * @throws Exception the exception
+     */
+    @GetMapping( Constants.V2_URL + "/domains-admin/{status}" )
+    public PaginatedResponse getDomainsAdmin( @RequestHeader(AUTHORIZATION_HEADER_KEY) String token,
+                                         @PathVariable String status) throws Exception {
+        return domainService.getDomains(this.getToken(), status.toLowerCase());
+    }
+
+
+
+    /**
      * Gets domains with guid.
      *
      * @param token  the token
@@ -111,6 +139,24 @@ public class DomainController extends Common {
         LOGGER.info("deleteDomain Start ");
 
         Map resultMap = domainService.deleteDomain(token, guid, domainName);
+
+        LOGGER.info("deleteDomain End ");
+        return resultMap;
+    }
+
+    /**
+     * Delete domain boolean.
+     *
+     * @param token the token
+     * @param domainName the domain name
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    @DeleteMapping( Constants.V2_URL + "/domains-admin/{guid}" )
+    public Map deleteDomainAdmin(@PathVariable String guid, @RequestParam String domainName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        LOGGER.info("deleteDomain Start ");
+
+        Map resultMap = domainService.deleteDomain(this.getToken(), guid, domainName);
 
         LOGGER.info("deleteDomain End ");
         return resultMap;
