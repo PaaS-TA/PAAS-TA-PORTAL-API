@@ -55,7 +55,7 @@ public class UserService extends Common {
         LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(this.getToken()));
             reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).active(userDetail.getActive()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
 
             result.put("result", true);
