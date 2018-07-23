@@ -429,7 +429,6 @@ public class Common {
     }
 
     public static DefaultConnectionContext crateConnectionContext(String apiUrl, boolean skipSSLValidation) {
-        Objects.requireNonNull(apiUrl, "CF API URL");
         DefaultConnectionContext connectionContext = peekConnectionContext();
         if (null != connectionContext) {
             boolean isEqual = connectionContext.getApiHost().equals(convertApiUrl(apiUrl)) && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
@@ -440,7 +439,6 @@ public class Common {
         }
 
         if (null == connectionContext) {
-            LOGGER.info(apiUrl);
             connectionContext = DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).build();
             pushConnectionContext(connectionContext);
         }
