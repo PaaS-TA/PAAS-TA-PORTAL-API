@@ -88,6 +88,10 @@ public class Common {
     @Autowired
     private LoginService loginService;
 
+    @Autowired
+    DefaultConnectionContext connectionContext;
+
+
     public ObjectMapper objectMapper = new ObjectMapper();
 
     public String getToken() {
@@ -391,10 +395,10 @@ public class Common {
     }
 
     // UAA Admin Client
-    public static ReactorUaaClient uaaAdminClient(String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
-        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
+    public static ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
+        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext, tokenProvider(token));
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
-        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
+        return Common.uaaClient(connectionContext, tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
 
     private static final ThreadLocal<DefaultConnectionContext> connectionContextThreadLocal = new ThreadLocal<>();
@@ -414,7 +418,7 @@ public class Common {
     }
 
     public DefaultConnectionContext connectionContext() {
-        return connectionContext(apiTarget, cfskipSSLValidation);
+        return connectionContext;
     }
 
     private static void disposeConnectionContext(DefaultConnectionContext connectionContext) {
@@ -424,7 +428,7 @@ public class Common {
         }
     }
 
-    public static DefaultConnectionContext connectionContext(String apiUrl, boolean skipSSLValidation) {
+    public static DefaultConnectionContext crateConnectionContext(String apiUrl, boolean skipSSLValidation) {
         Objects.requireNonNull(apiUrl, "CF API URL");
         DefaultConnectionContext connectionContext = peekConnectionContext();
         if (null != connectionContext) {

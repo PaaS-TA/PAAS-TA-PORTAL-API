@@ -4,9 +4,7 @@ import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import reactor.core.publisher.Mono;
 
-/**
- * Created by mg on 2016-08-09.
- */
+
 public class TokenGrantTokenProvider implements TokenProvider{
 
     private String token;
