@@ -348,17 +348,17 @@ public class SpaceService extends Common {
 
     @HystrixCommand(commandKey = "associateSpaceManager")
     private AssociateSpaceManagerResponse associateSpaceManager(String spaceId, String userId) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
     }
 
     @HystrixCommand(commandKey = "associateSpaceDeveloper")
     private AssociateSpaceDeveloperResponse associateSpaceDeveloper(String spaceId, String userId) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
     }
 
     @HystrixCommand(commandKey = "associateSpaceAuditor")
     private AssociateSpaceAuditorResponse associateSpaceAuditor(String spaceId, String userId) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
     }
 
     @HystrixCommand(commandKey = "associateSpaceUserRole")
@@ -407,17 +407,17 @@ public class SpaceService extends Common {
 
     private void removeSpaceManager(String spaceId, String userId) {
         LOGGER.debug("---->> Remove SpaceManager role of member({}) in space({}).", userId, spaceId);
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
+        Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
     }
 
     private void removeSpaceDeveloper(String spaceId, String userId) {
         LOGGER.debug("---->> Remove SpaceDeveloper role of member({}) in space({}).", userId, spaceId);
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
+        Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
     }
 
     private void removeSpaceAuditor(String spaceId, String userId) {
         LOGGER.debug("---->> Remove SpaceAuditor role of member({}) in space({}).", userId, spaceId);
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
+        Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
     }
 
     private void removeAllRoles(String spaceId, String userId) {

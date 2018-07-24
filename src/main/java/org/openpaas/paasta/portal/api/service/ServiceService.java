@@ -235,7 +235,7 @@ public class ServiceService extends Common {
      */
     @HystrixCommand(commandKey = "getServiceBrokers")
     public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(),tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(),tokenProvider())
                 .serviceBrokers()
                 .list(ListServiceBrokersRequest.builder().build())
                 .log()
@@ -252,7 +252,7 @@ public class ServiceService extends Common {
      */
     @HystrixCommand(commandKey = "getServiceBroker")
     public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .serviceBrokers()
                 .get(GetServiceBrokerRequest.builder()
                         .serviceBrokerId(serviceBroker.getGuid().toString())
@@ -270,7 +270,7 @@ public class ServiceService extends Common {
      */
     @HystrixCommand(commandKey = "createServiceBroker")
     public CreateServiceBrokerResponse createServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .serviceBrokers()
                 .create(CreateServiceBrokerRequest.builder()
                         .name(serviceBroker.getName())
@@ -292,7 +292,7 @@ public class ServiceService extends Common {
     @HystrixCommand(commandKey = "updateServiceBroker")
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .serviceBrokers()
                 .update(UpdateServiceBrokerRequest.builder()
                         .serviceBrokerId(serviceBroker.getGuid().toString())
@@ -314,7 +314,7 @@ public class ServiceService extends Common {
     @HystrixCommand(commandKey = "deleteServiceBroker")
     public boolean deleteServiceBroker(String guid, String token) throws Exception {
 
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .serviceBrokers()
                 .delete(DeleteServiceBrokerRequest.builder()
                         .serviceBrokerId(guid)
@@ -327,7 +327,7 @@ public class ServiceService extends Common {
 
     @HystrixCommand(commandKey = "getServicesInstances")
     public ListServiceInstancesResponse getServicesInstances(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider());
 
         ListServiceInstancesResponse listServicesInstancesResponse =
                 cloudFoundryClient.serviceInstances().list(ListServiceInstancesRequest.builder().spaceId(guid).build()

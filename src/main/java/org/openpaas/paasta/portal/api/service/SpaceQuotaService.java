@@ -184,7 +184,7 @@ public class SpaceQuotaService extends Common {
     @HystrixCommand(commandKey = "updateSpaceQuotaDefinitions")
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .spaceQuotaDefinitions()
                 .update(UpdateSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(quota.getGuid().toString())

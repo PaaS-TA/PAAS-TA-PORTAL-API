@@ -30,7 +30,7 @@ public class BuildPackService extends Common {
     @HystrixCommand(commandKey = "getBuildPacks")
     public Map<String, Object> getBuildPacks() throws Exception {
         ListBuildpacksResponse listBuildpacksResponse =
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .buildpacks()
                 .list(ListBuildpacksRequest.builder().build())
                 .block();
@@ -48,7 +48,7 @@ public class BuildPackService extends Common {
     @HystrixCommand(commandKey = "updateBuildPack")
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .buildpacks()
                 .update(UpdateBuildpackRequest.builder()
                         .buildpackId(buildPack.getGuid().toString())

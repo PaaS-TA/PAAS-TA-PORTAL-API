@@ -189,7 +189,7 @@ public class AppService extends Common {
         HashMap result = new HashMap();
         try {
             //앱 삭제
-            ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider());
             List<Route> routes = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block().getRoutes();
             for(Route route : routes) {
                 reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(route.getId()).build()).block();
