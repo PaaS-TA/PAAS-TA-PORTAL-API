@@ -77,6 +77,9 @@ public class OrgQuotaService extends Common {
         예약된 라우트 포트 total_reserved_route_ports  Y : 0(Default)    N : 무제한 (-1)
         */
 
+
+
+
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
                 .organizationQuotaDefinitions()
                 .create(CreateOrganizationQuotaDefinitionRequest.builder()
@@ -103,7 +106,7 @@ public class OrgQuotaService extends Common {
     @HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .organizationQuotaDefinitions()
                 .update(UpdateOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quota.getGuid().toString())
@@ -130,7 +133,7 @@ public class OrgQuotaService extends Common {
     @HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .organizationQuotaDefinitions()
                 .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)
@@ -150,7 +153,7 @@ public class OrgQuotaService extends Common {
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)
-        Common.cloudFoundryOperations(connectionContext(), tokenProvider(this.getToken()))
+        Common.cloudFoundryOperations(connectionContext(), tokenProvider())
             .organizationAdmin()
             .setQuota(SetQuotaRequest.builder()
                     .quotaName(quota.getName())

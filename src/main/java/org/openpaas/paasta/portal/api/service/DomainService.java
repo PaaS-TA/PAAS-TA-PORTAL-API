@@ -148,7 +148,7 @@ public class DomainService extends Common {
 
             if ( isShared ) {
                 final CreateSharedDomainResponse response =
-                        addSharedDomain( connectionContext(), tokenProvider(this.getToken()), domainName );
+                        addSharedDomain( connectionContext(), tokenProvider(), domainName );
                 LOGGER.debug( "Response for adding shared domain is... {}", response);
                 addedDomainName = response.getEntity().getName();
             } else {

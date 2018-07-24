@@ -140,7 +140,7 @@ public class BuildPackServiceTest extends TestConfig {
         System.out.println("==1");
         DefaultConnectionContext defaultConnectionContext = DefaultConnectionContext.builder().apiHost("api.115.68.46.187.xip.io").build();
         System.out.println("==2");
-        PowerMockito.when(common.connectionContext("api.115.68.46.187.xip.io", true)).thenReturn(defaultConnectionContext);
+        PowerMockito.when(common.connectionContext()).thenReturn(defaultConnectionContext);
 
 
         System.out.println("==3");

@@ -38,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.*;
 
 public class Common {
@@ -88,6 +89,13 @@ public class Common {
     @Autowired
     private LoginService loginService;
 
+    @Autowired
+    DefaultConnectionContext connectionContext;
+
+    @Autowired
+    PasswordGrantTokenProvider tokenProvider;
+
+
     public ObjectMapper objectMapper = new ObjectMapper();
 
     public String getToken() {
@@ -115,46 +123,6 @@ public class Common {
     public CloudFoundryClient getCloudFoundryClient(String token) throws MalformedURLException, URISyntaxException {
 
         return new CloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), true);
-    }
-
-    /**
-     * get CloudFoundryClinet Object from token String
-     * with organization, space
-     *
-     * @param token
-     * @param organization
-     * @param space
-     * @return CloudFoundryClinet
-     */
-    public CloudFoundryClient getCloudFoundryClient(String token, String organization, String space) throws MalformedURLException, URISyntaxException {
-
-        return new CloudFoundryClient(getCloudCredentials(token), getTargetURL(apiTarget), organization, space, true);
-    }
-
-    /**
-     * get CloudFoundryClinet Object from id, password
-     *
-     * @param id
-     * @param password
-     * @return CloudFoundryClinet
-     */
-    public CloudFoundryClient getCloudFoundryClient(String id, String password) throws MalformedURLException, URISyntaxException {
-        return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), true);
-    }
-
-    /**
-     * get CloudFoundryClinet Object from token String
-     * with organization, space
-     *
-     * @param id
-     * @param password
-     * @param organization
-     * @param space
-     * @return CloudFoundryClinet
-     */
-    public CloudFoundryClient getCloudFoundryClient(String id, String password, String organization, String space) throws MalformedURLException, URISyntaxException {
-
-        return new CloudFoundryClient(getCloudCredentials(id, password), getTargetURL(apiTarget), organization, space, true);
     }
 
 
@@ -199,26 +167,14 @@ public class Common {
         return new DefaultOAuth2AccessToken(token);
     }
 
-    /* 회원 생성시 사용(메일) */
-    public UaaUserOperations getUaaUserOperations(String uaaClientId) throws Exception {
-        UaaConnection connection = getUaaConnection(uaaClientId);
-        return connection.userOperations();
-    }
 
     /* 권한그룹 조회 등록시 사용 */
     public UaaGroupOperations getUaaGroupOperations(String uaaClientId) throws Exception {
         UaaConnection connection = getUaaConnection(uaaClientId);
         return connection.groupOperations();
     }
-
-    public UaaClientOperations getUaaClientOperations(String uaaClientId) throws Exception {
-        UaaConnection connection = getUaaConnection(uaaClientId);
-        return connection.clientOperations();
-    }
-
     //uaa 커넥션 생성
     private UaaConnection getUaaConnection(String uaaClientId) throws Exception {
-
         ResourceOwnerPasswordResourceDetails credentials = getCredentials(uaaClientId);
         URL uaaHost = new URL(uaaTarget);
 
@@ -391,13 +347,37 @@ public class Common {
     }
 
     // UAA Admin Client
-    public static ReactorUaaClient uaaAdminClient(String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
-        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(token));
+    public static ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
+        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext, tokenProvider(token));
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
-        return Common.uaaClient(connectionContext(apiTarget, true), tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
+        return Common.uaaClient(connectionContext, tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
 
     private static final ThreadLocal<DefaultConnectionContext> connectionContextThreadLocal = new ThreadLocal<>();
+
+
+
+    public DefaultConnectionContext connectionContext() {
+        return connectionContext;
+    }
+
+    public static DefaultConnectionContext crateConnectionContext(String apiUrl, boolean skipSSLValidation) {
+        DefaultConnectionContext connectionContext = peekConnectionContext();
+        if (null != connectionContext) {
+            boolean isEqual = connectionContext.getApiHost().equals(convertApiUrl(apiUrl)) && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
+            if (!isEqual) {
+                removeConnectionContext();
+                connectionContext = null;
+            }
+        }
+
+        if (null == connectionContext) {
+            connectionContext = DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).keepAlive(true).build();
+            pushConnectionContext(connectionContext);
+        }
+
+        return connectionContext;
+    }
 
     private static DefaultConnectionContext peekConnectionContext() {
         return connectionContextThreadLocal.get();
@@ -413,35 +393,13 @@ public class Common {
         connectionContextThreadLocal.remove();
     }
 
-    public DefaultConnectionContext connectionContext() {
-        return connectionContext(apiTarget, cfskipSSLValidation);
-    }
+
 
     private static void disposeConnectionContext(DefaultConnectionContext connectionContext) {
         try {
             if (null != connectionContext) connectionContext.dispose();
         } catch (Exception ignore) {
         }
-    }
-
-    public static DefaultConnectionContext connectionContext(String apiUrl, boolean skipSSLValidation) {
-        Objects.requireNonNull(apiUrl, "CF API URL");
-        DefaultConnectionContext connectionContext = peekConnectionContext();
-        if (null != connectionContext) {
-            boolean isEqual = connectionContext.getApiHost().equals(convertApiUrl(apiUrl)) && connectionContext.getSkipSslValidation().get() == skipSSLValidation;
-            if (!isEqual) {
-                removeConnectionContext();
-                connectionContext = null;
-            }
-        }
-
-        if (null == connectionContext) {
-            LOGGER.info(apiUrl);
-            connectionContext = DefaultConnectionContext.builder().apiHost(convertApiUrl(apiUrl)).skipSslValidation(skipSSLValidation).build();
-            pushConnectionContext(connectionContext);
-        }
-
-        return connectionContext;
     }
 
     public static TokenGrantTokenProvider tokenProvider(String token) {
@@ -474,16 +432,7 @@ public class Common {
         return PasswordGrantTokenProvider.builder().password(password).username(username).build();
     }
 
-    @PreDestroy
-    public void preDestroy() {
-        // Remove connection context in thread local
-        final DefaultConnectionContext connectionContext = peekConnectionContext();
-        if (connectionContext != null) {
-            final String hashCode = Integer.toHexString(connectionContext.hashCode());
-            removeConnectionContext();
-            LOGGER.info("Remove Pre-destroy connection context : ConnectionContext@{}", hashCode);
-        } else {
-            LOGGER.info("Try to remove Pre-destroy connection context, but cannot find ConnectionContext...");
-        }
+    public PasswordGrantTokenProvider tokenProvider() {
+        return tokenProvider;
     }
 }

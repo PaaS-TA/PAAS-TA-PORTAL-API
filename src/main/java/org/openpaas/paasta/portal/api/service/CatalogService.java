@@ -443,6 +443,6 @@ public class CatalogService extends Common {
      */
     @HystrixCommand(commandKey = "getService")
     public ListServicesResponse getService() throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).services().list(ListServicesRequest.builder().build()).log().block();
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).services().list(ListServicesRequest.builder().build()).log().block();
     }
 }
