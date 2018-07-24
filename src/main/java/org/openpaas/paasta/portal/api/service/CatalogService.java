@@ -314,7 +314,7 @@ public class CatalogService extends Common {
      */
     private String createRoute(Catalog param, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                routes().create(CreateRouteRequest.builder().host(param.getAppName()).domainId(param.getDomainId()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
+                routes().create(CreateRouteRequest.builder().host(param.getHostName()).domainId(param.getDomainId()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
     }
 
     /**
