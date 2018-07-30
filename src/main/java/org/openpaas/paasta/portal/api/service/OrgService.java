@@ -13,6 +13,7 @@ import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
+import org.cloudfoundry.operations.useradmin.UserAdmin;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.uaa.users.User;
 import org.json.simple.JSONArray;
@@ -321,7 +322,7 @@ public class OrgService extends Common {
             if (isAdmin) {
                 // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
                 LOGGER.warn("Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName());
-                DeleteOrganizationResponse eleteOrganizationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(true).async(true).build()).block();
+                DeleteOrganizationResponse eleteOrganizationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken())).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(true).async(true).build()).block();
 
                 resultMap.put("result", true);
                 return resultMap;
