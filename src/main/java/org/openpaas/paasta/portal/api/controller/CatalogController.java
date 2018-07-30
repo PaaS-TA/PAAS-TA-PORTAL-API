@@ -104,7 +104,7 @@ public class CatalogController extends Common {
      * @throws Exception Exception(자바클래스)
      */
     @PostMapping(Constants.V2_URL+"/catalogs/serviceinstances")
-    public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public Map procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return catalogService.procCatalogCreateServiceInstanceV2(param, token);
     }
 

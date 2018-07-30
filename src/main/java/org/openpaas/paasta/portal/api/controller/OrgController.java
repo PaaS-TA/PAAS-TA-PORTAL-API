@@ -434,6 +434,11 @@ public class OrgController extends Common {
         return resultMap;
     }
 
+    @GetMapping(V2_URL + "/{flagname}/orgflag")
+    public Map orgFlag(@PathVariable String flagname, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception{
+        return orgService.orgFlag(flagname.toLowerCase(),token);
+    }
+
 
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 3                   //////

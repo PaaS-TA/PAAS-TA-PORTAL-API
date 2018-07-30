@@ -3,6 +3,8 @@ package org.openpaas.paasta.portal.api.service;
 import org.apache.commons.collections.map.HashedMap;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.OrderDirection;
+import org.cloudfoundry.client.v2.featureflags.GetFeatureFlagRequest;
+import org.cloudfoundry.client.v2.featureflags.GetFeatureFlagResponse;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
@@ -829,6 +831,27 @@ public class OrgService extends Common {
     //@HystrixCommand(commandKey = "getOrgsForAdminAll")
     public ListOrganizationsResponse getOrgsForAdminAll(int number) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider()).organizations().list(ListOrganizationsRequest.builder().page(number).build()).block();
+    }
+
+    /**
+     * 플래그 사용여부를 가져온다.
+     *
+     * @return Map
+     * @version 2.0
+     * @since 2018.7.30
+     */
+    public Map orgFlag(String flagname,String token) throws Exception{
+        try{
+            GetFeatureFlagResponse getFeatureFlagResponse = Common.cloudFoundryClient(this.connectionContext(), tokenProvider(token)).featureFlags().get(GetFeatureFlagRequest.builder().name(flagname).build()).block();
+            return new HashMap(){{
+               put("RESULT", getFeatureFlagResponse.getEnabled());
+            }};
+        }catch (Exception e) {
+            return new HashMap(){{
+                put("RESULT", "FAIL");
+                put("MSG", e.getMessage());
+            }};
+        }
     }
 
 }

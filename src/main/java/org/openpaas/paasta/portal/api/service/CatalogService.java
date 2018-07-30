@@ -368,25 +368,34 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
-    public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
-        LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
-        });
-        LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + parameterMap + " : " + param.getServicePlan());
-        CreateServiceInstanceResponse createserviceinstanceresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
-                serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
+    public Map procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
+        try {
+            LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
+            });
+            LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + parameterMap + " : " + param.getServicePlan());
+            CreateServiceInstanceResponse createserviceinstanceresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+                    serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
 
-        if (!param.getAppGuid().equals("(id_dummy)")) {
+            if (!param.getAppGuid().equals("(id_dummy)")) {
 
 
-            param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
-            procCatalogBindService(param, token);
+                param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
+                procCatalogBindService(param, token);
+            }
+            if (param.getCatalogType() != null) {
+                commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
+            }
+            return new HashMap(){{
+                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+            }};
+        } catch (Exception e){
+            return new HashMap(){{
+                put("RESULT", Constants.RESULT_STATUS_FAIL);
+                put("MSG", e.getMessage());
+            }};
         }
-        if (param.getCatalogType() != null) {
-            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
-        }
-        return createserviceinstanceresponse;
     }
 
     /**
