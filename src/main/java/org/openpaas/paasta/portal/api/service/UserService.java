@@ -1,11 +1,9 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.client.v2.users.GetUserResponse;
-import org.cloudfoundry.reactor.ConnectionContext;
-import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
@@ -13,7 +11,6 @@ import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.cloudfoundry.uaa.users.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
-import org.openpaas.paasta.portal.api.model.UserManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +47,7 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    @HystrixCommand(commandKey = "createUser")
+    //@HystrixCommand(commandKey = "createUser")
     public Map createUser(UserDetail userDetail) {
         LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
@@ -78,7 +75,7 @@ public class UserService extends Common {
      * @param userDetail the user detail
      * @return int int
      */
-    @HystrixCommand(commandKey = "updateUser")
+    //@HystrixCommand(commandKey = "updateUser")
     public int updateUser(UserDetail userDetail, String token) {
         LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
@@ -107,7 +104,7 @@ public class UserService extends Common {
      * @param newPassword the user id
      * @return UserDetail user
      */
-    @HystrixCommand(commandKey = "updateUserPassword")
+    //@HystrixCommand(commandKey = "updateUserPassword")
     public Map updateUserPassword(String userId, String oldPassword, String newPassword, String token) {
 
         LOGGER.info("updateUserPassword ::: " + userId);
@@ -137,7 +134,7 @@ public class UserService extends Common {
      * 사용자 패스워드를 초기화 한다.
      * 패스워드를 입력안할경우 임의 값으로 패스워드를 변경한다.
      */
-    @HystrixCommand(commandKey = "resetPassword")
+    //@HystrixCommand(commandKey = "resetPassword")
     public Map resetPassword(String userId, String password) {
         LOGGER.info("resetPassword ::: " + userId);
         LOGGER.info("resetPassword ::: " + password);
@@ -183,7 +180,7 @@ public class UserService extends Common {
      * 사용자 패스워드를 만료시킨다.
      * 패스워드를 사용자가 변경하게 수정한다.
      */
-    @HystrixCommand(commandKey = "expiredPassword")
+    //@HystrixCommand(commandKey = "expiredPassword")
     public Map expiredPassword(String userGuid) {
         LOGGER.info("resetPassword ::: " + userGuid);
 
@@ -209,7 +206,7 @@ public class UserService extends Common {
      * @param userId the user id
      * @return 삭제 정보
      */
-    @HystrixCommand(commandKey = "deleteUser")
+    //@HystrixCommand(commandKey = "deleteUser")
     public Map deleteUser(String userId) {
         LOGGER.info("deleteUser ::: " + userId);
 
@@ -229,12 +226,12 @@ public class UserService extends Common {
         return result;
     }
 
-    @HystrixCommand(commandKey = "getUsernameFromToken")
+    //@HystrixCommand(commandKey = "getUsernameFromToken")
     public String getUsernameFromToken(String token) {
         return Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
     }
 
-    @HystrixCommand(commandKey = "getUser")
+    //@HystrixCommand(commandKey = "getUser")
     public User getUser(String token) {
         final String userName = getUsernameFromToken(token);
         return this.getUserSummaryByUsername(userName);
@@ -245,7 +242,7 @@ public class UserService extends Common {
      *
      * @return 삭제 정보
      */
-    @HystrixCommand(commandKey = "getUser")
+    //@HystrixCommand(commandKey = "getUser")
     public GetUserResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
 
         LOGGER.info("getUser ::: ");
@@ -260,7 +257,7 @@ public class UserService extends Common {
      *
      * @return 삭제 정보
      */
-    @HystrixCommand(commandKey = "allUsers")
+    //@HystrixCommand(commandKey = "allUsers")
     public List<User> allUsers() {
         List<User> users = new ArrayList<>();
         try {
@@ -283,7 +280,7 @@ public class UserService extends Common {
      * @return boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "create")
+    //@HystrixCommand(commandKey = "create")
     public boolean create(HashMap map) throws Exception {
         Boolean bRtn = false;
         return bRtn;
@@ -292,7 +289,7 @@ public class UserService extends Common {
 
     private enum UaaUserLookupFilterType {Username, Id, Origin}
 
-    @HystrixCommand(commandKey = "createUserLookupFilter")
+    //@HystrixCommand(commandKey = "createUserLookupFilter")
     private String createUserLookupFilter(UaaUserLookupFilterType filterType, String filterValue) {
         Objects.requireNonNull(filterType, "User lookup FilterType");
         Objects.requireNonNull(filterValue, "User lookup FilterValue");
@@ -308,7 +305,7 @@ public class UserService extends Common {
      * @param username
      * @return User ID
      */
-    @HystrixCommand(commandKey = "getUserIdByUsername")
+    //@HystrixCommand(commandKey = "getUserIdByUsername")
     public String getUserIdByUsername(String username) {
         final List<User> userList = Common.uaaClient(connectionContext(), tokenProvider()).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Username, username)).build()).block().getResources();
         if (userList.size() <= 0) {
@@ -325,7 +322,7 @@ public class UserService extends Common {
      * @param userId
      * @return User name
      */
-    @HystrixCommand(commandKey = "getUsernameByUserId")
+    //@HystrixCommand(commandKey = "getUsernameByUserId")
     public String getUsernameByUserId(String userId) {
         final List<User> userList = Common.uaaClient(connectionContext(), tokenProvider()).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Id, userId)).build()).block().getResources();
         if (userList.size() <= 0) {

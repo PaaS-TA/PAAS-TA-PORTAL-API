@@ -1,32 +1,23 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
 import org.apache.commons.io.IOUtils;
-import org.apache.velocity.runtime.directive.Foreach;
-import org.apache.velocity.runtime.log.Log;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.archive.ApplicationArchive;
-import org.cloudfoundry.client.lib.domain.CloudService;
-import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
-import org.cloudfoundry.client.lib.domain.CloudServicePlan;
-import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.lib.io.DynamicZipInputStream;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
-import org.cloudfoundry.client.v2.servicebindings.*;
-import org.cloudfoundry.client.v2.serviceinstances.*;
+import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
+import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
+import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceRequest;
+import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceResponse;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
-import org.cloudfoundry.client.v2.services.*;
-import org.cloudfoundry.client.v3.droplets.CopyDropletRequest;
-import org.cloudfoundry.client.v3.servicebindings.CreateServiceBindingData;
-import org.cloudfoundry.operations.applications.StartApplicationRequest;
-import org.cloudfoundry.operations.routes.CheckRouteRequest;
-import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.client.v2.services.ListServicesRequest;
+import org.cloudfoundry.client.v2.services.ListServicesResponse;
+import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -37,9 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,10 +36,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.*;
-
-import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 //import org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper;
 //import org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper;
@@ -93,7 +81,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "getCatalogServicePlanList")
+    //@HystrixCommand(commandKey = "getCatalogServicePlanList")
     public ListServicePlansResponse getCatalogServicePlanList(String servicename, String token) throws Exception {
 
         ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).services().list(ListServicesRequest.builder().build()).block();
@@ -111,7 +99,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "getCatalogAppList")
+    //@HystrixCommand(commandKey = "getCatalogAppList")
     public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, String token) throws Exception {
         ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
@@ -127,7 +115,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "getCheckCatalogApplicationNameExists")
+    //@HystrixCommand(commandKey = "getCheckCatalogApplicationNameExists")
     public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, String token, HttpServletResponse res) throws Exception {
 
         ListApplicationsResponse listApplicationsResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
@@ -215,7 +203,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "createApp")
+    //@HystrixCommand(commandKey = "createApp")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
@@ -247,7 +235,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "createAppTemplate")
+    //@HystrixCommand(commandKey = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
@@ -379,7 +367,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
+    //@HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
     public CreateServiceInstanceResponse procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
         LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
         ObjectMapper mapper = new ObjectMapper();
@@ -409,7 +397,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "procCatalogBindService")
+    //@HystrixCommand(commandKey = "procCatalogBindService")
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
@@ -429,7 +417,7 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    @HystrixCommand(commandKey = "listServiceInstancesResponse")
+    //@HystrixCommand(commandKey = "listServiceInstancesResponse")
     public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token) {
         ListServiceInstancesResponse listServiceInstancesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 serviceInstances().list(ListServiceInstancesRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
@@ -441,7 +429,7 @@ public class CatalogService extends Common {
      *
      * @return ListServicesResponse
      */
-    @HystrixCommand(commandKey = "getService")
+    //@HystrixCommand(commandKey = "getService")
     public ListServicesResponse getService() throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider()).services().list(ListServicesRequest.builder().build()).log().block();
     }

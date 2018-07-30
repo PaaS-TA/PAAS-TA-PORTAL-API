@@ -1,6 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
 import org.cloudfoundry.client.v2.organizationquotadefinitions.*;
 import org.cloudfoundry.operations.organizationadmin.SetQuotaRequest;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -43,7 +43,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getOrgQuotaDefinitions")
+    //@HystrixCommand(commandKey = "getOrgQuotaDefinitions")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
@@ -63,7 +63,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "createOrgQuotaDefinitions")
+    //@HystrixCommand(commandKey = "createOrgQuotaDefinitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         /* required
@@ -103,7 +103,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
+    //@HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider())
@@ -130,7 +130,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
+    //@HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider())
@@ -149,7 +149,7 @@ public class OrgQuotaService extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "setOrgQuotaDefinitions")
+    //@HystrixCommand(commandKey = "setOrgQuotaDefinitions")
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)

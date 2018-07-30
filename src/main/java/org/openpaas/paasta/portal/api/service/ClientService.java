@@ -1,6 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
 import org.cloudfoundry.uaa.clients.*;
 import org.cloudfoundry.uaa.tokens.GrantType;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -30,7 +30,7 @@ public class ClientService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);
 
     //V2
-    @HystrixCommand(commandKey = "getClientList")
+    //@HystrixCommand(commandKey = "getClientList")
     public ListClientsResponse getClientList() throws Exception {
         return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).log().block();
     }
@@ -42,7 +42,7 @@ public class ClientService extends Common {
      * @return GetClientResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getClient")
+    //@HystrixCommand(commandKey = "getClient")
     public GetClientResponse getClient(String clientId) throws Exception {
         return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).log().block();
     }
@@ -54,7 +54,7 @@ public class ClientService extends Common {
      * @return CreateClientResponse
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "registerClient")
+    //@HystrixCommand(commandKey = "registerClient")
     public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -72,7 +72,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "updateClient")
+    //@HystrixCommand(commandKey = "updateClient")
     public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -96,7 +96,7 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "deleteClient")
+    //@HystrixCommand(commandKey = "deleteClient")
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
         return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
     }
