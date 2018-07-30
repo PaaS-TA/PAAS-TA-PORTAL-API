@@ -1,17 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.google.common.base.CaseFormat;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
-import org.cloudfoundry.client.v2.users.ListUserSpacesRequest;
-import org.cloudfoundry.client.v2.users.ListUserSpacesResponse;
 import org.cloudfoundry.client.v2.users.UserResource;
-import org.cloudfoundry.operations.useradmin.ListSpaceUsersRequest;
-import org.cloudfoundry.operations.useradmin.SpaceUsers;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -20,13 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 //import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
 //import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
@@ -63,14 +54,14 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(commandKey = "getSpaces")
+    //@HystrixCommand(commandKey = "getSpaces")
     public ListSpacesResponse getSpaces(String orgId, String token) {
         ListSpacesResponse response = Common.cloudFoundryClient(connectionContext(), tokenProviderWithDefault(token, tokenProvider(this.getToken()))).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
 
         return response;
     }
 
-    @HystrixCommand(commandKey = "getSpacesWithOrgName")
+    //@HystrixCommand(commandKey = "getSpacesWithOrgName")
     public ListSpacesResponse getSpacesWithOrgName(String orgName, String token) {
         final String orgId = orgService.getOrgId(orgName, token);
 
@@ -88,7 +79,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(commandKey = "getSpaces")
+    //@HystrixCommand(commandKey = "getSpaces")
     public ListSpacesResponse getSpaces(Org org, String token) {
         String orgId = null;
         if (org.getGuid() != null) {
@@ -120,7 +111,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(commandKey = "createSpace")
+    //@HystrixCommand(commandKey = "createSpace")
     public Map createSpace(Space space, String token) {
         Map resultMap = new HashMap();
 
@@ -157,7 +148,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(commandKey = "getSpace")
+    //@HystrixCommand(commandKey = "getSpace")
     public GetSpaceResponse getSpace(String spaceId, String token) {
         Objects.requireNonNull(spaceId, "Space Id");
 
@@ -168,12 +159,12 @@ public class SpaceService extends Common {
         return Common.cloudFoundryClient(connectionContext(), internalTokenProvider).spaces().get(GetSpaceRequest.builder().spaceId(spaceId).build()).block();
     }
 
-    @HystrixCommand(commandKey = "getSpace")
+    //@HystrixCommand(commandKey = "getSpace")
     public GetSpaceResponse getSpace(String spaceId) {
         return getSpace(spaceId, null);
     }
 
-    @HystrixCommand(commandKey = "getSpaceUsingName")
+    //@HystrixCommand(commandKey = "getSpaceUsingName")
     public SpaceResource getSpaceUsingName(String orgName, String spaceName, String token) {
         final TokenProvider internalTokenProvider;
         if (null != token && !"".equals(token)) {
@@ -194,7 +185,7 @@ public class SpaceService extends Common {
     }
 
 
-    @HystrixCommand(commandKey = "isExistSpace")
+    //@HystrixCommand(commandKey = "isExistSpace")
     public boolean isExistSpace(final String spaceId) {
         try {
             return spaceId.equals(getSpace(spaceId).getMetadata().getId());
@@ -214,7 +205,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(commandKey = "renameSpace")
+    //@HystrixCommand(commandKey = "renameSpace")
     public Map renameSpace(Space space, String token) {
         Map resultMap = new HashMap();
 
@@ -250,7 +241,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    @HystrixCommand(commandKey = "deleteSpace")
+    //@HystrixCommand(commandKey = "deleteSpace")
     public Map deleteSpace(String guid, boolean recursive, String token) {
         Map resultMap = new HashMap();
 
@@ -279,7 +270,7 @@ public class SpaceService extends Common {
      * @return space summary
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getSpaceSummary")
+    //@HystrixCommand(commandKey = "getSpaceSummary")
     public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -299,7 +290,7 @@ public class SpaceService extends Common {
      * @version 2.0
      * @since 2018.4.30
      */
-    @HystrixCommand(commandKey = "getSpaceServices")
+    //@HystrixCommand(commandKey = "getSpaceServices")
     public ListSpaceServicesResponse getSpaceServices(String spaceId, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -313,55 +304,55 @@ public class SpaceService extends Common {
         SpaceManager, SpaceDeveloper, SpaceAuditor, SPACEMANAGER, SPACEDEVELOPER, SPACEAUDITOR,
     }
 
-    @HystrixCommand(commandKey = "listAllSpaceUsers")
+    //@HystrixCommand(commandKey = "listAllSpaceUsers")
     private List<UserSpaceRoleResource> listAllSpaceUsers(String spaceId, String token) {
         final ListSpaceUserRolesResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().listUserRoles(ListSpaceUserRolesRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    @HystrixCommand(commandKey = "listSpaceManagerUsers")
+    //@HystrixCommand(commandKey = "listSpaceManagerUsers")
     private List<UserResource> listSpaceManagerUsers(String spaceId, String token) {
         final ListSpaceManagersResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().listManagers(ListSpaceManagersRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    @HystrixCommand(commandKey = "listSpaceDeveloperUsers")
+    //@HystrixCommand(commandKey = "listSpaceDeveloperUsers")
     private List<UserResource> listSpaceDeveloperUsers(String spaceId, String token) {
         final ListSpaceDevelopersResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().listDevelopers(ListSpaceDevelopersRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    @HystrixCommand(commandKey = "listSpaceAuditorUsers")
+    //@HystrixCommand(commandKey = "listSpaceAuditorUsers")
     private List<UserResource> listSpaceAuditorUsers(String spaceId, String token) {
         final ListSpaceAuditorsResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().listAuditors(ListSpaceAuditorsRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    @HystrixCommand(commandKey = "getSpaceUserRoles")
+    //@HystrixCommand(commandKey = "getSpaceUserRoles")
     public ListSpaceUserRolesResponse getSpaceUserRoles(String spaceId, String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().listUserRoles(ListSpaceUserRolesRequest.builder().spaceId(spaceId).build()).block();
     }
 
-    @HystrixCommand(commandKey = "associateSpaceManager")
+    //@HystrixCommand(commandKey = "associateSpaceManager")
     private AssociateSpaceManagerResponse associateSpaceManager(String spaceId, String userId) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
     }
 
-    @HystrixCommand(commandKey = "associateSpaceDeveloper")
+    //@HystrixCommand(commandKey = "associateSpaceDeveloper")
     private AssociateSpaceDeveloperResponse associateSpaceDeveloper(String spaceId, String userId) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
     }
 
-    @HystrixCommand(commandKey = "associateSpaceAuditor")
+    //@HystrixCommand(commandKey = "associateSpaceAuditor")
     private AssociateSpaceAuditorResponse associateSpaceAuditor(String spaceId, String userId) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
     }
 
-    @HystrixCommand(commandKey = "associateSpaceUserRole")
+    //@HystrixCommand(commandKey = "associateSpaceUserRole")
     public AbstractSpaceResource associateSpaceUserRole(String spaceId, String userId, String role) {
         Objects.requireNonNull(spaceId, "Space Id");
         Objects.requireNonNull(userId, "User Id");
@@ -390,7 +381,7 @@ public class SpaceService extends Common {
         }
     }
 
-    @HystrixCommand(commandKey = "associateAllSpaceUserRolesByOrgId")
+    //@HystrixCommand(commandKey = "associateAllSpaceUserRolesByOrgId")
     public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles) {
         final List<AbstractSpaceResource> responses = new LinkedList<>();
         final List<String> spaceIds = this.getSpaces(orgId, null).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
@@ -435,7 +426,7 @@ public class SpaceService extends Common {
      * @param userId
      * @param role
      */
-    @HystrixCommand(commandKey = "removeSpaceUserRole")
+    //@HystrixCommand(commandKey = "removeSpaceUserRole")
     public void removeSpaceUserRole(String spaceId, String userId, String role) {
         Objects.requireNonNull(spaceId, "Space Id");
         Objects.requireNonNull(userId, "User Id");
@@ -466,7 +457,7 @@ public class SpaceService extends Common {
         }
     }
 
-    @HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
+    //@HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
     public void removeAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles) {
         final List<String> spaceIds = this.getSpaces(orgId, null).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
         for (String role : roles) {
@@ -475,7 +466,7 @@ public class SpaceService extends Common {
         }
     }
 
-    @HystrixCommand(commandKey = "associateSpaceUserRoles")
+    //@HystrixCommand(commandKey = "associateSpaceUserRoles")
     public boolean associateSpaceUserRoles(String spaceid, List<UserRole> Roles, String token) {
         Roles.forEach(userRole -> {
             boolean manager = true;

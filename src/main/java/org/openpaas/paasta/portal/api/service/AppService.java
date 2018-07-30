@@ -2,7 +2,6 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
@@ -10,8 +9,6 @@ import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
-import org.cloudfoundry.client.v2.routemappings.DeleteRouteMappingRequest;
-import org.cloudfoundry.client.v2.routemappings.GetRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteResponse;
 import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
@@ -34,7 +31,6 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -55,7 +51,7 @@ public class AppService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppService.class);
 
 
-    @HystrixCommand(commandKey = "getAppSummary")
+    //@HystrixCommand(commandKey = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) throws IOException {
 
         SummaryApplicationResponse summaryApplicationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token))
@@ -77,7 +73,7 @@ public class AppService extends Common {
      * @param token the client
      * @return the app stats
      */
-    @HystrixCommand(commandKey = "getAppStats")
+    //@HystrixCommand(commandKey = "getAppStats")
     public ApplicationStatisticsResponse getAppStats(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -97,7 +93,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "renameApp")
+    //@HystrixCommand(commandKey = "renameApp")
     public Map renameApp(App app, String token){
         HashMap result = new HashMap();
         try{
@@ -127,7 +123,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "startApp")
+    //@HystrixCommand(commandKey = "startApp")
     public Map startApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -155,7 +151,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "stopApp")
+    //@HystrixCommand(commandKey = "stopApp")
     public Map stopApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -184,7 +180,7 @@ public class AppService extends Common {
      * @param guid the app
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "deleteApp")
+    //@HystrixCommand(commandKey = "deleteApp")
     public Map deleteApp(String guid) {
         HashMap result = new HashMap();
         try {
@@ -225,7 +221,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "restageApp")
+    //@HystrixCommand(commandKey = "restageApp")
     public Map restageApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -255,7 +251,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "updateApp")
+    //@HystrixCommand(commandKey = "updateApp")
     public Map updateApp(App app, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -294,7 +290,7 @@ public class AppService extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "bindService")
+    //@HystrixCommand(commandKey = "bindService")
     public Map bindService(Map body, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -333,7 +329,7 @@ public class AppService extends Common {
      * @param token             the client
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "unbindService")
+    //@HystrixCommand(commandKey = "unbindService")
     public Map unbindService(String serviceInstanceId, String applicationId, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -375,7 +371,7 @@ public class AppService extends Common {
      * @return the app events
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getAppEvents")
+    //@HystrixCommand(commandKey = "getAppEvents")
     public ListEventsResponse getAppEvents(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -396,7 +392,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    @HystrixCommand(commandKey = "getApplicationEnv")
+    //@HystrixCommand(commandKey = "getApplicationEnv")
     public ApplicationEnvironmentResponse getApplicationEnv(String guid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
 
@@ -421,7 +417,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @HystrixCommand(commandKey = "addApplicationRoute")
+    //@HystrixCommand(commandKey = "addApplicationRoute")
     public Map addApplicationRoute(Map body, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -466,7 +462,7 @@ public class AppService extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @HystrixCommand(commandKey = "removeApplicationRoute")
+    //@HystrixCommand(commandKey = "removeApplicationRoute")
     public Map removeApplicationRoute(String guid, String route_guid, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -506,7 +502,7 @@ public class AppService extends Common {
      * @return the map
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "terminateInstance")
+    //@HystrixCommand(commandKey = "terminateInstance")
     public Map terminateInstance(String guid, String index, String token) throws Exception {
         Map resultMap = new HashMap();
 
@@ -528,7 +524,7 @@ public class AppService extends Common {
         return resultMap;
     }
 
-    @HystrixCommand(commandKey = "getRecentLog")
+    //@HystrixCommand(commandKey = "getRecentLog")
     public List<Envelope> getRecentLog(String guid, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
         ReactorDopplerClient reactorDopplerClient = Common.dopplerClient(connectionContext(), tokenProvider);
@@ -540,7 +536,7 @@ public class AppService extends Common {
         return getRecentLog;
     }
 
-    @HystrixCommand(commandKey = "getTailLog")
+    //@HystrixCommand(commandKey = "getTailLog")
     public List<LogMessage> getTailLog(String guid, String token) {
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), "demo.org", "dev");
 
@@ -563,7 +559,7 @@ public class AppService extends Common {
         LOGGER.info(" [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
     }
 
-    @HystrixCommand(commandKey = "socketTailLogs")
+    //@HystrixCommand(commandKey = "socketTailLogs")
     public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName, String token) {
         DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), orgName, spaceName);
 

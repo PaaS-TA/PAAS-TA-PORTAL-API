@@ -126,6 +126,7 @@ public class TailSocket implements CommandLineRunner {
         server.addDisconnectListener(new DisconnectListener() {
             @Override
             public void onDisconnect(SocketIOClient client) {
+
                 LOGGER.info("onDisconnected");
             }
         });

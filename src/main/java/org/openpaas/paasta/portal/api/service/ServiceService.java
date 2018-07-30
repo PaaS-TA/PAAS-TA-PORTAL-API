@@ -1,8 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
+
 import org.cloudfoundry.client.v2.servicebrokers.*;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
@@ -43,7 +41,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "renameInstance")
+    //@HystrixCommand(commandKey = "renameInstance")
     public Map renameInstance(Service service, String guid) throws Exception {
         HashMap result = new HashMap();
 
@@ -66,7 +64,7 @@ public class ServiceService extends Common {
      * @param guid the service
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "deleteInstance")
+    //@HystrixCommand(commandKey = "deleteInstance")
     public Map deleteInstance(String guid) throws Exception {
         HashMap result = new HashMap();
 
@@ -93,7 +91,7 @@ public class ServiceService extends Common {
      * @version 1.0
      * @since 2016.8.4 최초작성
      */
-    @HystrixCommand(commandKey = "getUserProvided")
+    //@HystrixCommand(commandKey = "getUserProvided")
     public GetUserProvidedServiceInstanceResponse getUserProvided(String token, String userProvidedServiceInstanceId) throws Exception {
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
@@ -151,7 +149,7 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @HystrixCommand(commandKey = "createUserProvided")
+    //@HystrixCommand(commandKey = "createUserProvided")
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
 
@@ -200,7 +198,7 @@ public class ServiceService extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @HystrixCommand(commandKey = "updateUserProvided")
+    //@HystrixCommand(commandKey = "updateUserProvided")
     public Map updateUserProvided(String guid, String token, Service service) throws Exception {
 
         HashMap result = new HashMap();
@@ -233,7 +231,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getServiceBrokers")
+    //@HystrixCommand(commandKey = "getServiceBrokers")
     public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(),tokenProvider())
                 .serviceBrokers()
@@ -250,7 +248,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "getServiceBroker")
+    //@HystrixCommand(commandKey = "getServiceBroker")
     public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .serviceBrokers()
@@ -268,7 +266,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "createServiceBroker")
+    //@HystrixCommand(commandKey = "createServiceBroker")
     public CreateServiceBrokerResponse createServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider())
                 .serviceBrokers()
@@ -289,7 +287,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "updateServiceBroker")
+    //@HystrixCommand(commandKey = "updateServiceBroker")
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
 
         return Common.cloudFoundryClient(connectionContext(), tokenProvider())
@@ -311,7 +309,7 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    @HystrixCommand(commandKey = "deleteServiceBroker")
+    //@HystrixCommand(commandKey = "deleteServiceBroker")
     public boolean deleteServiceBroker(String guid, String token) throws Exception {
 
         Common.cloudFoundryClient(connectionContext(), tokenProvider())
@@ -325,7 +323,7 @@ public class ServiceService extends Common {
     }
 
 
-    @HystrixCommand(commandKey = "getServicesInstances")
+    //@HystrixCommand(commandKey = "getServicesInstances")
     public ListServiceInstancesResponse getServicesInstances(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider());
 
