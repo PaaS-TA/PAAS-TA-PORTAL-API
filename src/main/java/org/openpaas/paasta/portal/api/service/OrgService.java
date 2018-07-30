@@ -89,11 +89,16 @@ public class OrgService extends Common {
      * @since 2018.5.2
      */
     @HystrixCommand(commandKey = "createOrg")
-    public CreateOrganizationResponse createOrg(final Org org, final String token) {
-        final CreateOrganizationResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
-
-
-        return response;
+    public Map createOrg(final Org org, final String token){
+        try {
+            final CreateOrganizationResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
+            return new HashMap(){{put("RESULT", "SUCCESS");}};
+        }catch (Exception e){
+            return new HashMap(){{
+                put("RESULT", "FAIL");
+                put("MSG", e.getMessage());
+            }};
+        }
     }
 
     @HystrixCommand(commandKey = "isExistOrgName")

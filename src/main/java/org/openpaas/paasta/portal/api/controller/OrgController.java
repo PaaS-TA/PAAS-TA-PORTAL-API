@@ -189,7 +189,7 @@ public class OrgController extends Common {
      * 이름을 가지고 조직을 생성한다.
      */
     @PostMapping( V2_URL + "/orgs" )
-    public CreateOrganizationResponse createOrg ( @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+    public Map createOrg ( @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         return orgService.createOrg( org, token );
     }
 
