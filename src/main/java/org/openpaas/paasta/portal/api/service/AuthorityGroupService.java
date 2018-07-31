@@ -18,15 +18,6 @@ import java.util.List;
 @Service
 public class AuthorityGroupService extends Common{
 
-    /**
-     * 운영자 포털에서 권한 그룹 목록을 요청했을때, 권한 그룹 목록을 응답한다.
-     *
-     * @return Collection<ScimGroup> authority groups
-     * @throws Exception the exception
-     * @author kimdojun
-     * @version 1.0
-     * @since 2016.9.26 최초작성
-     */
     //@HystrixCommand(commandKey = "getAuthorityGroups")
     public Collection<ScimGroup> getAuthorityGroups() throws Exception {
         UaaGroupOperations operations = getUaaGroupOperations(uaaAdminClientId);
