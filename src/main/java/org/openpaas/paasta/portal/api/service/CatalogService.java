@@ -40,17 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-//import org.openpaas.paasta.portal.api.mapper.cc.CatalogCcMapper;
-//import org.openpaas.paasta.portal.api.mapper.portal.CatalogMapper;
-
-/**
- * 서비스 카탈로그, 개발 환경 카탈로그, 앱 템플릿 카탈로그 정보 조회 및 관리 기능을 구현한 서비스 클래스로 Common(1.3.8) 클래스를 상속하여 구현한다.
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.07.04 최초작성
- */
-@Transactional
 @Service
 public class CatalogService extends Common {
 

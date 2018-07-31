@@ -19,16 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//import org.openpaas.paasta.portal.api.mapper.cc.OrgMapper;
-//import org.openpaas.paasta.portal.api.mapper.cc.SpaceMapper;
-
-/**
- * 공간 서비스 - 공간 목록 , 공간 이름 변경 , 공간 생성 및 삭제 등을 제공한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
 @Service
 public class SpaceService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceService.class);

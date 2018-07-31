@@ -38,13 +38,6 @@ import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-/**
- * 조직 서비스 - 조직 목록 , 조직 이름 변경 , 조직 생성 및 삭제 등을 제공한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
 @EnableAsync
 @Service
 public class OrgService extends Common {

@@ -14,17 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * ClientService.java
- * 클라이언트 목록 , 클라이언트 삭제 등 클라이언트 관리에 필요한 기능을 구현한 서비스 클래스
- * Common 클래스를 상속하여 구현
- *
- * @author 김영지
- * @version 1.0
- * @since 2016.9.29 최초작성
- */
 @Service
-@Transactional
 public class ClientService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);

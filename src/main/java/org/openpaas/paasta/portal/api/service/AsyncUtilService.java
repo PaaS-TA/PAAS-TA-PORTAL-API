@@ -3,13 +3,7 @@ package org.openpaas.paasta.portal.api.service;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.springframework.stereotype.Service;
 
-/**
- * 사용자 권한 서비스 - 권한별 사용자를 가져온다.
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.09.19 최초작성
- */
+
 @Service
 public class AsyncUtilService extends Common {
 

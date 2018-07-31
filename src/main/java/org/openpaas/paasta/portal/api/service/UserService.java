@@ -24,15 +24,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 
-/**
- * 유저 서비스 - 마이페이지의 유저의 조회 수정을 처리한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.5.23 최초작성
- */
 @Service
-@Transactional
 public class UserService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);

@@ -10,13 +10,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.Map;
 
-/**
- * 빌드팩 컨트롤러 - 빌드팩 정보를 조회, 수정한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
 @EnableAsync
 @org.springframework.stereotype.Service
 public class BuildPackService extends Common {

@@ -23,13 +23,6 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 로그인 서비스 - 로그인를 처리한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
 @Service
 public class LoginService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginService.class);

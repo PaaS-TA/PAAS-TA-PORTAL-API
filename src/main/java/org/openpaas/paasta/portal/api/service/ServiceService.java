@@ -1,6 +1,8 @@
 package org.openpaas.paasta.portal.api.service;
 
 
+import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingRequest;
+import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebrokers.*;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
@@ -18,15 +20,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import java.util.HashMap;
 import java.util.Map;
 
-//import org.openpaas.paasta.portal.api.mapper.portal.ServiceMapper;
-
-/**
- * 서비스 컨트롤 - 서비스 목록 , 서비스 상세 정보, 서비스 인스턴스 추가, 서비스 인스턴스 수정, 서비스 인스턴스 삭제 등 서비스 인스턴스 관리를  제공한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
 @EnableAsync
 @org.springframework.stereotype.Service
 public class ServiceService extends Common {
@@ -332,6 +325,10 @@ public class ServiceService extends Common {
                 ).block();
 
         return listServicesInstancesResponse;
+    }
+
+    public GetServiceBindingResponse getServiceBinding(String token, String serviceid){
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).serviceBindingsV2().get(GetServiceBindingRequest.builder().serviceBindingId(serviceid).build()).block();
     }
 
 

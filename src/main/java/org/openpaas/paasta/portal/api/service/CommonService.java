@@ -16,13 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 공통서비스 - 사용자 정의 에러메세지 처리
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.07.01
- */
 @Service
 public class CommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonService.class);
