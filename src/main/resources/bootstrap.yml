@@ -1,20 +1,5 @@
 spring:
   application:
       name: PortalApi
-  cloud:
-    config:
-      uri: http://localhost:8004
 
-
-# Discovery Server Access
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://127.0.0.1:2221/eureka/
-    healthcheck:
-      enabled: true
-    lease:
-      duration: 5
-  instance:
-    hostname: ${spring.cloud.client.hostname}
 

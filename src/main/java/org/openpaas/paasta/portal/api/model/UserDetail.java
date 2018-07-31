@@ -3,11 +3,6 @@ package org.openpaas.paasta.portal.api.model;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * user model of portaldb
- *
- * Created by mg on 2016-05-19.
- */
 public class UserDetail {
     private String userId;
     private String userName;

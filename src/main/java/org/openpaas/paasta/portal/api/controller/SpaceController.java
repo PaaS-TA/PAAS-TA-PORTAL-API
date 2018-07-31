@@ -3,7 +3,6 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -15,22 +14,13 @@ import org.openpaas.paasta.portal.api.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
-/**
- * 공간 컨트롤러 - 공간 목록 , 공간 이름 변경 , 공간 생성 및 삭제 등을 제공한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
+
 @RestController
-@Transactional
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class SpaceController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceController.class);

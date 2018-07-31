@@ -4,13 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * 조직 모델
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
+
 
 public class Org extends Entity {
     private String orgName;

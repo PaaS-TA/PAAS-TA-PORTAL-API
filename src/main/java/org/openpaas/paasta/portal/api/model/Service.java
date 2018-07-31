@@ -5,13 +5,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.UUID;
 
-/**
- * 서비스 모델
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.5.30 최초작성
- */
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Service {
     private String name;

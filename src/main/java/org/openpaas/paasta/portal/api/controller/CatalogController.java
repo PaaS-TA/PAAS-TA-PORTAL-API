@@ -23,13 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.Map;
 
-/**
- * 서비스 카탈로그, 개발 환경 카탈로그, 앱 템플릿 카탈로그 정보 조회 및 관리 등의 API 를 호출 받는 컨트롤러이다.
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.07.04 최초작성
- */
+
 @RestController
 public class CatalogController extends Common {
 

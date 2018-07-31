@@ -18,13 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
 
-/**
- * org.openpaas.paasta.portal.api.exception
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.07.07
- */
+
 @ControllerAdvice
 public class GlobalControllerExceptionHandler {
 

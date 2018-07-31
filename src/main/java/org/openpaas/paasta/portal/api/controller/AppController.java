@@ -1,13 +1,12 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import com.corundumstudio.socketio.SocketIOClient;
+
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.LogMessage;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
@@ -15,7 +14,6 @@ import org.openpaas.paasta.portal.api.service.AppService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,16 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- * 앱 컨트롤러 - 애플리케이션 정보 조회, 구동, 정지 등의 API 를 호출 하는 컨트롤러이다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
+
 @RestController
-@Transactional
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class AppController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
@@ -379,15 +369,15 @@ public class AppController extends Common {
         return mapLog;
     }
 
-    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName) {
-        try {
-            LOGGER.info("Starting TailLog :::::");
-            client = appService.socketTailLogs(client, appName, orgName, spaceName, this.getToken());
-        } catch (Exception e) {
-            LOGGER.error(e.toString());
-        }
-        return client;
-    }
+//    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName) {
+//        try {
+//            LOGGER.info("Starting TailLog :::::");
+//            client = appService.socketTailLogs(client, appName, orgName, spaceName, this.getToken());
+//        } catch (Exception e) {
+//            LOGGER.error(e.toString());
+//        }
+//        return client;
+//    }
 
 
 }

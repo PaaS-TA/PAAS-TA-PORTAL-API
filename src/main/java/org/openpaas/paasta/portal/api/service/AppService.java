@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
 
-import com.corundumstudio.socketio.SocketIOClient;
+
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
@@ -553,22 +553,22 @@ public class AppService extends Common {
     }
 
     //@HystrixCommand(commandKey = "socketTailLogs")
-    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName, String token) {
-        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), orgName, spaceName);
-
-        cloudFoundryOperations.applications()
-                .logs(LogsRequest.builder()
-                        .name(appName)
-                        .build()
-                ).subscribe((msg) -> {
-                    printLog(msg);
-                    client.sendEvent("message", " [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
-                },
-                (error) -> {
-                    error.printStackTrace();
-                }
-        );
-        return client;
-    }
+//    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName, String token) {
+//        DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token), orgName, spaceName);
+//
+//        cloudFoundryOperations.applications()
+//                .logs(LogsRequest.builder()
+//                        .name(appName)
+//                        .build()
+//                ).subscribe((msg) -> {
+//                    printLog(msg);
+//                    client.sendEvent("message", " [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
+//                },
+//                (error) -> {
+//                    error.printStackTrace();
+//                }
+//        );
+//        return client;
+//    }
 
 }

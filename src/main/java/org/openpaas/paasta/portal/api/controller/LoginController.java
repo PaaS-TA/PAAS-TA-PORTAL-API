@@ -16,16 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 로그인 컨트롤러 - 로그인를 처리한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
-@RestController
-@Transactional
 
+@RestController
 public class LoginController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);

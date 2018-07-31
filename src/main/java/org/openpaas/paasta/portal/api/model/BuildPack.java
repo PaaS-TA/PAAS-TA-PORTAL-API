@@ -2,13 +2,6 @@ package org.openpaas.paasta.portal.api.model;
 
 import java.util.UUID;
 
-/**
- * Web Ide 모델
- *
- * @author nawkm
- * @version 1.0
- * @since 2016.8.30 최초작성
- */
 public class BuildPack {
     private UUID guid;
     private String name;

@@ -346,7 +346,7 @@ public class Common {
         return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(ClientCredentialsGrantTokenProvider.builder().clientId(clientId).clientSecret(clientSecret).build()).build();
     }
 
-    // UAA Admin Client
+    // UAA Admin
     public static ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
         ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext, tokenProvider(token));
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();

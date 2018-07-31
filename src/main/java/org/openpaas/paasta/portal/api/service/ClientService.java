@@ -93,7 +93,7 @@ public class ClientService extends Common {
 
     /**
      * ClientOption Inner Class
-     * Client 생성/수정시 사용되는 Client Option 객체를 생성하기 위한 Inner Class
+     * 생성/수정시 사용되는 Option 객체를 생성하기 위한 Inner Class
      *
      * @author CISS
      * @version 1.0
@@ -117,7 +117,7 @@ public class ClientService extends Common {
 
         /**
          * 클라리언트 옵션 Set
-         * Map 으로 받은 Client Option 을 CreateClientRequest Argument 에 맞게 파싱처리
+         * Map 으로 받은 Option 을 CreateClientRequest Argument 에 맞게 파싱처리
          *
          * @return Map map
          * @see //docs.cloudfoundry.org/api/uaa/version/4.12.0/#create-6
@@ -145,12 +145,12 @@ public class ClientService extends Common {
                 Object value = param.get(key);
                 //LOGGER.info( "key : " + key + ", value : " + value);
 
-                // Client ID
+                // ID
                 if (key.equals("client_id")) {
                     clientId = (String) value;
                 }
 
-                // Client Secret
+                // Secret
                 if (key.equals("client_secret")) {
                     clientSecret = (String) value;
                 }

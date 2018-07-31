@@ -2,14 +2,7 @@ package org.openpaas.paasta.portal.api.model;
 
 import java.util.UUID;
 
-/**
- * 쿼터 모델
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- * 		  2018.4.11 확장
- */
+
 public class Quota extends Entity {
 
     private boolean nonBasicServicesAllowed = false;

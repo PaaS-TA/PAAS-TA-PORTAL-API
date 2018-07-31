@@ -5,23 +5,16 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Quota;
 import org.openpaas.paasta.portal.api.service.OrgQuotaService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * 할당량 관리(조직) 컨트롤러 - 조직의 할당량에 대한 리스트,조회,등록,수정,삭제,지정 기능을 제공한다.
- *
- * @author 최윤석
- * @version 1.0
- * @since 2018.4.11 최초작성
- */
+import javax.servlet.http.HttpServletRequest;
+import java.util.UUID;
+
+
 @RestController
-@Transactional
 public class OrgQuotaController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrgQuotaController.class);

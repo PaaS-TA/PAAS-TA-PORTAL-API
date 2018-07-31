@@ -10,12 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.*;
 
-/**
- * User's role in specific position, such as organization's role, space's role, etc.
- * @author hgcho
- * @version 2.0
- * @since 2018.5.16
- */
+
 public class UserRole implements Comparable<UserRole> {
     private final String userId;
     private final String userEmail;

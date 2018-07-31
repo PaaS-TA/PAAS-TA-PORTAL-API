@@ -3,36 +3,24 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v2.users.GetUserResponse;
 import org.cloudfoundry.uaa.users.UpdateUserResponse;
 import org.cloudfoundry.uaa.users.User;
-import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.UserDetail;
-import org.openpaas.paasta.portal.api.model.UserManagement;
 import org.openpaas.paasta.portal.api.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HeaderParam;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-/**
- * 유저 컨트롤러 - 마이페이지의 유저의 조회 수정을 처리한다.
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.5.23 최초작성
- */
+
 @RestController
-@Transactional
 public class UserController extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 

@@ -7,13 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * 앱 모델
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.5.30 최초작성
- */
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class App {
     private int appInstanceIndex;

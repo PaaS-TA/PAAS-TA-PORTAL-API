@@ -1,17 +1,8 @@
 package org.openpaas.paasta.portal.api.model;
 
 import java.util.List;
-import java.util.UUID;
 
-/**
- * 카탈로그(모델클래스)
- * 카탈로그 정보를 가지고 있는 데이터 모델 bean 클래스
- * Json 어노테이션을 사용해서 JSON 형태로 제공
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.07.04 최초작성
- */
+
 public class Catalog {
 
     private int no;

@@ -22,7 +22,6 @@ import java.util.UUID;
  * @since 2018.4.11 최초작성
  */
 @RestController
-@Transactional
 public class SpaceQuotaController extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceQuotaController.class);

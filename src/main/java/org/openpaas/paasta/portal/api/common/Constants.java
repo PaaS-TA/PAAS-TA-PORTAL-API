@@ -1,12 +1,6 @@
 package org.openpaas.paasta.portal.api.common;
 
-/**
- * Constants 클래스
- *
- * @author 김도준
- * @version 1.0
- * @since 2016.06.16 최초작성
- */
+
 public class Constants {
 
     /**

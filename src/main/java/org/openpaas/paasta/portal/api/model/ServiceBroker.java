@@ -3,13 +3,6 @@ package org.openpaas.paasta.portal.api.model;
 
 import java.util.UUID;
 
-/**
- * 서비스브로커 모델
- *
- * @author 조민구
- * @version 1.0
- * @since 2016.4.4 최초작성
- */
 
 public class ServiceBroker {
     private String name;
