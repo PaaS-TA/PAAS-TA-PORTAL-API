@@ -20,7 +20,6 @@ public class DomainController extends Common {
 
     @Autowired
     private DomainService domainService;
-
     /**
      * Gets domains for all.
      *
