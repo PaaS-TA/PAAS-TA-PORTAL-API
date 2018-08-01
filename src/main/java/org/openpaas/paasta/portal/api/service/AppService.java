@@ -13,9 +13,7 @@ import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteResponse;
 import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
 import org.cloudfoundry.client.v2.routes.Route;
-import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
-import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingRequest;
-import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
+import org.cloudfoundry.client.v2.servicebindings.*;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.doppler.Envelope;
@@ -174,16 +172,28 @@ public class AppService extends Common {
      * @throws Exception the exception
      */
     //@HystrixCommand(commandKey = "deleteApp")
-    public Map deleteApp(String guid) {
+    public Map deleteApp(String guid) throws Exception {
         HashMap result = new HashMap();
         try {
             //앱 삭제
             ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider());
-            List<Route> routes = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block().getRoutes();
-            for(Route route : routes) {
+            try {
+                ListApplicationServiceBindingsResponse listApplicationServiceBindingsResponse =
+                        reactorCloudFoundryClient.applicationsV2().listServiceBindings(ListApplicationServiceBindingsRequest.builder().applicationId(guid).build()).block();
+                for(ServiceBindingResource resource : listApplicationServiceBindingsResponse.getResources())
+                {
+                    reactorCloudFoundryClient.serviceBindingsV2()
+                            .delete(DeleteServiceBindingRequest.builder()
+                                    .serviceBindingId(resource.getMetadata().getId())
+                                    .build()
+                            ).block();
+                }
+            } catch (Exception e) {
+
+            } List<Route> routes = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block().getRoutes();
+            for (Route route : routes) {
                 reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(route.getId()).build()).block();
-            }
-            reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(guid).build()).block();
+            } reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(guid).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
@@ -191,18 +201,6 @@ public class AppService extends Common {
             result.put("result", false);
             result.put("msg", e.getMessage());
         }
-
-        try {
-            //AutoScale 설정 삭제
-            HashMap map = new HashMap();
-            map.put("guid", String.valueOf(guid));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", false);
-            result.put("msg", e.getMessage());
-        }
-
         return result;
     }
 

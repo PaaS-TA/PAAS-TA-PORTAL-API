@@ -62,11 +62,10 @@ public class ServiceService extends Common {
         HashMap result = new HashMap();
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
-            cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).async(false).recursive(true).build()).block();
+            cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
-            e.printStackTrace();
             result.put("result", false);
             result.put("msg", e.getMessage());
         }
