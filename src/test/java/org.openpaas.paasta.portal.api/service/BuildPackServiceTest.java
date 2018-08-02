@@ -32,6 +32,7 @@ import org.mockito.MockitoAnnotations;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.config.TestConfig;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
+import org.openpaas.paasta.portal.api.controller.AppController;
 import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -39,6 +40,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -64,8 +66,9 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BuildPackServiceTest extends TestConfig {
-    @Mock
-    Logger LOGGER;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
+
     @Mock
     LoginService loginService;
     @Mock
