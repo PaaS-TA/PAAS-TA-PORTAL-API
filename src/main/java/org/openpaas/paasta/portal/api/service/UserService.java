@@ -45,7 +45,7 @@ public class UserService extends Common {
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
-            reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
+            reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).active(userDetail.getActive()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
