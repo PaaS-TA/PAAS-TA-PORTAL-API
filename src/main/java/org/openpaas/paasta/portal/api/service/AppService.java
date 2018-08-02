@@ -121,14 +121,15 @@ public class AppService extends Common {
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
-            DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
-            cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
+            //DefaultCloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(connectionContext(), tokenProvider(token),app.getOrgName(),app.getSpaceName());
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state("STARTED").build()).block();
+            //cloudFoundryOperations.applications().start(StartApplicationRequest.builder().name(app.getName()).build()).block();
 
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("result", false);
-            resultMap.put("msg", e);
+            resultMap.put("msg", e.getMessage());
         }
 
         return resultMap;
