@@ -22,9 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class SpaceService extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceService.class);
-
-    @Autowired
-    private AsyncUtilService asyncUtilService;
+    
 
     @Autowired
     private UserService userService;
