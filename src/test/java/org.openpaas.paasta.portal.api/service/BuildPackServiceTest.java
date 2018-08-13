@@ -39,40 +39,9 @@ public class BuildPackServiceTest extends TestConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 
-
-    @Mock
-    ObjectMapper objectMapper;
-
-
     @Mock
     private BuildPackService buildPackService;
 
-
-    final String TOKEN = "token";
-
-    final String ADMINUSER = "ADMIN";
-    final String ADMINPAWD = "ADMIN";
-    final String CLIENTID = "CLIENTID";
-    final String CLIENTSECRET = "CLIENTSECRET";
-    final String ZONEDOMAIN = "ZONEDOMAIN";
-
-    @InjectMocks
-    Common common;
-
-
-    @MockBean
-    PasswordGrantTokenProvider tokenProvider;
-
-
-    private ReactorCloudFoundryClient client;
-
-
-    MockWebServer mockWebServer;
-
-    protected TokenProvider TOKEN_PROVIDER = connectionContext -> Mono.just("test-authorization");
-
-
-    protected DefaultConnectionContext CONNECTION_CONTEXT;
 
     @Before
     public void setUp() {
