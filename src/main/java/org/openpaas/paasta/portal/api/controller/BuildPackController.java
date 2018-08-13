@@ -36,10 +36,7 @@ public class BuildPackController extends Common {
     public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start");
-
-        //service call
         Map<String, Object> buildPacks = buildPackService.getBuildPacks();
-
         LOGGER.info("getBuildPacks End ");
 
         return buildPacks;
@@ -59,12 +56,7 @@ public class BuildPackController extends Common {
     public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateBuildPack Start : " + guid);
-
         Map<String, Object> resultMap = new HashMap<>();
-
-        //token setting
-        //CustomCloudFoundryClient client = getCustomCloudFoundryClient(request.getHeader(AUTHORIZATION_HEADER_KEY));
-
         //service call
         buildPack.setGuid(UUID.fromString(guid));
         buildPackService.updateBuildPack(buildPack);

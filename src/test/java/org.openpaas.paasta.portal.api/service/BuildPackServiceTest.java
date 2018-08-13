@@ -1,7 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
+import okhttp3.mockwebserver.MockWebServer;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.client.v2.Metadata;
+import org.cloudfoundry.client.v2.buildpacks.BuildpackEntity;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.client.v2.applications.ApplicationsV2;
 import org.cloudfoundry.client.v2.buildpacks.Buildpacks;
@@ -25,10 +28,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.config.TestConfig;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
@@ -57,65 +57,64 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-//@RunWith(SpringRunner.class)
-@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
-@PrepareForTest({Common.class})
-@RunWith(PowerMockRunner.class)
+
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BuildPackServiceTest extends TestConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 
-    @Mock
-    LoginService loginService;
+
     @Mock
     ObjectMapper objectMapper;
+
+
     @Mock
-    ThreadLocal<DefaultConnectionContext> connectionContextThreadLocal;
+    private BuildPackService buildPackService;
+
+
+    final String TOKEN = "token";
+
+    final String ADMINUSER = "ADMIN";
+    final String ADMINPAWD = "ADMIN";
+    final String CLIENTID = "CLIENTID";
+    final String CLIENTSECRET = "CLIENTSECRET";
+    final String ZONEDOMAIN = "ZONEDOMAIN";
+
     @InjectMocks
-    private final BuildPackService buildPackService = new BuildPackService();
-
-    private final CloudFoundryOperations cloudFoundryOperations = mock(CloudFoundryOperations.class);
-
-//    private final CloudFoundryApplication application;
-
-//    @Mock
-//    private CloudFoundryClient cloudFoundryClient;
-
-//    @Mock
     Common common;
 
-    @Mock
-    Buildpacks buildpacks;
 
-    private final ApplicationsV2 applications = mock(ApplicationsV2.class, RETURNS_SMART_NULLS);
+    @MockBean
+    PasswordGrantTokenProvider tokenProvider;
 
-    private final CloudFoundryClient cloudFoundryClient = mock(CloudFoundryClient.class, RETURNS_SMART_NULLS);
 
-//    private final ReactorCloudFoundryClient reactorCloudFoundryClient = mock(ReactorCloudFoundryClient.class, RETURNS_SMART_NULLS);
+    private ReactorCloudFoundryClient client;
 
-    private CloudFoundryClient cfClient;
-    private CloudFoundryOperations cfOps;
 
-    ConnectionContext connectionContext;
+    MockWebServer mockWebServer;
+
+    protected TokenProvider TOKEN_PROVIDER = connectionContext -> Mono.just("test-authorization");
+
+
+    protected DefaultConnectionContext CONNECTION_CONTEXT;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mockWebServer = new MockWebServer();
+        CONNECTION_CONTEXT = DefaultConnectionContext.builder().apiHost(mockWebServer.getHostName()).secure(false).build();
 
-        common = PowerMockito.spy(new Common());
+        client = ReactorCloudFoundryClient.builder().connectionContext(CONNECTION_CONTEXT).rootV2(this.root).rootV3(this.root).tokenProvider(TOKEN_PROVIDER).build();
 
-//        ConnectionContext connectionContext = DefaultConnectionContext.builder().apiHost("apiHost").skipSslValidation(true).build();
-//        TokenProvider tokenProvider = PasswordGrantTokenProvider.builder().username("admin").password("admin").build();
-//        cfClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
-//        cfOps = DefaultCloudFoundryOperations.builder().cloudFoundryClient(cfClient).build();
+//        PW_TOKEN_PROVIDER = PasswordGrantTokenProvider.builder().username(ADMINUSER).password(ADMINPAWD).build();
     }
 
-//    @Test
-//    public void testGetBuildPacks() throws Exception {
+    @Test
+    public void testGetBuildPacks() throws Exception {
 //        when(loginService.cloudFoundryClient(any(), any())).thenReturn(null);
 //        when(loginService.connectionContext()).thenReturn(null);
 //        when(loginService.tokenProvider(any(), any())).thenReturn(null);
@@ -124,7 +123,9 @@ public class BuildPackServiceTest extends TestConfig {
 //        Assert.assertEquals(new HashMap<String, Object>() {{
 //            put("String", null);
 //        }}, result);
-//    }
+
+        assertThat(this.client.buildpacks()).isNotNull();
+    }
 
     @Test
     public void testUpdateBuildPack() throws Exception {
@@ -133,64 +134,12 @@ public class BuildPackServiceTest extends TestConfig {
         buildPack.setPosition(1);
         buildPack.setEnable(true);
         buildPack.setLock(true);
-
-
-
-        BuildPackService service = mock(BuildPackService.class);
-//        Common com = Whitebox.invokeConstructor(Common.class);
-//        Common com = mock(Common.class);
-        PowerMockito.mockStatic(Common.class);
-        System.out.println("==1");
-        DefaultConnectionContext defaultConnectionContext = DefaultConnectionContext.builder().apiHost("api.115.68.46.187.xip.io").build();
-        System.out.println("==2");
-        PowerMockito.when(common.connectionContext()).thenReturn(defaultConnectionContext);
-
-
-        System.out.println("==3");
-        when(service.updateBuildPack(buildPack)).thenReturn(true);
-        System.out.println("==4");
-
-        PowerMockito.when(service.updateBuildPack(buildPack)).thenReturn(true);
-        System.out.println("==5");
-        boolean result = service.updateBuildPack(buildPack);
-        System.out.println("==6");
+        UpdateBuildpackResponse updateBuildpackResponse = UpdateBuildpackResponse.builder().build();
+        PowerMockito.when(buildPackService.updateBuildPack(buildPack)).thenReturn(true);
+        boolean result = buildPackService.updateBuildPack(buildPack);
         Assert.assertEquals(true, result);
-        System.out.println("==7");
 
 
-//        Mono<UpdateBuildpackResponse> response = Mono.just(UpdateBuildpackResponse.builder().build());
-//
-//        when(cfClient.buildpacks().update(UpdateBuildpackRequest.builder()
-//                .buildpackId("f89b1ef6-7416-4d12-b492-c10fdaaff632")
-//                .position(1)
-//                .enabled(true)
-//                .locked(true)
-//                .build())).thenReturn(response);
-
-
-
-//        when(buildpacks.update(UpdateBuildpackRequest.builder()
-//                                .buildpackId("f89b1ef6-7416-4d12-b492-c10fdaaff632")
-//                                .position(1)
-//                                .enabled(true)
-//                                .locked(true)
-//                                .build()
-//        ));
-//        BuildPackService service = mock(BuildPackService.class);
-//        when(service.updateBuildPack(buildPack)).thenReturn(true);
-//
-//        boolean result = service.updateBuildPack(buildPack);
-//        Assert.assertEquals(true, result);
-
-
-
-
-//        when(loginService.cloudFoundryClient(any(), any())).thenReturn(null);
-//        when(loginService.connectionContext()).thenReturn(null);
-//        when(loginService.tokenProvider(any(), any())).thenReturn(null);
-//
-//        boolean result = buildPackService.updateBuildPack(new BuildPack());
-//        Assert.assertEquals(true, result);
     }
 
 //    @Test
