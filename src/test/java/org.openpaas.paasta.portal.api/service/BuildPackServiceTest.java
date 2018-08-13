@@ -1,64 +1,36 @@
 package org.openpaas.paasta.portal.api.service;
 
 import okhttp3.mockwebserver.MockWebServer;
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.CloudFoundryClient;
-import org.cloudfoundry.client.v2.Metadata;
-import org.cloudfoundry.client.v2.buildpacks.BuildpackEntity;
-import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.cloudfoundry.client.v2.applications.ApplicationsV2;
-import org.cloudfoundry.client.v2.buildpacks.Buildpacks;
-import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackRequest;
 import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackResponse;
-import org.cloudfoundry.identity.uaa.api.client.UaaClientOperations;
-import org.cloudfoundry.identity.uaa.api.group.UaaGroupOperations;
-import org.cloudfoundry.identity.uaa.api.user.UaaUserOperations;
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
-import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.config.TestConfig;
-import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.controller.AppController;
 import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.expression.EnvironmentAccessor;
-import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
