@@ -1,30 +1,22 @@
 package org.openpaas.paasta.portal.api.service;
 
-import okhttp3.mockwebserver.MockWebServer;
 import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackResponse;
-import org.cloudfoundry.reactor.DefaultConnectionContext;
-import org.cloudfoundry.reactor.TokenProvider;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.config.TestConfig;
 import org.openpaas.paasta.portal.api.controller.AppController;
 import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import reactor.core.publisher.Mono;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,9 +25,12 @@ import java.util.UUID;
 import static org.mockito.Mockito.when;
 
 
+@ActiveProfiles("dev")
+@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*", "javax.crypto.*", "org.openpaas.paasta.portal.api.common.*", "org.openpaas.paasta.portal.api.config.*"})
+@TestPropertySource(properties = {"spring.config.location = classpath:/application.yml","eureka.client.enabled=false"}) // Push 용
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class BuildPackServiceTest extends TestConfig {
+public class BuildPackServiceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 

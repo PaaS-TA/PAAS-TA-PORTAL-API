@@ -1,34 +1,9 @@
 package org.openpaas.paasta.portal.api.service;
 
-import okhttp3.mockwebserver.MockWebServer;
-import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
-import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
-import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.applications.*;
-import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackResponse;
-import org.cloudfoundry.client.v2.events.ListEventsRequest;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
-import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
-import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
-import org.cloudfoundry.client.v2.routes.CreateRouteResponse;
-import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
-import org.cloudfoundry.client.v2.routes.Route;
-import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
-import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingRequest;
-import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
-import org.cloudfoundry.client.v2.servicebindings.ServiceBindingResource;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.LogMessage;
-import org.cloudfoundry.doppler.RecentLogsRequest;
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.applications.LogsRequest;
-import org.cloudfoundry.reactor.DefaultConnectionContext;
-import org.cloudfoundry.reactor.TokenProvider;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
-import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -38,29 +13,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.config.TestConfig;
 import org.openpaas.paasta.portal.api.controller.AppController;
 import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import reactor.core.publisher.Mono;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 
 
+@ActiveProfiles("dev")
+@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*", "javax.crypto.*", "org.openpaas.paasta.portal.api.common.*", "org.openpaas.paasta.portal.api.config.*"})
+@TestPropertySource(properties = {"spring.config.location = classpath:/application.yml", "eureka.client.enabled=false"})
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AppServiceTest extends TestConfig {
+public class AppServiceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 
@@ -105,19 +80,14 @@ public class AppServiceTest extends TestConfig {
         APP.setState("STATE");
         APP.setTotalUserCount(1);
 
-        List<String> urls = new ArrayList<>();
-        urls.add("url1");
-        APP.setUrls(urls);
+        APP.setUrls(Arrays.<String>asList("url"));
 
-        App.Staging staging = null;
-        APP.setStaging(staging);
+        APP.setStaging(null);
 
         Map env = new HashMap();
         APP.setEnvironment(env);
 
-        List<String> services = new ArrayList<>();
-        services.add("service1");
-        APP.setServices(services);
+        APP.setServices(Arrays.<String>asList("service"));
 
 
     }
@@ -285,9 +255,9 @@ public class AppServiceTest extends TestConfig {
     public void testTerminateInstance() {
         Map map = new HashMap();
         map.put("result", true);
-        PowerMockito.when(appService.terminateInstance(anyString(),anyString(),anyString())).thenReturn(map);
+        PowerMockito.when(appService.terminateInstance(anyString(), anyString(), anyString())).thenReturn(map);
 
-        Map result = appService.terminateInstance(GUID,"1",TOKEN);
+        Map result = appService.terminateInstance(GUID, "1", TOKEN);
         Assert.assertEquals(map, result);
     }
 
@@ -295,18 +265,18 @@ public class AppServiceTest extends TestConfig {
     @Test
     public void testGetRecentLog() {
         List<Envelope> envelopes = new ArrayList<>();
-        PowerMockito.when(appService.getRecentLog(anyString(),anyString())).thenReturn(envelopes);
+        PowerMockito.when(appService.getRecentLog(anyString(), anyString())).thenReturn(envelopes);
 
-        List<Envelope> result = appService.getRecentLog(GUID,TOKEN);
+        List<Envelope> result = appService.getRecentLog(GUID, TOKEN);
         Assert.assertEquals(envelopes, result);
     }
 
     @Test
     public void testGetTailLog() {
         List<LogMessage> logMessages = new ArrayList<>();
-        PowerMockito.when(appService.getTailLog(anyString(),anyString())).thenReturn(logMessages);
+        PowerMockito.when(appService.getTailLog(anyString(), anyString())).thenReturn(logMessages);
 
-        List<LogMessage> result = appService.getTailLog(GUID,TOKEN);
+        List<LogMessage> result = appService.getTailLog(GUID, TOKEN);
         Assert.assertEquals(logMessages, result);
     }
 
