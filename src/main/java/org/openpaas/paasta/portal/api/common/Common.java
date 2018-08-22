@@ -74,12 +74,6 @@ public class Common {
     @Value("${cloudfoundry.user.uaaClient.adminClientSecret}")
     public String uaaAdminClientSecret;
 
-    @Value("${cloudfoundry.user.uaaClient.loginClientId}")
-    public String uaaLoginClientId;
-
-    @Value("${cloudfoundry.user.uaaClient.loginClientSecret}")
-    public String uaaLoginClientSecret;
-
     @Value("${cloudfoundry.user.uaaClient.skipSSLValidation}")
     public boolean skipSSLValidation;
 
@@ -235,8 +229,6 @@ public class Common {
 
         if (uaaClientId.equals(uaaAdminClientId)) {
             credentials.setClientSecret(uaaAdminClientSecret);
-        } else if (uaaClientId.equals(uaaLoginClientId)) {
-            credentials.setClientSecret(uaaLoginClientSecret);
         }
         return credentials;
     }
