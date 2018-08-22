@@ -213,7 +213,7 @@ public class OrgService extends Common {
     }
 
     /**
-     * 사용자/운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다. (Org Read for all)
+     * 사용자 포털에서 조직목록을 요청했을때, 한 페이지당 10개의 조직목록을 응답한다. (Org Read for all)
      *
      * @param token the token
      * @return ListOrganizationsResponse
@@ -221,9 +221,27 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    public ListOrganizationsResponse getOrgsForUser(final String token) {
+    public ListOrganizationsResponse getOrgsForUser(final String token, int page) {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().page(page).resultsPerPage(10).build()).block();
+    }
+
+    /**
+     * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다. (Org Read for all)
+     *
+     * @param token the token
+     * @return ListOrganizationsResponse
+     * @author cheolhan
+     * @version 2.0
+     * @since 2018.8.17
+     */
+    public ListOrganizationsResponse getAllOrgsForUser(final String token) {
         return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block();
     }
+
+
+
+
+
 
     /**
      * 운영자 포털에서 조직목록을 요청했을때, 모든 조직목록을 응답한다. (Org Read for all)

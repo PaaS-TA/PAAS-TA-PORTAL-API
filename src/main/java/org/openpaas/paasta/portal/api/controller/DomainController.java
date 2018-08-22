@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-
+/**
+ * Created by cheolhan on 2018-03-26.
+ */
 @RestController
 public class DomainController extends Common {
 

@@ -22,6 +22,12 @@ public class AppAutoscalingController {
     @Autowired
     public AppAutoscalingController(AppAutoscalingService appAutoscalingService) { this.appAutoscalingService = appAutoscalingService; }
 
+    /**
+     * 오토 스케일링 정보를 가져온다.
+     *
+     * @param appGuid
+     * @return Map
+     */
     @RequestMapping(value = {"/autoscaling/policy"}, method = RequestMethod.GET)
     public Map getAutoscaling(@RequestParam(value = "appGuid") String appGuid) {
         LOGGER.info("AppAutoscalingController Get Start");
@@ -29,6 +35,13 @@ public class AppAutoscalingController {
         return appAutoscalingService.getAutoscaling(appGuid);
     }
 
+    /**
+     * 오토 스케일링 정보를 수정한다.
+     *
+     * @param body
+     * @return Map
+     * @throws Exception
+     */
     @RequestMapping(value = {"/autoscaling/policy"}, method = RequestMethod.POST)
     public Map updateAutoscaling(@RequestBody Map body) throws Exception {
         LOGGER.info("AppAutoscalingController Update Start");

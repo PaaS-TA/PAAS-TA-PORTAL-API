@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-
+/**
+ * Created by cheolhan on 2018-03-26.
+ */
 @RestController
 public class OrgController extends Common {
 
@@ -86,7 +88,7 @@ public class OrgController extends Common {
      * 조직 요약 정보를 조회한다.
      *
      * @param orgId     the org id
-     * @param token the request
+     * @param token
      * @return summary of the organization
      */
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
@@ -98,6 +100,13 @@ public class OrgController extends Common {
         return orgService.getOrgSummaryMap(orgId, token);
     }
 
+    /**
+     * 조직 요약 정보를 조회한다.(관리자)
+     *
+     * @param orgId     the org id
+     * @return summary of the organization
+     * @throws IllegalArgumentException
+     */
     @GetMapping(V2_URL + "/orgs/{orgId}/summary-admin")
     public Map getOrgSummaryAdmin(@PathVariable String orgId) {
         LOGGER.info("org summary : " + orgId);
@@ -111,18 +120,19 @@ public class OrgController extends Common {
     /**
      * 관리자/사용자 권한으로 조직 목록을 조회한다.
      *
-     * @return the orgs for admin
+     * @param token
+     * @return ListOrganizationsResponse
      * @throws Exception the exception
      */
     @GetMapping(V2_URL + "/orgs")
     public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.debug("Org list by user");
-        return orgService.getOrgsForUser(token);
+        return orgService.getAllOrgsForUser(token);
     }
 
     /**
      * 관리자 권한으로 조직 목록을 조회한다.
-     * @return
+     * @return ListOrganizationsResponse
      */
     @GetMapping(V2_URL + "/orgs-admin")
     public ListOrganizationsResponse getOrgsForAdmin() {
@@ -131,7 +141,7 @@ public class OrgController extends Common {
     }
     /**
      * 관리자 권한으로 조직 목록을 조회한다.
-     * @return
+     * @return ListOrganizationsResponse
      */
     @GetMapping(V2_URL + "/orgs-admin/{number}")
     public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
@@ -161,6 +171,17 @@ public class OrgController extends Common {
         return result;
     }
 
+    /**
+     * 공간 목록을 조회한다.(관리자)
+     * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
+     *
+     * @param orgId     the org
+     * @return List<CloudSpace>     orgList
+     * @throws Exception the exception
+     * @author hgcho
+     * @version 2.0
+     * @since 2018.04.17 (modified)
+     */
     @GetMapping(V2_URL + "/orgs/{orgId}/spaces-admin")
     public Map<?, ?> getSpacesAdmin(@PathVariable String orgId) {
         LOGGER.debug("Get Spaces " + orgId);
@@ -171,13 +192,22 @@ public class OrgController extends Common {
     }
 
 
+    /**
+     * 조직명 중복검사를 실행한다.
+     *
+     * @param orgName     the org
+     * @return boolean
+     */
     @GetMapping(V2_URL + "/orgs/{orgName}/exist")
     public boolean isExistOrgName(@PathVariable String orgName) {
         return orgService.isExistOrgName( orgName );
     }
 
     /**
-     * 이름을 가지고 조직을 생성한다.
+     * 조직을 생성한다.
+     * @param org
+     * @param token
+     * @return Map
      */
     @PostMapping( V2_URL + "/orgs" )
     public Map createOrg ( @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
@@ -189,7 +219,7 @@ public class OrgController extends Common {
      * @param org
      * @param token
      * @param token
-     * @return
+     * @return Map
      */
     @PutMapping( V2_URL + "/orgs" )
     public Map renameOrg(@RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
@@ -218,7 +248,7 @@ public class OrgController extends Common {
         LOGGER.info("deleteOrg End ");
         return resultMap;
     }
-    
+
     // space read-only
     public ListSpacesResponse getOrgSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         return orgService.getOrgSpaces( orgId, token );
@@ -230,7 +260,7 @@ public class OrgController extends Common {
      *
      * @param orgId     the org id
      * @param token the request
-     * @return ModelAndView model
+     * @return GetOrganizationQuotaDefinitionResponse
      * @throws Exception the exception
      */
     @GetMapping(V2_URL + "/orgs/{orgId}/quota")
@@ -239,12 +269,28 @@ public class OrgController extends Common {
         return orgService.getOrgQuota(orgId, token);
     }
 
+    /**
+     * 조직의 자원 할당량을 조회한다.(관리자)
+     *
+     * @param orgId     the org id
+     * @return GetOrganizationQuotaDefinitionResponse
+     * @throws Exception the exception
+     */
     @GetMapping(V2_URL + "/orgs/{orgId}/quota-admin")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaAdmin(@PathVariable String orgId) {
         LOGGER.info("Get quota of org {}" + orgId);
         return orgService.getOrgQuota(orgId, this.getToken());
     }
 
+    /**
+     * 조직의 자원 할당량을 수정한다.
+     *
+     * @param orgId
+     * @param org
+     * @param token
+     * @return Map
+     * @throws Exception the exception
+     */
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")
     public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         LOGGER.info("changeQuota Start ");
@@ -389,14 +435,14 @@ public class OrgController extends Common {
         return orgService.associateOrgUserRole2(body);
     }
 
-    @GetMapping(V2_URL + "/orgList")
-    public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    @GetMapping(V2_URL + "/orgList/{page}")
+    public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable int page) throws Exception {
         LOGGER.debug("orgList Start");
 
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
 
-        ListOrganizationsResponse listOrganizationsResponse = orgService.getOrgsForUser(token);
+        ListOrganizationsResponse listOrganizationsResponse = orgService.getOrgsForUser(token, page);
 
         listOrganizationsResponse.getResources().forEach(orgs -> {
             Map orgMap = new HashMap();

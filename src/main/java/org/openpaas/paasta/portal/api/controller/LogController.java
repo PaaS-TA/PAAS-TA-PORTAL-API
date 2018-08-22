@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Created by swmoon on 2018-07-31.
+ */
 @RestController
 public class LogController extends Common {
 

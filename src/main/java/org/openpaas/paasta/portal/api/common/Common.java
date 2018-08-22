@@ -98,6 +98,12 @@ public class Common {
 
     public ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * 관리자 토큰을 가져온다.
+     *
+     * @return String token
+     * @throws Exception the exception
+     */
     public String getToken() {
         try {
             return loginService.login(adminUserName, adminPassword).getValue();
@@ -106,19 +112,32 @@ public class Common {
         }
     }
 
+    /**
+     * CF Target URL을 가져온다.
+     * @param target cf target
+     * @return URL target
+     * @throws MalformedURLException, URISyntaxException the exception
+     */
     public URL getTargetURL(String target) throws MalformedURLException, URISyntaxException {
         return getTargetURI(target).toURL();
     }
 
+    /**
+     * CF Target URL을 가져온다.
+     * @param target cf target
+     * @return URL target
+     * @throws URISyntaxException
+     */
     private URI getTargetURI(String target) throws URISyntaxException {
         return new URI(target);
     }
 
     /**
-     * get CloudFoundryClinet Object from token String
+     * CF Client Object를 가져온다.
      *
-     * @param token
+     * @param token cf token
      * @return CloudFoundryClinet
+     * @throws MalformedURLException, URISyntaxException
      */
     public CloudFoundryClient getCloudFoundryClient(String token) throws MalformedURLException, URISyntaxException {
 
@@ -168,12 +187,26 @@ public class Common {
     }
 
 
-    /* 권한그룹 조회 등록시 사용 */
+
+    /**
+     * 권한그룹 조회 등록시 사용
+     *
+     * @param uaaClientId
+     * @return UaaGroupOperations
+     * @throws Exception
+     */
     public UaaGroupOperations getUaaGroupOperations(String uaaClientId) throws Exception {
         UaaConnection connection = getUaaConnection(uaaClientId);
         return connection.groupOperations();
     }
-    //uaa 커넥션 생성
+
+    /**
+     * UAA 커넥션 생성
+     *
+     * @param uaaClientId
+     * @return UaaConnection
+     * @throws Exception
+     */
     private UaaConnection getUaaConnection(String uaaClientId) throws Exception {
         ResourceOwnerPasswordResourceDetails credentials = getCredentials(uaaClientId);
         URL uaaHost = new URL(uaaTarget);
@@ -187,7 +220,12 @@ public class Common {
         return connection;
     }
 
-    //credentials 세팅
+    /**
+     * credentials 세팅
+     *
+     * @param uaaClientId
+     * @return ResourceOwnerPasswordResourceDetails
+     */
     private ResourceOwnerPasswordResourceDetails getCredentials(String uaaClientId) {
         ResourceOwnerPasswordResourceDetails credentials = new ResourceOwnerPasswordResourceDetails();
         credentials.setAccessTokenUri(uaaTarget + "/oauth/token?grant_type=client_credentials&response_type=token");
@@ -209,13 +247,18 @@ public class Common {
      * 요청 파라미터 중 빈값 또는 null값인 파라미터가 있는 경우, false를 리턴한다.
      *
      * @param params
-     * @return
+     * @return boolean
      */
     public boolean stringNullCheck(String... params) {
         return Arrays.stream(params).allMatch(param -> null != param && !param.equals(""));
     }
 
-    //요청 문자열 파라미터 중, 공백을 포함하고 있는 파라미터가 있을 경우 false를 리턴
+    /**
+     * 요청 문자열 파라미터 중, 공백을 포함하고 있는 파라미터가 있을 경우 false를 리턴
+     *
+     * @param params
+     * @return boolean
+     */
     public boolean stringContainsSpaceCheck(String... params) {
         return Arrays.stream(params).allMatch(param -> !param.contains(" "));
     }
@@ -333,20 +376,50 @@ public class Common {
         return ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
 
-
+    /**
+     * ReactorDopplerClient 생성하여, 반환한다.
+     *
+     * @param connectionContext
+     * @param tokenProvider
+     * @return ReactorDopplerClient
+     */
     public static ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorDopplerClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
 
+    /**
+     * ReactorUaaClient 생성하여, 반환한다.
+     *
+     * @param connectionContext
+     * @param tokenProvider
+     * @return ReactorUaaClient
+     */
     public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
 
+    /**
+     * ReactorUaaClient 생성하여, 반환한다.
+     *
+     * @param connectionContext
+     * @param clientId
+     * @param clientSecret
+     * @return ReactorUaaClient
+     */
     public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, String clientId, String clientSecret) {
         return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(ClientCredentialsGrantTokenProvider.builder().clientId(clientId).clientSecret(clientSecret).build()).build();
     }
 
-    // UAA Admin
+    /**
+     * ReactorUaaClient(관리자) 생성하여, 반환한다.
+     *
+     * @param connectionContext
+     * @param apiTarget
+     * @param token
+     * @param uaaAdminClientId
+     * @param uaaAdminClientSecret
+     * @return ReactorUaaClient
+     */
     public static ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String apiTarget, String token, String uaaAdminClientId, String uaaAdminClientSecret) {
         ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext, tokenProvider(token));
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
@@ -356,11 +429,22 @@ public class Common {
     private static final ThreadLocal<DefaultConnectionContext> connectionContextThreadLocal = new ThreadLocal<>();
 
 
-
+    /**
+     * DefaultConnectionContext 가져온다.
+     *
+     * @return DefaultConnectionContext
+     */
     public DefaultConnectionContext connectionContext() {
         return connectionContext;
     }
 
+    /**
+     * DefaultConnectionContext 생성하여, 반환한다.
+     *
+     * @param apiUrl
+     * @param skipSSLValidation
+     * @return DefaultConnectionContext
+     */
     public static DefaultConnectionContext crateConnectionContext(String apiUrl, boolean skipSSLValidation) {
         DefaultConnectionContext connectionContext = peekConnectionContext();
         if (null != connectionContext) {
@@ -402,6 +486,13 @@ public class Common {
         }
     }
 
+    /**
+     * TokenGrantTokenProvider 생성하여, 반환한다.
+     *
+     * @param token
+     * @return DefaultConnectionContext
+     * @throws Exception
+     */
     public static TokenGrantTokenProvider tokenProvider(String token) {
         try {
             if (token.indexOf("bearer") < 0) {
@@ -413,6 +504,14 @@ public class Common {
         }
     }
 
+    /**
+     * TokenProvider 생성하여, 반환한다. 토큰이 null일경우 defaultTokenProvider을 반환한다.
+     *
+     * @param token
+     * @param defaultTokenProvider
+     * @return TokenProvider
+     * @throws Exception
+     */
     public static TokenProvider tokenProviderWithDefault(String token, TokenProvider defaultTokenProvider) {
         if (null == token) return defaultTokenProvider;
         else if (token.trim().length() <= 0) return defaultTokenProvider;
@@ -426,7 +525,7 @@ public class Common {
      *
      * @param username
      * @param password
-     * @return
+     * @return PasswordGrantTokenProvider
      */
     public static PasswordGrantTokenProvider tokenProvider(String username, String password) {
         return PasswordGrantTokenProvider.builder().password(password).username(username).build();

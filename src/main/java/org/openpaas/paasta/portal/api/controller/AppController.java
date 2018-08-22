@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 
-
+/**
+ * Created by indra on 2018-05-14.
+ */
 @RestController
 public class AppController extends Common {
 
@@ -349,6 +351,14 @@ public class AppController extends Common {
         return mapLog;
     }
 
+    /**
+     * 앱 최근 로그를 가져온다.
+     *
+     * @param guid
+     * @param request the request
+     * @return Map
+     * @throws Exception the exception
+     */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/taillogs"}, method = RequestMethod.GET)
     public Map getTailLogs(@PathVariable String guid, HttpServletRequest request) throws Exception {
 

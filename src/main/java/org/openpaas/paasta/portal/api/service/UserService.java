@@ -136,12 +136,12 @@ public class UserService extends Common {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
 
 
-            GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaLoginClientId).clientSecret(uaaLoginClientSecret).build()).block();
+            GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", getTokenByClientCredentialsResponse.getTokenType() + " " + getTokenByClientCredentialsResponse.getAccessToken());
             HttpEntity<Map> resetEntity = new HttpEntity(userId, headers);
-            ResponseEntity<Map> responseEntity = restTemplate.exchange(uaaTarget + "/password_resets?client_id=" + uaaLoginClientId, HttpMethod.POST, resetEntity, Map.class);
+            ResponseEntity<Map> responseEntity = restTemplate.exchange(uaaTarget + "/password_resets?client_id=" + uaaAdminClientId, HttpMethod.POST, resetEntity, Map.class);
             LOGGER.debug(responseEntity.getBody().toString());
 
             String code = responseEntity.getBody().get("code").toString();

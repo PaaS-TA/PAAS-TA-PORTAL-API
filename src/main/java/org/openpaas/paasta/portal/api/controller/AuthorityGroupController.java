@@ -12,7 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Created by swmoon on 2017-12-19.
+ */
 @RestController
 public class AuthorityGroupController extends Common {
 
@@ -26,8 +28,6 @@ public class AuthorityGroupController extends Common {
      *
      * @return Map (자바 클래스)
      * @throws Exception the exception
-     * @author 김도준
-     * @since 2016.09.19
      */
     @GetMapping(V2_URL+"/authority")
     public Map<String, Object> getAuthorityGroups() throws Exception{
@@ -42,8 +42,6 @@ public class AuthorityGroupController extends Common {
      * @param body (자바 클래스)
      * @return Map (자바 클래스)
      * @throws Exception the exception
-     * @author 김도준
-     * @since 2016.09.19
      */
     @PostMapping(V2_URL+"/authority/group")
     public Map<String, Object> createAuthorityGroup(@RequestBody Map<String, Object> body) throws Exception{
@@ -60,8 +58,7 @@ public class AuthorityGroupController extends Common {
      * @param body (자바 클래스)
      * @return Map (자바 클래스)
      * @throws Exception the exception
-     * @author 김도준
-     * @since 2016.09.19
+
      */
     @DeleteMapping(V2_URL+"/authority/group/{groupguid}")
     public Map<String, Object> deleteAuthorityGroup(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception{

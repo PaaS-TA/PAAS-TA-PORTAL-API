@@ -24,6 +24,16 @@ public class AppAlarmController {
         this.alarmService = alarmService;
     }
 
+    /**
+     * 알람 정보 리스트를 가져온다.
+     *
+     * @param appGuid
+     * @param pageItems
+     * @param pageIndex
+     * @param resourceType
+     * @param alarmLevel
+     * @return Map
+     */
     @RequestMapping(value = {"/alarm/list"}, method = RequestMethod.GET)
     public Map getAlarmList(@RequestParam(value = "appGuid") String appGuid
             , @RequestParam(value = "pageItems") String pageItems
@@ -36,6 +46,12 @@ public class AppAlarmController {
         return alarmService.getAlarmList(appGuid, pageItems, pageIndex, resourceType, alarmLevel);
     }
 
+    /**
+     * 알람 정보를 가져온다.
+     *
+     * @param appGuid
+     * @return Map
+     */
     @RequestMapping(value = {"/alarm/policy"}, method = RequestMethod.GET)
     public Map getAlarm(@RequestParam(value = "appGuid") String appGuid) {
         LOGGER.info("AlarmController Get Start");
@@ -43,6 +59,13 @@ public class AppAlarmController {
         return alarmService.getAlarm(appGuid);
     }
 
+    /**
+     * 알람 정보를 수정한다..
+     *
+     * @param body
+     * @return Map
+     * @throws Exception
+     */
     @RequestMapping(value = {"/alarm/policy"}, method = RequestMethod.POST)
     public Map updateAlarm(@RequestBody Map body) throws Exception {
         LOGGER.info("AlarmController Update Start");

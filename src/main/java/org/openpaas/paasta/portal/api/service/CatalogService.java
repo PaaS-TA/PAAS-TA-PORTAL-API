@@ -196,18 +196,30 @@ public class CatalogService extends Common {
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
         File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
         try {
-            String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
-            String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
+            if(file != null) {
+                String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
+                String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
 
-            routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
-            fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
-
-            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                procCatalogStartApplication(applicationid, token); //앱 시작
+                routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
+                LOGGER.info("START" + file.getAbsolutePath()+ file + "FILEUPLOAD");
+                fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
+                LOGGER.info("END" + param.getAppName() + "FILEUPLOAD");
+                if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
+                    procCatalogStartApplication(applicationid, token); //앱 시작
+                }
+                commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
+                return new HashMap<String, Object>() {{
+                    put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+                }};
+            }else {
+                return new HashMap<String, Object>() {{
+                    put("RESULT", Constants.RESULT_STATUS_FAIL);
+                }};
             }
-            commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
+        }catch (Exception e){
+            LOGGER.info(e.getMessage());
             return new HashMap<String, Object>() {{
-                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+                put("RESULT", Constants.RESULT_STATUS_FAIL);
             }};
         } finally {
             file.delete();
@@ -336,16 +348,22 @@ public class CatalogService extends Common {
      */
     private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
-        response.setContentType("application/octet-stream");
-        String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
-        File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
-        InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
-        OutputStream out = new FileOutputStream(file);
-        IOUtils.copy(is, out);
-        IOUtils.closeQuietly(is);
-        IOUtils.closeQuietly(out);
-        return file;
+        try {
+            response.setContentType("application/octet-stream");
+            String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
+            File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
+            InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
+            OutputStream out = new FileOutputStream(file);
+            IOUtils.copy(is, out);
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(out);
+            return file;
+        }
+        catch(Exception e){
+            LOGGER.info(e.getMessage());
+        }
+        return null;
     }
 
     /**
