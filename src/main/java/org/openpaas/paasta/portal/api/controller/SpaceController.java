@@ -46,14 +46,14 @@ public class SpaceController extends Common {
      * 공간 요약 정보를 조회한다.
      *
      * @param spaceid  the spaceId
-     * @param request the request
+     * @param token the token
      * @return Space respSpace
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summary")
-    public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
+    public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
-        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, token);
         LOGGER.info("Get SpaceSummary End ");
         return respSapceSummary;
     }
@@ -62,15 +62,15 @@ public class SpaceController extends Common {
      * 공간 요약 정보 리스트를 조회한다.[dashboard]
      *
      * @param spaceid  the spaceId
-     * @param request the request
+     * @param token the token
      * @return Space respSpace
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summarylist")
-    public Map getSpaceSummary2(@PathVariable String spaceid, HttpServletRequest request) throws Exception {
+    public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
 
-        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, this.getToken());
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, token);
 
         Map<String, Object> resultMap = new HashMap<>();
         List<SpaceApplicationSummary> appsArray = new ArrayList<>();
@@ -148,7 +148,7 @@ public class SpaceController extends Common {
      * 공간명을 변경한다.
      *
      * @param space   the space
-     * @param request the request
+     * @param token   the token
      * @return ModelAndView model
      * @throws Exception the exception
      * @return UpdateSpaceResponse
@@ -157,10 +157,10 @@ public class SpaceController extends Common {
      * @since 2018.5.8
      */
     @PutMapping(V2_URL + "/spaces")
-    public Map renameSpace(@RequestBody Space space, HttpServletRequest request) throws Exception {
+    public Map renameSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("renameSpace Start ");
 
-        Map resultMap = spaceService.renameSpace(space, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        Map resultMap = spaceService.renameSpace(space, token);
 
         LOGGER.info("renameSpace End ");
         return resultMap;

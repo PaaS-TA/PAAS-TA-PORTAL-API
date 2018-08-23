@@ -218,6 +218,17 @@ public class UserService extends Common {
         return result;
     }
 
+    public Map deleteUserForAdmin(){
+
+
+
+
+        Map result = new HashMap();
+
+        result.put("result", true);
+        return result;
+    }
+
     //@HystrixCommand(commandKey = "getUsernameFromToken")
     public String getUsernameFromToken(String token) {
         return Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
@@ -341,10 +352,14 @@ public class UserService extends Common {
         return getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userName);
     }
 
-    public UpdateUserResponse UpdateUserActive(String userGuid) {
+    public UpdateUserResponse UpdateUserActive(String userGuid) throws Exception {
          ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
          User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
-         Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?"familyName":user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?"givenName":user.getName().getGivenName()).build();
+         LOGGER.info(user.getUserName());
+         if(user.getUserName().equals("admin")){
+             return null;
+         }
+         Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getGivenName()).build();
          final boolean active = !user.getActive();
          UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(active).build()).block();
          return updateUserResponse;
