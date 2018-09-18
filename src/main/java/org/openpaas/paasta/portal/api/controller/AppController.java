@@ -398,6 +398,12 @@ public class AppController extends Common {
         return mapLog;
     }
 
+    @GetMapping(Constants.V2_URL + "/apps/{guid}/credentials")
+    public Map userProvideCredentials(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return appService.userProvideCredentials(guid, token);
+    }
+
+
 //    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName) {
 //        try {
 //            LOGGER.info("Starting TailLog :::::");

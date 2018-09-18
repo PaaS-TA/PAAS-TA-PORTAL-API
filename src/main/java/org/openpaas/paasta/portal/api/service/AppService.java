@@ -18,8 +18,7 @@ import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebindings.ServiceBindingResource;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
-import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsRequest;
-import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsResponse;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -506,6 +506,29 @@ public class AppService extends Common {
         });
 
         return null;
+    }
+
+    public Map userProvideCredentials(String guid, String token){
+        Map resultMap = new HashMap();
+        ArrayList resultlist = new ArrayList();
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+
+        GetUserProvidedServiceInstanceResponse getUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
+                .get(GetUserProvidedServiceInstanceRequest.builder().userProvidedServiceInstanceId(guid).build()).block();
+        String str = getUserProvidedServiceInstanceResponse.getEntity().getCredentials().toString();
+        str = str.replace("{","");
+        str = str.replace("}","");
+        str = str.replace(" ","");
+        String[] str2 = str.split(",");
+        for (String strs: str2) {
+            Map listStr = new HashMap();
+            String[] str3 = strs.split("=");
+            listStr.put("key", str3[0]);
+            listStr.put("value", str3[1]);
+            resultlist.add(listStr);
+        }
+        resultMap.put("List", resultlist);
+        return resultMap;
     }
 
     private void printLog(LogMessage msg) {
