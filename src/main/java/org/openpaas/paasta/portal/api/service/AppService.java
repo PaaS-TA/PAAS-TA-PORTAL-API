@@ -18,6 +18,8 @@ import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebindings.ServiceBindingResource;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsRequest;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.doppler.Envelope;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.RecentLogsRequest;
@@ -300,7 +302,6 @@ public class AppService extends Common {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
 
             ListServiceInstanceServiceBindingsResponse listServiceInstanceServiceBindingsResponse = cloudFoundryClient.serviceInstances().listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder().applicationId(applicationId).serviceInstanceId(serviceInstanceId).build()).block();
-
             String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
 
             DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2().delete(DeleteServiceBindingRequest.builder().serviceBindingId(instancesServiceBindingGuid).build()).block();
@@ -315,6 +316,38 @@ public class AppService extends Common {
 
         return resultMap;
     }
+
+    /**
+     * 앱-유저 프로바이드 서비스를 언바인드한다.
+     *
+     * @param serviceInstanceId
+     * @param applicationId
+     * @param token             the client
+     * @the exception
+     */
+    //@HystrixCommand(commandKey = "unbindService")
+    public Map unbindUserProvideService(String serviceInstanceId, String applicationId, String token) {
+        Map resultMap = new HashMap();
+
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ListUserProvidedServiceInstanceServiceBindingsResponse listUserProvidedServiceInstanceServiceBindingsResponse = cloudFoundryClient.userProvidedServiceInstances().listServiceBindings(ListUserProvidedServiceInstanceServiceBindingsRequest.builder().applicationId(applicationId).userProvidedServiceInstanceId(serviceInstanceId).build()).block();
+            String instancesUserProvidedServiceBindingGuid = listUserProvidedServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
+            DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2().delete(DeleteServiceBindingRequest.builder().serviceBindingId(instancesUserProvidedServiceBindingGuid).build()).block();
+            resultMap.put("result", true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e);
+        }
+
+        return resultMap;
+    }
+
+
+
+
 
     /**
      * 앱 이벤트를 조회한다.

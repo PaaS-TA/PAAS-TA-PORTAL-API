@@ -218,6 +218,25 @@ public class AppController extends Common {
         return resultMap;
     }
 
+    /**
+     * 앱-서비스를 언바인드한다.
+     *
+     * @param serviceInstanceId
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    @DeleteMapping(Constants.V2_URL + "/user-provide-service-bindings/{serviceInstanceId}/apps/{applicationId}")
+    public Map unbindUserProvideService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
+        LOGGER.info("unbindService Start ");
+
+        Map resultMap = appService.unbindUserProvideService(serviceInstanceId, applicationId, this.getToken());
+
+        LOGGER.info("unbindService End ");
+        return resultMap;
+    }
+
+
+
 
     /**
      * 앱 이벤트를 조회한다.
