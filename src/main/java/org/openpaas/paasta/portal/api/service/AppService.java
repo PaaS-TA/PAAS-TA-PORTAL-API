@@ -225,7 +225,6 @@ public class AppService extends Common {
     //@HystrixCommand(commandKey = "updateApp")
     public Map updateApp(App app, String token) {
         Map resultMap = new HashMap();
-
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             if (app.getInstances() > 0) {
@@ -242,6 +241,9 @@ public class AppService extends Common {
             }
             if (app.getEnvironment() != null && app.getEnvironment().size() > 0) {
                 cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(app.getEnvironment()).build()).block();
+            }
+            else if(app.getEnvironment().size() == 0){
+                cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(new HashMap<>()).build()).block();
             }
 
             resultMap.put("result", true);
