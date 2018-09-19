@@ -53,6 +53,7 @@ public class SpaceController extends Common {
     @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summary")
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
+        token = orgService.adminToken(token);
         GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, token);
         LOGGER.info("Get SpaceSummary End ");
         return respSapceSummary;
@@ -69,7 +70,7 @@ public class SpaceController extends Common {
     @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
-
+        token = orgService.adminToken(token);
         GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, token);
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -141,6 +142,7 @@ public class SpaceController extends Common {
 
     @GetMapping(V2_URL + "/spaces/{spaceid}")
     public GetSpaceResponse getSpace(@PathVariable String spaceId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String authHeader) {
+        authHeader = orgService.adminToken(authHeader);
         return spaceService.getSpace( spaceId, authHeader );
     }
 
@@ -159,7 +161,7 @@ public class SpaceController extends Common {
     @PutMapping(V2_URL + "/spaces")
     public Map renameSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("renameSpace Start ");
-
+        token = orgService.adminToken(token);
         Map resultMap = spaceService.renameSpace(space, token);
 
         LOGGER.info("renameSpace End ");
@@ -171,17 +173,17 @@ public class SpaceController extends Common {
      * 공간을 삭제한다.
      *
      * @param guid   the space
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @version 2.0
      * @author hgcho
      * @since 2018.5.8
      */
     @DeleteMapping(V2_URL + "/spaces/{guid}")
-    public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, HttpServletRequest request) throws Exception {
+    public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("deleteSpace Start ");
-
-        Map resultMap = spaceService.deleteSpace(guid, recursive, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        token = orgService.adminToken(token);
+        Map resultMap = spaceService.deleteSpace(guid, recursive, token);
 
         LOGGER.info("deleteSpace End ");
         return resultMap;
@@ -191,7 +193,7 @@ public class SpaceController extends Common {
      * 공간을 생성한다.
      *
      * @param space   the space
-     * @param authHeader a cloud foundry access token
+     * @param token a cloud foundry access token
      * @return boolean boolean
      * @throws Exception the exception
      * @version 2.0
@@ -199,10 +201,10 @@ public class SpaceController extends Common {
      * @since 2018.5.8
      */
     @PostMapping(V2_URL + "/spaces")
-    public Map createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String authHeader) throws Exception {
+    public Map createSpace(@RequestBody Space space, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) throws Exception {
         LOGGER.info("createSpace Start ");
-
-        Map resultMap = spaceService.createSpace(space, authHeader);
+        token = orgService.adminToken(token);
+        Map resultMap = spaceService.createSpace(space, token);
 
         LOGGER.info("createSpace End ");
         return resultMap;
@@ -231,9 +233,7 @@ public class SpaceController extends Common {
     @GetMapping(V2_URL + "/spaces/{spaceId}/user-roles")
     public ListSpaceUserRolesResponse getSpaceUserRoles ( @PathVariable String spaceId, @RequestHeader
         (AUTHORIZATION_HEADER_KEY ) String token ) {
-        Objects.requireNonNull( spaceId, "Space Id" );
-        // token can fill "NULL" value.
-        //Objects.requireNonNull( token, "token" );
+        token = orgService.adminToken(token);
         return spaceService.getSpaceUserRoles( spaceId, token );
 
     }
@@ -242,6 +242,7 @@ public class SpaceController extends Common {
     public boolean associateSpaceUserRoles( @PathVariable String spaceId,
                                                           @RequestBody List<UserRole> Roles,
                                                           @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
+        token = orgService.adminToken(token);
         return spaceService.associateSpaceUserRoles( spaceId, Roles, token );
     }
 
@@ -249,9 +250,7 @@ public class SpaceController extends Common {
     public void removeSpaceUserRoles( @PathVariable String spaceId,
                                                        @RequestParam String userId, @RequestParam String role,
                                                        @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        Objects.requireNonNull( userId, "User ID(userId) is required" );
-        Objects.requireNonNull( role, "Org Role(role) is required" );
-        LOGGER.info("Remove organization role of user (Delete) : {} / {}", userId, role);
+        token = orgService.adminToken(token);
         spaceService.removeSpaceUserRole( spaceId, userId, role );
     }
 }

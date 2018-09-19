@@ -26,7 +26,7 @@ public class UserController extends Common {
 
     @Autowired
     private UserService userService;
-
+    private Runtime r = Runtime.getRuntime();
     /**
      * V1 URL HEAD = (empty string)
      */
@@ -185,5 +185,17 @@ public class UserController extends Common {
     @PutMapping(V2_URL + "/user/{userid}/active")
     public UpdateUserResponse UpdateUserActive(@PathVariable String userid) throws Exception {
         return userService.UpdateUserActive(userid);
+    }
+
+
+    @GetMapping(V2_URL + "/test")
+    public int testprovider(){
+
+        //tokenProvider(adminUserName, adminPassword);
+        //userService.test();
+        System.out.println(r.freeMemory());
+        //tokenProvider1(adminUserName, adminPassword);
+        System.out.println(r.freeMemory());
+        return 1;
     }
 }

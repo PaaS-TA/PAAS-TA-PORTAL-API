@@ -5,6 +5,8 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.featureflags.GetFeatureFlagRequest;
 import org.cloudfoundry.client.v2.featureflags.GetFeatureFlagResponse;
+import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.client.v2.jobs.ErrorDetails;
 import org.cloudfoundry.client.v2.jobs.JobEntity;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionRequest;
@@ -18,6 +20,8 @@ import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.operations.useradmin.UserAdmin;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.uaa.users.User;
+import org.cloudfoundry.uaa.users.UserInfoRequest;
+import org.cloudfoundry.uaa.users.UserInfoResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -222,7 +226,7 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     public ListOrganizationsResponse getOrgsForUser(final String token, int page) {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().page(page).resultsPerPage(10).build()).block();
+        return Common.cloudFoundryClient(connectionContext(),tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().page(page).resultsPerPage(10).build()).block();
     }
 
     /**
@@ -863,6 +867,16 @@ public class OrgService extends Common {
                 put("MSG", e.getMessage());
             }};
         }
+    }
+
+
+    public String adminToken(String token){
+        UserInfoResponse userInfoResponse= Common.uaaClient(connectionContext(), tokenProvider(token)).users().userInfo(UserInfoRequest.builder().build()).block();
+        TokenProvider tokenProvider = tokenProvider(token);
+        if(userInfoResponse.getEmail().equals("admin")){
+            tokenProvider = tokenProvider(adminUserName, adminPassword);
+        }
+        return tokenProvider.getToken(connectionContext()).block();
     }
 
 }

@@ -99,18 +99,17 @@ public class UserService extends Common {
     //@HystrixCommand(commandKey = "updateUserPassword")
     public Map updateUserPassword(String userId, String oldPassword, String newPassword, String token) {
 
-        LOGGER.info("updateUserPassword ::: " + userId);
-        LOGGER.info("updateUserPassword ::: " + oldPassword);
-        LOGGER.info("updateUserPassword ::: " + newPassword);
-
+        LOGGER.debug("updateUserPassword ::: " + userId);
+        LOGGER.debug("updateUserPassword ::: " + oldPassword);
+        LOGGER.debug("updateUserPassword ::: " + newPassword);
         Map result = new HashMap();
         try {
-
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(userId, oldPassword));
+            User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userId);
             UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).block();
+            Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getGivenName()).build();
+            reactorUaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).build()).block();
             ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userInfoResponse.getUserId()).oldPassword(oldPassword).password(newPassword).build()).block();
-            LOGGER.info("updateUserPassword status :: " + changeUserPasswordResponse.getStatus());
-
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
@@ -355,7 +354,6 @@ public class UserService extends Common {
     public UpdateUserResponse UpdateUserActive(String userGuid) throws Exception {
          ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
          User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
-         LOGGER.info(user.getUserName());
          if(user.getUserName().equals("admin")){
              return null;
          }
@@ -364,5 +362,11 @@ public class UserService extends Common {
          UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(active).build()).block();
          return updateUserResponse;
     }
+
+    public ReactorUaaClient test(){
+        ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
+        return uaaClient;
+    }
+
 
 }

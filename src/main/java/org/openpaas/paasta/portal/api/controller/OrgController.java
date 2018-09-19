@@ -78,9 +78,7 @@ public class OrgController extends Common {
     @GetMapping(V2_URL + "/orgs/{orgId}")
     public GetOrganizationResponse getOrg(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
     	LOGGER.info("get org start : " + orgId);
-    	if (orgId == null)
-    		throw new IllegalArgumentException("Org id is empty.");
-
+        token = orgService.adminToken(token);
     	return orgService.getOrg(orgId, token);
     }
 
@@ -94,9 +92,7 @@ public class OrgController extends Common {
     @GetMapping(V2_URL + "/orgs/{orgId}/summary")
     public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("org summary : " + orgId);
-        if (orgId == null) {
-            throw new IllegalArgumentException("조직정보를 가져오지 못하였습니다.");
-        }
+        token = orgService.adminToken(token);
         return orgService.getOrgSummaryMap(orgId, token);
     }
 
@@ -127,6 +123,7 @@ public class OrgController extends Common {
     @GetMapping(V2_URL + "/orgs")
     public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.debug("Org list by user");
+        token = orgService.adminToken(token);
         return orgService.getAllOrgsForUser(token);
     }
 
@@ -165,6 +162,7 @@ public class OrgController extends Common {
     @GetMapping(V2_URL + "/orgs/{orgId}/spaces")
     public Map<?, ?> getSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
     	LOGGER.debug("Get Spaces " + orgId);
+        token = orgService.adminToken(token);
     	final Map<String, Object> result = new HashMap<>();
 		result.put("spaceList", orgService.getOrgSpaces(orgId, token));
 
@@ -224,7 +222,7 @@ public class OrgController extends Common {
     @PutMapping( V2_URL + "/orgs" )
     public Map renameOrg(@RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
         LOGGER.info("renameOrg Start ");
-
+        token = orgService.adminToken(token);
         Map resultMap = orgService.renameOrg(org, token);
 
         LOGGER.info("renameOrg End ");
@@ -251,6 +249,7 @@ public class OrgController extends Common {
 
     // space read-only
     public ListSpacesResponse getOrgSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+        token = orgService.adminToken(token);
         return orgService.getOrgSpaces( orgId, token );
     }
     
@@ -266,6 +265,7 @@ public class OrgController extends Common {
     @GetMapping(V2_URL + "/orgs/{orgId}/quota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("Get quota of org {}" + orgId);
+        token = orgService.adminToken(token);
         return orgService.getOrgQuota(orgId, token);
     }
 
@@ -294,7 +294,7 @@ public class OrgController extends Common {
     @PutMapping(V2_URL + "/orgs/{orgId}/quota")
     public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         LOGGER.info("changeQuota Start ");
-
+        token = orgService.adminToken(token);
         Map resultMap = orgService.updateOrgQuota( orgId, org, token );
 
         LOGGER.info("changeQuota End ");
@@ -337,6 +337,7 @@ public class OrgController extends Common {
 
         LOGGER.info( "getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}",
             orgName, userName, userId );
+        token = orgService.adminToken(token);
         OrganizationUsers users = orgService.getOrgUserRolesByOrgName( orgName, token );
         final boolean isManager = users.getManagers().stream().anyMatch( userName::equals );
         final boolean isBillingManager = users.getBillingManagers().stream().anyMatch( userName::equals );
@@ -358,6 +359,7 @@ public class OrgController extends Common {
                                 @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token) {
         LOGGER.info( "isOrgManager : Org name : {} / User name : {}", orgName,
             userName);
+        token = orgService.adminToken(token);
         return orgService.getOrgUserRolesByOrgName( orgName, token )
             .getManagers().stream().anyMatch( userName::equals );
     }
@@ -376,9 +378,7 @@ public class OrgController extends Common {
     public AbstractOrganizationResource associateOrgUserRoles ( @PathVariable String orgId,
                                         @RequestBody UserRole.RequestBody body,
                                         @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        Objects.requireNonNull( body.getUserId(), "User ID(userId) is required" );
-        Objects.requireNonNull( body.getRole(), "Org Role(role) is required" );
-        LOGGER.info("Associate organization role of user (Update) : {} / {}", body.getUserId(), body.getRole());
+        token = orgService.adminToken(token);
         return orgService.associateOrgUserRole( orgId, body.getUserId(), body.getRole(), token );
     }
 
@@ -396,9 +396,7 @@ public class OrgController extends Common {
     public boolean removeOrgUserRoles ( @PathVariable String orgId,
                                      @RequestParam String userId, @RequestParam String role,
                                      @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
-        Objects.requireNonNull( userId, "User ID(userId) is required" );
-        Objects.requireNonNull( role, "Org Role(role) is required" );
-        LOGGER.info("Remove organization role of user (Delete) : {} / {}", userId, role);
+        token = orgService.adminToken(token);
         orgService.removeOrgUserRole( orgId, userId, role, token );
         return true;
     }
@@ -421,24 +419,21 @@ public class OrgController extends Common {
 
         boolean isSuccessed = orgService.cancelOrganizationMember( orgId, userId, token );
         if (isSuccessed) {
-            LOGGER.info( "Success to cancel organization member : org ID {} / user ID {}", orgId, userId );
             return true;
         } else {
-            LOGGER.error( "Fail to cancel organization member : org ID {} / user ID {}", orgId, userId );
             throw new CloudFoundryException( HttpStatus.BAD_REQUEST, "Fail to cancel organization member" );
         }
     }
 
     @PutMapping(V2_URL + "/orgs/user-roles")
     public Boolean associateOrgUserRoles2(@RequestBody Map body) {
-        LOGGER.info("associateOrgUserRoles Start");
         return orgService.associateOrgUserRole2(body);
     }
 
     @GetMapping(V2_URL + "/orgList/{page}")
-    public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable int page) throws Exception {
+    public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String orgin, @PathVariable int page) throws Exception {
         LOGGER.debug("orgList Start");
-
+        final String token = orgService.adminToken(orgin);
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
 
@@ -473,6 +468,7 @@ public class OrgController extends Common {
 
     @GetMapping(V2_URL + "/{flagname}/orgflag")
     public Map orgFlag(@PathVariable String flagname, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception{
+        token = orgService.adminToken(token);
         return orgService.orgFlag(flagname.toLowerCase(),token);
     }
 
