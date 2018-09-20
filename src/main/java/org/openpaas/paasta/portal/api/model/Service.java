@@ -53,6 +53,9 @@ public class Service {
     @JsonProperty("serviceInstanceId")
     private String serviceInstanceId;
 
+    @JsonProperty("routeServiceUrl")
+    private String routeServiceUrl;
+
     public String getName() {
         return name;
     }
@@ -176,6 +179,15 @@ public class Service {
     public String getServiceInstanceId() {return serviceInstanceId;}
 
     public void setServiceInstanceId(String serviceInstanceId) {this.serviceInstanceId = serviceInstanceId;}
+
+
+    public String getRouteServiceUrl() {
+        return routeServiceUrl;
+    }
+
+    public void setRouteServiceUrl(String routeServiceUrl) {
+        this.routeServiceUrl = routeServiceUrl;
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public class ServicePlan {

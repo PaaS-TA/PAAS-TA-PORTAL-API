@@ -143,18 +143,19 @@ public class ServiceService extends Common {
     //@HystrixCommand(commandKey = "createUserProvided")
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
-
-
-
+        Map<String, Object> map = new HashMap<>();
+        LOGGER.info(service.getRouteServiceUrl());
         try {
             //Todo credentialsStr parsing => map
-            Map<String, Object> map = parsing(service.getCredentials());
 
-            String orgName = service.getOrgName();//("orgName");
-            String spaceName = service.getSpaceName();//("spaceName");
-            String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
-            String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl");
-
+            if(!service.getCredentials().equals("") && !service.getCredentials().equals("{}")) {
+                map = parsing(service.getCredentials());
+            }
+                String orgName = service.getOrgName();//("orgName");
+                String spaceName = service.getSpaceName();//("spaceName");
+                String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
+                String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl");
+                String routeServiceUrl = service.getRouteServiceUrl();
 
             if (!stringNullCheck(orgName, spaceName, serviceInstanceName, service.getCredentials().toString())) {
             }
@@ -162,7 +163,7 @@ public class ServiceService extends Common {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             CreateUserProvidedServiceInstanceResponse createUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
                     .create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName)
-                            .spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).build()).block();
+                            .spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(routeServiceUrl).build()).block();
 
 
             result.put("result", true);
@@ -193,14 +194,17 @@ public class ServiceService extends Common {
     public Map updateUserProvided(String guid, String token, Service service) throws Exception {
 
         HashMap result = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         try {
             //Todo credentialsStr parsing => map
-            Map<String, Object> map = parsing(service.getCredentials());
+            if(!service.getCredentials().equals("") && !service.getCredentials().equals("{}")) {
+                map = parsing(service.getCredentials());
+            }
             String syslogDrainUrl = service.getSyslogDrainUrl();
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances()
-                    .update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).build()).block();
+                    .update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(service.getRouteServiceUrl()).build()).block();
 
 
             result.put("result", true);
