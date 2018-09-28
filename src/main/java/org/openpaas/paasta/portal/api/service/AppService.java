@@ -242,7 +242,7 @@ public class AppService extends Common {
             if (app.getEnvironment() != null && app.getEnvironment().size() > 0) {
                 cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(app.getEnvironment()).build()).block();
             }
-            else if(app.getEnvironment().size() == 0){
+            else if(app.getEnvironment() != null && app.getEnvironment().size() == 0){
                 cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).environmentJsons(new HashMap<>()).build()).block();
             }
 

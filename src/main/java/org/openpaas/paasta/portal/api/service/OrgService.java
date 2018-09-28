@@ -19,6 +19,7 @@ import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.operations.useradmin.UserAdmin;
 import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.users.User;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
@@ -871,12 +872,12 @@ public class OrgService extends Common {
 
 
     public String adminToken(String token){
-        UserInfoResponse userInfoResponse= Common.uaaClient(connectionContext(), tokenProvider(token)).users().userInfo(UserInfoRequest.builder().build()).block();
-        TokenProvider tokenProvider = tokenProvider(token);
-        if(userInfoResponse.getEmail().equals("admin")){
-            tokenProvider = tokenProvider(adminUserName, adminPassword);
+        String name = Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
+        if(name.equals("admin")){
+            return tokenProvider(adminUserName, adminPassword).getToken(connectionContext()).block();
         }
-        return tokenProvider.getToken(connectionContext()).block();
+        return tokenProvider(token).getToken(connectionContext()).block();
+
     }
 
 }

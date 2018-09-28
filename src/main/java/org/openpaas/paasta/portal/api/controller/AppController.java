@@ -63,14 +63,8 @@ public class AppController extends Common {
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/stats"}, method = RequestMethod.GET)
     public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, HttpServletRequest request) throws Exception {
-
-        LOGGER.info("stopApp Start : " + guid);
-
         //service call
         ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, this.getToken());
-
-        LOGGER.info("stopApp End ");
-
         return applicationStatisticsResponse;
     }
 

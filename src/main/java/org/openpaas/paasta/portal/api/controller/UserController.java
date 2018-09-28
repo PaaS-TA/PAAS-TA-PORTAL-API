@@ -53,7 +53,8 @@ public class UserController extends Common {
         LOGGER.info("> into updateUserPassword");
         String oldPassword = (String) body.get("oldPassword");
         String newPassword = (String) body.get("password");
-        Map<String, Object> result = userService.updateUserPassword(userId, oldPassword, newPassword, token);
+        String userGuid = (String) body.get("userGuid");
+        Map<String, Object> result = userService.updateUserPassword(userId,userGuid, oldPassword, newPassword, token);
         return result;
     }
 

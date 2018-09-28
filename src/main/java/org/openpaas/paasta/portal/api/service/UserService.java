@@ -33,6 +33,9 @@ public class UserService extends Common {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    private LoginService loginService;
+
     /**
      * 사용자 생성
      *
@@ -97,7 +100,7 @@ public class UserService extends Common {
      * @return UserDetail user
      */
     //@HystrixCommand(commandKey = "updateUserPassword")
-    public Map updateUserPassword(String userId, String oldPassword, String newPassword, String token) {
+    public Map updateUserPassword(String userId, String userGuid, String oldPassword, String newPassword, String token) {
 
         LOGGER.debug("updateUserPassword ::: " + userId);
         LOGGER.debug("updateUserPassword ::: " + oldPassword);
@@ -108,9 +111,9 @@ public class UserService extends Common {
             //User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userId);
             //Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getGivenName()).build();
             //reactorUaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).build()).block();
-            UserInfoResponse userInfoResponse = reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).block();
-            ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userInfoResponse.getUserId()).oldPassword(oldPassword).password(newPassword).build()).block();
+            ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userGuid).oldPassword(oldPassword).password(newPassword).build()).block();
             result.put("result", true);
+            result.put("token", loginService.login(userId, newPassword));
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
             e.printStackTrace();
