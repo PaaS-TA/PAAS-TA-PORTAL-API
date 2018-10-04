@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Space;
@@ -52,12 +53,26 @@ public class SpaceController extends Common {
      */
     @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summary")
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("Get SpaceSummary Start : " + spaceid);
         token = orgService.adminToken(token);
-        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, token);
-        LOGGER.info("Get SpaceSummary End ");
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, Common.cloudFoundryClient(connectionContext(), tokenProvider(token)));
         return respSapceSummary;
     }
+
+    /**
+     * 공간 요약 정보를 조회한다. (관리자)
+     *
+     * @param spaceid  the spaceId
+     * @param token the token
+     * @return Space respSpace
+     * @throws Exception the exception
+     */
+    @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summary-admin")
+    public GetSpaceSummaryResponse getSpaceSummaryAdmin(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, cloudFoundryClient(connectionContext()));
+        return respSapceSummary;
+    }
+
+
 
     /**
      * 공간 요약 정보 리스트를 조회한다.[dashboard]
@@ -71,7 +86,7 @@ public class SpaceController extends Common {
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
         token = orgService.adminToken(token);
-        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, token);
+        GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, Common.cloudFoundryClient(connectionContext(), tokenProvider(token)));
 
         Map<String, Object> resultMap = new HashMap<>();
         List<SpaceApplicationSummary> appsArray = new ArrayList<>();

@@ -19,10 +19,14 @@ import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.operations.useradmin.UserAdmin;
 import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.cloudfoundry.reactor.uaa.clients.ReactorClients;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.users.User;
 import org.cloudfoundry.uaa.users.UserInfoRequest;
 import org.cloudfoundry.uaa.users.UserInfoResponse;
+import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -120,21 +124,15 @@ public class OrgService extends Common {
      * 조직 Id를 이용해 조직 정보를 조회한다. (Org Read, fully info.)
      *
      * @param orgId the org id
-     * @param token the token
+     * @param reactorCloudFoundryClient the ReactorCloudFoundryClient
      * @return GetOrganizationResponse
      * @author hgcho
      * @version 2.0
      * @since 2018.4.22
      */
     //@HystrixCommand(commandKey = "getOrg")
-    public GetOrganizationResponse getOrg(final String orgId, final String token) {
-        Objects.requireNonNull(orgId, "Org Id");
-
-        final TokenProvider internalTokenProvider;
-        if (null != token && !"".equals(token)) internalTokenProvider = tokenProvider(token);
-        else internalTokenProvider = tokenProvider(this.getToken());
-
-        return Common.cloudFoundryClient(connectionContext(), internalTokenProvider).organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
+    public GetOrganizationResponse getOrg(final String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        return reactorCloudFoundryClient.organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
 
     /**
@@ -153,14 +151,20 @@ public class OrgService extends Common {
     }
 
     //@HystrixCommand(commandKey = "getOrgSummaryMap")
-    public Map getOrgSummaryMap(final String orgId, final String token) {
+    public Map getOrgSummaryMap(final String orgId, final ReactorCloudFoundryClient reactorClients) {
+        LOGGER.info(DateTime.now().toString());
+        LOGGER.info("===========================");
         Map map = new HashedMap();
         try {
             /*
              * OrgSummary 정보 추출
+             *
              */
-            SummaryOrganizationResponse summaryOrganizationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
+            SummaryOrganizationResponse summaryOrganizationResponse = reactorClients.organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
             List<OrganizationSpaceSummary> organizationSpaceSummaries = summaryOrganizationResponse.getSpaces();
+
+
+
             int memDevTotal = 0;
             int memProTotal = 0;
             int appTotal = 0;
@@ -184,12 +188,19 @@ public class OrgService extends Common {
             /*
              * Org quota 정보 추출
              */
-            GetOrganizationResponse getOrganizationResponse = getOrg(orgId, token);
+            GetOrganizationResponse getOrganizationResponse = getOrg(orgId, reactorClients);
             LOGGER.info("Org name :: " + getOrganizationResponse.getEntity().getName());
             LOGGER.info("Org Quotaid :: " + getOrganizationResponse.getEntity().getQuotaDefinitionId());
             String quotaDefinitionId = getOrganizationResponse.getEntity().getQuotaDefinitionId();
 
-            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgQuotaService.getOrgQuotaDefinitions(quotaDefinitionId, token);
+            //GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgQuotaService.getOrgQuotaDefinitions(quotaDefinitionId, token);
+            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = reactorClients
+                    .organizationQuotaDefinitions()
+                    .get(GetOrganizationQuotaDefinitionRequest.builder()
+                            .organizationQuotaDefinitionId(quotaDefinitionId)
+                            .build()
+                    ).log()
+                    .block();
             Map quota = objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
             quota.remove("metadata");
             map.put("quota", quota.get("entity"));
@@ -198,6 +209,8 @@ public class OrgService extends Common {
             e.printStackTrace();
             map.clear();
         }
+        LOGGER.info("===========================");
+        LOGGER.info(DateTime.now().toString());
         return map;
     }
 
@@ -220,14 +233,14 @@ public class OrgService extends Common {
     /**
      * 사용자 포털에서 조직목록을 요청했을때, 한 페이지당 10개의 조직목록을 응답한다. (Org Read for all)
      *
-     * @param token the token
+     * @param reactorCloudFoundryClient the ReactorCloudFoundryClient
      * @return ListOrganizationsResponse
      * @author hgcho
      * @version 2.0
      * @since 2018.4.22
      */
-    public ListOrganizationsResponse getOrgsForUser(final String token, int page) {
-        return Common.cloudFoundryClient(connectionContext(),tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().page(page).resultsPerPage(10).build()).block();
+    public ListOrganizationsResponse getOrgsForUser(final ReactorCloudFoundryClient reactorCloudFoundryClient, int page) {
+        return reactorCloudFoundryClient.organizations().list(ListOrganizationsRequest.builder().page(page).resultsPerPage(10).build()).block();
     }
 
     /**
@@ -399,15 +412,15 @@ public class OrgService extends Common {
      * 운영자/사용자 포털에서 스페이스 목록을 요청했을때, 해당 조직의 모든 스페이스 목록을 응답한다.
      *
      * @param orgId the org id
-     * @param token the token
+     * @param reactorCloudFoundryClient the ReactorCloudFoundryClient
      * @return Map&lt;String, Object&gt;
      * @author hgcho
      * @version 2.0
      * @since 2018.4.22
      */
     //@HystrixCommand(commandKey = "getOrgSpaces")
-    public ListSpacesResponse getOrgSpaces(String orgId, String token) {
-        return spaceService.getSpaces(orgId, token);
+    public ListSpacesResponse getOrgSpaces(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        return spaceService.getSpaces(orgId, reactorCloudFoundryClient);
     }
 
     //// Org's Quota setting : Read, Update
@@ -417,18 +430,18 @@ public class OrgService extends Common {
      * 조직의 Quota를 조회한다. (Org Read : quota(s))
      *
      * @param orgId the org id
-     * @param token the token
+     * @param reactorCloudFoundryClient the ReactorCloudFoundryClient
      * @return Map&lt;String, Object&gt;
      * @author hgcho
      * @version 2.0
      * @since 2018.4.22
      */
     //@HystrixCommand(commandKey = "getOrgQuota")
-    public GetOrganizationQuotaDefinitionResponse getOrgQuota(String orgId, String token) {
-        GetOrganizationResponse org = getOrg(orgId, token);
+    public GetOrganizationQuotaDefinitionResponse getOrgQuota(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        GetOrganizationResponse org = getOrg(orgId, reactorCloudFoundryClient);
         String quotaId = org.getEntity().getQuotaDefinitionId();
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaId).build()).block();
+        return reactorCloudFoundryClient.organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaId).build()).block();
     }
 
     /**
@@ -466,42 +479,39 @@ public class OrgService extends Common {
         OrgManager, BillingManager, OrgAuditor, ORGMANAGER, BILLINGMANAGER, ORGAUDITOR,
     }
 
-    protected List<UserResource> listAllOrgUsers(String orgId, String token) {
-        final ListOrganizationUsersResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider()).organizations().listUsers(ListOrganizationUsersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
+    protected List<UserResource> listAllOrgUsers(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        final ListOrganizationUsersResponse response = reactorCloudFoundryClient.organizations().listUsers(ListOrganizationUsersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
         return response.getResources();
     }
 
-    private List<UserResource> listOrgManagerUsers(String orgId, String token) {
-        final ListOrganizationManagersResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().listManagers(ListOrganizationManagersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
-
-        return response.getResources();
-    }
-
-    private List<UserResource> listBillingManagerUsers(String orgId, String token) {
-        final ListOrganizationBillingManagersResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().listBillingManagers(ListOrganizationBillingManagersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
+    private List<UserResource> listOrgManagerUsers(String orgId,ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        final ListOrganizationManagersResponse response = reactorCloudFoundryClient.organizations().listManagers(ListOrganizationManagersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
 
         return response.getResources();
     }
 
-    private List<UserResource> listOrgAuditorUsers(String orgId, String token) {
-        final ListOrganizationAuditorsResponse response = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().listAuditors(ListOrganizationAuditorsRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
+    private List<UserResource> listBillingManagerUsers(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        final ListOrganizationBillingManagersResponse response = reactorCloudFoundryClient.organizations().listBillingManagers(ListOrganizationBillingManagersRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
 
         return response.getResources();
     }
 
-    public Map<String, Collection<UserRole>> getOrgUserRoles(String orgId, String token) {
-        if (null == token) token = tokenProvider().getToken(connectionContext()).block();
+    private List<UserResource> listOrgAuditorUsers(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        final ListOrganizationAuditorsResponse response = reactorCloudFoundryClient.organizations().listAuditors(ListOrganizationAuditorsRequest.builder().organizationId(orgId).orderDirection(OrderDirection.ASCENDING).build()).block();
 
+        return response.getResources();
+    }
+
+    public Map<String, Collection<UserRole>> getOrgUserRoles(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         Map<String, UserRole> userRoles = new HashMap<>();
-        listAllOrgUsers(orgId, token).stream().map(resource -> UserRole.builder().userId(resource.getMetadata().getId()).userEmail(resource.getEntity().getUsername()).modifiableRoles(true).build()).filter(ur -> null != ur).forEach(ur -> userRoles.put(ur.getUserId(), ur));
+        listAllOrgUsers(orgId, reactorCloudFoundryClient).stream().map(resource -> UserRole.builder().userId(resource.getMetadata().getId()).userEmail(resource.getEntity().getUsername()).modifiableRoles(true).build()).filter(ur -> null != ur).forEach(ur -> userRoles.put(ur.getUserId(), ur));
 
-        listOrgManagerUsers(orgId, token).stream().map(ur -> userRoles.get(ur.getMetadata().getId())).filter(ur -> null != ur).forEach(ur -> ur.addRole("OrgManager"));
+        listOrgManagerUsers(orgId, reactorCloudFoundryClient).stream().map(ur -> userRoles.get(ur.getMetadata().getId())).filter(ur -> null != ur).forEach(ur -> ur.addRole("OrgManager"));
 
-        listBillingManagerUsers(orgId, token).stream().map(ur -> userRoles.get(ur.getMetadata().getId())).filter(ur -> null != ur).forEach(ur -> ur.addRole("BillingManager"));
+        listBillingManagerUsers(orgId, reactorCloudFoundryClient).stream().map(ur -> userRoles.get(ur.getMetadata().getId())).filter(ur -> null != ur).forEach(ur -> ur.addRole("BillingManager"));
 
-        listOrgAuditorUsers(orgId, token).stream().map(ur -> userRoles.get(ur.getMetadata().getId())).filter(ur -> null != ur).forEach(ur -> ur.addRole("OrgAuditor"));
+        listOrgAuditorUsers(orgId, reactorCloudFoundryClient).stream().map(ur -> userRoles.get(ur.getMetadata().getId())).filter(ur -> null != ur).forEach(ur -> ur.addRole("OrgAuditor"));
         //roles.put( "all_users",  );
-
         final Map<String, Collection<UserRole>> result = new HashMap<>();
         result.put("user_roles", userRoles.values());
         return result;
@@ -556,23 +566,23 @@ public class OrgService extends Common {
         return matches;
     }
 
-    private AssociateOrganizationManagerResponse associateOrgManager(String orgId, String userId) {
-        spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgManager));
+    private AssociateOrganizationManagerResponse associateOrgManager(String orgId, String userId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgManager), reactorCloudFoundryClient);
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
+        return reactorCloudFoundryClient.organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
     }
 
-    private AssociateOrganizationBillingManagerResponse associateBillingManager(String orgId, String userId) {
+    private AssociateOrganizationBillingManagerResponse associateBillingManager(String orgId, String userId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         // CHECK : Is needed to bill Org's Billing manager?
-        spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.BillingManager));
+        spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.BillingManager), reactorCloudFoundryClient);
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
+        return reactorCloudFoundryClient.organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
     }
 
-    private AssociateOrganizationAuditorResponse associateOrgAuditor(String orgId, String userId) {
-        spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgAuditor));
+    private AssociateOrganizationAuditorResponse associateOrgAuditor(String orgId, String userId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        spaceService.associateAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgAuditor), reactorCloudFoundryClient);
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
+        return reactorCloudFoundryClient.organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
     }
 
     /**
@@ -587,7 +597,8 @@ public class OrgService extends Common {
     public AbstractOrganizationResource associateOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             final Object lock = blockingQueue.take();
-
+            token = adminToken(token);
+            ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
             Objects.requireNonNull(orgId, "Org Id");
             Objects.requireNonNull(userId, "User Id");
             Objects.requireNonNull(role, "role");
@@ -604,15 +615,15 @@ public class OrgService extends Common {
             switch (roleEnum) {
                 case OrgManager:
                 case ORGMANAGER:
-                    response = associateOrgManager(orgId, userId);
+                    response = associateOrgManager(orgId, userId, reactorCloudFoundryClient);
                     break;
                 case BillingManager:
                 case BILLINGMANAGER:
-                    response = associateBillingManager(orgId, userId);
+                    response = associateBillingManager(orgId, userId, reactorCloudFoundryClient);
                     break;
                 case OrgAuditor:
                 case ORGAUDITOR:
-                    response = associateOrgAuditor(orgId, userId);
+                    response = associateOrgAuditor(orgId, userId, reactorCloudFoundryClient);
                     break;
                 default:
                     throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Request role is invalid : " + role);
@@ -872,12 +883,15 @@ public class OrgService extends Common {
 
 
     public String adminToken(String token){
-        String name = Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
-        if(name.equals("admin")){
-            return tokenProvider(adminUserName, adminPassword).getToken(connectionContext()).block();
+        try {
+            String name = Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
+            if (name.equals("admin")) {
+                return tokenProvider(adminUserName, adminPassword).getToken(connectionContext()).block();
+            }
+            return token;
+        } catch (Exception e){
+            return token;
         }
-        return tokenProvider(token).getToken(connectionContext()).block();
-
     }
 
 }

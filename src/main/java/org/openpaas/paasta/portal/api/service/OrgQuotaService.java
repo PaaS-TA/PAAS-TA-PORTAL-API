@@ -28,7 +28,7 @@ public class OrgQuotaService extends Common {
      */
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitionsList(String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return cloudFoundryClient(connectionContext())
                 .organizationQuotaDefinitions()
                 .list(ListOrganizationQuotaDefinitionsRequest.builder()
                         .build()
@@ -46,7 +46,7 @@ public class OrgQuotaService extends Common {
     //@HystrixCommand(commandKey = "getOrgQuotaDefinitions")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return cloudFoundryClient(connectionContext())
                .organizationQuotaDefinitions()
                 .get(GetOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)
@@ -80,7 +80,7 @@ public class OrgQuotaService extends Common {
 
 
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()))
+        return cloudFoundryClient(connectionContext())
                 .organizationQuotaDefinitions()
                 .create(CreateOrganizationQuotaDefinitionRequest.builder()
                         .name(quota.getName())
@@ -106,7 +106,7 @@ public class OrgQuotaService extends Common {
     //@HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .organizationQuotaDefinitions()
                 .update(UpdateOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quota.getGuid().toString())
@@ -133,7 +133,7 @@ public class OrgQuotaService extends Common {
     //@HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .organizationQuotaDefinitions()
                 .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
                         .organizationQuotaDefinitionId(quotaGuid)

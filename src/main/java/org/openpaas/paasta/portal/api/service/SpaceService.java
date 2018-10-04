@@ -36,24 +36,24 @@ public class SpaceService extends Common {
      * 공간(스페이스) 목록 조회한다.
      * 특정 조직을 인자로 받아 해당 조직의 공간을 조회한다.
      *
-     * @param token the token
+     * @param reactorCloudFoundryClient the ReactorCloudFoundryClient
      * @return ListSpacesResponse
      * @author hgcho
      * @version 2.0
      * @since 2018.5.3
      */
     //@HystrixCommand(commandKey = "getSpaces")
-    public ListSpacesResponse getSpaces(String orgId, String token) {
-        ListSpacesResponse response = Common.cloudFoundryClient(connectionContext(), tokenProviderWithDefault(token, tokenProvider(this.getToken()))).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
+    public ListSpacesResponse getSpaces(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        ListSpacesResponse response = reactorCloudFoundryClient.spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
 
         return response;
     }
 
     //@HystrixCommand(commandKey = "getSpacesWithOrgName")
-    public ListSpacesResponse getSpacesWithOrgName(String orgName, String token) {
+    public ListSpacesResponse getSpacesWithOrgName(String orgName, ReactorCloudFoundryClient reactorCloudFoundryClient, String token) {
         final String orgId = orgService.getOrgId(orgName, token);
 
-        return getSpaces(orgId, token);
+        return getSpaces(orgId, reactorCloudFoundryClient);
     }
 
     /**
@@ -160,9 +160,8 @@ public class SpaceService extends Common {
         } else {
             internalTokenProvider = tokenProvider(this.getToken());
         }
-
-
-        final ListSpacesResponse response = this.getSpacesWithOrgName(orgName, token);
+        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), internalTokenProvider);
+        final ListSpacesResponse response = this.getSpacesWithOrgName(orgName, reactorCloudFoundryClient, token);
         if (response.getTotalResults() <= 0) return null;
         else if (response.getResources() != null && response.getResources().size() <= 0) return null;
 
@@ -254,16 +253,13 @@ public class SpaceService extends Common {
      * 공간 요약 정보를 조회한다.
      *
      * @param spaceId the spaceId
-     * @param token   the token
+     * @param cloudFoundryClient   the ReactorCloudFoundryClient
      * @return space summary
      * @throws Exception the exception
      */
     //@HystrixCommand(commandKey = "getSpaceSummary")
-    public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception {
-        ReactorCloudFoundryClient cloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
-
+    public GetSpaceSummaryResponse getSpaceSummary(String spaceId, ReactorCloudFoundryClient cloudFoundryClient) throws Exception {
         GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
-
         return respSapceSummary;
     }
 
@@ -370,9 +366,9 @@ public class SpaceService extends Common {
     }
 
     //@HystrixCommand(commandKey = "associateAllSpaceUserRolesByOrgId")
-    public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles) {
+    public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         final List<AbstractSpaceResource> responses = new LinkedList<>();
-        final List<String> spaceIds = this.getSpaces(orgId, null).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
+        final List<String> spaceIds = this.getSpaces(orgId, reactorCloudFoundryClient).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
         for (String role : roles) {
             for (String spaceId : spaceIds) {
                 final AbstractSpaceResource response = associateSpaceUserRole(spaceId, userId, role);

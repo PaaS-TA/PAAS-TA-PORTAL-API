@@ -25,14 +25,14 @@ public class OrgQuotaController extends Common {
     /**
      * 조직 할당량 리스트를 조회한다.
      *
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions")
-    public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(HttpServletRequest request) throws Exception {
+    public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getOrgQuotaDefinitions Start : ");
-        return orgQuotaService.getOrgQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgQuotaService.getOrgQuotaDefinitionsList(token);
     }
 
     /**

@@ -92,6 +92,8 @@ public class Common {
 
     public ObjectMapper objectMapper = new ObjectMapper();
 
+    private static ReactorCloudFoundryClient adminReactorCloudFoundryClient;
+
     /**
      * 관리자 토큰을 가져온다.
      *
@@ -367,6 +369,19 @@ public class Common {
     public static ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
+
+    public ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext){
+        try {
+            if (adminReactorCloudFoundryClient == null) {
+                return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
+            } else {
+                return adminReactorCloudFoundryClient;
+            }
+        } catch (Exception e){
+            return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
+        }
+    }
+
 
     /**
      * ReactorDopplerClient 생성하여, 반환한다.

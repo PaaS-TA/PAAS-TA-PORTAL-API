@@ -386,8 +386,6 @@ public class CatalogService extends Common {
                     serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
 
             if (!param.getAppGuid().equals("(id_dummy)")) {
-
-
                 param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
                 procCatalogBindService(param, token);
             }
