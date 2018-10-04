@@ -21,6 +21,7 @@ import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
@@ -93,6 +94,8 @@ public class Common {
     public ObjectMapper objectMapper = new ObjectMapper();
 
     private static ReactorCloudFoundryClient adminReactorCloudFoundryClient;
+
+    private static long adminTime;
 
     /**
      * 관리자 토큰을 가져온다.
@@ -375,10 +378,16 @@ public class Common {
             if (adminReactorCloudFoundryClient == null) {
                 return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
             } else {
+                if(System.currentTimeMillis() - adminTime >= 180000){
+                    LOGGER.info("관리자 클라이언트 재생산");
+                    return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
+                }
                 return adminReactorCloudFoundryClient;
             }
         } catch (Exception e){
             return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
+        } finally {
+            adminTime = System.currentTimeMillis();
         }
     }
 
