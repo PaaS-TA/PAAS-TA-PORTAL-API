@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -89,18 +90,18 @@ public class CatalogServiceTest {
 
     @Test
     public void testProcCatalogCreateServiceInstanceV2() throws Exception {
-        when(catalogService.procCatalogCreateServiceInstanceV2(any(), anyString())).thenReturn(thenReturn);
+        when(catalogService.procCatalogCreateServiceInstanceV2(any(), anyObject())).thenReturn(thenReturn);
 
-        Map result = catalogService.procCatalogCreateServiceInstanceV2(new Catalog(), "token");
+        Map result = catalogService.procCatalogCreateServiceInstanceV2(new Catalog(), null);
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testProcCatalogBindService() throws Exception {
         CreateServiceBindingResponse createServiceBindingResponse = CreateServiceBindingResponse.builder().build();
-        when(catalogService.procCatalogBindService(any(), anyString())).thenReturn(createServiceBindingResponse);
+        when(catalogService.procCatalogBindService(any(), anyObject())).thenReturn(createServiceBindingResponse);
 
-        CreateServiceBindingResponse result = catalogService.procCatalogBindService(new Catalog(), "token");
+        CreateServiceBindingResponse result = catalogService.procCatalogBindService(new Catalog(), null);
         Assert.assertEquals(createServiceBindingResponse, result);
     }
 

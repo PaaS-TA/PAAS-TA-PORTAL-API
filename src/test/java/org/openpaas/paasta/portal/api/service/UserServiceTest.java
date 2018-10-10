@@ -59,9 +59,9 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateUserPassword() throws Exception {
-        when(userService.updateUserPassword(anyString(), anyString(), anyString(), anyString())).thenReturn(thenReturn);
+        when(userService.updateUserPassword(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(thenReturn);
 
-        Map result = userService.updateUserPassword("userId", "oldPassword", "newPassword", "token");
+        Map result = userService.updateUserPassword("userId", "userGuid","oldPassword", "newPassword", "token");
         Assert.assertEquals(thenReturn, result);
     }
 

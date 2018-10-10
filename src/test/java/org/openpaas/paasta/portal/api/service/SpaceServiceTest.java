@@ -32,18 +32,18 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaces() throws Exception {
         ListSpacesResponse listSpacesResponse = ListSpacesResponse.builder().build();
-        when(spaceService.getSpaces(anyString(),anyString())).thenReturn(listSpacesResponse);
+        when(spaceService.getSpaces(anyString(),anyObject())).thenReturn(listSpacesResponse);
 
-        ListSpacesResponse result = spaceService.getSpaces("orgId", "token");
+        ListSpacesResponse result = spaceService.getSpaces("orgId", null);
         Assert.assertEquals(listSpacesResponse, result);
     }
 
     @Test
     public void testGetSpacesWithOrgName() throws Exception {
         ListSpacesResponse listSpacesResponse = ListSpacesResponse.builder().build();
-        when(spaceService.getSpacesWithOrgName(anyString(),anyString())).thenReturn(listSpacesResponse);
+        when(spaceService.getSpacesWithOrgName(anyString(),anyObject(),anyString())).thenReturn(listSpacesResponse);
 
-        ListSpacesResponse result = spaceService.getSpacesWithOrgName("orgName", "token");
+        ListSpacesResponse result = spaceService.getSpacesWithOrgName("orgName", null, "token");
         Assert.assertEquals(listSpacesResponse, result);
     }
 
@@ -118,9 +118,9 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaceSummary() throws Exception {
         GetSpaceSummaryResponse getSpaceSummaryResponse = GetSpaceSummaryResponse.builder().build();
-        when(spaceService.getSpaceSummary(anyString(),anyString())).thenReturn(getSpaceSummaryResponse);
+        when(spaceService.getSpaceSummary(anyString(),anyObject())).thenReturn(getSpaceSummaryResponse);
 
-        GetSpaceSummaryResponse result = spaceService.getSpaceSummary("spaceId", "token");
+        GetSpaceSummaryResponse result = spaceService.getSpaceSummary("spaceId", null);
         Assert.assertEquals(getSpaceSummaryResponse, result);
     }
 
@@ -153,9 +153,9 @@ public class SpaceServiceTest {
     @Test
     public void testAssociateAllSpaceUserRolesByOrgId() throws Exception {
         List<AbstractSpaceResource> abstractSpaceResourceList = new ArrayList<>();
-        when(spaceService.associateAllSpaceUserRolesByOrgId(anyString(),anyString(),any())).thenReturn(abstractSpaceResourceList);
+        when(spaceService.associateAllSpaceUserRolesByOrgId(anyString(),anyString(),any(),anyObject())).thenReturn(abstractSpaceResourceList);
 
-        List<AbstractSpaceResource> result = spaceService.associateAllSpaceUserRolesByOrgId("orgId", "userId", null);
+        List<AbstractSpaceResource> result = spaceService.associateAllSpaceUserRolesByOrgId("orgId", "userId", null, null);
         Assert.assertEquals(abstractSpaceResourceList, result);
     }
 

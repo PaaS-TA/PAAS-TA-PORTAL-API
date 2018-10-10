@@ -73,9 +73,9 @@ public class OrgServiceTest {
     @Test
     public void testGetOrg2() throws Exception {
         GetOrganizationResponse getOrganizationResponse = GetOrganizationResponse.builder().build();
-        when(orgService.getOrg(anyString(), anyString())).thenReturn(getOrganizationResponse);
+        when(orgService.getOrg(anyString(), anyObject())).thenReturn(getOrganizationResponse);
 
-        GetOrganizationResponse result = orgService.getOrg("orgId", "token");
+        GetOrganizationResponse result = orgService.getOrg("orgId", null);
         Assert.assertEquals(getOrganizationResponse, result);
     }
 
@@ -90,9 +90,9 @@ public class OrgServiceTest {
 
     @Test
     public void testGetOrgSummaryMap() throws Exception {
-        when(orgService.getOrgSummaryMap(anyString(), anyString())).thenReturn(thenReturn);
+        when(orgService.getOrgSummaryMap(anyString(), anyObject())).thenReturn(thenReturn);
 
-        Map result = orgService.getOrgSummaryMap("orgId", "token");
+        Map result = orgService.getOrgSummaryMap("orgId", null);
         Assert.assertEquals(thenReturn, result);
     }
 
@@ -109,9 +109,9 @@ public class OrgServiceTest {
     @Test
     public void testGetOrgsForUser() throws Exception {
         ListOrganizationsResponse listOrganizationsResponse = ListOrganizationsResponse.builder().build();
-        when(orgService.getOrgsForUser(anyString())).thenReturn(listOrganizationsResponse);
+        when(orgService.getOrgsForUser(anyObject(), anyInt())).thenReturn(listOrganizationsResponse);
 
-        ListOrganizationsResponse result = orgService.getOrgsForUser("token");
+        ListOrganizationsResponse result = orgService.getOrgsForUser(null, 0);
         Assert.assertEquals(listOrganizationsResponse, result);
     }
 
@@ -169,18 +169,18 @@ public class OrgServiceTest {
     @Test
     public void testGetOrgSpaces() throws Exception {
         ListSpacesResponse listSpacesResponse = ListSpacesResponse.builder().build();
-        when(orgService.getOrgSpaces(anyString(), anyString())).thenReturn(listSpacesResponse);
+        when(orgService.getOrgSpaces(anyString(), anyObject())).thenReturn(listSpacesResponse);
 
-        ListSpacesResponse result = orgService.getOrgSpaces("orgId", "token");
+        ListSpacesResponse result = orgService.getOrgSpaces("orgId", null);
         Assert.assertEquals(listSpacesResponse, result);
     }
 
     @Test
     public void testGetOrgQuota() throws Exception {
         GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = GetOrganizationQuotaDefinitionResponse.builder().build();
-        when(orgService.getOrgQuota(anyString(), anyString())).thenReturn(getOrganizationQuotaDefinitionResponse);
+        when(orgService.getOrgQuota(anyString(), anyObject())).thenReturn(getOrganizationQuotaDefinitionResponse);
 
-        GetOrganizationQuotaDefinitionResponse result = orgService.getOrgQuota("orgId", "token");
+        GetOrganizationQuotaDefinitionResponse result = orgService.getOrgQuota("orgId", null);
         Assert.assertEquals(getOrganizationQuotaDefinitionResponse, result);
     }
 
@@ -195,17 +195,17 @@ public class OrgServiceTest {
     @Test
     public void testListAllOrgUsers() throws Exception {
         List<UserResource> userResourceList = new ArrayList<>();
-        when(orgService.listAllOrgUsers(anyString(), anyString())).thenReturn(userResourceList);
+        when(orgService.listAllOrgUsers(anyString(), anyObject())).thenReturn(userResourceList);
 
-        List<UserResource> result = orgService.listAllOrgUsers("orgId", "token");
+        List<UserResource> result = orgService.listAllOrgUsers("orgId", null);
         Assert.assertEquals(userResourceList, result);
     }
 
     @Test
     public void testGetOrgUserRoles() throws Exception {
-        when(orgService.getOrgUserRoles(anyString(), anyString())).thenReturn(null);
+        when(orgService.getOrgUserRoles(anyString(), anyObject())).thenReturn(null);
 
-        Map<String, Collection<UserRole>> result = orgService.getOrgUserRoles("orgId", "token");
+        Map<String, Collection<UserRole>> result = orgService.getOrgUserRoles("orgId", null);
         Assert.assertEquals(null, result);
     }
 
