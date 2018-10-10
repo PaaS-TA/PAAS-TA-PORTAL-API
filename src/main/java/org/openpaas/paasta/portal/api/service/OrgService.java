@@ -560,7 +560,7 @@ public class OrgService extends Common {
         Objects.requireNonNull(role, "role");
 
         final String roleKey = "user_roles";
-        Stream<UserRole> userRoles = getOrgUserRoles(orgId, null).get(roleKey).stream().filter(ur -> ur.getRoles().contains(role));
+        Stream<UserRole> userRoles = getOrgUserRoles(orgId, cloudFoundryClient(connectionContext())).get(roleKey).stream().filter(ur -> ur.getRoles().contains(role));
         boolean matches = userRoles.anyMatch(ur -> ur.getUserId().equals(userId));
 
         return matches;
@@ -882,16 +882,6 @@ public class OrgService extends Common {
     }
 
 
-    public String adminToken(String token){
-        try {
-            String name = Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
-            if (name.equals("admin")) {
-                return tokenProvider(adminUserName, adminPassword).getToken(connectionContext()).block();
-            }
-            return token;
-        } catch (Exception e){
-            return token;
-        }
-    }
+
 
 }

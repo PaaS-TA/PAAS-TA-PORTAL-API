@@ -392,6 +392,14 @@ public class AppController extends Common {
         return mapLog;
     }
 
+    /**
+     * 유저 프로바이드 credentials을 가져온다.
+     *
+     * @param guid
+     * @param token the token
+     * @return Map
+     * @throws Exception the exception
+     */
     @GetMapping(Constants.V2_URL + "/apps/{guid}/credentials")
     public Map userProvideCredentials(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         return appService.userProvideCredentials(guid, token);

@@ -37,9 +37,9 @@ public class MonitoringService {
             }
         } else {
             Map data = new HashMap();
-            Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + idx + "/cpu/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
+            Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + type + "/cpu/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
 
-            data.put("name", idx);
+            data.put("name", type);
             data.put("data", result);
             dataList.add(data);
         }
@@ -55,17 +55,17 @@ public class MonitoringService {
         if(type.equals("All")) {
             for(int i = 0 ; i <= idx; i++){
                 Map data = new HashMap();
-                Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + i + "/memory/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
+                Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + idx + "/memory/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
 
-                data.put("name", i);
+                data.put("name", type);
                 data.put("data", result);
                 dataList.add(data);
             }
         } else {
             Map data = new HashMap();
-            Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + idx + "/memory/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
+            Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + type + "/memory/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
 
-            data.put("name", idx);
+            data.put("name", type);
             data.put("data", result);
             dataList.add(data);
         }
@@ -89,9 +89,9 @@ public class MonitoringService {
             }
         } else {
             Map data = new HashMap();
-            Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + idx + "/network/bytes?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
+            Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + type + "/network/bytes?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
 
-            data.put("name", idx);
+            data.put("name", type);
             data.put("data", result);
             dataList.add(data);
         }

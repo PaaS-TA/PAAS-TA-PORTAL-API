@@ -443,7 +443,7 @@ public class SpaceService extends Common {
 
     //@HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
     public void removeAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles) {
-        final List<String> spaceIds = this.getSpaces(orgId, null).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
+        final List<String> spaceIds = this.getSpaces(orgId, cloudFoundryClient(connectionContext())).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
         for (String role : roles) {
             for (String spaceId : spaceIds)
                 removeSpaceUserRole(spaceId, userId, role);

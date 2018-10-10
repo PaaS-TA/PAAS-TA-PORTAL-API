@@ -18,6 +18,7 @@ import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.services.ListServicesRequest;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -167,14 +168,14 @@ public class CatalogService extends Common {
      * 카탈로그 앱을 시작한다.
      *
      * @param applicationid applicationid
-     * @param token         token
+     * @param reactorCloudFoundryClient         ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> procCatalogStartApplication(String applicationid, String token) throws Exception {
+    private Map<String, Object> procCatalogStartApplication(String applicationid,  ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
             Thread.sleep(500);
-            Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
+            reactorCloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
         } catch (Exception e) {
             LOGGER.info(e.toString());
         }
@@ -193,36 +194,31 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@HystrixCommand(commandKey = "createApp")
-    public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
-        File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
+    public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) {
+        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        File file = null;
         try {
-            if(file != null) {
-                String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
-                String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
-
-                routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
-                LOGGER.info("START" + file.getAbsolutePath()+ file + "FILEUPLOAD");
-                fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
-                LOGGER.info("END" + param.getAppName() + "FILEUPLOAD");
+                file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
+                String applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
+                String routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
+                routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
+                fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
                 if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                    procCatalogStartApplication(applicationid, token); //앱 시작
+                    procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
                 }
                 commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
                 return new HashMap<String, Object>() {{
                     put("RESULT", Constants.RESULT_STATUS_SUCCESS);
                 }};
-            }else {
-                return new HashMap<String, Object>() {{
-                    put("RESULT", Constants.RESULT_STATUS_FAIL);
-                }};
-            }
         }catch (Exception e){
-            LOGGER.info(e.getMessage());
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_FAIL);
+                put("msg", e.getMessage());
             }};
         } finally {
-            file.delete();
+            if(file != null) {
+                file.delete();
+            }
         }
     }
 
@@ -237,19 +233,18 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     //@HystrixCommand(commandKey = "createAppTemplate")
-    public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) throws Exception {
-        File file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
+    public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) {
+        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        File file = null;
         try {
-            String applicationid = createApplication(param, token); // App을 만들고 guid를 return 합니다.
-            String routeid = createRoute(param, token); //route를 생성후 guid를 return 합니다.
-
-            routeMapping(applicationid, routeid, token); // app와 route를 mapping합니다.
-            fileUpload(file, applicationid, token); // app에 파일 업로드 작업을 합니다.
-
+            file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
+            String applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
+            String routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
+            routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
+            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                procCatalogStartApplication(applicationid, token); //앱 시작
+                procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
             }
-            LOGGER.info(param.toString());
             if (param.getServicePlanList() != null) {
                 param.getServicePlanList().forEach(serviceplan -> {
                     try {
@@ -257,7 +252,7 @@ public class CatalogService extends Common {
                         if (!serviceplan.getAppGuid().equals("(id_dummy)")) {
                             serviceplan.setAppGuid(applicationid);
                         }
-                        procCatalogCreateServiceInstanceV2(serviceplan, token);
+                        procCatalogCreateServiceInstanceV2(serviceplan, reactorCloudFoundryClient);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -267,8 +262,15 @@ public class CatalogService extends Common {
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
-        } finally {
-            file.delete();
+        } catch (Exception e) {
+            return new HashMap<String, Object>() {{
+                put("RESULT", Constants.RESULT_STATUS_FAIL);
+                put("msg", e.getMessage());
+            }};
+        }finally {
+            if(file != null) {
+                file.delete();
+            }
         }
     }
 
@@ -276,19 +278,19 @@ public class CatalogService extends Common {
      * 앱을 생성한다.
      *
      * @param param Catalog
-     * @param token token
+     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private String createApplication(Catalog param, String token) throws Exception {
+    private String createApplication(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient)  throws Exception {
         if (param.getBuildPackName().toLowerCase().contains(Constants.CATALOG_EGOV_BUILD_PACK_CHECK_STRING)) {
-            return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+            return reactorCloudFoundryClient.
                     applicationsV2().create(CreateApplicationRequest.builder().buildpack(param.getBuildPackName()).memory(param.getMemorySize()).name(param.getAppName()).diskQuota(param.getDiskSize()).spaceId(param.getSpaceId()).environmentJsons(new HashMap<String, Object>() {{
                 put(Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_KEY, Constants.CATALOG_EGOV_BUILD_PACK_ENVIRONMENT_VALUE);
             }}).build()).block().getMetadata().getId();
         }
 
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+        return reactorCloudFoundryClient.
                 applicationsV2().create(CreateApplicationRequest.builder().buildpack(param.getBuildPackName()).memory(param.getMemorySize()).name(param.getAppName()).diskQuota(param.getDiskSize()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
 
     }
@@ -297,12 +299,12 @@ public class CatalogService extends Common {
      * 라우트를 생성한다..
      *
      * @param param Catalog
-     * @param token token
+     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private String createRoute(Catalog param, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+    private String createRoute(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) {
+        return reactorCloudFoundryClient.
                 routes().create(CreateRouteRequest.builder().host(param.getHostName()).domainId(param.getDomainId()).spaceId(param.getSpaceId()).build()).block().getMetadata().getId();
     }
 
@@ -311,12 +313,12 @@ public class CatalogService extends Common {
      *
      * @param applicationid String
      * @param routeid       String
-     * @param token         token
+     * @param reactorCloudFoundryClient         ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private void routeMapping(String applicationid, String routeid, String token) throws Exception {
-        Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+    private void routeMapping(String applicationid, String routeid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+        reactorCloudFoundryClient.
                 routeMappings().create(CreateRouteMappingRequest.builder().routeId(routeid).applicationId(applicationid).build()).block();
     }
 
@@ -325,13 +327,13 @@ public class CatalogService extends Common {
      *
      * @param file          File
      * @param applicationid String
-     * @param token         token
+     * @param reactorCloudFoundryClient         ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private void fileUpload(File file, String applicationid, String token) throws Exception {
+    private void fileUpload(File file, String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
-            Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+            reactorCloudFoundryClient.
                     applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
         } catch (Exception e) {
             LOGGER.info(e.toString());
@@ -370,24 +372,24 @@ public class CatalogService extends Common {
      * 카탈로그 서비스 인스턴스를 생성한다.
      *
      * @param param Catalog(모델클래스)
-     * @param token String(자바클래스)
+     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     //@HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
-    public Map procCatalogCreateServiceInstanceV2(Catalog param, String token) throws Exception {
+    public Map procCatalogCreateServiceInstanceV2(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
             LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
             });
             LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + parameterMap + " : " + param.getServicePlan());
-            CreateServiceInstanceResponse createserviceinstanceresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+            CreateServiceInstanceResponse createserviceinstanceresponse = reactorCloudFoundryClient.
                     serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
 
             if (!param.getAppGuid().equals("(id_dummy)")) {
                 param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
-                procCatalogBindService(param, token);
+                procCatalogBindService(param, reactorCloudFoundryClient);
             }
             if (param.getCatalogType() != null) {
                 commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
@@ -407,19 +409,19 @@ public class CatalogService extends Common {
      * 카탈로그 앱 서비스를 바인드한다.
      *
      * @param param Catalog(모델클래스)
-     * @param token String(자바클래스)
+     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     //@HystrixCommand(commandKey = "procCatalogBindService")
-    public CreateServiceBindingResponse procCatalogBindService(Catalog param, String token) throws Exception {
+    public CreateServiceBindingResponse procCatalogBindService(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
         });
-        CreateServiceBindingResponse createservicebindingresponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).
+        return reactorCloudFoundryClient.
                 serviceBindingsV2().create(CreateServiceBindingRequest.builder().applicationId(param.getAppGuid()).serviceInstanceId(param.getServiceInstanceGuid()).parameters(bindparameterMap).build()).block();
 
-        return createservicebindingresponse;
+
     }
 
     /**

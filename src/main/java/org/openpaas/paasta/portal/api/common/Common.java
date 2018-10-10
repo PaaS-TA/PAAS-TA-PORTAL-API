@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import javax.annotation.PreDestroy;
 import java.io.InputStream;
@@ -96,6 +97,8 @@ public class Common {
     private static ReactorCloudFoundryClient adminReactorCloudFoundryClient;
 
     private static long adminTime;
+
+    private static int expiresInTime;
 
     /**
      * 관리자 토큰을 가져온다.
@@ -373,21 +376,25 @@ public class Common {
         return ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
 
-    public ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext){
+    public ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext) {
         try {
             if (adminReactorCloudFoundryClient == null) {
-                return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
+                OAuth2AccessToken token = loginService.login(adminUserName, adminPassword);
+                adminTime = System.currentTimeMillis();
+                expiresInTime = token.getExpiresIn();
+                return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(token.getValue())).build();
             } else {
-                if(System.currentTimeMillis() - adminTime >= 180000){
-                    LOGGER.info("관리자 클라이언트 재생산");
-                    return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
+                if ((System.currentTimeMillis() - adminTime) >= (expiresInTime * 1000)) {
+                    LOGGER.info("관리자 토큰 재생산");
+                    OAuth2AccessToken token = loginService.login(adminUserName, adminPassword);
+                    adminTime = System.currentTimeMillis();
+                    expiresInTime = token.getExpiresIn();
+                    return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(token.getValue())).build();
                 }
                 return adminReactorCloudFoundryClient;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             return adminReactorCloudFoundryClient = ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider(getToken())).build();
-        } finally {
-            adminTime = System.currentTimeMillis();
         }
     }
 
@@ -549,5 +556,17 @@ public class Common {
 
     public PasswordGrantTokenProvider tokenProvider() {
         return tokenProvider;
+    }
+
+    public String adminToken(String token){
+        try {
+            String name = Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
+            if (name.equals("admin")) {
+                return tokenProvider(adminUserName, adminPassword).getToken(connectionContext()).block();
+            }
+            return token;
+        } catch (Exception e){
+            return token;
+        }
     }
 }

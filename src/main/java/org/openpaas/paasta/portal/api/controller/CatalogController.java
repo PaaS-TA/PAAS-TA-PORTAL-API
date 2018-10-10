@@ -7,6 +7,7 @@ import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceResponse
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -102,7 +103,8 @@ public class CatalogController extends Common {
      */
     @PostMapping(Constants.V2_URL+"/catalogs/serviceinstances")
     public Map procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return catalogService.procCatalogCreateServiceInstanceV2(param, token);
+        token = adminToken(token);
+        return catalogService.procCatalogCreateServiceInstanceV2(param, Common.cloudFoundryClient(connectionContext(), tokenProvider(token)));
     }
 
     /**
@@ -116,7 +118,7 @@ public class CatalogController extends Common {
      */
     @PostMapping(Constants.V2_URL+"/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param,   @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws  Exception{
-        LOGGER.info(param.toString());
+        token = adminToken(token);
         return catalogService.createApp(param, token, token2, response);
     }
 
