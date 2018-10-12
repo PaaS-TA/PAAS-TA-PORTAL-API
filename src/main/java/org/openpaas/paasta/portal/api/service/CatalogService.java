@@ -244,7 +244,7 @@ public class CatalogService extends Common {
         ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
         String applicationid = "applicationID";
         String routeid = "route ID";
-        Map instanceresult;
+        boolean appcreated = false;
         File file = null;
         try {
             file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
@@ -255,6 +255,7 @@ public class CatalogService extends Common {
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
                 procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
             }
+            appcreated = true;
             String appid = applicationid;
             if (param.getServicePlanList() != null) {
                 param.getServicePlanList().forEach(serviceplan -> {
@@ -275,10 +276,13 @@ public class CatalogService extends Common {
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
         } catch (Exception e) {
-            param.getServicePlanList().forEach(serviceplan -> {
-                if(!serviceplan.getServiceInstanceGuid().equals("")){
-                reactorCloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(serviceplan.getServiceInstanceGuid()).recursive(true).build()).block();}
-            });
+            if(appcreated) {
+                param.getServicePlanList().forEach(serviceplan -> {
+                    if (!serviceplan.getServiceInstanceGuid().equals("")) {
+                        reactorCloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(serviceplan.getServiceInstanceGuid()).recursive(true).build()).block();
+                    }
+                });
+            }
             if(!applicationid.equals("applicationID")){
                 if(!routeid.equals("route ID")){
                     reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(routeid).build()).block();
