@@ -6,13 +6,12 @@ import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
 import org.cloudfoundry.client.v2.routemappings.CreateRouteMappingRequest;
+import org.cloudfoundry.client.v2.routemappings.DeleteRouteMappingRequest;
 import org.cloudfoundry.client.v2.routes.CreateRouteRequest;
+import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
-import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceRequest;
-import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceResponse;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.serviceinstances.*;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.services.ListServicesRequest;
@@ -196,11 +195,13 @@ public class CatalogService extends Common {
     //@HystrixCommand(commandKey = "createApp")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) {
         ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        String applicationid = "applicationID";
+        String routeid = "route ID";
         File file = null;
         try {
                 file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
-                String applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
-                String routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
+                applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
+                routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
                 routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
                 fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
                 if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
@@ -211,6 +212,12 @@ public class CatalogService extends Common {
                     put("RESULT", Constants.RESULT_STATUS_SUCCESS);
                 }};
         }catch (Exception e){
+            if(!applicationid.equals("applicationID")){
+                if(!routeid.equals("route ID")){
+                    reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(routeid).build()).block();
+                }
+                reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(applicationid).build()).block();
+            }
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_FAIL);
                 put("msg", e.getMessage());
@@ -235,24 +242,29 @@ public class CatalogService extends Common {
     //@HystrixCommand(commandKey = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) {
         ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        String applicationid = "applicationID";
+        String routeid = "route ID";
+        Map instanceresult;
         File file = null;
         try {
             file = createTempFile(param, token2, response); // 임시파일을 생성합니다.
-            String applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
-            String routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
+            applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
+            routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
             fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
                 procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
             }
+            String appid = applicationid;
             if (param.getServicePlanList() != null) {
                 param.getServicePlanList().forEach(serviceplan -> {
                     try {
                         serviceplan.setSpaceId(param.getSpaceId());
                         if (!serviceplan.getAppGuid().equals("(id_dummy)")) {
-                            serviceplan.setAppGuid(applicationid);
+                            serviceplan.setAppGuid(appid);
                         }
-                        procCatalogCreateServiceInstanceV2(serviceplan, reactorCloudFoundryClient);
+                        serviceplan.setServiceInstanceGuid("");
+                        serviceplan.setServiceInstanceGuid(procCatalogCreateServiceInstanceV2(serviceplan, reactorCloudFoundryClient).get("SERVICEID").toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -263,6 +275,16 @@ public class CatalogService extends Common {
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
             }};
         } catch (Exception e) {
+            param.getServicePlanList().forEach(serviceplan -> {
+                if(!serviceplan.getServiceInstanceGuid().equals("")){
+                reactorCloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(serviceplan.getServiceInstanceGuid()).recursive(true).build()).block();}
+            });
+            if(!applicationid.equals("applicationID")){
+                if(!routeid.equals("route ID")){
+                    reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(routeid).build()).block();
+                }
+                reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(applicationid).build()).block();
+            }
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_FAIL);
                 put("msg", e.getMessage());
@@ -318,8 +340,8 @@ public class CatalogService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     private void routeMapping(String applicationid, String routeid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
-        reactorCloudFoundryClient.
-                routeMappings().create(CreateRouteMappingRequest.builder().routeId(routeid).applicationId(applicationid).build()).block();
+            reactorCloudFoundryClient.
+                    routeMappings().create(CreateRouteMappingRequest.builder().routeId(routeid).applicationId(applicationid).build()).block();
     }
 
     /**
@@ -379,11 +401,9 @@ public class CatalogService extends Common {
     //@HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
     public Map procCatalogCreateServiceInstanceV2(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
-            LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + param.getServicePlan());
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
             });
-            LOGGER.info(param.getName() + " : " + param.getSpaceId() + " : " + parameterMap + " : " + param.getServicePlan());
             CreateServiceInstanceResponse createserviceinstanceresponse = reactorCloudFoundryClient.
                     serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
 
@@ -396,11 +416,13 @@ public class CatalogService extends Common {
             }
             return new HashMap(){{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+                put("SERVICEID", createserviceinstanceresponse.getEntity().getServiceId());
             }};
         } catch (Exception e){
             return new HashMap(){{
                 put("RESULT", Constants.RESULT_STATUS_FAIL);
                 put("MSG", e.getMessage());
+                put("SERVICEID", "");
             }};
         }
     }
