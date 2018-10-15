@@ -53,7 +53,7 @@ public class SpaceController extends Common {
      */
     @GetMapping(Constants.V2_URL+"/spaces/{spaceid}/summary")
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        token = orgService.adminToken(token);
+        token = adminToken(token);
         GetSpaceSummaryResponse respSapceSummary = spaceService.getSpaceSummary(spaceid, Common.cloudFoundryClient(connectionContext(), tokenProvider(token)));
         return respSapceSummary;
     }
