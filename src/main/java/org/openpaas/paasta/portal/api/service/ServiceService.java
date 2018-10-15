@@ -8,6 +8,8 @@ import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -334,4 +336,23 @@ public class ServiceService extends Common {
     }
 
 
+    /**
+     * 서비스 플랜(제어동작) 리스트를 조회한다.
+     *
+     * @param token token
+     * @return the boolean
+     * @throws Exception the exception
+     */
+
+    public ListServicePlansResponse getServicePlans(String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(),tokenProvider())
+                .servicePlans()
+                .list(ListServicePlansRequest.builder().build())
+                .log()
+                .block();
+//        return Common.cloudFoundryClient(connectionContext()).servicePlans().update(UpdateServicePlanRequest.builder().publiclyVisible().servicePlanId().build());
+    }
 }
+
+
+

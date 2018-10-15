@@ -6,6 +6,7 @@ import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -220,4 +221,17 @@ public class ServiceController extends Common {
     }
 
 
+    /**
+     * 서비스 플랜(제어동작) 리스트를 조회한다.
+     *
+     * @param request the request
+     * @return CloudServiceInstance cloudServiceInstance
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V2_URL + "/serviceplans"})
+    public ListServicePlansResponse getServicePlans(HttpServletRequest request) throws Exception {
+        LOGGER.info("getServicePlans Start:");
+        return serviceService.getServicePlans(request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
 }
+
