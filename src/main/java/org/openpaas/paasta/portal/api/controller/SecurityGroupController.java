@@ -117,16 +117,30 @@ public class SecurityGroupController extends Common {
 
 
     /**
+     * 준비 응용 프로그램에 사용할 보안 그룹 목록에 보안 그룹을 바인딩합니다.
+     *
+     * @param securityid  the security guid
+     * @return SetSecurityGroupStagingDefaultResponse
+     * @throws Exception the exception
+     */
+    @PutMapping(Constants.V2_URL+"/securitygruops/staging/{securityid}")
+    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(@PathVariable String securityid) throws Exception {
+        return securityGroupService.setSecurityGroupStagingDefaultResponse(securityid);
+    }
+
+
+    /**
      * 시큐리티 스테이징 그룹을 조회한다.
      *
      * @param page  listStagingDefaults page
      * @return ListSecurityGroupStagingDefaultsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygruop/staging/{page}")
+    @GetMapping(Constants.V2_URL+"/securitygruops/staging/{page}")
     public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefaultsResponse(@PathVariable int page) throws Exception {
         return securityGroupService.listSecurityGroupStagingDefaultsResponse(page);
     }
+
 
     /**
      * 스테이징 시큐리티 그룹을 언바인드 한다.
@@ -136,8 +150,21 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL+"/securitygruop/{securityid}/staging")
-    public Map removeSecurityGroupStaging(String securityid) throws Exception {
+    public Map removeSecurityGroupStaging(@PathVariable String securityid) throws Exception {
         return securityGroupService.removeSecurityGroupStaging(securityid);
+    }
+
+
+    /**
+     *
+     * 응용 프로그램 실행에 사용할 보안 그룹 목록에 보안 그룹을 바인딩합니다.
+     *
+     * @param securityid  the security guid
+     * @return SetSecurityGroupRunningDefaultResponse
+     * @throws Exception the exception
+     */
+    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(@PathVariable String securityid) throws Exception {
+        return securityGroupService.setSecurityGroupRunningDefaultResponse(securityid);
     }
 
 
@@ -148,8 +175,8 @@ public class SecurityGroupController extends Common {
      * @return ListSecurityGroupRunningDefaultsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygruop/running")
-    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(int page) throws Exception {
+    @GetMapping(Constants.V2_URL+"/securitygruops/running/{page}")
+    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(@PathVariable int page) throws Exception {
         return securityGroupService.listSecurityGroupRunningDefaultsResponse(page);
     }
 
@@ -161,7 +188,7 @@ public class SecurityGroupController extends Common {
      * @return Map
      * @throws Exception the exception
      */
-    public Map removeSecurityGroupRunning(String securityid) throws Exception {
+    public Map removeSecurityGroupRunning(@PathVariable String securityid) throws Exception {
         return securityGroupService.removeSecurityGroupRunning(securityid);
     }
 

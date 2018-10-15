@@ -77,6 +77,7 @@ public class SecurityGroupService extends Common {
         return cloudFoundryClient(connectionContext()).securityGroups().delete(DeleteSecurityGroupRequest.builder().securityGroupId(securityid).build()).block();
     }
 
+
     /**
      * 시큐리티그룹과 공간을 연결한다.
      *
@@ -112,6 +113,19 @@ public class SecurityGroupService extends Common {
         }
     }
 
+
+    /**
+     * 준비 응용 프로그램에 사용할 보안 그룹 목록에 보안 그룹을 바인딩합니다.
+     *
+     * @param securityid  the security guid
+     * @return SetSecurityGroupStagingDefaultResponse
+     * @throws Exception the exception
+     */
+    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(String securityid) throws Exception {
+        return cloudFoundryClient(connectionContext()).securityGroups().setStagingDefault(SetSecurityGroupStagingDefaultRequest.builder().securityGroupId(securityid).build()).block();
+    }
+
+
     /**
      * 시큐리티 스테이징 그룹을 조회한다.
      *
@@ -143,6 +157,19 @@ public class SecurityGroupService extends Common {
                 put("MSG", e.getMessage());
             }};
         }
+    }
+
+
+    /**
+     *
+     * 응용 프로그램 실행에 사용할 보안 그룹 목록에 보안 그룹을 바인딩합니다.
+     *
+     * @param securityid  the security guid
+     * @return SetSecurityGroupRunningDefaultResponse
+     * @throws Exception the exception
+     */
+    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(String securityid) throws Exception {
+        return cloudFoundryClient(connectionContext()).securityGroups().setRunningDefault(SetSecurityGroupRunningDefaultRequest.builder().securityGroupId(securityid).build()).block();
     }
 
 
