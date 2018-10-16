@@ -8,8 +8,7 @@ import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
-import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
-import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.serviceplans.*;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -337,21 +336,55 @@ public class ServiceService extends Common {
 
 
     /**
-     * 서비스 플랜(제어동작) 리스트를 조회한다.
+     * 해당 서비스 브로커 상세내용을 조회한다.
      *
      * @param token token
      * @return the boolean
      * @throws Exception the exception
      */
-
     public ListServicePlansResponse getServicePlans(String token) throws Exception {
         return Common.cloudFoundryClient(connectionContext(),tokenProvider())
                 .servicePlans()
                 .list(ListServicePlansRequest.builder().build())
                 .log()
                 .block();
-//        return Common.cloudFoundryClient(connectionContext()).servicePlans().update(UpdateServicePlanRequest.builder().publiclyVisible().servicePlanId().build());
     }
+
+    /**
+     * 서비스  조회한다.
+     *
+     * @param serviceBroker the serviceBroker
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public GetServicePlanResponse getServicePlan(ServiceBroker serviceBroker, String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+                .servicePlans()
+                .get(GetServicePlanRequest.builder()
+                        .servicePlanId(serviceBroker.getGuid().toString())
+                        .build()
+                ).log()
+                .block();
+    }
+
+    /**
+     * 서비스 제어 수정한다. / 서비스 활성화를 변경한다.
+     *
+     * @param serviceBroker the cloudServiceBroker
+     * @param token
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public UpdateServicePlanResponse updateServicePlan(ServiceBroker serviceBroker, String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+                .servicePlans()
+                .update(UpdateServicePlanRequest.builder()
+                        .servicePlanId(serviceBroker.getGuid().toString())
+                        .publiclyVisible(serviceBroker.getPubliclyVisible())
+                        .build()
+                ).block();
+    }
+
 }
 
 

@@ -6,7 +6,9 @@ import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -56,7 +58,6 @@ public class ServiceController extends Common {
         LOGGER.info("Rename InstanceService End ");
         return result;
     }
-
 
     /**
      * 서비스 인스턴스를 삭제한다.
@@ -143,7 +144,7 @@ public class ServiceController extends Common {
     }
 
     /**
-     * 서비스 브로커 상세내용을 조회한다.
+     * 해당 서비스 브로커 상세내용을 조회한다.
      *
      * @param serviceBroker the serviceBroker
      * @param request       the request
@@ -155,7 +156,6 @@ public class ServiceController extends Common {
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
         return serviceService.getServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
-
 
     /**
      * 서비스 브로커를 등록한다.
@@ -172,7 +172,6 @@ public class ServiceController extends Common {
         return serviceService.createServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
-
     /**
      * 서비스 브로커를 수정한다. / 서비스 브로커 이름을 변경한다.
      *
@@ -188,7 +187,6 @@ public class ServiceController extends Common {
         serviceBroker.setGuid(UUID.fromString(guid));
         return serviceService.updateServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
-
 
     /**
      * 서비스 브로커를 삭제한다.
@@ -220,9 +218,8 @@ public class ServiceController extends Common {
         return respServicesInstances;
     }
 
-
     /**
-     * 서비스 플랜(제어동작) 리스트를 조회한다.
+     * 서비스 제어 리스트를 조회한다.
      *
      * @param request the request
      * @return CloudServiceInstance cloudServiceInstance
@@ -233,5 +230,37 @@ public class ServiceController extends Common {
         LOGGER.info("getServicePlans Start:");
         return serviceService.getServicePlans(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
+
+    /**
+     * 해당 서비스 제어 상세내용을 조회한다.
+     *
+     * @param serviceBroker the serviceBroker
+     * @param request       the request
+     * @return CloudServiceInstance cloudServiceInstance
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
+    public GetServicePlanResponse getServicePlan(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("getServicePlan Start : " + serviceBroker.getGuid());
+        return serviceService.getServicePlan(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
+
+    /**
+     * 서비스 제어 수정한다. / 서비스 활성화를 변경한다.
+     *
+     * @param serviceBroker the cloudServiceBroker
+     * @param request       the request
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    @PutMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
+    public UpdateServicePlanResponse updateServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
+
+        LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getPubliclyVisible()+"   " + serviceBroker.getServiceName());
+        serviceBroker.setGuid(UUID.fromString(guid));
+        serviceBroker.setPubliclyVisible(true);
+        return serviceService.updateServicePlan(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
+
 }
 
