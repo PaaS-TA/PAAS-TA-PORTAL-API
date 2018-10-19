@@ -920,8 +920,6 @@ public class OrgService extends Common {
      * @throws Exception the exception
      */
     public AssignOrganizationDefaultIsolationSegmentResponse resetOrgDefaultIsolationSegments(String organizationsId) throws Exception {
-        LOGGER.info("resetOrgDefaultIsolationSegments in!!");
-
         return cloudFoundryClient(connectionContext()).organizationsV3()
                 .assignDefaultIsolationSegment(AssignOrganizationDefaultIsolationSegmentRequest.builder()
                         .organizationId(organizationsId)
