@@ -3,6 +3,12 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
+import org.cloudfoundry.client.v3.Relationship;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentRequest;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentResponse;
+import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentRequest;
+import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentResponse;
+import org.cloudfoundry.client.v3.spaces.GetSpaceIsolationSegmentRequest;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -487,5 +493,37 @@ public class SpaceService extends Common {
             }
         });
         return true;
+    }
+
+    /**
+     * Space Isolation 에 Isolation Segments default 를 설정한다.
+     *
+     * @param spaceId  the space id
+     * @param isolationSegmentId  the isolation segement id
+     * @return AssignSpaceIsolationSegmentResponse
+     * @throws Exception the exception
+     */
+    public AssignSpaceIsolationSegmentResponse setSpaceDefaultIsolationSegments(String spaceId, String isolationSegmentId) throws Exception {
+        return cloudFoundryClient(connectionContext()).spacesV3()
+                .assignIsolationSegment(AssignSpaceIsolationSegmentRequest.builder()
+                        .spaceId(spaceId)
+                        .data(Relationship.builder()
+                                .id(isolationSegmentId)
+                                .build())
+                        .build()).block();
+    }
+
+    /**
+     * Space Isolation 에 Isolation Segments default 를 해제한다.
+     *
+     * @param spaceId  the space id
+     * @return AssignSpaceIsolationSegmentResponse
+     * @throws Exception the exception
+     */
+    public AssignSpaceIsolationSegmentResponse resetSpaceDefaultIsolationSegments(String spaceId) throws Exception {
+        return cloudFoundryClient(connectionContext()).spacesV3()
+                .assignIsolationSegment(AssignSpaceIsolationSegmentRequest.builder()
+                        .spaceId(spaceId)
+                        .build()).block();
     }
 }

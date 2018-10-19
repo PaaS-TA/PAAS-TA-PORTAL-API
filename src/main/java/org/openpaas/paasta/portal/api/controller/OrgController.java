@@ -1,11 +1,13 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import com.unboundid.scim.wink.PATCH;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.AbstractOrganizationResource;
 import org.cloudfoundry.client.v2.organizations.GetOrganizationResponse;
 import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentResponse;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
@@ -483,4 +485,29 @@ public class OrgController extends Common {
     //////////////////////////////////////////////////////////////////////
 
     // Not-implemented
+
+    /**
+     * Organizations 에 Isolation Segments default 를 설정한다.
+     *
+     * @param organizationsId  the organizations id
+     * @param isolationSegmentId  the isolation segement id
+     * @return AddIsolationSegmentOrganizationEntitlementResponse
+     * @throws Exception the exception
+     */
+    @PutMapping(Constants.V3_URL+"/orgs/{organizationsId:.+}/isolationSegments/{isolationSegmentId:.+}")
+    public AssignOrganizationDefaultIsolationSegmentResponse setOrgDefaultIsolationSegments(@PathVariable String organizationsId, @PathVariable String isolationSegmentId) throws Exception {
+        return orgService.setOrgDefaultIsolationSegments(organizationsId, isolationSegmentId);
+    }
+
+    /**
+     * Organizations 에 Isolation Segments default 를 재설정한다.
+     *
+     * @param organizationsId  the organizations id
+     * @return AddIsolationSegmentOrganizationEntitlementResponse
+     * @throws Exception the exception
+     */
+    @PutMapping(Constants.V3_URL+"/orgs/{organizationsId:.+}/isolationSegments/reset")
+    public AssignOrganizationDefaultIsolationSegmentResponse resetOrgDefaultIsolationSegments(@PathVariable String organizationsId) throws Exception {
+        return orgService.resetOrgDefaultIsolationSegments(organizationsId);
+    }
 }

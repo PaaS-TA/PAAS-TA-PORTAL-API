@@ -1,7 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.cloudfoundry.Nullable;
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
+import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.featureflags.GetFeatureFlagRequest;
 import org.cloudfoundry.client.v2.featureflags.GetFeatureFlagResponse;
@@ -14,6 +17,14 @@ import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQu
 import org.cloudfoundry.client.v2.organizations.*;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
+import org.cloudfoundry.client.v3.Relationship;
+import org.cloudfoundry.client.v3.isolationsegments.AddIsolationSegmentOrganizationEntitlementRequest;
+import org.cloudfoundry.client.v3.isolationsegments.AddIsolationSegmentOrganizationEntitlementResponse;
+import org.cloudfoundry.client.v3.isolationsegments.ListIsolationSegmentEntitledOrganizationsRequest;
+import org.cloudfoundry.client.v3.isolationsegments.ListIsolationSegmentOrganizationsRelationshipRequest;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentRequest;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentResponse;
+import org.cloudfoundry.client.v3.organizations.GetOrganizationDefaultIsolationSegmentRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
@@ -30,10 +41,12 @@ import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.junit.internal.builders.NullBuilder;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserRole;
 import org.slf4j.Logger;
+import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -881,7 +894,39 @@ public class OrgService extends Common {
         }
     }
 
+    /**
+     * Organizations 에 Isolation Segments default 를 설정한다.
+     *
+     * @param organizationsId  the organizations id
+     * @param isolationSegmentId  the isolation segement id
+     * @return AddIsolationSegmentOrganizationEntitlementResponse
+     * @throws Exception the exception
+     */
+    public AssignOrganizationDefaultIsolationSegmentResponse setOrgDefaultIsolationSegments(String organizationsId, String isolationSegmentId) throws Exception {
+        return cloudFoundryClient(connectionContext()).organizationsV3()
+                .assignDefaultIsolationSegment(AssignOrganizationDefaultIsolationSegmentRequest.builder()
+                        .organizationId(organizationsId)
+                        .data(Relationship.builder()
+                                .id(isolationSegmentId)
+                                .build())
+                        .build()).block();
+    }
 
+    /**
+     * Organizations 에 Isolation Segments default 를 재설정한다.
+     *
+     * @param organizationsId  the organizations id
+     * @return AddIsolationSegmentOrganizationEntitlementResponse
+     * @throws Exception the exception
+     */
+    public AssignOrganizationDefaultIsolationSegmentResponse resetOrgDefaultIsolationSegments(String organizationsId) throws Exception {
+        LOGGER.info("resetOrgDefaultIsolationSegments in!!");
+
+        return cloudFoundryClient(connectionContext()).organizationsV3()
+                .assignDefaultIsolationSegment(AssignOrganizationDefaultIsolationSegmentRequest.builder()
+                        .organizationId(organizationsId)
+                        .build()).block();
+    }
 
 
 }
