@@ -3,6 +3,8 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
+import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentResponse;
+import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentResponse;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -267,5 +269,30 @@ public class SpaceController extends Common {
                                                        @RequestHeader( AUTHORIZATION_HEADER_KEY ) String token ) {
         token = orgService.adminToken(token);
         spaceService.removeSpaceUserRole( spaceId, userId, role );
+    }
+
+    /**
+     * Space Isolation 에 Isolation Segments 를 설정한다.
+     *
+     * @param spaceId  the space id
+     * @param isolationSegmentId  the isolation segement id
+     * @return AssignSpaceIsolationSegmentResponse
+     * @throws Exception the exception
+     */
+    @PutMapping(Constants.V3_URL+"/spaces/{spaceId:.+}/isolationSegments/{isolationSegmentId:.+}")
+    public AssignSpaceIsolationSegmentResponse setSpaceDefaultIsolationSegments(@PathVariable String spaceId, @PathVariable String isolationSegmentId) throws Exception {
+        return spaceService.setSpaceDefaultIsolationSegments(spaceId, isolationSegmentId);
+    }
+
+    /**
+     * Space Isolation 에 Isolation Segments 를 해제한다.
+     *
+     * @param spaceId  the space id
+     * @return AssignSpaceIsolationSegmentResponse
+     * @throws Exception the exception
+     */
+    @PutMapping(Constants.V3_URL+"/spaces/{spaceId:.+}/isolationSegments/reset")
+    public AssignSpaceIsolationSegmentResponse resetSpaceDefaultIsolationSegments(@PathVariable String spaceId) throws Exception {
+        return spaceService.resetSpaceDefaultIsolationSegments(spaceId);
     }
 }

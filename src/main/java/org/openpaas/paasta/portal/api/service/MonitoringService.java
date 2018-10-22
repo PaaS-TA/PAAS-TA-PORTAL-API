@@ -55,9 +55,9 @@ public class MonitoringService {
         if(type.equals("All")) {
             for(int i = 0 ; i <= idx; i++){
                 Map data = new HashMap();
-                Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + idx + "/memory/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
+                Map result = monitoringRestTemplateService.send(url + "/" + guid + "/" + i + "/memory/usages?defaultTimeRange=" + defaultTimeRange + "&groupBy=" + groupBy, HttpMethod.GET, null);
 
-                data.put("name", type);
+                data.put("name", i);
                 data.put("data", result);
                 dataList.add(data);
             }
