@@ -59,10 +59,10 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     //@HystrixCommand(commandKey = "deleteInstance")
-    public Map deleteInstance(String guid) throws Exception {
+    public Map deleteInstance(String guid, String token) throws Exception {
         HashMap result = new HashMap();
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             cloudFoundryClient.serviceInstances().delete(DeleteServiceInstanceRequest.builder().serviceInstanceId(guid).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");

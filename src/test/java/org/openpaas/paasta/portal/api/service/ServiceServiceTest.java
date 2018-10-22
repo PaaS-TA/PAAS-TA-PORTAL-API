@@ -49,11 +49,11 @@ public class ServiceServiceTest {
     @Test
     public void testDeleteInstance() throws Exception {
 
-        when(serviceService.deleteInstance(anyString())).thenReturn(new HashMap() {{
+        when(serviceService.deleteInstance(anyString(), anyString())).thenReturn(new HashMap() {{
             put("String", "String");
         }});
 
-        Map result = serviceService.deleteInstance("guid");
+        Map result = serviceService.deleteInstance("guid", "token");
         Assert.assertEquals(new HashMap() {{
             put("String", "String");
         }}, result);
