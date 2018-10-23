@@ -1,6 +1,9 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.v2.securitygroups.*;
+import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanRequest;
+import org.cloudfoundry.client.v3.Relationship;
+import org.cloudfoundry.client.v3.isolationsegments.AddIsolationSegmentOrganizationEntitlementRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -61,7 +64,7 @@ public class SecurityGroupService extends Common {
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    public UpdateSecurityGroupResponse updateSecurityGroupResponse(String securityid, String groupname, List<RuleEntity> rule) throws Exception {
+    public UpdateSecurityGroupResponse updateSecurityGroupResponse(String securityid, String groupname, List<RuleEntity> rule) {
         return cloudFoundryClient(connectionContext()).securityGroups().update(UpdateSecurityGroupRequest.builder().securityGroupId(securityid).name(groupname).rules(rule).build()).block();
     }
 
@@ -193,6 +196,7 @@ public class SecurityGroupService extends Common {
      * @throws Exception the exception
      */
     public Map removeSecurityGroupRunning(String securityid) throws Exception {
+
         try {
             cloudFoundryClient(connectionContext()).securityGroups().removeRunningDefault(RemoveSecurityGroupRunningDefaultRequest.builder().securityGroupId(securityid).build()).block();
             return new HashMap() {{

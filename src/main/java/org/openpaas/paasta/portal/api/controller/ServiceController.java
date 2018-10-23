@@ -69,10 +69,10 @@ public class ServiceController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/service/{guid}"}, method = RequestMethod.DELETE)
-    public Map deleteInstance(@PathVariable String guid) throws Exception {
+    public Map deleteInstance(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("delete InstanceService Start : " + guid);
         //service call
-        Map result = serviceService.deleteInstance(guid);
+        Map result = serviceService.deleteInstance(guid, token);
         LOGGER.info("delete InstanceService End ");
         return result;
     }

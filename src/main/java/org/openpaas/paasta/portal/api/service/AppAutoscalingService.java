@@ -27,6 +27,7 @@ public class AppAutoscalingService {
     }
 
     public Map updateAutoscaling(Map body) {
+
         return monitoringRestTemplateService.send(url + "/policy", HttpMethod.POST, body);
     }
 }

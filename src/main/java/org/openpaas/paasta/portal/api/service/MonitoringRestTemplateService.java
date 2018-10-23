@@ -26,7 +26,6 @@ public class MonitoringRestTemplateService extends Common {
         HttpEntity<Object> reqEntity = new HttpEntity<>(bodyObject, reqHeaders);
 //        LOGGER.info("####### monitoringApiTarget Url ::: " + monitoringApiTarget + reqUrl);
         RestTemplate restTemplate = new RestTemplate();
-        monitoringApiTarget = "http://115.68.151.184:8080";
         ResponseEntity<Map> resEntity = restTemplate.exchange(monitoringApiTarget + reqUrl, httpMethod , reqEntity, Map.class);
         Map body = resEntity.getBody();
         LOGGER.info("Response Type: {}", resEntity.getBody().getClass());

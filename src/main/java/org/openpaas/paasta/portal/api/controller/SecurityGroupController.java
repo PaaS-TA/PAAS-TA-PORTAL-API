@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class SecurityGroupController extends Common {
      * @return GetSecurityGroupResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygruop/{securityid}")
+    @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}")
     public GetSecurityGroupResponse getSecurityGroupResponse(@PathVariable String securityid) throws Exception {
         return securityGroupService.getSecurityGroupResponse(securityid);
     }
@@ -38,7 +39,7 @@ public class SecurityGroupController extends Common {
      * @return ListSecurityGroupsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygruops/{page}")
+    @GetMapping(Constants.V2_URL+"/securitygroups/{page}")
     public ListSecurityGroupsResponse listSecurityGroupsResponse(@PathVariable int page) throws Exception {
         LOGGER.info("시작");
         return securityGroupService.listSecurityGroupsResponse(page);
@@ -53,7 +54,7 @@ public class SecurityGroupController extends Common {
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V2_URL+"/securitygruop/{groupname:.+}")
+    @PostMapping(Constants.V2_URL+"/securitygroup/{groupname:.+}")
     public CreateSecurityGroupResponse createSecurityGroupResponse(@PathVariable String groupname, @RequestBody List<RuleEntity> rule) throws Exception {
         return securityGroupService.createSecurityGroupResponse(groupname, rule);
     }
@@ -68,10 +69,18 @@ public class SecurityGroupController extends Common {
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygruop/{securityid}/{groupname:.+}")
-    public UpdateSecurityGroupResponse updateSecurityGroupResponse(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule) throws Exception {
-        LOGGER.info("수정");
-        return securityGroupService.updateSecurityGroupResponse(securityid, groupname, rule);
+    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/{groupname:.+}")
+    public Map updateSecurityGroupResponse(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule) {
+        try {
+            return new HashMap<String, Object>() {{
+                put("RESULT", securityGroupService.updateSecurityGroupResponse(securityid, groupname, rule));
+            }};
+        }catch (Exception e){
+            e.printStackTrace();
+            return new HashMap<String, Object>() {{
+                put("message", e.getMessage());
+            }};
+        }
     }
 
 
@@ -82,7 +91,7 @@ public class SecurityGroupController extends Common {
      * @return DeleteSecurityGroupResponse
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygruop/{securityid}")
+    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}")
     public DeleteSecurityGroupResponse deleteSecurityGroupResponse(@PathVariable String securityid) throws Exception {
         return securityGroupService.deleteSecurityGroupResponse(securityid);
     }
@@ -96,7 +105,7 @@ public class SecurityGroupController extends Common {
      * @return AssociateSecurityGroupSpaceResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygruop/{securityid}/spaces/{spaceid}")
+    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
     public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpaceResponse(@PathVariable String securityid, @PathVariable String spaceid) throws Exception {
         return securityGroupService.associateSecurityGroupSpaceResponse(securityid, spaceid);
     }
@@ -110,7 +119,7 @@ public class SecurityGroupController extends Common {
      * @return Map
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygruop/{securityid}/spaces/{spaceid}")
+    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
     public Map removeSecurityGroupSpace(@PathVariable String securityid, @PathVariable String spaceid) throws Exception {
         return securityGroupService.removeSecurityGroupSpace(securityid, spaceid);
     }
@@ -123,7 +132,7 @@ public class SecurityGroupController extends Common {
      * @return SetSecurityGroupStagingDefaultResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygruops/staging/{securityid}")
+    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
     public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(@PathVariable String securityid) throws Exception {
         return securityGroupService.setSecurityGroupStagingDefaultResponse(securityid);
     }
@@ -136,7 +145,7 @@ public class SecurityGroupController extends Common {
      * @return ListSecurityGroupStagingDefaultsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygruops/staging/{page}")
+    @GetMapping(Constants.V2_URL+"/securitygroup/{page}/staging")
     public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefaultsResponse(@PathVariable int page) throws Exception {
         return securityGroupService.listSecurityGroupStagingDefaultsResponse(page);
     }
@@ -149,7 +158,7 @@ public class SecurityGroupController extends Common {
      * @return Map
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygruop/{securityid}/staging")
+    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
     public Map removeSecurityGroupStaging(@PathVariable String securityid) throws Exception {
         return securityGroupService.removeSecurityGroupStaging(securityid);
     }
@@ -163,6 +172,7 @@ public class SecurityGroupController extends Common {
      * @return SetSecurityGroupRunningDefaultResponse
      * @throws Exception the exception
      */
+    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
     public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(@PathVariable String securityid) throws Exception {
         return securityGroupService.setSecurityGroupRunningDefaultResponse(securityid);
     }
@@ -175,7 +185,7 @@ public class SecurityGroupController extends Common {
      * @return ListSecurityGroupRunningDefaultsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygruops/running/{page}")
+    @GetMapping(Constants.V2_URL+"/securitygroup/{page}/running")
     public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(@PathVariable int page) throws Exception {
         return securityGroupService.listSecurityGroupRunningDefaultsResponse(page);
     }
@@ -188,6 +198,7 @@ public class SecurityGroupController extends Common {
      * @return Map
      * @throws Exception the exception
      */
+    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
     public Map removeSecurityGroupRunning(@PathVariable String securityid) throws Exception {
         return securityGroupService.removeSecurityGroupRunning(securityid);
     }
