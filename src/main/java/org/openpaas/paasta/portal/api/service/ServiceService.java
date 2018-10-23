@@ -1,15 +1,18 @@
 package org.openpaas.paasta.portal.api.service;
 
 
+import org.cloudfoundry.client.v2.organizations.ListOrganizationServicesRequest;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationServicesResponse;
+import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
 import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebrokers.*;
-import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
-import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
+import org.cloudfoundry.client.v2.serviceinstances.*;
 import org.cloudfoundry.client.v2.serviceplans.*;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesRequest;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
+import org.cloudfoundry.client.v3.organizations.ListOrganizationsRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.Service;
@@ -383,6 +386,21 @@ public class ServiceService extends Common {
                         .publiclyVisible(serviceBroker.getPubliclyVisible())
                         .build()
                 ).block();
+    }
+
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 조회한다.
+     *
+     * @param serviceplanId the serviceplan id
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(String serviceplanId) throws Exception {
+        return cloudFoundryClient(connectionContext())
+                .servicePlanVisibilities()
+                .list(ListServicePlanVisibilitiesRequest.builder()
+                        .servicePlanId(serviceplanId)
+                        .build()).block();
     }
 
 }

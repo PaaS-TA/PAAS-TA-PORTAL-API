@@ -1,14 +1,17 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
+import org.cloudfoundry.client.v2.organizations.ListOrganizationServicesResponse;
 import org.cloudfoundry.client.v2.servicebrokers.CreateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanResponse;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -260,6 +263,19 @@ public class ServiceController extends Common {
         serviceBroker.setGuid(UUID.fromString(guid));
         serviceBroker.setPubliclyVisible(true);
         return serviceService.updateServicePlan(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
+
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 조회한다.
+     *
+     * @param serviceplanId the serviceplan id
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V2_URL + "/serviceplans/{serviceplanId}/visibilites"})
+    public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(@PathVariable String serviceplanId) throws Exception {
+
+        return serviceService.getServicePlanVisibilites(serviceplanId);
     }
 
 }
