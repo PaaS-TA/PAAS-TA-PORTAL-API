@@ -1,12 +1,10 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
-import org.cloudfoundry.client.v2.organizations.ListOrganizationServicesResponse;
 import org.cloudfoundry.client.v2.servicebrokers.CreateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
@@ -260,9 +258,7 @@ public class ServiceController extends Common {
     public UpdateServicePlanResponse updateServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getPubliclyVisible()+"   " + serviceBroker.getServiceName());
-        serviceBroker.setGuid(UUID.fromString(guid));
-        serviceBroker.setPubliclyVisible(true);
-        return serviceService.updateServicePlan(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceService.updateServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
