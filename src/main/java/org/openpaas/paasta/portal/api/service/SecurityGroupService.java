@@ -2,6 +2,8 @@ package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.v2.securitygroups.*;
 import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanRequest;
+import org.cloudfoundry.client.v2.spaces.ListSpaceSecurityGroupsRequest;
+import org.cloudfoundry.client.v2.spaces.ListSpaceSecurityGroupsResponse;
 import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.isolationsegments.AddIsolationSegmentOrganizationEntitlementRequest;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @EnableAsync
 @Service
@@ -125,6 +128,7 @@ public class SecurityGroupService extends Common {
      * @throws Exception the exception
      */
     public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(String securityid) throws Exception {
+        System.out.println("*****************************************");
         return cloudFoundryClient(connectionContext()).securityGroups().setStagingDefault(SetSecurityGroupStagingDefaultRequest.builder().securityGroupId(securityid).build()).block();
     }
 
@@ -208,6 +212,17 @@ public class SecurityGroupService extends Common {
                 put("MSG", e.getMessage());
             }};
         }
+    }
+
+    /**
+     * 실행중인 응용 프로그램에 대한 시큐리티 그룹 조회
+     *
+     * @param page  ListSecurityGroups page
+     * @return ListSecurityGroupRunningDefaultsResponse
+     * @throws Exception the exception
+     */
+    public ListSecurityGroupSpacesResponse listSecurityGroupSpacesResponse(String securityid, int page) throws Exception {
+        return cloudFoundryClient(connectionContext()).securityGroups().listSpaces(ListSecurityGroupSpacesRequest.builder().securityGroupId(securityid).page(page).build()).block();
     }
 
 

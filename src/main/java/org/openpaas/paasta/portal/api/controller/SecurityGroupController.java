@@ -28,7 +28,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}")
-    public GetSecurityGroupResponse getSecurityGroupResponse(@PathVariable String securityid) throws Exception {
+    public GetSecurityGroupResponse getSecurityGroupResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.getSecurityGroupResponse(securityid);
     }
 
@@ -40,7 +40,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroups/{page}")
-    public ListSecurityGroupsResponse listSecurityGroupsResponse(@PathVariable int page) throws Exception {
+    public ListSecurityGroupsResponse listSecurityGroupsResponse(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("시작");
         return securityGroupService.listSecurityGroupsResponse(page);
     }
@@ -55,7 +55,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V2_URL+"/securitygroup/{groupname:.+}")
-    public CreateSecurityGroupResponse createSecurityGroupResponse(@PathVariable String groupname, @RequestBody List<RuleEntity> rule) throws Exception {
+    public CreateSecurityGroupResponse createSecurityGroupResponse(@PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.createSecurityGroupResponse(groupname, rule);
     }
 
@@ -70,7 +70,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/{groupname:.+}")
-    public Map updateSecurityGroupResponse(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule) {
+    public Map updateSecurityGroupResponse(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         try {
             return new HashMap<String, Object>() {{
                 put("RESULT", securityGroupService.updateSecurityGroupResponse(securityid, groupname, rule));
@@ -92,8 +92,18 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}")
-    public DeleteSecurityGroupResponse deleteSecurityGroupResponse(@PathVariable String securityid) throws Exception {
-        return securityGroupService.deleteSecurityGroupResponse(securityid);
+    public Map deleteSecurityGroupResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        try {
+            securityGroupService.deleteSecurityGroupResponse(securityid);
+            return new HashMap<String, Object>() {{
+                put("RESULT", "SUCCESS");
+            }};
+        }catch (Exception e){
+            e.printStackTrace();
+            return new HashMap<String, Object>() {{
+                put("message", e.getMessage());
+            }};
+        }
     }
 
 
@@ -106,7 +116,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
-    public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpaceResponse(@PathVariable String securityid, @PathVariable String spaceid) throws Exception {
+    public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpaceResponse(@PathVariable String securityid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.associateSecurityGroupSpaceResponse(securityid, spaceid);
     }
 
@@ -120,7 +130,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
-    public Map removeSecurityGroupSpace(@PathVariable String securityid, @PathVariable String spaceid) throws Exception {
+    public Map removeSecurityGroupSpace(@PathVariable String securityid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.removeSecurityGroupSpace(securityid, spaceid);
     }
 
@@ -133,7 +143,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
-    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(@PathVariable String securityid) throws Exception {
+    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.setSecurityGroupStagingDefaultResponse(securityid);
     }
 
@@ -146,7 +156,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{page}/staging")
-    public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefaultsResponse(@PathVariable int page) throws Exception {
+    public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefaultsResponse(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.listSecurityGroupStagingDefaultsResponse(page);
     }
 
@@ -159,7 +169,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
-    public Map removeSecurityGroupStaging(@PathVariable String securityid) throws Exception {
+    public Map removeSecurityGroupStaging(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.removeSecurityGroupStaging(securityid);
     }
 
@@ -173,7 +183,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
-    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(@PathVariable String securityid) throws Exception {
+    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.setSecurityGroupRunningDefaultResponse(securityid);
     }
 
@@ -186,7 +196,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{page}/running")
-    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(@PathVariable int page) throws Exception {
+    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.listSecurityGroupRunningDefaultsResponse(page);
     }
 
@@ -199,24 +209,24 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
-    public Map removeSecurityGroupRunning(@PathVariable String securityid) throws Exception {
+    public Map removeSecurityGroupRunning(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.removeSecurityGroupRunning(securityid);
     }
 
 
 
-//    /**
-//     * 공간 시큐리티그룹을 조회한다.
-//     *
-//     * @param page  ListSecurityGroups page
-//     * @param spaceid  Space guid
-//     * @return ListSecurityGroupSpacesResponse
-//     * @throws Exception the exception
-//     */
-//    @GetMapping(Constants.V2_URL+"/securitygruop/{spaceid}/{page}")
-//    public ListSecurityGroupSpacesResponse listSecurityGroupsResponse(@PathVariable String spaceid, @PathVariable int page) throws Exception {
-//        return securityGroupService.listSecurityGroupsResponse(spaceid, page);
-//    }
+    /**
+     * 공간 시큐리티그룹을 조회한다.
+     *
+     * @param page  ListSecurityGroups page
+     * @param securityid the security guid
+     * @return ListSecurityGroupSpacesResponse
+     * @throws Exception the exception
+     */
+    @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}/{page}")
+    public ListSecurityGroupSpacesResponse listSecurityGroupSpacesResponse(@PathVariable String securityid, @PathVariable int page) throws Exception {
+        return securityGroupService.listSecurityGroupSpacesResponse(securityid, page);
+    }
 
 
 
