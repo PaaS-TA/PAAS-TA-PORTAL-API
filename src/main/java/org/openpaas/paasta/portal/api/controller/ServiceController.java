@@ -6,6 +6,7 @@ import org.cloudfoundry.client.v2.servicebrokers.GetServiceBrokerResponse;
 import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.serviceplans.DeleteServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanResponse;
@@ -247,7 +248,7 @@ public class ServiceController extends Common {
     }
 
     /**
-     * 서비스 제어 수정한다. / 서비스 활성화를 변경한다.
+     * 서비스 활성화 접근허용한다.
      *
      * @param serviceBroker the cloudServiceBroker
      * @param request       the request
@@ -256,7 +257,6 @@ public class ServiceController extends Common {
      */
     @PutMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
     public UpdateServicePlanResponse updateServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
-
         LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getPubliclyVisible()+"   " + serviceBroker.getServiceName());
         return serviceService.updateServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
@@ -270,8 +270,21 @@ public class ServiceController extends Common {
      */
     @GetMapping(value = {Constants.V2_URL + "/serviceplans/{serviceplanId}/visibilites"})
     public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(@PathVariable String serviceplanId) throws Exception {
-
         return serviceService.getServicePlanVisibilites(serviceplanId);
+    }
+
+    /**
+     * 서비스 플랜 삭제
+     *
+     * @param serviceBroker the cloudServiceBroker
+     * @param request       the request
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    @DeleteMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
+    public DeleteServicePlanResponse deleteServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("deleteServicePlan Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getPubliclyVisible()+"   " + serviceBroker.getServiceName());
+        return serviceService.deleteServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 }

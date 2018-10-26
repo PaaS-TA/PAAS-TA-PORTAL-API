@@ -402,6 +402,24 @@ public class ServiceService extends Common {
                         .build()).block();
     }
 
+    /**
+     * 서비스 플랜 삭제
+     *
+     * @param serviceBroker the cloudServiceBroker
+     * @param token
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public DeleteServicePlanResponse deleteServicePlan(ServiceBroker serviceBroker, String guid, String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+                .servicePlans()
+                .delete(DeleteServicePlanRequest.builder()
+                        .servicePlanId(guid)
+                        .async(serviceBroker.getPubliclyVisible())
+                        .build()
+                ).block();
+    }
+
 }
 
 
