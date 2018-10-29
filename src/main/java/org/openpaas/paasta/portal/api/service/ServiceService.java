@@ -11,6 +11,8 @@ import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceplans.*;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesRequest;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesResponse;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.UpdateServicePlanVisibilityRequest;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.UpdateServicePlanVisibilityResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -416,6 +418,25 @@ public class ServiceService extends Common {
                 .delete(DeleteServicePlanRequest.builder()
                         .servicePlanId(guid)
                         .async(serviceBroker.getPubliclyVisible())
+                        .build()
+                ).block();
+    }
+
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 추가한다.
+     *
+     * @param serviceBroker the cloudServiceBroker
+     * @param token
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public UpdateServicePlanVisibilityResponse updateServicePlanVisibility(ServiceBroker serviceBroker, String guid, String token) throws Exception {
+        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+                .servicePlanVisibilities()
+                .update(UpdateServicePlanVisibilityRequest.builder()
+                        .servicePlanId(guid)
+                        .organizationId(serviceBroker.getOrgGuid())
+                        .servicePlanVisibilityId(String.valueOf(serviceBroker.getPubliclyVisible()))
                         .build()
                 ).block();
     }
