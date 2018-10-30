@@ -72,12 +72,33 @@ public class CatalogService extends Common {
      */
     //@HystrixCommand(commandKey = "getCatalogServicePlanList")
     public ListServicePlansResponse getCatalogServicePlanList(String servicename, String token) throws Exception {
-
-        ListServicesResponse listServicesResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).services().list(ListServicesRequest.builder().build()).block();
+        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ListServicesResponse listServicesResponse = reactorCloudFoundryClient.services().list(ListServicesRequest.builder().build()).block();
         Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream().filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
-        ListServicePlansResponse listServicePlansResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
+        ListServicePlansResponse listServicePlansResponse = reactorCloudFoundryClient.servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
         return listServicePlansResponse;
     }
+
+    /**
+     * 카탈로그 서비스 이용사양 목록을 조회한다.
+     *
+     * @param servicename ServiceName(자바클래스)
+     * @param token         HttpServletRequest(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    //@HystrixCommand(commandKey = "getCatalogServicePlanList")
+    public ListServicePlansResponse getCatalogServicePlanAdMinList(String servicename, String token) throws Exception {
+        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ListServicesResponse listServicesResponse = reactorCloudFoundryClient.services().list(ListServicesRequest.builder().build()).block();
+        Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream().filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
+        ListServicePlansResponse listServicePlansResponse = reactorCloudFoundryClient.servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
+        return listServicePlansResponse;
+    }
+
+
+
+
 
     /**
      * 카탈로그 앱 목록을 조회한다.
