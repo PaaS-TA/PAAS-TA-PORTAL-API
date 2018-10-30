@@ -344,7 +344,7 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     public ListServicePlansResponse getServicePlans(String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(),tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .servicePlans()
                 .list(ListServicePlansRequest.builder().build())
                 .log()
@@ -359,7 +359,7 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     public GetServicePlanResponse getServicePlan(ServiceBroker serviceBroker, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .servicePlans()
                 .get(GetServicePlanRequest.builder()
                         .servicePlanId(serviceBroker.getGuid().toString())
@@ -377,7 +377,7 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     public UpdateServicePlanResponse updateServicePlan(ServiceBroker serviceBroker, String guid, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .servicePlans()
                 .update(UpdateServicePlanRequest.builder()
                         .servicePlanId(guid)
@@ -410,7 +410,7 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     public DeleteServicePlanResponse deleteServicePlan(ServiceBroker serviceBroker, String guid, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .servicePlans()
                 .delete(DeleteServicePlanRequest.builder()
                         .servicePlanId(guid)
@@ -428,7 +428,7 @@ public class ServiceService extends Common {
      * @throws Exception the exception
      */
     public CreateServicePlanVisibilityResponse updateServicePlanVisibility(Map<String, Object> bodyMap, String guid, String token) throws Exception {
-        return Common.cloudFoundryClient(connectionContext(), tokenProvider())
+        return cloudFoundryClient(connectionContext())
                 .servicePlanVisibilities()
                 .create(CreateServicePlanVisibilityRequest.builder()
                         .servicePlanId(bodyMap.get("servicePlanGuid").toString())

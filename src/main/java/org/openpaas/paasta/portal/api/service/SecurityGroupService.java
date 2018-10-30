@@ -53,8 +53,19 @@ public class SecurityGroupService extends Common {
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    public CreateSecurityGroupResponse createSecurityGroupResponse(String groupname, List<RuleEntity> rule) throws Exception {
-        return cloudFoundryClient(connectionContext()).securityGroups().create(CreateSecurityGroupRequest.builder().name(groupname).rules(rule).build()).block();
+    public Map createSecurityGroupResponse(String groupname, List<RuleEntity> rule) throws Exception {
+        try {
+           CreateSecurityGroupResponse createSecurityGroupResponse = cloudFoundryClient(connectionContext()).securityGroups().create(CreateSecurityGroupRequest.builder().name(groupname).rules(rule).build()).block();
+            return new HashMap() {{
+                put("RESULT", "SUCCESS");
+                put("DATA", createSecurityGroupResponse);
+            }};
+        } catch (Exception e) {
+            return new HashMap() {{
+                put("RESULT", "FALE");
+                put("MSG", e.getMessage());
+            }};
+        }
     }
 
 
