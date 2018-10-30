@@ -10,8 +10,8 @@ import org.cloudfoundry.client.v2.serviceplans.DeleteServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanResponse;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.CreateServicePlanVisibilityResponse;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesResponse;
-import org.cloudfoundry.client.v2.serviceplanvisibilities.UpdateServicePlanVisibilityResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -291,15 +291,15 @@ public class ServiceController extends Common {
     /**
      * 서비스 Plan에 Access 등록 되어있는 조직을 추가한다.
      *
-     * @param serviceBroker the cloudServiceBroker
+     * @param bodyMap the map
      * @param request       the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
-    public UpdateServicePlanVisibilityResponse updateServicePlanVisibility(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("serviceplanvisibilities Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getOrgGuid()+"   " +serviceBroker.getPubliclyVisible());
-        return serviceService.updateServicePlanVisibility(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    public CreateServicePlanVisibilityResponse updateServicePlanVisibility(@RequestBody Map<String, Object> bodyMap, @PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("serviceplanvisibilities Start : " + guid +"   " + bodyMap.get("servicePlanGuid").toString()+"   " +bodyMap.get("orgGuid").toString());
+        return serviceService.updateServicePlanVisibility(bodyMap, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 }
