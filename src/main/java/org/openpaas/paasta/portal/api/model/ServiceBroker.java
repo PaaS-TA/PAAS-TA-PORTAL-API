@@ -14,6 +14,8 @@ public class ServiceBroker {
     private String serviceName;
     private boolean publiclyVisible;
 
+    private String orgGuid;
+
 
     public String getName() {
         return name;
@@ -69,5 +71,13 @@ public class ServiceBroker {
 
     public void setPubliclyVisible(boolean publiclyVisible) {
         this.publiclyVisible = publiclyVisible;
+    }
+
+    public String getOrgGuid() {
+        return orgGuid;
+    }
+
+    public void setOrgGuid(String orgGuid) {
+        this.orgGuid = orgGuid;
     }
 }
