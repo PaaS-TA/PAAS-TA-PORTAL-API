@@ -55,7 +55,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V2_URL+"/securitygroup/{groupname:.+}")
-    public CreateSecurityGroupResponse createSecurityGroupResponse(@PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public Map createSecurityGroupResponse(@PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.createSecurityGroupResponse(groupname, rule);
     }
 
