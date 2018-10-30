@@ -11,6 +11,7 @@ import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.serviceplans.UpdateServicePlanResponse;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.CreateServicePlanVisibilityResponse;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.DeleteServicePlanVisibilityResponse;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -263,18 +264,6 @@ public class ServiceController extends Common {
     }
 
     /**
-     * 서비스 Plan에 Access 등록 되어있는 조직을 조회한다.
-     *
-     * @param serviceplanId the serviceplan id
-     * @return boolean boolean
-     * @throws Exception the exception
-     */
-    @GetMapping(value = {Constants.V2_URL + "/serviceplans/{serviceplanId}/visibilites"})
-    public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(@PathVariable String serviceplanId) throws Exception {
-        return serviceService.getServicePlanVisibilites(serviceplanId);
-    }
-
-    /**
      * 서비스 플랜 삭제
      *
      * @param serviceBroker the cloudServiceBroker
@@ -289,6 +278,18 @@ public class ServiceController extends Common {
     }
 
     /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 조회한다.
+     *
+     * @param serviceplanId the serviceplan id
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V2_URL + "/serviceplans/{serviceplanId}/visibilites"})
+    public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(@PathVariable String serviceplanId) throws Exception {
+        return serviceService.getServicePlanVisibilites(serviceplanId);
+    }
+
+    /**
      * 서비스 Plan에 Access 등록 되어있는 조직을 추가한다.
      *
      * @param bodyMap the map
@@ -300,6 +301,20 @@ public class ServiceController extends Common {
     public CreateServicePlanVisibilityResponse updateServicePlanVisibility(@RequestBody Map<String, Object> bodyMap, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("serviceplanvisibilities Start : " + guid +"   " + bodyMap.get("servicePlanGuid").toString()+"   " +bodyMap.get("orgGuid").toString());
         return serviceService.updateServicePlanVisibility(bodyMap, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    }
+
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 삭제한다.
+     *
+     * @param serviceBroker the cloudServiceBroker
+     * @param request       the request
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    @DeleteMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
+    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
+        LOGGER.info("serviceplanvisibilities Start : " + guid+"   " +serviceBroker.getPubliclyVisible());
+        return serviceService.deleteServicePlanVisibility(serviceBroker,guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 }

@@ -386,20 +386,6 @@ public class ServiceService extends Common {
                 ).block();
     }
 
-    /**
-     * 서비스 Plan에 Access 등록 되어있는 조직을 조회한다.
-     *
-     * @param serviceplanId the serviceplan id
-     * @return boolean boolean
-     * @throws Exception the exception
-     */
-    public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(String serviceplanId) throws Exception {
-        return cloudFoundryClient(connectionContext())
-                .servicePlanVisibilities()
-                .list(ListServicePlanVisibilitiesRequest.builder()
-                        .servicePlanId(serviceplanId)
-                        .build()).block();
-    }
 
     /**
      * 서비스 플랜 삭제
@@ -420,6 +406,21 @@ public class ServiceService extends Common {
     }
 
     /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 조회한다.
+     *
+     * @param serviceplanId the serviceplan id
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(String serviceplanId) throws Exception {
+        return cloudFoundryClient(connectionContext())
+                .servicePlanVisibilities()
+                .list(ListServicePlanVisibilitiesRequest.builder()
+                        .servicePlanId(serviceplanId)
+                        .build()).block();
+    }
+
+    /**
      * 서비스 Plan에 Access 등록 되어있는 조직을 추가한다.
      *
      * @param bodyMap the map
@@ -437,6 +438,23 @@ public class ServiceService extends Common {
                 ).block();
     }
 
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 삭제한다.
+     *
+
+     * @param token
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(ServiceBroker serviceBroker, String guid, String token) throws Exception {
+        return cloudFoundryClient(connectionContext())
+                .servicePlanVisibilities()
+                .delete(DeleteServicePlanVisibilityRequest.builder()
+                        .servicePlanVisibilityId(guid)
+                        .async(serviceBroker.getPubliclyVisible())
+                        .build()
+                ).block();
+    }
 }
 
 
