@@ -34,7 +34,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/organizations/{organizationsId:.+}")
-    public ListIsolationSegmentsResponse getIsolationSegmentsByOrgGuid(@PathVariable String organizationsId) throws Exception {
+    public ListIsolationSegmentsResponse getIsolationSegmentsByOrgGuid(@PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.getIsolationSegmentsByOrgGuid(organizationsId);
     }
 
@@ -46,7 +46,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations")
-    public ListIsolationSegmentEntitledOrganizationsResponse getIsolationSegmentsOrgs(@PathVariable String isolationSegmentId) throws Exception {
+    public ListIsolationSegmentEntitledOrganizationsResponse getIsolationSegmentsOrgs(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.getIsolationSegmentsOrgs(isolationSegmentId);
     }
 
@@ -58,7 +58,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/relationships/organizations")
-    public ListIsolationSegmentOrganizationsRelationshipResponse getIsolationSegmentsOrgsRelationships(@PathVariable String isolationSegmentId) throws Exception {
+    public ListIsolationSegmentOrganizationsRelationshipResponse getIsolationSegmentsOrgsRelationships(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.getIsolationSegmentsOrgsRelationships(isolationSegmentId);
     }
 
@@ -71,7 +71,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/spaces")
-    public ListIsolationSegmentSpacesRelationshipResponse getIsolationSegmentsSpaces(@PathVariable String isolationSegmentId) throws Exception {
+    public ListIsolationSegmentSpacesRelationshipResponse getIsolationSegmentsSpaces(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.getIsolationSegmentsSpaces(isolationSegmentId);
     }
 
@@ -83,7 +83,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/isolationSegments/{segementName:.+}")
-    public CreateIsolationSegmentResponse createIsolationSegments(@PathVariable String segementName) throws Exception {
+    public CreateIsolationSegmentResponse createIsolationSegments(@PathVariable String segementName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.createIsolationSegments(segementName);
     }
 
@@ -95,7 +95,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}")
-    public Map deleteIsolationSegments(@PathVariable String isolationSegmentId) throws Exception {
+    public Map deleteIsolationSegments(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.deleteIsolationSegments(isolationSegmentId);
     }
 
@@ -108,7 +108,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
-    public AddIsolationSegmentOrganizationEntitlementResponse eanbleIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId) throws Exception {
+    public AddIsolationSegmentOrganizationEntitlementResponse eanbleIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.eanbleIsolationSegments(isolationSegmentId, organizationsId);
     }
 
@@ -121,7 +121,7 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
-    public Map disableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId) throws Exception {
+    public Map disableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsService.disableIsolationSegments(isolationSegmentId, organizationsId);
     }
 }
