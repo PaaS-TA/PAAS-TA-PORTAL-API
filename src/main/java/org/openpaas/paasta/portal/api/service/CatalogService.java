@@ -12,8 +12,11 @@ import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
 import org.cloudfoundry.client.v2.serviceinstances.*;
+import org.cloudfoundry.client.v2.serviceplans.ListServicePlanServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesRequest;
+import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesResponse;
 import org.cloudfoundry.client.v2.services.ListServicesRequest;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
@@ -36,9 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class CatalogService extends Common {
@@ -82,18 +83,30 @@ public class CatalogService extends Common {
     /**
      * 카탈로그 서비스 이용사양 목록을 조회한다.
      *
-     * @param servicename ServiceName(자바클래스)
-     * @param token         HttpServletRequest(자바클래스)
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     //@HystrixCommand(commandKey = "getCatalogServicePlanList")
-    public ListServicePlansResponse getCatalogServicePlanAdMinList(String servicename, String token) throws Exception {
-        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+    public Map getCatalogServicePlanAdMinList() throws Exception {
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext());
+        List<Map> List_service = new ArrayList<>();
         ListServicesResponse listServicesResponse = reactorCloudFoundryClient.services().list(ListServicesRequest.builder().build()).block();
-        Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream().filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
-        ListServicePlansResponse listServicePlansResponse = reactorCloudFoundryClient.servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
-        return listServicePlansResponse;
+        listServicesResponse.getResources().forEach(resource -> {
+            Map list_result = new HashMap();
+            try {
+                list_result.put("Plan", reactorCloudFoundryClient.servicePlans().list(ListServicePlansRequest.builder().serviceId(resource.getMetadata().getId()).build()).block());
+                list_result.put("Service", resource);
+            }catch (Exception e){
+
+            }finally {
+                List_service.add(list_result);
+            }
+        });
+        ListServicePlanVisibilitiesResponse listServicePlanVisibilitiesResponse =  reactorCloudFoundryClient.servicePlanVisibilities().list(ListServicePlanVisibilitiesRequest.builder().build()).block();
+        return new HashMap<String, Object>() {{
+            put("RESULT", List_service);
+            put("Visibilities", listServicePlanVisibilitiesResponse);
+        }};
     }
 
 

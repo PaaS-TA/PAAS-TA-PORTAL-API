@@ -52,6 +52,20 @@ public class CatalogController extends Common {
     }
 
     /**
+     * 카탈로그 서비스 이용사양 목록을 조회한다.
+     *
+     * @param token   HttpServletRequest(자바클래스)
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    @GetMapping(Constants.V2_URL+"/catalogs/serviceplan-admin")
+    public Map getCatalogServicePlanList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return catalogService.getCatalogServicePlanAdMinList();
+    }
+
+
+
+    /**
      * 카탈로그 앱 목록을 조회한다.
      *
      * @param orgid String(자바클래스)
