@@ -27,7 +27,7 @@ public class SecurityGroupService extends Common {
      * @return GetSecurityGroupResponse
      * @throws Exception the exception
      */
-    public GetSecurityGroupResponse getSecurityGroupResponse(String securityid) throws Exception {
+    public GetSecurityGroupResponse getSecurityGroup(String securityid) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().get(GetSecurityGroupRequest.builder().securityGroupId(securityid).build()).block();
     }
 
@@ -39,7 +39,7 @@ public class SecurityGroupService extends Common {
      * @return ListSecurityGroupsResponse
      * @throws Exception the exception
      */
-    public ListSecurityGroupsResponse listSecurityGroupsResponse(int page) throws Exception {
+    public ListSecurityGroupsResponse listSecurityGroups(int page) throws Exception {
 
         return cloudFoundryClient(connectionContext()).securityGroups().list(ListSecurityGroupsRequest.builder().page(page).build()).block();
     }
@@ -53,7 +53,7 @@ public class SecurityGroupService extends Common {
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    public Map createSecurityGroupResponse(String groupname, List<RuleEntity> rule) throws Exception {
+    public Map createSecurityGroup(String groupname, List<RuleEntity> rule) throws Exception {
         try {
            CreateSecurityGroupResponse createSecurityGroupResponse = cloudFoundryClient(connectionContext()).securityGroups().create(CreateSecurityGroupRequest.builder().name(groupname).rules(rule).build()).block();
             return new HashMap() {{
@@ -78,7 +78,7 @@ public class SecurityGroupService extends Common {
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    public UpdateSecurityGroupResponse updateSecurityGroupResponse(String securityid, String groupname, List<RuleEntity> rule) {
+    public UpdateSecurityGroupResponse updateSecurityGroup(String securityid, String groupname, List<RuleEntity> rule) {
         return cloudFoundryClient(connectionContext()).securityGroups().update(UpdateSecurityGroupRequest.builder().securityGroupId(securityid).name(groupname).rules(rule).build()).block();
     }
 
@@ -90,7 +90,7 @@ public class SecurityGroupService extends Common {
      * @return DeleteSecurityGroupResponse
      * @throws Exception the exception
      */
-    public DeleteSecurityGroupResponse deleteSecurityGroupResponse(String securityid) throws Exception {
+    public DeleteSecurityGroupResponse deleteSecurityGroup(String securityid) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().delete(DeleteSecurityGroupRequest.builder().securityGroupId(securityid).build()).block();
     }
 
@@ -103,7 +103,7 @@ public class SecurityGroupService extends Common {
      * @return AssociateSecurityGroupSpaceResponse
      * @throws Exception the exception
      */
-    public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpaceResponse(String securityid,  String spaceid) throws Exception {
+    public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpace(String securityid,  String spaceid) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().associateSpace(AssociateSecurityGroupSpaceRequest.builder().securityGroupId(securityid).spaceId(spaceid).build()).block();
     }
 
@@ -138,8 +138,7 @@ public class SecurityGroupService extends Common {
      * @return SetSecurityGroupStagingDefaultResponse
      * @throws Exception the exception
      */
-    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(String securityid) throws Exception {
-        System.out.println("*****************************************");
+    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefault(String securityid) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().setStagingDefault(SetSecurityGroupStagingDefaultRequest.builder().securityGroupId(securityid).build()).block();
     }
 
@@ -186,7 +185,7 @@ public class SecurityGroupService extends Common {
      * @return SetSecurityGroupRunningDefaultResponse
      * @throws Exception the exception
      */
-    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(String securityid) throws Exception {
+    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefault(String securityid) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().setRunningDefault(SetSecurityGroupRunningDefaultRequest.builder().securityGroupId(securityid).build()).block();
     }
 
@@ -198,7 +197,7 @@ public class SecurityGroupService extends Common {
      * @return ListSecurityGroupRunningDefaultsResponse
      * @throws Exception the exception
      */
-    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(int page) throws Exception {
+    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaults(int page) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().listRunningDefaults(ListSecurityGroupRunningDefaultsRequest.builder().page(page).build()).block();
     }
 
@@ -232,7 +231,7 @@ public class SecurityGroupService extends Common {
      * @return ListSecurityGroupRunningDefaultsResponse
      * @throws Exception the exception
      */
-    public ListSecurityGroupSpacesResponse listSecurityGroupSpacesResponse(String securityid, int page) throws Exception {
+    public ListSecurityGroupSpacesResponse listSecurityGroupSpaces(String securityid, int page) throws Exception {
         return cloudFoundryClient(connectionContext()).securityGroups().listSpaces(ListSecurityGroupSpacesRequest.builder().securityGroupId(securityid).page(page).build()).block();
     }
 

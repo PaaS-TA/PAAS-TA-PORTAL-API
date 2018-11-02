@@ -28,8 +28,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}")
-    public GetSecurityGroupResponse getSecurityGroupResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return securityGroupService.getSecurityGroupResponse(securityid);
+    public GetSecurityGroupResponse getSecurityGroup(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return securityGroupService.getSecurityGroup(securityid);
     }
 
     /**
@@ -40,9 +40,9 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroups/{page}")
-    public ListSecurityGroupsResponse listSecurityGroupsResponse(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public ListSecurityGroupsResponse listSecurityGroups(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("시작");
-        return securityGroupService.listSecurityGroupsResponse(page);
+        return securityGroupService.listSecurityGroups(page);
     }
 
 
@@ -55,8 +55,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V2_URL+"/securitygroup/{groupname:.+}")
-    public Map createSecurityGroupResponse(@PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return securityGroupService.createSecurityGroupResponse(groupname, rule);
+    public Map createSecurityGroup(@PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return securityGroupService.createSecurityGroup(groupname, rule);
     }
 
 
@@ -70,10 +70,10 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/{groupname:.+}")
-    public Map updateSecurityGroupResponse(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+    public Map updateSecurityGroup(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         try {
             return new HashMap<String, Object>() {{
-                put("RESULT", securityGroupService.updateSecurityGroupResponse(securityid, groupname, rule));
+                put("RESULT", securityGroupService.updateSecurityGroup(securityid, groupname, rule));
             }};
         }catch (Exception e){
             e.printStackTrace();
@@ -92,9 +92,9 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}")
-    public Map deleteSecurityGroupResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public Map deleteSecurityGroup(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         try {
-            securityGroupService.deleteSecurityGroupResponse(securityid);
+            securityGroupService.deleteSecurityGroup(securityid);
             return new HashMap<String, Object>() {{
                 put("RESULT", "SUCCESS");
             }};
@@ -116,8 +116,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
-    public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpaceResponse(@PathVariable String securityid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return securityGroupService.associateSecurityGroupSpaceResponse(securityid, spaceid);
+    public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpace(@PathVariable String securityid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return securityGroupService.associateSecurityGroupSpace(securityid, spaceid);
     }
 
 
@@ -143,8 +143,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
-    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefaultResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return securityGroupService.setSecurityGroupStagingDefaultResponse(securityid);
+    public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefault(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return securityGroupService.setSecurityGroupStagingDefault(securityid);
     }
 
 
@@ -156,7 +156,7 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{page}/staging")
-    public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefaultsResponse(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefault(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.listSecurityGroupStagingDefaultsResponse(page);
     }
 
@@ -183,8 +183,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
-    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefaultResponse(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return securityGroupService.setSecurityGroupRunningDefaultResponse(securityid);
+    public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefault(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return securityGroupService.setSecurityGroupRunningDefault(securityid);
     }
 
 
@@ -196,8 +196,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{page}/running")
-    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaultsResponse(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return securityGroupService.listSecurityGroupRunningDefaultsResponse(page);
+    public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaults(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return securityGroupService.listSecurityGroupRunningDefaults(page);
     }
 
 
@@ -224,8 +224,8 @@ public class SecurityGroupController extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}/{page}")
-    public ListSecurityGroupSpacesResponse listSecurityGroupSpacesResponse(@PathVariable String securityid, @PathVariable int page) throws Exception {
-        return securityGroupService.listSecurityGroupSpacesResponse(securityid, page);
+    public ListSecurityGroupSpacesResponse listSecurityGroupSpaces(@PathVariable String securityid, @PathVariable int page) throws Exception {
+        return securityGroupService.listSecurityGroupSpaces(securityid, page);
     }
 
 
