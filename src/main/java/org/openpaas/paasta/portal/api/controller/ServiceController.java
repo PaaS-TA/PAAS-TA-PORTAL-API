@@ -306,15 +306,13 @@ public class ServiceController extends Common {
     /**
      * 서비스 Plan에 Access 등록 되어있는 조직을 삭제한다.
      *
-     * @param serviceBroker the cloudServiceBroker
      * @param request       the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @DeleteMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
-    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("serviceplanvisibilities Start : " + guid+"   " +serviceBroker.getPubliclyVisible());
-        return serviceService.deleteServicePlanVisibility(serviceBroker,guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility( @PathVariable String guid, HttpServletRequest request) throws Exception {
+        return serviceService.deleteServicePlanVisibility(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
 }
