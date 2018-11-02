@@ -446,12 +446,12 @@ public class ServiceService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(ServiceBroker serviceBroker, String guid, String token) throws Exception {
+    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(String guid, String token) throws Exception {
         return cloudFoundryClient(connectionContext())
                 .servicePlanVisibilities()
                 .delete(DeleteServicePlanVisibilityRequest.builder()
                         .servicePlanVisibilityId(guid)
-                        .async(serviceBroker.getPubliclyVisible())
+                        .async(false)
                         .build()
                 ).block();
     }
