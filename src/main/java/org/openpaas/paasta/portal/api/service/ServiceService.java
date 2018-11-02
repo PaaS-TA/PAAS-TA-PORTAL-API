@@ -455,6 +455,32 @@ public class ServiceService extends Common {
                         .build()
                 ).block();
     }
+
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 삭제한다.
+     *
+
+     * @param guid serviceplan guid
+     * @return the boolean
+     * @throws Exception the exception
+     */
+    public Map allDeleteServicePlanVisibility(String guid) throws Exception {
+        try {
+            ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext());
+            ListServicePlanVisibilitiesResponse listServicePlanVisibilitiesResponse = reactorCloudFoundryClient.servicePlanVisibilities().list(ListServicePlanVisibilitiesRequest.builder().servicePlanId(guid).build()).block();
+            listServicePlanVisibilitiesResponse.getResources().forEach(resource -> {
+                reactorCloudFoundryClient.servicePlanVisibilities()
+                        .delete(DeleteServicePlanVisibilityRequest.builder()
+                                .servicePlanVisibilityId(resource.getMetadata().getId())
+                                .async(false)
+                                .build()
+                        ).block();
+            });
+           return new HashMap<String,Object>(){{put("RESULT", "SUCCESS");}};
+        } catch (Exception e){
+         return new HashMap<String,Object>(){{put("RESULT", "FALE");}};
+        }
+    }
 }
 
 

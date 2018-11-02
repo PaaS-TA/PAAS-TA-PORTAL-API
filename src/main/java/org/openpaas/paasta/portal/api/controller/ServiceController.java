@@ -315,5 +315,17 @@ public class ServiceController extends Common {
         return serviceService.deleteServicePlanVisibility(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
+    /**
+     * 서비스 Plan에 Access 등록 되어있는 조직을 모두 삭제한다.
+     *
+     * @param token    token
+     * @return boolean boolean
+     * @throws Exception the exception
+     */
+    @DeleteMapping(Constants.V2_URL + "/serviceplanvisibilities/all/{guid}")
+    public Map allDeleteServicePlanVisibility( @PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return serviceService.allDeleteServicePlanVisibility(guid);
+    }
+
 }
 
