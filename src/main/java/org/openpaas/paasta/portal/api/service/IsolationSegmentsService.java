@@ -87,14 +87,14 @@ public class IsolationSegmentsService extends Common {
     /**
      * Isolation Segments를 생성한다.
      *
-     * @param segementName  the segement name
+     * @param segmentName  the segment name
      * @return CreateIsolationSegmentResponse
      * @throws Exception the exception
      */
-    public CreateIsolationSegmentResponse createIsolationSegments(String segementName) throws Exception {
+    public CreateIsolationSegmentResponse createIsolationSegments(String segmentName) throws Exception {
         return cloudFoundryClient(connectionContext()).isolationSegments()
                 .create(CreateIsolationSegmentRequest.builder()
-                        .name(segementName)
+                        .name(segmentName)
                         .build()).block();
     }
 
