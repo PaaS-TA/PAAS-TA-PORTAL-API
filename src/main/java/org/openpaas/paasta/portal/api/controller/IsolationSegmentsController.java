@@ -78,13 +78,13 @@ public class IsolationSegmentsController extends Common {
     /**
      * Isolation Segments를 생성한다.
      *
-     * @param segementName  the segement name
+     * @param segmentName  the segment name
      * @return CreateIsolationSegmentResponse
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V3_URL+"/isolationSegments/{segementName:.+}")
-    public CreateIsolationSegmentResponse createIsolationSegments(@PathVariable String segementName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.createIsolationSegments(segementName);
+    @PostMapping(Constants.V3_URL+"/isolationSegments/{segmentName:.+}")
+    public CreateIsolationSegmentResponse createIsolationSegments(@PathVariable String segmentName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return isolationSegmentsService.createIsolationSegments(segmentName);
     }
 
     /**
