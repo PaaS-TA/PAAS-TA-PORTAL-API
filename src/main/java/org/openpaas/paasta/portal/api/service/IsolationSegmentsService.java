@@ -132,7 +132,7 @@ public class IsolationSegmentsService extends Common {
      * @return AddIsolationSegmentOrganizationEntitlementResponse
      * @throws Exception the exception
      */
-    public AddIsolationSegmentOrganizationEntitlementResponse eanbleIsolationSegments(String isolationSegmentId, String organizationsId) throws Exception {
+    public AddIsolationSegmentOrganizationEntitlementResponse enableIsolationSegments(String isolationSegmentId, String organizationsId) throws Exception {
         return cloudFoundryClient(connectionContext()).isolationSegments()
                 .addOrganizationEntitlement(AddIsolationSegmentOrganizationEntitlementRequest.builder()
                         .isolationSegmentId(isolationSegmentId)

@@ -108,8 +108,8 @@ public class IsolationSegmentsController extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
-    public AddIsolationSegmentOrganizationEntitlementResponse eanbleIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.eanbleIsolationSegments(isolationSegmentId, organizationsId);
+    public AddIsolationSegmentOrganizationEntitlementResponse enableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return isolationSegmentsService.enableIsolationSegments(isolationSegmentId, organizationsId);
     }
 
     /**

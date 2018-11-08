@@ -354,6 +354,13 @@ public class UserService extends Common {
         return getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userName);
     }
 
+    /**
+     * 사용자 포탈 접속 가능 유무 수정
+     *
+     * @param userGuid     userId
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
     public UpdateUserResponse UpdateUserActive(String userGuid) throws Exception {
          ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
          User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
@@ -366,10 +373,6 @@ public class UserService extends Common {
          return updateUserResponse;
     }
 
-    public ReactorUaaClient test(){
-        ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
-        return uaaClient;
-    }
 
 
 }

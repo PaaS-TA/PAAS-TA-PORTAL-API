@@ -80,6 +80,14 @@ public class LoginController extends Common {
         return result;
     }
 
+
+    /**
+     * token Refresh.
+     *
+     * @param body the body
+     * @return the map
+     * @throws Exception the exception
+     */
     @PostMapping("/token/refresh")
     public Map<String, Object> refresh(@RequestBody Map<String, Object> body) throws Exception {
         String tokenStr = (String) body.get("token");

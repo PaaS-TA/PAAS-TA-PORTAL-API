@@ -150,17 +150,37 @@ public class UserController extends Common {
         return result;
     }
 
-
+    /**
+     * 유저 이름(user name)으로 유저의 GUID(user id)를 가져온다.
+     *
+     * @param username  user name
+     * @return User ID
+     * @throws Exception the exception
+     */
     @GetMapping(V2_URL + "/user/name-by-id/{username}")
     public String getUserId(@PathVariable String username) {
         return userService.getUserIdByUsername(username);
     }
 
+    /**
+     * 유저 GUID(user id)로 유저의 이름(user name)을 가져온다.
+     *
+     * @param userId  user Id
+     * @return User name
+     * @throws Exception the exception
+     */
     @GetMapping(V2_URL + "/user/id-by-name/{userId}")
     public String getUsername(@PathVariable String userId) {
         return userService.getUsernameByUserId(userId);
     }
 
+    /**
+     * 실행중인 응용 프로그램에 대한 시큐리티 그룹 조회
+     *
+     * @param userIdentifier  ListSecurityGroups page
+     * @return ListSecurityGroupRunningDefaultsResponse
+     * @throws Exception the exception
+     */
     @GetMapping(V2_URL + "/user/summary/{userIdentifier}")
     public User getUserSummary(@PathVariable String userIdentifier, @RequestParam String type) {
         String filterType;
@@ -186,17 +206,5 @@ public class UserController extends Common {
     @PutMapping(V2_URL + "/user/{userid}/active")
     public UpdateUserResponse UpdateUserActive(@PathVariable String userid) throws Exception {
         return userService.UpdateUserActive(userid);
-    }
-
-
-    @GetMapping(V2_URL + "/test")
-    public int testprovider(){
-
-        //tokenProvider(adminUserName, adminPassword);
-        //userService.test();
-        System.out.println(r.freeMemory());
-        //tokenProvider1(adminUserName, adminPassword);
-        System.out.println(r.freeMemory());
-        return 1;
     }
 }
