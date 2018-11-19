@@ -442,14 +442,14 @@ public class OrgController extends Common {
             try {
                 orgMap.put("org", orgs);
 
-                ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), reactorCloudFoundryClient);
-                orgMap.put("space", listSpacesResponse);
-
-                Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), reactorCloudFoundryClient);
-                orgMap.put("userRoles", userRoles);
-
-                GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), reactorCloudFoundryClient);
-                orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
+//                ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), reactorCloudFoundryClient);
+//                orgMap.put("space", listSpacesResponse);
+//
+//                Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), reactorCloudFoundryClient);
+//                orgMap.put("userRoles", userRoles);
+//
+//                GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), reactorCloudFoundryClient);
+//                orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
 
                 orgList.add(orgMap);
             } catch (Exception e) {
@@ -460,6 +460,37 @@ public class OrgController extends Common {
         resultMap.put("result", orgList);
 
         LOGGER.debug("orgList End");
+        return resultMap;
+    }
+
+    @GetMapping(V2_URL + "/orgDetail/{guid}")
+    public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String orgin, @PathVariable String guid) throws Exception {
+        LOGGER.info("orgDetail Start");
+        final String token = adminToken(orgin);
+        ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider(token));
+        Map resultMap = new HashMap();
+        List<Map> orgList = new ArrayList<Map>();
+
+        Map orgMap = new HashMap();
+
+        try {
+            ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(guid, reactorCloudFoundryClient);
+            orgMap.put("space", listSpacesResponse);
+
+            Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(guid, reactorCloudFoundryClient);
+            orgMap.put("userRoles", userRoles);
+
+            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(guid, reactorCloudFoundryClient);
+            orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
+
+            orgList.add(orgMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        resultMap.put("result", orgMap);
+
+        LOGGER.debug("orgDetail End");
         return resultMap;
     }
 
