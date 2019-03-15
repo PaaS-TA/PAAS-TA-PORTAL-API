@@ -408,7 +408,7 @@ public class OrgService extends Common {
                 // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
                 DeleteOrganizationResponse eleteOrganizationResponse = DeleteOrganizationResponse.builder().entity(JobEntity.builder().error("You don't have a OrgManager role. To delete org, you have to get OrgManager role.").errorDetails(ErrorDetails.builder().code(403).build()).id("httpstatus-403").build()).build();
 
-                resultMap.put("result", true);
+                resultMap.put("result", false);
                 return resultMap;
             }
         } catch (Exception e) {

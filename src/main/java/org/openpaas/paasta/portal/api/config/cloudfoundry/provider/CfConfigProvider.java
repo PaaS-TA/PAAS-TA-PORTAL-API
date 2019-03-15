@@ -15,6 +15,7 @@ public class CfConfigProvider {
 
     @Bean
     DefaultConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiHost, @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation) {
+
         return Common.crateConnectionContext(apiHost, sslSkipValidation);
     }
 

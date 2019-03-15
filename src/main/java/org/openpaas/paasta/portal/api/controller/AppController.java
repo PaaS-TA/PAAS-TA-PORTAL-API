@@ -40,15 +40,14 @@ public class AppController extends Common {
      * 앱 요약 정보를 조회한다.
      *
      * @param guid
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/summary"}, method = RequestMethod.GET)
-    public SummaryApplicationResponse getAppSummary(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public SummaryApplicationResponse getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppSummary Start : " + guid);
 
-        SummaryApplicationResponse respApp = appService.getAppSummary(guid, this.getToken());
+        SummaryApplicationResponse respApp = appService.getAppSummary(guid, token);
 
         return respApp;
     }
@@ -57,14 +56,13 @@ public class AppController extends Common {
      * 앱 실시간 상태를 조회한다.
      *
      * @param guid    the app guid
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/stats"}, method = RequestMethod.GET)
-    public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         //service call
-        ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, this.getToken());
+        ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, token);
         return applicationStatisticsResponse;
     }
 
@@ -72,15 +70,14 @@ public class AppController extends Common {
      * 앱을 변경한다.
      *
      * @param app     the app
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/rename"}, method = RequestMethod.PUT)
-    public Map renameApp(@PathVariable String guid, @RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map renameApp(@PathVariable String guid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
-        Map result = appService.renameApp(app,guid);
+        Map result = appService.renameApp(app,token);
         LOGGER.info("Rename App End ");
         return result;
     }
@@ -105,15 +102,14 @@ public class AppController extends Common {
      * 앱을 실행한다.
      *
      * @param app     the app
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V3_URL + "/apps/startApp"}, method = RequestMethod.POST)
-    public Map startApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
 
-        Map resultMap = appService.startApp(app, this.getToken());
+        Map resultMap = appService.startApp(app, token);
 
         LOGGER.info("startApp End ");
         return resultMap;
@@ -124,15 +120,14 @@ public class AppController extends Common {
      * 앱을 중지한다.
      *
      * @param app     the app
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V3_URL + "/apps/stopApp"}, method = RequestMethod.POST)
-    public Map stopApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
 
-        Map resultMap = appService.stopApp(app, this.getToken());
+        Map resultMap = appService.stopApp(app, token);
 
         LOGGER.info("stopApp End ");
         return resultMap;
@@ -143,15 +138,15 @@ public class AppController extends Common {
      * 앱을 리스테이징한다.
      *
      * @param app     the app
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/restageApp"}, method = RequestMethod.POST)
-    public Map restageApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map restageApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("restageApp Start ");
 
-        Map resultMap = appService.restageApp(app, this.getToken());
+        Map resultMap = appService.restageApp(app, token);
 
         LOGGER.info("restageApp End ");
         return resultMap;
@@ -162,15 +157,15 @@ public class AppController extends Common {
      * 앱 인스턴스를 변경한다.
      *
      * @param app     the app
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/updateApp"}, method = RequestMethod.POST)
-    public Map updateApp(@RequestBody App app, HttpServletRequest request) throws Exception {
+    public Map updateApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("updateApp Start ");
 
-        Map resultMap = appService.updateApp(app, this.getToken());
+        Map resultMap = appService.updateApp(app, token);
 
         LOGGER.info("updateApp End ");
         return resultMap;
@@ -180,15 +175,15 @@ public class AppController extends Common {
      * 앱-서비스를 바인드한다.
      *
      * @param body
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/service-bindings"}, method = RequestMethod.POST)
-    public Map bindService(@RequestBody Map body, HttpServletRequest request) throws Exception {
+    public Map bindService(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("bindService Start ");
 
-        Map resultMap = appService.bindService(body, this.getToken());
+        Map resultMap = appService.bindService(body, token);
 
         LOGGER.info("bindService End ");
         return resultMap;
@@ -203,10 +198,10 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
-    public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
+    public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("unbindService Start ");
 
-        Map resultMap = appService.unbindService(serviceInstanceId, applicationId, this.getToken());
+        Map resultMap = appService.unbindService(serviceInstanceId, applicationId, token);
 
         LOGGER.info("unbindService End ");
         return resultMap;
@@ -220,10 +215,10 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL + "/user-provide-service-bindings/{serviceInstanceId}/apps/{applicationId}")
-    public Map unbindUserProvideService(@PathVariable String serviceInstanceId, @PathVariable String applicationId) throws Exception {
+    public Map unbindUserProvideService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("unbindService Start ");
 
-        Map resultMap = appService.unbindUserProvideService(serviceInstanceId, applicationId, this.getToken());
+        Map resultMap = appService.unbindUserProvideService(serviceInstanceId, applicationId, token);
 
         LOGGER.info("unbindService End ");
         return resultMap;
@@ -236,15 +231,15 @@ public class AppController extends Common {
      * 앱 이벤트를 조회한다.
      *
      * @param guid
-     * @param request the request
+     * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/app-usage-events/{guid}"}, method = RequestMethod.GET)
-    public ListEventsResponse getAppEvents(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public ListEventsResponse getAppEvents(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppEvents Start : " + guid);
 
-        ListEventsResponse respAppEvents = appService.getAppEvents(guid, this.getToken());
+        ListEventsResponse respAppEvents = appService.getAppEvents(guid, token);
 
         LOGGER.info("getAppEvents End ");
 
@@ -256,18 +251,17 @@ public class AppController extends Common {
      * 앱 환경변수를 조회한다.
      *
      * @param guid
-     * @param request the request
+     * @param token the request
      * @return map application env
      * @throws Exception the exception
-     * @author 김도준
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/env"}, method = RequestMethod.GET)
-    public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getApplicationEnv Start : " + guid);
 
-        ApplicationEnvironmentResponse respAppEvents = appService.getApplicationEnv(guid, this.getToken());
+        ApplicationEnvironmentResponse respAppEvents = appService.getApplicationEnv(guid, token);
 
         LOGGER.info("getApplicationEnv End ");
 
@@ -278,18 +272,15 @@ public class AppController extends Common {
      * 라우트 추가 및 라우트와 앱을 연결한다. (앱에 URI를 추가함)
      *
      * @param body
-     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
-     * @author 김도준
      * @version 1.0
-     * @since 2016.7.6 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/routes"}, method = RequestMethod.POST)
-    public Map addApplicationRoute(@RequestBody Map body, HttpServletRequest request) throws Exception {
+    public Map addApplicationRoute(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
 
-        Map resultMap = appService.addApplicationRoute(body, this.getToken());
+        Map resultMap = appService.addApplicationRoute(body, token);
 
         LOGGER.info("addApplicationRoute End ");
         return resultMap;
@@ -308,10 +299,10 @@ public class AppController extends Common {
      * @since 2016.7.6 최초작성
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
-    public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid) throws Exception {
+    public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("removeApplicationRoute Start ");
 
-        Map resultMap = appService.removeApplicationRoute(guid, route_guid, this.getToken());
+        Map resultMap = appService.removeApplicationRoute(guid, route_guid, token);
 
         LOGGER.info("removeApplicationRoute End ");
         return resultMap;
@@ -326,10 +317,10 @@ public class AppController extends Common {
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
-    public Map terminateInstance(@PathVariable String guid, @PathVariable String index) throws Exception {
+    public Map terminateInstance(@PathVariable String guid, @PathVariable String index, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("terminateInstance Start");
 
-        Map resultMap = appService.terminateInstance(guid, index, this.getToken());
+        Map resultMap = appService.terminateInstance(guid, index, token);
 
         LOGGER.info("terminateInstance End");
         return resultMap;
@@ -340,18 +331,17 @@ public class AppController extends Common {
      * 앱 최근 로그
      *
      * @param guid
-     * @param request the request
      * @return Space respSpace
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
-    public Map getRecentLog(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
 
         LOGGER.info("getRecentLog Start : " + guid);
 
         Map mapLog = new HashMap();
         try {
-            List<Envelope> respAppEvents = appService.getRecentLog(guid, this.getToken());
+            List<Envelope> respAppEvents = appService.getRecentLog(guid, token);
             mapLog.put("log", respAppEvents);
         } catch (Exception e) {
             LOGGER.info("################ ");
@@ -368,18 +358,18 @@ public class AppController extends Common {
      * 앱 최근 로그를 가져온다.
      *
      * @param guid
-     * @param request the request
+     * @param token the request
      * @return Map
      * @throws Exception the exception
      */
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/taillogs"}, method = RequestMethod.GET)
-    public Map getTailLogs(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public Map getTailLogs(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
 
         LOGGER.info("getTailLogs Start ");
 
         Map mapLog = new HashMap();
         try {
-            List<LogMessage> respAppEvents = appService.getTailLog(guid, this.getToken());
+            List<LogMessage> respAppEvents = appService.getTailLog(guid, token);
             mapLog.put("log", respAppEvents);
         } catch (Exception e) {
             LOGGER.info("################ ");

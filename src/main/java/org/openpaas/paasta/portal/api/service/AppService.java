@@ -46,7 +46,6 @@ public class AppService extends Common {
 
     //@HystrixCommand(commandKey = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) {
-
         SummaryApplicationResponse summaryApplicationResponse = Common.cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
 
         return summaryApplicationResponse;
@@ -80,7 +79,7 @@ public class AppService extends Common {
     public Map renameApp(App app, String token) {
         HashMap result = new HashMap();
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
             UpdateApplicationResponse response = cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getNewName()).build()).block();
 
             LOGGER.info("Update app response :", response);
@@ -164,7 +163,7 @@ public class AppService extends Common {
         HashMap result = new HashMap();
         try {
             //앱 삭제
-            ReactorCloudFoundryClient reactorCloudFoundryClient = Common.cloudFoundryClient(connectionContext(), tokenProvider());
+            ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext());
             try {
                 ListApplicationServiceBindingsResponse listApplicationServiceBindingsResponse = reactorCloudFoundryClient.applicationsV2().listServiceBindings(ListApplicationServiceBindingsRequest.builder().applicationId(guid).build()).block();
                 for (ServiceBindingResource resource : listApplicationServiceBindingsResponse.getResources()) {

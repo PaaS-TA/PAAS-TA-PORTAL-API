@@ -108,6 +108,7 @@ public class UserService extends Common {
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(userId, oldPassword));
+            reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).map(UserInfoResponse::toString).subscribe(System.out::println).dispose();
             //User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userId);
             //Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getGivenName()).build();
             //reactorUaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).build()).block();
