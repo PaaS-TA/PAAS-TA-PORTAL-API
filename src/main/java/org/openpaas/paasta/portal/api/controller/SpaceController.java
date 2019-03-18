@@ -106,7 +106,7 @@ public class SpaceController extends Common {
 
             try {
                 if(sapceApplicationSummary.getState().equals("STARTED")) {
-                    ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(sapceApplicationSummary.getId(), this.getToken());
+                    ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(sapceApplicationSummary.getId(), token);
 
                     Double cpu = 0.0;
                     Double mem = 0.0;
