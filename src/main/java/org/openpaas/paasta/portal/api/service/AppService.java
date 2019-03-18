@@ -375,7 +375,6 @@ public class AppService extends Common {
      * @param token the token
      * @return the application env
      * @the exception
-     * @author 김도준
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
@@ -395,7 +394,6 @@ public class AppService extends Common {
      * @param token the token
      * @return the boolean
      * @the exception
-     * @author 김도준
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
@@ -428,7 +426,6 @@ public class AppService extends Common {
      * @param token      the token
      * @return the boolean
      * @the exception
-     * @author 김도준
      * @version 1.0
      * @since 2016.7.6 최초작성
      */

@@ -294,7 +294,6 @@ public class AppController extends Common {
      * @param route_guid
      * @return boolean boolean
      * @throws Exception the exception
-     * @author 김도준
      * @version 1.0
      * @since 2016.7.6 최초작성
      */

@@ -233,7 +233,6 @@ public class OrgService extends Common {
      *
      * @param token the token
      * @return List<OrganizationResource> organization list
-     * @author 김도준(1.x), hgcho(2.x)
      * @version 2.0
      * @since 2018.4.22
      */
