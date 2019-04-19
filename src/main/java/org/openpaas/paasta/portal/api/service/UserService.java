@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.MalformedURLException;
@@ -131,8 +130,8 @@ public class UserService extends Common {
      */
     //@HystrixCommand(commandKey = "resetPassword")
     public Map resetPassword(String userId, String password) {
-        LOGGER.info("resetPassword ::: " + userId);
-        LOGGER.info("resetPassword ::: " + password);
+        LOGGER.info("> resetPassword userId" + userId);
+        LOGGER.info("> resetPassword password" + password);
 
         Map result = new HashMap();
         try {

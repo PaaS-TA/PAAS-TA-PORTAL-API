@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ public class LoginController extends Common {
 
         LOGGER.info("> into login ...");
         LOGGER.info("id: {}", id);
+        LOGGER.info("password: {}", password);
 
         Map<String, Object> result = new HashMap<>();
         OAuth2AccessToken token = loginService.login(id, password);

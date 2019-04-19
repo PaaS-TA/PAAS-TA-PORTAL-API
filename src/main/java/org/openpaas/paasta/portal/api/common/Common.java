@@ -4,10 +4,8 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.identity.uaa.api.UaaConnectionFactory;
-import org.cloudfoundry.identity.uaa.api.client.UaaClientOperations;
 import org.cloudfoundry.identity.uaa.api.common.UaaConnection;
 import org.cloudfoundry.identity.uaa.api.group.UaaGroupOperations;
-import org.cloudfoundry.identity.uaa.api.user.UaaUserOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
@@ -21,7 +19,6 @@ import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.service.LoginService;
 import org.openpaas.paasta.portal.api.util.SSLUtils;
@@ -34,14 +31,14 @@ import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import javax.annotation.PreDestroy;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Properties;
 
 public class Common {
 
@@ -110,6 +107,7 @@ public class Common {
         try {
             return loginService.login(adminUserName, adminPassword).getValue();
         } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             return null;
         }
     }
