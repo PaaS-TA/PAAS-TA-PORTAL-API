@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
-public class CommonServiceTest {
+public class CommonV2ServiceTest {
 
     @Mock
     CommonService commonService;

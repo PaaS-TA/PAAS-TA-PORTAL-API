@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 
+import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
@@ -10,13 +11,12 @@ import org.cloudfoundry.doppler.LogMessage;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.service.AppService;
+import org.openpaas.paasta.portal.api.service.AppServiceV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +26,12 @@ import java.util.Map;
  * Created by indra on 2018-05-14.
  */
 @RestController
-public class AppController extends Common {
+public class AppControllerV2 extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV2.class);
 
     @Autowired
-    private AppService appService;
+    private AppServiceV2 appServiceV2;
 
 //    @Autowired
 //    private LoginService loginService;
@@ -47,7 +47,7 @@ public class AppController extends Common {
     public SummaryApplicationResponse getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppSummary Start : " + guid);
 
-        SummaryApplicationResponse respApp = appService.getAppSummary(guid, token);
+        SummaryApplicationResponse respApp = appServiceV2.getAppSummary(guid, token);
 
         return respApp;
     }
@@ -62,7 +62,7 @@ public class AppController extends Common {
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/stats"}, method = RequestMethod.GET)
     public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         //service call
-        ApplicationStatisticsResponse applicationStatisticsResponse = appService.getAppStats(guid, token);
+        ApplicationStatisticsResponse applicationStatisticsResponse = appServiceV2.getAppStats(guid, token);
         return applicationStatisticsResponse;
     }
 
@@ -77,7 +77,7 @@ public class AppController extends Common {
     public Map renameApp(@PathVariable String guid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
-        Map result = appService.renameApp(app,token);
+        Map result = appServiceV2.renameApp(app,token);
         LOGGER.info("Rename App End ");
         return result;
     }
@@ -92,7 +92,7 @@ public class AppController extends Common {
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}"}, method = RequestMethod.DELETE)
     public Map deleteApp(@PathVariable String guid) throws Exception {
         LOGGER.info("delete App Start : " + guid);
-        Map result = appService.deleteApp(guid);
+        Map result = appServiceV2.deleteApp(guid);
         LOGGER.info("delete App End ");
         return result;
     }
@@ -109,7 +109,7 @@ public class AppController extends Common {
     public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
 
-        Map resultMap = appService.startApp(app, token);
+        Map resultMap = appServiceV2.startApp(app, token);
 
         LOGGER.info("startApp End ");
         return resultMap;
@@ -127,7 +127,7 @@ public class AppController extends Common {
     public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
 
-        Map resultMap = appService.stopApp(app, token);
+        Map resultMap = appServiceV2.stopApp(app, token);
 
         LOGGER.info("stopApp End ");
         return resultMap;
@@ -146,7 +146,7 @@ public class AppController extends Common {
     public Map restageApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("restageApp Start ");
 
-        Map resultMap = appService.restageApp(app, token);
+        Map resultMap = appServiceV2.restageApp(app, token);
 
         LOGGER.info("restageApp End ");
         return resultMap;
@@ -165,7 +165,7 @@ public class AppController extends Common {
     public Map updateApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("updateApp Start ");
 
-        Map resultMap = appService.updateApp(app, token);
+        Map resultMap = appServiceV2.updateApp(app, token);
 
         LOGGER.info("updateApp End ");
         return resultMap;
@@ -183,7 +183,7 @@ public class AppController extends Common {
     public Map bindService(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("bindService Start ");
 
-        Map resultMap = appService.bindService(body, token);
+        Map resultMap = appServiceV2.bindService(body, token);
 
         LOGGER.info("bindService End ");
         return resultMap;
@@ -201,7 +201,7 @@ public class AppController extends Common {
     public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("unbindService Start ");
 
-        Map resultMap = appService.unbindService(serviceInstanceId, applicationId, token);
+        Map resultMap = appServiceV2.unbindService(serviceInstanceId, applicationId, token);
 
         LOGGER.info("unbindService End ");
         return resultMap;
@@ -218,7 +218,7 @@ public class AppController extends Common {
     public Map unbindUserProvideService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("unbindService Start ");
 
-        Map resultMap = appService.unbindUserProvideService(serviceInstanceId, applicationId, token);
+        Map resultMap = appServiceV2.unbindUserProvideService(serviceInstanceId, applicationId, token);
 
         LOGGER.info("unbindService End ");
         return resultMap;
@@ -239,7 +239,7 @@ public class AppController extends Common {
     public ListEventsResponse getAppEvents(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppEvents Start : " + guid);
 
-        ListEventsResponse respAppEvents = appService.getAppEvents(guid, token);
+        ListEventsResponse respAppEvents = appServiceV2.getAppEvents(guid, token);
 
         LOGGER.info("getAppEvents End ");
 
@@ -261,7 +261,7 @@ public class AppController extends Common {
     public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getApplicationEnv Start : " + guid);
 
-        ApplicationEnvironmentResponse respAppEvents = appService.getApplicationEnv(guid, token);
+        ApplicationEnvironmentResponse respAppEvents = appServiceV2.getApplicationEnv(guid, token);
 
         LOGGER.info("getApplicationEnv End ");
 
@@ -280,7 +280,7 @@ public class AppController extends Common {
     public Map addApplicationRoute(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
 
-        Map resultMap = appService.addApplicationRoute(body, token);
+        Map resultMap = appServiceV2.addApplicationRoute(body, token);
 
         LOGGER.info("addApplicationRoute End ");
         return resultMap;
@@ -301,7 +301,7 @@ public class AppController extends Common {
     public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("removeApplicationRoute Start ");
 
-        Map resultMap = appService.removeApplicationRoute(guid, route_guid, token);
+        Map resultMap = appServiceV2.removeApplicationRoute(guid, route_guid, token);
 
         LOGGER.info("removeApplicationRoute End ");
         return resultMap;
@@ -319,7 +319,7 @@ public class AppController extends Common {
     public Map terminateInstance(@PathVariable String guid, @PathVariable String index, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("terminateInstance Start");
 
-        Map resultMap = appService.terminateInstance(guid, index, token);
+        Map resultMap = appServiceV2.terminateInstance(guid, index, token);
 
         LOGGER.info("terminateInstance End");
         return resultMap;
@@ -336,11 +336,12 @@ public class AppController extends Common {
     @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
     public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
 
+
         LOGGER.info("getRecentLog Start : " + guid);
 
         Map mapLog = new HashMap();
         try {
-            List<Envelope> respAppEvents = appService.getRecentLog(guid, token);
+            List<Envelope> respAppEvents = appServiceV2.getRecentLog(guid, token);
             mapLog.put("log", respAppEvents);
         } catch (Exception e) {
             LOGGER.info("################ ");
@@ -368,7 +369,7 @@ public class AppController extends Common {
 
         Map mapLog = new HashMap();
         try {
-            List<LogMessage> respAppEvents = appService.getTailLog(guid, token);
+            List<LogMessage> respAppEvents = appServiceV2.getTailLog(guid, token);
             mapLog.put("log", respAppEvents);
         } catch (Exception e) {
             LOGGER.info("################ ");
@@ -391,7 +392,7 @@ public class AppController extends Common {
      */
     @GetMapping(Constants.V2_URL + "/apps/{guid}/credentials")
     public Map userProvideCredentials(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return appService.userProvideCredentials(guid, token);
+        return appServiceV2.userProvideCredentials(guid, token);
     }
 
 

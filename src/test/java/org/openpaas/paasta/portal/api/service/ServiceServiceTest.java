@@ -7,18 +7,13 @@ import org.cloudfoundry.client.v2.servicebrokers.ListServiceBrokersResponse;
 import org.cloudfoundry.client.v2.servicebrokers.UpdateServiceBrokerResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
-import org.cloudfoundry.reactor.DefaultConnectionContext;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
-import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -140,9 +135,9 @@ public class ServiceServiceTest {
     @Test
     public void testGetServicesInstances() throws Exception {
         ListServiceInstancesResponse listServiceInstancesResponse = ListServiceInstancesResponse.builder().build();
-        when(serviceService.getServicesInstances(anyString(), anyString())).thenReturn(listServiceInstancesResponse);
+        when(serviceService.getServicesInstances(anyString())).thenReturn(listServiceInstancesResponse);
 
-        ListServiceInstancesResponse result = serviceService.getServicesInstances("guid", "token");
+        ListServiceInstancesResponse result = serviceService.getServicesInstances("guid");
         Assert.assertEquals(listServiceInstancesResponse, result);
     }
 

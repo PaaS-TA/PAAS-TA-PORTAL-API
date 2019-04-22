@@ -6,9 +6,6 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.uaa.tokens.AbstractToken;
-import org.cloudfoundry.uaa.tokens.GetTokenByAuthorizationCodeRequest;
-import org.cloudfoundry.uaa.tokens.RefreshTokenRequest;
-import org.cloudfoundry.uaa.tokens.TokenFormat;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +16,9 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -94,5 +93,29 @@ public class LoginService extends Common {
     private final OAuth2AccessToken getOAuth2TokenFromTokenResponse(AbstractToken tokenResponse) {
         final Map<String, String> tokenMap = objectMapper.convertValue( tokenResponse, typeRef );
         return DefaultOAuth2AccessToken.valueOf( tokenMap );
+    }
+
+
+
+    /**
+     * CF Target URL을 가져온다.
+     *
+     * @param target cf target
+     * @return URL target
+     * @throws MalformedURLException, URISyntaxException the exception
+     */
+    public URL getTargetURL(String target) throws MalformedURLException, URISyntaxException {
+        return getTargetURI(target).toURL();
+    }
+
+    /**
+     * CF Target URL을 가져온다.
+     *
+     * @param target cf target
+     * @return URL target
+     * @throws URISyntaxException
+     */
+    private URI getTargetURI(String target) throws URISyntaxException {
+        return new URI(target);
     }
 }

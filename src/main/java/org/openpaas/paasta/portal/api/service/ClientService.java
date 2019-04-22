@@ -7,7 +7,6 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,7 +21,7 @@ public class ClientService extends Common {
     //V2
     //@HystrixCommand(commandKey = "getClientList")
     public ListClientsResponse getClientList() throws Exception {
-        return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).log().block();
     }
 
     /**
@@ -34,11 +33,12 @@ public class ClientService extends Common {
      */
     //@HystrixCommand(commandKey = "getClient")
     public GetClientResponse getClient(String clientId) throws Exception {
-        return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).log().block();
     }
 
     /**
      * 클라이언트 등록
+     * cloudFoundryClient
      *
      * @param param
      * @return CreateClientResponse
@@ -49,10 +49,7 @@ public class ClientService extends Common {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
         clientOption = clientOption.setClientOptionByMap(param);
-
-        LOGGER.info(clientOption.toString());
-
-        return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).log().block();
     }
 
     /**
@@ -71,7 +68,7 @@ public class ClientService extends Common {
         LOGGER.info(clientOption.toString());
 
         //Secret, Token Validity 는 생성 이후 수정 불가
-        return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId)
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId)
                 //.clientSecret(clientOption.clientSecret)
                 .name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders)
                 //.accessTokenValidity(clientOption.accessTokenValidity)
@@ -88,7 +85,7 @@ public class ClientService extends Common {
      */
     //@HystrixCommand(commandKey = "deleteClient")
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
-        return Common.uaaAdminClient(connectionContext(), apiTarget, this.getToken(), uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
     }
 
     /**

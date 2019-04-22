@@ -64,8 +64,6 @@ public class LoginController extends Common {
         result.put("user_id", token.getAdditionalInformation().get("user_id"));
         result.put("scope", token.getScope());
         result.put("token_type", token.getTokenType());
-        //result.put("token", token.getValue());
-        LOGGER.info(token.getValue());
         result.put("token", token.getValue());
         result.put("refresh_token_type", token.getTokenType());
         result.put("refresh_token", token.getRefreshToken().getValue());
@@ -94,7 +92,6 @@ public class LoginController extends Common {
         String refreshTokenStr = (String) body.get("refresh_token");
 
         Map<String, Object> result = new HashMap<>();
-        //OAuth2AccessToken token = loginService.refresh( tokenStr, refreshTokenStr );
         OAuth2AccessToken token = loginService.refresh("", refreshTokenStr);
         long currentTime = System.currentTimeMillis();
 
@@ -109,7 +106,6 @@ public class LoginController extends Common {
         result.put("expiredAt-cal", (token.getExpiration().getTime() - currentTime) / 1000);
         result.put("real_token", token);
 
-        LOGGER.info("token realization : {}", token.getExpiresIn());
 
         return result;
     }

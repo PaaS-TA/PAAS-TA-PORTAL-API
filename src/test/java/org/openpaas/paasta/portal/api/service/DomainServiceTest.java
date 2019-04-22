@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,12 +28,13 @@ public class DomainServiceTest {
         thenReturn.put("msg", "You have successfully completed the task.");
         MockitoAnnotations.initMocks(this);
     }
+
     @Test
     public void testGetDomains() throws Exception {
 
-        when(domainService.getDomains(anyString(), anyString())).thenReturn(null);
+        when(domainService.getDomains(anyString())).thenReturn(null);
 
-        PaginatedResponse result = domainService.getDomains("token", "status");
+        PaginatedResponse result = domainService.getDomains("status");
         Assert.assertEquals(null, result);
     }
 
@@ -67,7 +67,7 @@ public class DomainServiceTest {
     @Test
     public void testAddPrivateDomain() throws Exception {
         CreatePrivateDomainResponse createPrivateDomainResponse = CreatePrivateDomainResponse.builder().build();
-        when(domainService.addPrivateDomain(any(),any(),anyString(),anyString())).thenReturn(createPrivateDomainResponse);
+        when(domainService.addPrivateDomain(any(), any(), anyString(), anyString())).thenReturn(createPrivateDomainResponse);
 
         CreatePrivateDomainResponse result = domainService.addPrivateDomain(null, new TokenGrantTokenProvider("token"), "domainName", "orgId");
         Assert.assertEquals(createPrivateDomainResponse, result);
@@ -75,9 +75,9 @@ public class DomainServiceTest {
 
     @Test
     public void testDeleteDomain() throws Exception {
-        when(domainService.deleteDomain(anyString(),anyString(),anyString())).thenReturn(thenReturn);
+        when(domainService.deleteDomain(anyString(), anyString())).thenReturn(thenReturn);
 
-        Map result = domainService.deleteDomain("token", "orgId", "domainName");
+        Map result = domainService.deleteDomain("orgId", "domainName");
         Assert.assertEquals(thenReturn, result);
     }
 

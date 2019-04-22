@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openpaas.paasta.portal.api.controller.AppController;
+import org.openpaas.paasta.portal.api.controller.AppControllerV2;
 import org.openpaas.paasta.portal.api.model.App;
 import org.powermock.api.mockito.PowerMockito;
 import org.slf4j.Logger;
@@ -29,10 +29,10 @@ import static org.mockito.Matchers.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AppServiceTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV2.class);
 
     @Mock
-    private AppService appService;
+    private AppServiceV2 appServiceV2;
 
 
     App APP;
@@ -87,25 +87,25 @@ public class AppServiceTest {
     @Test
     public void testGetAppSummary() {
         SummaryApplicationResponse summaryApplicationResponse = SummaryApplicationResponse.builder().buildpack("buildpacks").build();
-        PowerMockito.when(appService.getAppSummary(anyString(), anyString())).thenReturn(summaryApplicationResponse);
-        SummaryApplicationResponse result = appService.getAppSummary("guid", "token");
+        PowerMockito.when(appServiceV2.getAppSummary(anyString(), anyString())).thenReturn(summaryApplicationResponse);
+        SummaryApplicationResponse result = appServiceV2.getAppSummary("guid", "token");
         Assert.assertEquals(summaryApplicationResponse.getBuildpack(), result.getBuildpack());
     }
 
     @Test
     public void testGetAppStats() {
         ApplicationStatisticsResponse applicationStatisticsResponse = ApplicationStatisticsResponse.builder().build();
-        PowerMockito.when(appService.getAppStats(anyString(), anyString())).thenReturn(applicationStatisticsResponse);
-        ApplicationStatisticsResponse result = appService.getAppStats("guid", "token");
+        PowerMockito.when(appServiceV2.getAppStats(anyString(), anyString())).thenReturn(applicationStatisticsResponse);
+        ApplicationStatisticsResponse result = appServiceV2.getAppStats("guid", "token");
         Assert.assertEquals(applicationStatisticsResponse, result);
     }
 
     @Test
     public void testRenameApp() {
 
-        PowerMockito.when(appService.renameApp(any(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.renameApp(any(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.renameApp(APP, "token");
+        Map result = appServiceV2.renameApp(APP, "token");
         Assert.assertEquals(thenReturn, result);
 
 
@@ -113,50 +113,50 @@ public class AppServiceTest {
 
     @Test
     public void testStartApp() {
-        PowerMockito.when(appService.startApp(any(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.startApp(any(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.startApp(APP, "token");
+        Map result = appServiceV2.startApp(APP, "token");
         Assert.assertEquals(thenReturn, result);
 
     }
 
     @Test
     public void testStopApp() {
-        PowerMockito.when(appService.stopApp(any(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.stopApp(any(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.stopApp(APP, "token");
+        Map result = appServiceV2.stopApp(APP, "token");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testDeleteApp() {
-        PowerMockito.when(appService.deleteApp(anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.deleteApp(anyString())).thenReturn(thenReturn);
 
-        Map result = appService.deleteApp("token");
+        Map result = appServiceV2.deleteApp("token");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testRestageApp() {
-        PowerMockito.when(appService.restageApp(any(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.restageApp(any(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.restageApp(APP, "token");
+        Map result = appServiceV2.restageApp(APP, "token");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testUpdateApp() {
-        PowerMockito.when(appService.updateApp(any(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.updateApp(any(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.updateApp(APP, "token");
+        Map result = appServiceV2.updateApp(APP, "token");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testBindService() {
-        PowerMockito.when(appService.bindService(anyMap(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.bindService(anyMap(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.bindService(new HashMap() {{
+        Map result = appServiceV2.bindService(new HashMap() {{
             put("parameter","{name:name}");
             put("applicationId","applicationId");
             put("serviceInstanceId","serviceInstanceId");
@@ -166,18 +166,18 @@ public class AppServiceTest {
 
     @Test
     public void testUnbindService() {
-        PowerMockito.when(appService.unbindService(anyString(), anyString(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.unbindService(anyString(), anyString(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.unbindService("serviceInstanceId", "applicationId", "token");
+        Map result = appServiceV2.unbindService("serviceInstanceId", "applicationId", "token");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void getAppEvents() {
         ListEventsResponse listEventsResponse = ListEventsResponse.builder().build();
-        PowerMockito.when(appService.getAppEvents(anyString(), anyString())).thenReturn(listEventsResponse);
+        PowerMockito.when(appServiceV2.getAppEvents(anyString(), anyString())).thenReturn(listEventsResponse);
 
-        ListEventsResponse result = appService.getAppEvents("guid", "token");
+        ListEventsResponse result = appServiceV2.getAppEvents("guid", "token");
 
         Assert.assertEquals(listEventsResponse, result);
     }
@@ -185,17 +185,17 @@ public class AppServiceTest {
     @Test
     public void testGetApplicationEnv() {
         ApplicationEnvironmentResponse applicationEnvironmentResponse = ApplicationEnvironmentResponse.builder().build();
-        PowerMockito.when(appService.getApplicationEnv(anyString(), anyString())).thenReturn(applicationEnvironmentResponse);
+        PowerMockito.when(appServiceV2.getApplicationEnv(anyString(), anyString())).thenReturn(applicationEnvironmentResponse);
 
-        ApplicationEnvironmentResponse result = appService.getApplicationEnv("guid", "token");
+        ApplicationEnvironmentResponse result = appServiceV2.getApplicationEnv("guid", "token");
         Assert.assertEquals(applicationEnvironmentResponse, result);
     }
 
     @Test
     public void testAddApplicationRoute() {
-        PowerMockito.when(appService.addApplicationRoute(anyMap(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.addApplicationRoute(anyMap(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.addApplicationRoute(new HashMap(){{
+        Map result = appServiceV2.addApplicationRoute(new HashMap(){{
             put("host", "host");
             put("domainId", "domainId");
             put("spaceId", "spaceId");
@@ -206,9 +206,9 @@ public class AppServiceTest {
 
     @Test
     public void testRemoveApplicationRoute() {
-        PowerMockito.when(appService.removeApplicationRoute(anyString(), anyString(), anyString())).thenReturn(thenReturn);
+        PowerMockito.when(appServiceV2.removeApplicationRoute(anyString(), anyString(), anyString())).thenReturn(thenReturn);
 
-        Map result = appService.removeApplicationRoute("guid", "route_guid","token");
+        Map result = appServiceV2.removeApplicationRoute("guid", "route_guid","token");
         Assert.assertEquals(thenReturn, result);
     }
 
@@ -216,9 +216,9 @@ public class AppServiceTest {
     public void testTerminateInstance() {
         Map map = new HashMap();
         map.put("result", true);
-        PowerMockito.when(appService.terminateInstance(anyString(), anyString(), anyString())).thenReturn(map);
+        PowerMockito.when(appServiceV2.terminateInstance(anyString(), anyString(), anyString())).thenReturn(map);
 
-        Map result = appService.terminateInstance("goid", "1", "token");
+        Map result = appServiceV2.terminateInstance("goid", "1", "token");
         Assert.assertEquals(map, result);
     }
 
@@ -226,18 +226,18 @@ public class AppServiceTest {
     @Test
     public void testGetRecentLog() {
         List<Envelope> envelopes = new ArrayList<>();
-        PowerMockito.when(appService.getRecentLog(anyString(), anyString())).thenReturn(envelopes);
+        PowerMockito.when(appServiceV2.getRecentLog(anyString(), anyString())).thenReturn(envelopes);
 
-        List<Envelope> result = appService.getRecentLog("guid", "token");
+        List<Envelope> result = appServiceV2.getRecentLog("guid", "token");
         Assert.assertEquals(envelopes, result);
     }
 
     @Test
     public void testGetTailLog() {
         List<LogMessage> logMessages = new ArrayList<>();
-        PowerMockito.when(appService.getTailLog(anyString(), anyString())).thenReturn(logMessages);
+        PowerMockito.when(appServiceV2.getTailLog(anyString(), anyString())).thenReturn(logMessages);
 
-        List<LogMessage> result = appService.getTailLog("guid", "token");
+        List<LogMessage> result = appServiceV2.getTailLog("guid", "token");
         Assert.assertEquals(logMessages, result);
     }
 
