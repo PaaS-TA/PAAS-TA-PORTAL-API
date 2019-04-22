@@ -1,8 +1,5 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.client.v3.applications.CreateApplicationResponse;
-import org.cloudfoundry.client.v3.applications.GetApplicationEnvironmentResponse;
-import org.cloudfoundry.client.v3.applications.GetApplicationEnvironmentVariablesResponse;
 import org.cloudfoundry.client.v3.applications.UpdateApplicationEnvironmentVariablesResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.App;
@@ -25,61 +22,38 @@ public class AppControllerV3 extends Common {
 
 
     /**
-     * 사용자 권한으로 Env 조회
-     * GET /v3/apps/:guid/env
-     *
-     * @param appGuid
-     * @return
-     */
-    @GetMapping(value = "/v3/apps/{appGuid}/env")
-    public GetApplicationEnvironmentResponse getAppEnv(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        LOGGER.info("사용자 토큰 :::: " + token);
-        return appService.getAppEnv(appGuid, token);
-    }
-
-    /**
-     * 사용자 권한으로 Env 변수 조회
-     * GET /v3/apps/:guid/environment_variables
-     *
-     * @param appGuid
-     * @return
-     */
-    @GetMapping(value = "/v3/apps/{appGuid}/environment_variables")
-    public GetApplicationEnvironmentVariablesResponse getAppEnvVariables(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        LOGGER.info("사용자 토큰 :::: " + token);
-        return appService.getAppEnvVariables(appGuid, token);
-    }
-
-
-    // 1. App Create 시 환경변수 넣을 수 있음. (POST /v3/apps)
-    /**
-     * 사용자 권한으로 app create 시 환경변수 추가
-     *
-     * @param app
-     * @return
-     */
-    @PostMapping(value = "/v3/apps")
-    public CreateApplicationResponse createApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        LOGGER.info("사용자 토큰 :::: " + token);
-        return appService.createApp(app, token);
-    }
-
-
-
-    // 2. Update environment variables for an app (PATCH /v3/apps/:guid/environment_variables)
-    /**
-     * 사용자 권한으로 app env 변수 업데이트
-     *
+     * App env 변수 업데이트 (PATCH /v3/apps/:guid/environment_variables)
      * The updated environment variables will not take effect until the app is restarted.
      *
+     * @param appGuid the appGuid
+     * @param app the app
+     * @param token the token
+     * @return UpdateApplicationEnvironmentVariablesResponse
+     *
+     * 권한 : 사용자 권한
+     *
      */
-    @PatchMapping(value = "/v3/apps/{appGuid}")
+    @PutMapping(value = "/v3/apps/{appGuid}")
     public UpdateApplicationEnvironmentVariablesResponse setAppEnv(@PathVariable String appGuid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         LOGGER.info("사용자 토큰 :::: " + token);
+
+        // TODO ::: AppV3 모델 쓰면 appGuid 가 UUID -> String 으로 바뀔 예정.
         app.setGuid(UUID.fromString(appGuid));
 
         return appService.setAppEnv(app, token);
     }
 
 
+    /**
+     * App 삭제
+     *
+     * @param appGuid the appGuid
+     * @param token the token
+     * 권한 : 사용자 권한
+     *
+     */
+    @DeleteMapping(value = "/v3/apps/{appGuid}")
+    public void deleteApp(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        appService.deleteApp(appGuid, token);
+    }
 }
