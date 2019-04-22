@@ -47,7 +47,6 @@ public class AppServiceV2 extends Common {
     //@HystrixCommand(commandKey = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) {
         SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
-
         return summaryApplicationResponse;
     }
 

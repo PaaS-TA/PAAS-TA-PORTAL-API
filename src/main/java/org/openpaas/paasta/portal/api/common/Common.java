@@ -57,7 +57,7 @@ public class Common {
 
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
-    
+
 
     @Autowired
     DefaultConnectionContext connectionContext;
@@ -166,7 +166,13 @@ public class Common {
         if (token.indexOf("bearer") < 0) {
             token = "bearer " + token;
         }
-        return new TokenGrantTokenProvider(token);
+        TokenGrantTokenProvider tokenProvider = new TokenGrantTokenProvider(token);
+        /**
+         * 토큰 상태 체크
+         */
+        uaaClient(connectionContext(), tokenProvider).getUsername().block();
+
+        return tokenProvider;
 
     }
 
@@ -179,15 +185,11 @@ public class Common {
     }
 
     public String adminToken(String token) {
-        try {
-            String name = uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
-            if (name.equals("admin")) {
-                return tokenProvider().getToken(connectionContext()).block();
-            }
-            return token;
-        } catch (Exception e) {
-            return token;
+        String name = uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
+        if (name.equals("admin")) {
+            return tokenProvider().getToken(connectionContext()).block();
         }
+        return token;
     }
 
 
