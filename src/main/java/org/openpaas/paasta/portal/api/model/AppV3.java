@@ -69,6 +69,110 @@ public class AppV3 {
 
     private String lifecycleType;
 
+    public String getName() {
+        return name;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public String getSpaceGuid() {
+        return spaceGuid;
+    }
+
+    public String getSpaceName() {
+        return spaceName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getExecutionMetadata() {
+        return executionMetadata;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public String getStack() {
+        return stack;
+    }
+
+    public String getDropletState() {
+        return dropletState;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public Integer getInstance() {
+        return instance;
+    }
+
+    public Integer getDisk() {
+        return disk;
+    }
+
+    public Integer getMemory() {
+        return memory;
+    }
+
+    public Map<String, Object> getApplicationEnvironmentVariables() {
+        return applicationEnvironmentVariables;
+    }
+
+    public Map<String, Object> getEnvironmentVariables() {
+        return environmentVariables;
+    }
+
+    public Map<String, Object> getRunningEnvironmentVariables() {
+        return runningEnvironmentVariables;
+    }
+
+    public Map<String, Object> getStagingEnvironmentVariables() {
+        return stagingEnvironmentVariables;
+    }
+
+    public Map<String, Object> getSystemEnvironmentVariables() {
+        return systemEnvironmentVariables;
+    }
+
+    public Map<String, String> getProcessTypes() {
+        return processTypes;
+    }
+
+    public HealthCheck getHealthCheck() {
+        return healthCheck;
+    }
+
+    public List<ProcessStatisticsResource> getProcessStatisticsResources() {
+        return processStatisticsResources;
+    }
+
+    public List<Buildpack> getBuildpacks() {
+        return buildpacks;
+    }
+
+    public Checksum getChecksum() {
+        return checksum;
+    }
+
+    public LifecycleData getLifecycle() {
+        return lifecycle;
+    }
+
+    public String getLifecycleType() {
+        return lifecycleType;
+    }
+
     @Override
     public String toString() {
         return "AppV3{" +
@@ -102,57 +206,57 @@ public class AppV3 {
     }
 
     private AppV3(AppV3.Builder builder) {
-        if(builder.getApplicationResponse != null){
+        if(builder.applicationResponse != null){
             this.ApplicationResponseBuild(builder);
-        } if(builder.getApplicationEnvironmentResponse != null){
+        } if(builder.applicationEnvironmentResponse != null){
            this.ApplicationEnvironmentResponseBuild(builder);
-        } if(builder.getApplicationProcessResponse != null){
+        } if(builder.applicationProcessResponse != null){
             this.ApplicationProcessResponseBuild(builder);
-        } if(builder.getApplicationCurrentDropletResponse != null){
+        } if(builder.applicationCurrentDropletResponse != null){
             ApplicationCurrentDropletResponseBuild(builder);
         }
     }
 
     private void ApplicationResponseBuild(AppV3.Builder builder){
-        this.name = builder.getApplicationResponse.getName();
-        this.guid = builder.getApplicationResponse.getId();
-        this.spaceGuid = builder.getApplicationResponse.getRelationships().getSpace().getData().getId();
-        this.state = builder.getApplicationResponse.getState().getValue();
-        this.lifecycle = builder.getApplicationResponse.getLifecycle().getData();
-        this.lifecycleType = builder.getApplicationResponse.getLifecycle().getType().getValue();
+        this.name = builder.applicationResponse.getName();
+        this.guid = builder.applicationResponse.getId();
+        this.spaceGuid = builder.applicationResponse.getRelationships().getSpace().getData().getId();
+        this.state = builder.applicationResponse.getState().getValue();
+        this.lifecycle = builder.applicationResponse.getLifecycle().getData();
+        this.lifecycleType = builder.applicationResponse.getLifecycle().getType().getValue();
     }
 
     private void ApplicationEnvironmentResponseBuild(AppV3.Builder builder){
-        this.applicationEnvironmentVariables = builder.getApplicationEnvironmentResponse.getApplicationEnvironmentVariables();
-        this.environmentVariables = builder.getApplicationEnvironmentResponse.getEnvironmentVariables();
-        this.runningEnvironmentVariables = builder.getApplicationEnvironmentResponse.getRunningEnvironmentVariables();
-        this.stagingEnvironmentVariables = builder.getApplicationEnvironmentResponse.getStagingEnvironmentVariables();
-        this.systemEnvironmentVariables = builder.getApplicationEnvironmentResponse.getSystemEnvironmentVariables();
+        this.applicationEnvironmentVariables = builder.applicationEnvironmentResponse.getApplicationEnvironmentVariables();
+        this.environmentVariables = builder.applicationEnvironmentResponse.getEnvironmentVariables();
+        this.runningEnvironmentVariables = builder.applicationEnvironmentResponse.getRunningEnvironmentVariables();
+        this.stagingEnvironmentVariables = builder.applicationEnvironmentResponse.getStagingEnvironmentVariables();
+        this.systemEnvironmentVariables = builder.applicationEnvironmentResponse.getSystemEnvironmentVariables();
     }
 
     private void ApplicationProcessResponseBuild(AppV3.Builder builder){
-        this.healthCheck = builder.getApplicationProcessResponse.getHealthCheck();
-        this.disk = builder.getApplicationProcessResponse.getDiskInMb();
-        this.guid = builder.getApplicationProcessResponse.getId();
-        this.instance = builder.getApplicationProcessResponse.getInstances();
-        this.memory = builder.getApplicationProcessResponse.getMemoryInMb();
-        this.type = builder.getApplicationProcessResponse.getType();
-        this.command = builder.getApplicationProcessResponse.getCommand();
+        this.healthCheck = builder.applicationProcessResponse.getHealthCheck();
+        this.disk = builder.applicationProcessResponse.getDiskInMb();
+        this.guid = builder.applicationProcessResponse.getId();
+        this.instance = builder.applicationProcessResponse.getInstances();
+        this.memory = builder.applicationProcessResponse.getMemoryInMb();
+        this.type = builder.applicationProcessResponse.getType();
+        this.command = builder.applicationProcessResponse.getCommand();
     }
 
     private void ApplicationProcessStatisticsResponseBuild(AppV3.Builder builder){
-        this.processStatisticsResources = builder.getApplicationProcessStatisticsResponse.getResources();
+        this.processStatisticsResources = builder.applicationProcessStatisticsResponse.getResources();
     }
 
     private void ApplicationCurrentDropletResponseBuild(AppV3.Builder builder){
-        this.buildpacks = builder.getApplicationCurrentDropletResponse.getBuildpacks();
-        this.checksum = builder.getApplicationCurrentDropletResponse.getChecksum();
-        this.executionMetadata = builder.getApplicationCurrentDropletResponse.getExecutionMetadata();
-        this.image = builder.getApplicationCurrentDropletResponse.getImage();
-        this.processTypes = builder.getApplicationCurrentDropletResponse.getProcessTypes();
-        this.stack = builder.getApplicationCurrentDropletResponse.getStack();
-        this.dropletState = builder.getApplicationCurrentDropletResponse.getState().getValue();
-        this.guid = builder.getApplicationCurrentDropletResponse.getId();
+        this.buildpacks = builder.applicationCurrentDropletResponse.getBuildpacks();
+        this.checksum = builder.applicationCurrentDropletResponse.getChecksum();
+        this.executionMetadata = builder.applicationCurrentDropletResponse.getExecutionMetadata();
+        this.image = builder.applicationCurrentDropletResponse.getImage();
+        this.processTypes = builder.applicationCurrentDropletResponse.getProcessTypes();
+        this.stack = builder.applicationCurrentDropletResponse.getStack();
+        this.dropletState = builder.applicationCurrentDropletResponse.getState().getValue();
+        this.guid = builder.applicationCurrentDropletResponse.getId();
     }
 
 
@@ -161,51 +265,46 @@ public class AppV3 {
     }
 
     public static final class Builder {
-        private GetApplicationResponse getApplicationResponse;
-        private GetApplicationEnvironmentResponse getApplicationEnvironmentResponse;
-//        private GetApplicationEnvironmentVariablesResponse getApplicationEnvironmentVariablesResponse;
-        private GetApplicationProcessResponse getApplicationProcessResponse;
-        private GetApplicationProcessStatisticsResponse getApplicationProcessStatisticsResponse;
-        private GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse;
-//        private GetApplicationCurrentDropletRelationshipResponse getApplicationCurrentDropletRelationshipResponse;
+        private GetApplicationResponse applicationResponse;
+        private GetApplicationEnvironmentResponse applicationEnvironmentResponse;
+        private GetApplicationProcessResponse applicationProcessResponse;
+        private GetApplicationProcessStatisticsResponse applicationProcessStatisticsResponse;
+        private GetApplicationCurrentDropletResponse applicationCurrentDropletResponse;
 
         private Builder() {
 
         }
 
-        public final Builder GetApplicationResponse(GetApplicationResponse response) {
-            this.getApplicationResponse = Objects.requireNonNull(response, "getApplicationResponse");
+        public final Builder applicationResponse(GetApplicationResponse response) {
+            this.applicationResponse = Objects.requireNonNull(response, "applicationResponse");
             return this;
         }
 
-        public final Builder GetApplicationEnvironmentResponse(GetApplicationEnvironmentResponse response) {
-            this.getApplicationEnvironmentResponse = Objects.requireNonNull(response, "getApplicationEnvironmentResponse");
+        public final Builder applicationEnvironmentResponse(GetApplicationEnvironmentResponse response) {
+            this.applicationEnvironmentResponse = Objects.requireNonNull(response, "applicationEnvironmentResponse");
             return this;
         }
 
-//        public final Builder GetApplicationEnvironmentVariablesResponse(GetApplicationEnvironmentVariablesResponse response) {
-//            this.getApplicationEnvironmentVariablesResponse = Objects.requireNonNull(response, "getApplicationEnvironmentVariablesResponse");
-//            return this;
-//        }
-
-        public final Builder GetApplicationProcessResponse(GetApplicationProcessResponse response) {
-            this.getApplicationProcessResponse = Objects.requireNonNull(response, "getApplicationEnvironmentVariablesResponse");
+        public final Builder applicationProcessResponse(GetApplicationProcessResponse response) {
+            this.applicationProcessResponse = Objects.requireNonNull(response, "applicationEnvironmentVariablesResponse");
             return this;
         }
 
-        public final Builder GetApplicationCurrentDropletResponse(GetApplicationCurrentDropletResponse response) {
-            this.getApplicationCurrentDropletResponse = Objects.requireNonNull(response, "getApplicationEnvironmentVariablesResponse");
+        public final Builder applicationProcessStatisticsResponse(GetApplicationProcessStatisticsResponse response) {
+            this.applicationProcessStatisticsResponse = Objects.requireNonNull(response, "applicationProcessStatisticsResponse");
             return this;
         }
 
-//        public final Builder GetApplicationCurrentDropletRelationshipResponse(GetApplicationCurrentDropletRelationshipResponse response) {
-//            this.getApplicationCurrentDropletRelationshipResponse = Objects.requireNonNull(response, "getApplicationEnvironmentVariablesResponse");
-//            return this;
-//        }
+        public final Builder applicationCurrentDropletResponse(GetApplicationCurrentDropletResponse response) {
+            this.applicationCurrentDropletResponse = Objects.requireNonNull(response, "applicationEnvironmentVariablesResponse");
+            return this;
+        }
+
 
         public AppV3 build() {
             return new AppV3(this);
         }
+
     }
 
 }
