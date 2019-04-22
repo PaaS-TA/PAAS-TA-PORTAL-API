@@ -64,7 +64,7 @@ public class AppControllerV3 extends Common {
      * 권한 : 사용자 권한
      *
      */
-    @PutMapping(value = "/v3/apps/{appGuid}")
+    @PutMapping(value = Constants.V3_URL + "/apps/{appGuid}")
     public UpdateApplicationEnvironmentVariablesResponse setAppEnv(@PathVariable String appGuid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         LOGGER.info("사용자 토큰 :::: " + token);
 
@@ -83,7 +83,7 @@ public class AppControllerV3 extends Common {
      * 권한 : 사용자 권한
      *
      */
-    @DeleteMapping(value = "/v3/apps/{appGuid}")
+    @DeleteMapping(value = Constants.V3_URL + "/apps/{appGuid}")
     public void deleteApp(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         appService.deleteApp(appGuid, token);
     }
