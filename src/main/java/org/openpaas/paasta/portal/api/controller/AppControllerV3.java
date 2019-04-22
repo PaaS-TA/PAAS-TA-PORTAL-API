@@ -4,7 +4,6 @@ import org.cloudfoundry.client.v3.applications.UpdateApplicationEnvironmentVaria
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 

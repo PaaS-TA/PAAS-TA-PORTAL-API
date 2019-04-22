@@ -20,26 +20,6 @@ public class AppServiceV3 extends Common{
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
 
     /**
-     *  App env 변수 업데이트
-     *
-     * @param app the app
-     * @param token the token
-     * @return UpdateApplicationEnvironmentVariablesResponse
-     *
-     * 권한 : 사용자 권한
-     *
-     */
-    public UpdateApplicationEnvironmentVariablesResponse setAppEnv(App app, String token) {
-        LOGGER.info("변경사항 있는 환경변수들 ::: " + app.getEnvironment().toString());
-
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-        UpdateApplicationEnvironmentVariablesResponse updatedAppEnvVar = reactorCloudFoundryClient.applicationsV3()
-                .updateEnvironmentVariables(UpdateApplicationEnvironmentVariablesRequest.builder()
-                        .applicationId(app.getGuid().toString())
-                        .putAllVars(app.getEnvironment())
-                        .build()).block();
-
-    /**
      * 앱을 실행한다.
      *
      * @param app   the app
@@ -88,7 +68,25 @@ public class AppServiceV3 extends Common{
         return resultMap;
     }
 
+    /**
+     *  App env 변수 업데이트
+     *
+     * @param app the app
+     * @param token the token
+     * @return UpdateApplicationEnvironmentVariablesResponse
+     *
+     * 권한 : 사용자 권한
+     *
+     */
+    public UpdateApplicationEnvironmentVariablesResponse setAppEnv(App app, String token) {
+        LOGGER.info("변경사항 있는 환경변수들 ::: " + app.getEnvironment().toString());
 
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+        UpdateApplicationEnvironmentVariablesResponse updatedAppEnvVar = reactorCloudFoundryClient.applicationsV3()
+                .updateEnvironmentVariables(UpdateApplicationEnvironmentVariablesRequest.builder()
+                        .applicationId(app.getGuid().toString())
+                        .putAllVars(app.getEnvironment())
+                        .build()).block();
 
         LOGGER.info("변경사항 있는 환경변수들은요~~~ ::: " + updatedAppEnvVar.toString());
         return updatedAppEnvVar;
