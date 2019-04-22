@@ -46,7 +46,7 @@ public class UserService extends Common {
         LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).active(userDetail.getActive()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
 
             result.put("result", true);
@@ -74,7 +74,7 @@ public class UserService extends Common {
         LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             reactorUaaClient.users().update(UpdateUserRequest.builder().userName(userDetail.getUserId()).phoneNumber(PhoneNumber.builder().value(userDetail.getTellPhone()).build()).email(Email.builder().value(userDetail.getUserName()).build()).build()).block();
 
             //TODO : ORG 권한 부여
@@ -135,7 +135,7 @@ public class UserService extends Common {
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
 
 
             GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
@@ -180,7 +180,7 @@ public class UserService extends Common {
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             reactorUaaClient.users().expirePassword(ExpirePasswordRequest.builder().passwordChangeRequired(true).userId(userGuid).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -206,7 +206,7 @@ public class UserService extends Common {
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             DeleteUserResponse deleteUserResponse = reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -220,9 +220,7 @@ public class UserService extends Common {
         return result;
     }
 
-    public Map deleteUserForAdmin(){
-
-
+    public Map deleteUserForAdmin() {
 
 
         Map result = new HashMap();
@@ -251,7 +249,7 @@ public class UserService extends Common {
     public GetUserResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
 
         LOGGER.info("getUser ::: ");
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(this.getToken()));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
         GetUserResponse getUserResponse = cloudFoundryClient.users().get(GetUserRequest.builder().userId(userGuid).build()).block();
         return getUserResponse;
     }
@@ -267,7 +265,7 @@ public class UserService extends Common {
         List<User> users = new ArrayList<>();
         try {
             LOGGER.info("allUsers ::: ");
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(this.getToken()));
+            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
             ListUsersResponse listUsersResponse = reactorUaaClient.users().list(ListUsersRequest.builder().build().builder().build()).block();
             users = listUsersResponse.getResources();
             return users;
@@ -357,22 +355,21 @@ public class UserService extends Common {
     /**
      * 사용자 포탈 접속 가능 유무 수정
      *
-     * @param userGuid     userId
+     * @param userGuid userId
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
     public UpdateUserResponse UpdateUserActive(String userGuid) throws Exception {
-         ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
-         User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
-         if(user.getUserName().equals("admin")){
-             return null;
-         }
-         Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getGivenName()).build();
-         final boolean active = !user.getActive();
-         UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(active).build()).block();
-         return updateUserResponse;
+        ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
+        User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
+        if (user.getUserName().equals("admin")) {
+            return null;
+        }
+        Name name = Name.builder().familyName((user.getName().getFamilyName() == null) || (user.getName().getFamilyName().equals("")) ? user.getId() : user.getName().getFamilyName()).givenName((user.getName().getGivenName() == null) || (user.getName().getFamilyName().equals("")) ? user.getId() : user.getName().getGivenName()).build();
+        final boolean active = !user.getActive();
+        UpdateUserResponse updateUserResponse = uaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).active(active).build()).block();
+        return updateUserResponse;
     }
-
 
 
 }

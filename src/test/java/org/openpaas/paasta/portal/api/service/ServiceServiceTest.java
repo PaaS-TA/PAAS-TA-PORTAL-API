@@ -140,9 +140,9 @@ public class ServiceServiceTest {
     @Test
     public void testGetServicesInstances() throws Exception {
         ListServiceInstancesResponse listServiceInstancesResponse = ListServiceInstancesResponse.builder().build();
-        when(serviceService.getServicesInstances(anyString(), anyString())).thenReturn(listServiceInstancesResponse);
+        when(serviceService.getServicesInstances(anyString())).thenReturn(listServiceInstancesResponse);
 
-        ListServiceInstancesResponse result = serviceService.getServicesInstances("guid", "token");
+        ListServiceInstancesResponse result = serviceService.getServicesInstances("guid");
         Assert.assertEquals(listServiceInstancesResponse, result);
     }
 

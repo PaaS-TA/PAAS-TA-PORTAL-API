@@ -29,7 +29,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "getSpaceQuotaDefinitionsList")
     public ListSpaceQuotaDefinitionsResponse getSpaceQuotaDefinitionsList(String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                .spaceQuotaDefinitions()
                 .list(ListSpaceQuotaDefinitionsRequest.builder()
                         .build()
@@ -48,7 +48,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "getSpaceQuotaDefinitions")
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(String spaceQuotaId, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                 .spaceQuotaDefinitions()
                 .get(GetSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(spaceQuotaId)
@@ -68,7 +68,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "createSpaceQuotaDefinitions")
     public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws ClientV2Exception {
 
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                 .spaceQuotaDefinitions()
                 .create(CreateSpaceQuotaDefinitionRequest.builder()
                         .name(quota.getName())
@@ -95,7 +95,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "deleteSpaceQuotaDefinitions")
     public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                 .spaceQuotaDefinitions()
                 .delete(DeleteSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(guid)
@@ -120,7 +120,7 @@ public class SpaceQuotaService extends Common {
             - 공간 정의 GUID
             - 공간 GUID
         */
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                 .spaceQuotaDefinitions()
                 .associateSpace(AssociateSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(quota.getGuid().toString())
@@ -141,7 +141,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "getListSpaceUsedSpaceQuotaDefinitions")
     public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                 .spaceQuotaDefinitions()
                 .listSpaces(ListSpaceQuotaDefinitionSpacesRequest.builder()
                         .spaceQuotaDefinitionId(guid)
@@ -161,7 +161,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "removeSpaceQuotaDefinitionsFromSpace")
     public boolean removeSpaceQuotaDefinitionsFromSpace(org.openpaas.paasta.portal.api.model.Quota quota, String token) throws Exception {
 
-        cloudFoundryClient(connectionContext())
+        cloudFoundryClient()
             .spaceQuotaDefinitions()
             .removeSpace(RemoveSpaceQuotaDefinitionRequest.builder()
                     .spaceQuotaDefinitionId(quota.getGuid().toString())
@@ -182,7 +182,7 @@ public class SpaceQuotaService extends Common {
     //@HystrixCommand(commandKey = "updateSpaceQuotaDefinitions")
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
+        return cloudFoundryClient()
                 .spaceQuotaDefinitions()
                 .update(UpdateSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(quota.getGuid().toString())

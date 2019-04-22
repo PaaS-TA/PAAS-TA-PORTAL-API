@@ -18,7 +18,7 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
-import org.openpaas.paasta.portal.api.service.AppService;
+import org.openpaas.paasta.portal.api.service.AppServiceV2;
 import org.openpaas.paasta.portal.api.service.ServiceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,21 +32,20 @@ import java.util.UUID;
 
 /**
  * 서비스 컨트롤 - 서비스 목록 , 서비스 상세 정보, 서비스 인스턴스 추가, 서비스 인스턴스 수정, 서비스 인스턴스 삭제 등 서비스 인스턴스 관리를  제공한다.
+ *
  * @version 2.0
  * @since 2018.2.20 최초작성
  */
 @RestController
-public class ServiceController extends Common {
+public class CommonController extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonController.class);
 
-    @Autowired
-    private AppService appService;
 
     @Autowired
     private ServiceService serviceService;
 
-     /**
+    /**
      * 서비스 인스턴스 이름을 변경한다.
      *
      * @param service the service
@@ -215,7 +214,7 @@ public class ServiceController extends Common {
     public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicesInstances Start ");
 
-        ListServiceInstancesResponse respServicesInstances = serviceService.getServicesInstances(guid, this.getToken());
+        ListServiceInstancesResponse respServicesInstances = serviceService.getServicesInstances(guid);
 
         LOGGER.info("getServicesInstances End ");
 
@@ -259,7 +258,7 @@ public class ServiceController extends Common {
      */
     @PutMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
     public UpdateServicePlanResponse updateServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getPubliclyVisible()+"   " + serviceBroker.getServiceName());
+        LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() + "   " + serviceBroker.getPubliclyVisible() + "   " + serviceBroker.getServiceName());
         return serviceService.updateServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
@@ -273,7 +272,7 @@ public class ServiceController extends Common {
      */
     @DeleteMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
     public DeleteServicePlanResponse deleteServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("deleteServicePlan Start : " + serviceBroker.getGuid() +"   " + serviceBroker.getPubliclyVisible()+"   " + serviceBroker.getServiceName());
+        LOGGER.info("deleteServicePlan Start : " + serviceBroker.getGuid() + "   " + serviceBroker.getPubliclyVisible() + "   " + serviceBroker.getServiceName());
         return serviceService.deleteServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
@@ -293,37 +292,37 @@ public class ServiceController extends Common {
      * 서비스 Plan에 Access 등록 되어있는 조직을 추가한다.
      *
      * @param bodyMap the map
-     * @param request       the request
+     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
     public CreateServicePlanVisibilityResponse updateServicePlanVisibility(@RequestBody Map<String, Object> bodyMap, @PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("serviceplanvisibilities Start : " + guid +"   " + bodyMap.get("servicePlanGuid").toString()+"   " +bodyMap.get("orgGuid").toString());
+        LOGGER.info("serviceplanvisibilities Start : " + guid + "   " + bodyMap.get("servicePlanGuid").toString() + "   " + bodyMap.get("orgGuid").toString());
         return serviceService.updateServicePlanVisibility(bodyMap, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
      * 서비스 Plan에 Access 등록 되어있는 조직을 삭제한다.
      *
-     * @param request       the request
+     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @DeleteMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
-    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility( @PathVariable String guid, HttpServletRequest request) throws Exception {
+    public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(@PathVariable String guid, HttpServletRequest request) throws Exception {
         return serviceService.deleteServicePlanVisibility(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
      * 서비스 Plan에 Access 등록 되어있는 조직을 모두 삭제한다.
      *
-     * @param token    token
+     * @param token token
      * @return boolean boolean
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V2_URL + "/serviceplanvisibilities/all/{guid}")
-    public Map allDeleteServicePlanVisibility( @PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public Map allDeleteServicePlanVisibility(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return serviceService.allDeleteServicePlanVisibility(guid);
     }
 

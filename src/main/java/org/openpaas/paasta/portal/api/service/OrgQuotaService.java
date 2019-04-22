@@ -28,12 +28,7 @@ public class OrgQuotaService extends Common {
      */
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitionsList(String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
-                .organizationQuotaDefinitions()
-                .list(ListOrganizationQuotaDefinitionsRequest.builder()
-                        .build()
-                ).log()
-                .block();
+        return cloudFoundryClient().organizationQuotaDefinitions().list(ListOrganizationQuotaDefinitionsRequest.builder().build()).log().block();
     }
 
     /**
@@ -46,13 +41,7 @@ public class OrgQuotaService extends Common {
     //@HystrixCommand(commandKey = "getOrgQuotaDefinitions")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
-               .organizationQuotaDefinitions()
-                .get(GetOrganizationQuotaDefinitionRequest.builder()
-                        .organizationQuotaDefinitionId(quotaGuid)
-                        .build()
-                ).log()
-                .block();
+        return cloudFoundryClient().organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).build()).log().block();
     }
 
     /**
@@ -78,22 +67,7 @@ public class OrgQuotaService extends Common {
         */
 
 
-
-
-        return cloudFoundryClient(connectionContext())
-                .organizationQuotaDefinitions()
-                .create(CreateOrganizationQuotaDefinitionRequest.builder()
-                        .name(quota.getName())
-                        .nonBasicServicesAllowed(quota.isNonBasicServicesAllowed())
-                        .totalServices(quota.getTotalServices())
-                        .totalRoutes(quota.getTotalRoutes())
-                        .totalReservedRoutePorts(quota.getTotalReservedRoutePorts())
-                        .memoryLimit(quota.getMemoryLimit())
-                        .instanceMemoryLimit(quota.getInstanceMemoryLimit())
-                        .applicationInstanceLimit(quota.getAppInstanceLimit())
-                        .build()
-                ).log()
-                .block();
+        return cloudFoundryClient().organizationQuotaDefinitions().create(CreateOrganizationQuotaDefinitionRequest.builder().name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).log().block();
     }
 
     /**
@@ -106,21 +80,7 @@ public class OrgQuotaService extends Common {
     //@HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
-                .organizationQuotaDefinitions()
-                .update(UpdateOrganizationQuotaDefinitionRequest.builder()
-                        .organizationQuotaDefinitionId(quota.getGuid().toString())
-                        .name(quota.getName())
-                        .nonBasicServicesAllowed(quota.isNonBasicServicesAllowed())
-                        .totalServices(quota.getTotalServices())
-                        .totalRoutes(quota.getTotalRoutes())
-                        .totalReservedRoutePorts(quota.getTotalReservedRoutePorts())
-                        .memoryLimit(quota.getMemoryLimit())
-                        .instanceMemoryLimit(quota.getInstanceMemoryLimit())
-                        .applicationInstanceLimit(quota.getAppInstanceLimit())
-                        .build()
-                ).log()
-                .block();
+        return cloudFoundryClient().organizationQuotaDefinitions().update(UpdateOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quota.getGuid().toString()).name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).log().block();
     }
 
     /**
@@ -133,18 +93,13 @@ public class OrgQuotaService extends Common {
     //@HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return cloudFoundryClient(connectionContext())
-                .organizationQuotaDefinitions()
-                .delete(DeleteOrganizationQuotaDefinitionRequest.builder()
-                        .organizationQuotaDefinitionId(quotaGuid)
-                        .async(false) // background async 처리 여부(recommend:true)
-                        .build()
-                ).log()
-                .block();
+        return cloudFoundryClient().organizationQuotaDefinitions().delete(DeleteOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).async(false) // background async 처리 여부(recommend:true)
+                .build()).log().block();
     }
 
     /**
      * 특정 조직 할당량 정보를 지정한다.
+     *
      * @param quota the Quota Info
      * @return ModelAndView model
      * @throws Exception the exception
@@ -153,14 +108,7 @@ public class OrgQuotaService extends Common {
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)
-        Common.cloudFoundryOperations(connectionContext(), tokenProvider())
-            .organizationAdmin()
-            .setQuota(SetQuotaRequest.builder()
-                    .quotaName(quota.getName())
-                    .organizationName(quota.getOrganizationName())
-                    .build()
-            ).log()
-            .block();
+        cloudFoundryOperations().organizationAdmin().setQuota(SetQuotaRequest.builder().quotaName(quota.getName()).organizationName(quota.getOrganizationName()).build()).log().block();
 
         return true;
     }

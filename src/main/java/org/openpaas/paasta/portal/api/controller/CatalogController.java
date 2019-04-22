@@ -1,13 +1,9 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
-import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
-import org.cloudfoundry.client.v2.servicebindings.GetServiceBindingResponse;
-import org.cloudfoundry.client.v2.serviceinstances.CreateServiceInstanceResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
@@ -15,13 +11,9 @@ import org.openpaas.paasta.portal.api.service.CatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
 import java.util.Map;
 
 
@@ -118,7 +110,7 @@ public class CatalogController extends Common {
     @PostMapping(Constants.V2_URL+"/catalogs/serviceinstances")
     public Map procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         token = adminToken(token);
-        return catalogService.procCatalogCreateServiceInstanceV2(param, Common.cloudFoundryClient(connectionContext(), tokenProvider(token)));
+        return catalogService.procCatalogCreateServiceInstanceV2(param, cloudFoundryClient(connectionContext(), tokenProvider(token)));
     }
 
     /**

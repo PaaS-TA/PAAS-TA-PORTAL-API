@@ -32,7 +32,7 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaces() throws Exception {
         ListSpacesResponse listSpacesResponse = ListSpacesResponse.builder().build();
-        when(spaceService.getSpaces(anyString(),anyObject())).thenReturn(listSpacesResponse);
+        when(spaceService.getSpaces(anyString(), anyObject())).thenReturn(listSpacesResponse);
 
         ListSpacesResponse result = spaceService.getSpaces("orgId", null);
         Assert.assertEquals(listSpacesResponse, result);
@@ -41,7 +41,7 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpacesWithOrgName() throws Exception {
         ListSpacesResponse listSpacesResponse = ListSpacesResponse.builder().build();
-        when(spaceService.getSpacesWithOrgName(anyString(),anyObject(),anyString())).thenReturn(listSpacesResponse);
+        when(spaceService.getSpacesWithOrgName(anyString(), anyObject(), anyString())).thenReturn(listSpacesResponse);
 
         ListSpacesResponse result = spaceService.getSpacesWithOrgName("orgName", null, "token");
         Assert.assertEquals(listSpacesResponse, result);
@@ -50,7 +50,7 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaces2() throws Exception {
         ListSpacesResponse listSpacesResponse = ListSpacesResponse.builder().build();
-        when(spaceService.getSpaces(any(Org.class),anyString())).thenReturn(listSpacesResponse);
+        when(spaceService.getSpaces(any(Org.class), anyString())).thenReturn(listSpacesResponse);
 
         ListSpacesResponse result = spaceService.getSpaces(new Org(), "token");
         Assert.assertEquals(listSpacesResponse, result);
@@ -58,7 +58,7 @@ public class SpaceServiceTest {
 
     @Test
     public void testCreateSpace() throws Exception {
-        when(spaceService.createSpace(any(),anyString())).thenReturn(thenReturn);
+        when(spaceService.createSpace(any(), anyString())).thenReturn(thenReturn);
         Map result = spaceService.createSpace(new Space(), "token");
         Assert.assertEquals(thenReturn, result);
     }
@@ -66,7 +66,7 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpace() throws Exception {
         GetSpaceResponse getSpaceResponse = GetSpaceResponse.builder().build();
-        when(spaceService.getSpace(anyString(),anyString())).thenReturn(getSpaceResponse);
+        when(spaceService.getSpace(anyString(), anyString())).thenReturn(getSpaceResponse);
 
         GetSpaceResponse result = spaceService.getSpace("spaceId", "token");
         Assert.assertEquals(getSpaceResponse, result);
@@ -84,7 +84,7 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaceUsingName() throws Exception {
         SpaceResource spaceResource = SpaceResource.builder().build();
-        when(spaceService.getSpaceUsingName(anyString(),anyString(),anyString())).thenReturn(spaceResource);
+        when(spaceService.getSpaceUsingName(anyString(), anyString(), anyString())).thenReturn(spaceResource);
 
         SpaceResource result = spaceService.getSpaceUsingName("orgName", "spaceName", "token");
         Assert.assertEquals(spaceResource, result);
@@ -100,7 +100,7 @@ public class SpaceServiceTest {
 
     @Test
     public void testRenameSpace() throws Exception {
-        when(spaceService.renameSpace(any(),anyString())).thenReturn(thenReturn);
+        when(spaceService.renameSpace(any(), anyString())).thenReturn(thenReturn);
 
         Map result = spaceService.renameSpace(new Space(), "token");
         Assert.assertEquals(thenReturn, result);
@@ -109,7 +109,7 @@ public class SpaceServiceTest {
     @Test
     public void testDeleteSpace() throws Exception {
 
-        when(spaceService.deleteSpace(anyString(),anyBoolean(),anyString())).thenReturn(thenReturn);
+        when(spaceService.deleteSpace(anyString(), anyBoolean(), anyString())).thenReturn(thenReturn);
 
         Map result = spaceService.deleteSpace("guid", true, "token");
         Assert.assertEquals(thenReturn, result);
@@ -118,7 +118,7 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaceSummary() throws Exception {
         GetSpaceSummaryResponse getSpaceSummaryResponse = GetSpaceSummaryResponse.builder().build();
-        when(spaceService.getSpaceSummary(anyString(),anyObject())).thenReturn(getSpaceSummaryResponse);
+        when(spaceService.getSpaceSummary(anyString(), anyObject())).thenReturn(getSpaceSummaryResponse);
 
         GetSpaceSummaryResponse result = spaceService.getSpaceSummary("spaceId", null);
         Assert.assertEquals(getSpaceSummaryResponse, result);
@@ -127,16 +127,16 @@ public class SpaceServiceTest {
     @Test
     public void testGetSpaceServices() throws Exception {
         ListSpaceServicesResponse listSpaceServicesResponse = ListSpaceServicesResponse.builder().build();
-        when(spaceService.getSpaceServices(anyString(),anyString())).thenReturn(listSpaceServicesResponse);
+        when(spaceService.getSpaceServices(anyString())).thenReturn(listSpaceServicesResponse);
 
-        ListSpaceServicesResponse result = spaceService.getSpaceServices("spaceId", "token");
+        ListSpaceServicesResponse result = spaceService.getSpaceServices("spaceId");
         Assert.assertEquals(listSpaceServicesResponse, result);
     }
 
     @Test
     public void testGetSpaceUserRoles() throws Exception {
         ListSpaceUserRolesResponse listSpaceUserRolesResponse = ListSpaceUserRolesResponse.builder().build();
-        when(spaceService.getSpaceUserRoles(anyString(),anyString())).thenReturn(listSpaceUserRolesResponse);
+        when(spaceService.getSpaceUserRoles(anyString(), anyString())).thenReturn(listSpaceUserRolesResponse);
 
         ListSpaceUserRolesResponse result = spaceService.getSpaceUserRoles("spaceId", "token");
         Assert.assertEquals(listSpaceUserRolesResponse, result);
@@ -144,7 +144,7 @@ public class SpaceServiceTest {
 
     @Test
     public void testAssociateSpaceUserRole() throws Exception {
-        when(spaceService.associateSpaceUserRole(anyString(),anyString(),anyString())).thenReturn(null);
+        when(spaceService.associateSpaceUserRole(anyString(), anyString(), anyString())).thenReturn(null);
 
         AbstractSpaceResource result = spaceService.associateSpaceUserRole("spaceId", "userId", "role");
         Assert.assertEquals(null, result);
@@ -153,7 +153,7 @@ public class SpaceServiceTest {
     @Test
     public void testAssociateAllSpaceUserRolesByOrgId() throws Exception {
         List<AbstractSpaceResource> abstractSpaceResourceList = new ArrayList<>();
-        when(spaceService.associateAllSpaceUserRolesByOrgId(anyString(),anyString(),any(),anyObject())).thenReturn(abstractSpaceResourceList);
+        when(spaceService.associateAllSpaceUserRolesByOrgId(anyString(), anyString(), any(), anyObject())).thenReturn(abstractSpaceResourceList);
 
         List<AbstractSpaceResource> result = spaceService.associateAllSpaceUserRolesByOrgId("orgId", "userId", null, null);
         Assert.assertEquals(abstractSpaceResourceList, result);

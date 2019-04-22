@@ -8,7 +8,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.controller.AppController;
+import org.openpaas.paasta.portal.api.controller.AppControllerV2;
 import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BuildPackServiceTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV2.class);
 
     @Mock
     private BuildPackService buildPackService;
