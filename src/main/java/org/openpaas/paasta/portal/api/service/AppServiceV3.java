@@ -1,11 +1,5 @@
 package org.openpaas.paasta.portal.api.service;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
-import org.cloudfoundry.client.v3.applications.GetApplicationResponse;
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.openpaas.paasta.portal.api.common.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,11 +10,54 @@ public class AppServiceV3 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
 
 
-    public void getAppSummary(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient();
-        GetApplicationResponse getApplicationResponse =  cloudFoundryClient.applicationsV3().get(GetApplicationRequest.builder().applicationId(guid).build()).block();
-        LOGGER.info(getApplicationResponse.getRelationships().toString());
 
+    /**
+     * 앱을 실행한다.
+     *
+     * @param app   the app
+     * @param token the client
+     * @throws Exception the exception
+     */
+    //@HystrixCommand(commandKey = "startApp")
+    public Map startApp(App app, String token) {
+        Map resultMap = new HashMap();
+
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+            cloudFoundryClient.applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e.getMessage());
+        }
+
+        return resultMap;
+    }
+
+    /**
+     * 앱을 중지한다.
+     *
+     * @param app     the app
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    //@HystrixCommand(commandKey = "stopApp")
+    public Map stopApp(App app, String token) {
+        Map resultMap = new HashMap();
+
+        try {
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+            cloudFoundryClient.applicationsV3().stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+
+            resultMap.put("result", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", false);
+            resultMap.put("msg", e.getMessage());
+        }
+
+        return resultMap;
     }
 
 
