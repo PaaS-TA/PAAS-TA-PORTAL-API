@@ -12,8 +12,6 @@ import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsRequest;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
-import org.openpaas.paasta.portal.api.service.LoginService;
-import org.opensaml.ws.wsaddressing.To;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +57,7 @@ public class Common {
 
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
-
-    @Autowired
-    private LoginService loginService;
+    
 
     @Autowired
     DefaultConnectionContext connectionContext;
