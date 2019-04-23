@@ -65,13 +65,14 @@ public class AppControllerV3 extends Common {
      * 앱 요약 정보를 조회한다.
      *
      * @param guid
-     * @return ModelAndView model
+     * @return AppV3 appV3
      * @throws Exception the exception
+     * 권한 : 사용자 권한
      */
     @GetMapping(Constants.V3_URL + "/apps/{guid}/summary")
     public AppV3 getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        AppV3 respApp = appService.getAppSummary(guid, token);
-        return respApp;
+        AppV3 appV3 = appService.getAppSummary(guid, token);
+        return appV3;
     }
 
 

@@ -116,11 +116,139 @@ public class AppV3 {
     @JsonProperty("services")
     private List<ServiceInstance> serviceInstances;
 
+    public String getName() {
+        return name;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public String getSpaceGuid() {
+        return spaceGuid;
+    }
+
+    public String getSpaceName() {
+        return spaceName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getExecutionMetadata() {
+        return executionMetadata;
+    }
+
+    public String getDetected_start_command() {
+        return detected_start_command;
+    }
+
+    public String getStack() {
+        return stack;
+    }
+
+    public String getDropletState() {
+        return dropletState;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public String getBuildpack() {
+        return buildpack;
+    }
+
+    public String getDetected_buildpack() {
+        return detected_buildpack;
+    }
+
+    public Integer getInstances() {
+        return instances;
+    }
+
+    public Integer getDisk_quota() {
+        return disk_quota;
+    }
+
+    public Integer getMemory() {
+        return memory;
+    }
+
+    public Map<String, Object> getApplicationEnvironmentVariables() {
+        return applicationEnvironmentVariables;
+    }
+
+    public Map<String, Object> getEnvironmentVariables() {
+        return environmentVariables;
+    }
+
+    public Map<String, Object> getRunningEnvironmentVariables() {
+        return runningEnvironmentVariables;
+    }
+
+    public Map<String, Object> getStagingEnvironmentVariables() {
+        return stagingEnvironmentVariables;
+    }
+
+    public Map<String, Object> getSystemEnvironmentVariables() {
+        return systemEnvironmentVariables;
+    }
+
+    public Map<String, String> getProcessTypes() {
+        return processTypes;
+    }
+
+    public HealthCheck getHealthCheck() {
+        return healthCheck;
+    }
+
+    public List<ProcessStatisticsResource> getProcessStatisticsResources() {
+        return processStatisticsResources;
+    }
+
+    public List<Buildpack> getBuildpacks() {
+        return buildpacks;
+    }
+
+    public Checksum getChecksum() {
+        return checksum;
+    }
+
+    public LifecycleData getLifecycle() {
+        return lifecycle;
+    }
+
+    public String getLifecycleType() {
+        return lifecycleType;
+    }
+
+    public String getPackage_updated_at() {
+        return package_updated_at;
+    }
+
+    public List<Route> getRoutes() {
+        return routes;
+    }
+
+    public List<Domain> getDomains() {
+        return domains;
+    }
+
+    public List<ServiceInstance> getServiceInstances() {
+        return serviceInstances;
+    }
+
     @Override
     public String toString() {
         return "AppV3{" +
                 "name='" + name + '\'' +
-                ", package_state='" + state + '\'' +
+                ", state='" + state + '\'' +
                 ", guid='" + guid + '\'' +
                 ", spaceGuid='" + spaceGuid + '\'' +
                 ", spaceName='" + spaceName + '\'' +
@@ -130,6 +258,8 @@ public class AppV3 {
                 ", stack='" + stack + '\'' +
                 ", dropletState='" + dropletState + '\'' +
                 ", image='" + image + '\'' +
+                ", buildpack='" + buildpack + '\'' +
+                ", detected_buildpack='" + detected_buildpack + '\'' +
                 ", instances=" + instances +
                 ", disk_quota=" + disk_quota +
                 ", memory=" + memory +
@@ -146,6 +276,9 @@ public class AppV3 {
                 ", lifecycle=" + lifecycle +
                 ", lifecycleType='" + lifecycleType + '\'' +
                 ", package_updated_at='" + package_updated_at + '\'' +
+                ", routes=" + routes +
+                ", domains=" + domains +
+                ", serviceInstances=" + serviceInstances +
                 '}';
     }
 
