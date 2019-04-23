@@ -232,14 +232,14 @@ public class AppServiceTest {
         Assert.assertEquals(envelopes, result);
     }
 
-    @Test
-    public void testGetTailLog() {
-        List<LogMessage> logMessages = new ArrayList<>();
-        PowerMockito.when(appServiceV2.getTailLog(anyString(), anyString())).thenReturn(logMessages);
-
-        List<LogMessage> result = appServiceV2.getTailLog("guid", "token");
-        Assert.assertEquals(logMessages, result);
-    }
+//    @Test
+//    public void testGetTailLog() {
+//        List<LogMessage> logMessages = new ArrayList<>();
+//        PowerMockito.when(appServiceV2.getTailLog(anyString(), anyString())).thenReturn(logMessages);
+//
+//        List<LogMessage> result = appServiceV2.getTailLog("guid", "token");
+//        Assert.assertEquals(logMessages, result);
+//    }
 
 }
 

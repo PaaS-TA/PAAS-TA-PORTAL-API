@@ -3,7 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.BuildPack;
-import org.openpaas.paasta.portal.api.service.BuildPackService;
+import org.openpaas.paasta.portal.api.service.BuildPackServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +18,12 @@ import java.util.UUID;
  * Created by swmoon on 2017-12-19.
  */
 @RestController
-public class BuildPackController extends Common {
+public class BuildPackControllerV3 extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackController.class);
-    private final String V2_URL = "/v2";
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackControllerV3.class);
 
     @Autowired
-    private BuildPackService buildPackService;
+    private BuildPackServiceV3 buildPackServiceV3;
 
 
     /**
@@ -33,12 +32,13 @@ public class BuildPackController extends Common {
      * @param request   the request
      * @return boolean boolean
      * @throws Exception the exception
+     * 권한 : 관리자
      */
-    @GetMapping(value = {V2_URL + "/buildpacks"})
+    @GetMapping(value = {Constants.V3_URL + "/buildpacks"})
     public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start");
-        Map<String, Object> buildPacks = buildPackService.getBuildPacks();
+        Map<String, Object> buildPacks = buildPackServiceV3.getBuildPacks();
         LOGGER.info("getBuildPacks End ");
 
         return buildPacks;
@@ -53,15 +53,15 @@ public class BuildPackController extends Common {
      * @param request   the request
      * @return boolean boolean
      * @throws Exception the exception
+     * 권한 :  관리자
      */
-    @PutMapping(value = {V2_URL + "/buildpacks/{guid}"})
+    @PutMapping(value = {Constants.V3_URL + "/buildpacks/{guid}"})
     public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateBuildPack Start : " + guid);
         Map<String, Object> resultMap = new HashMap<>();
-        //service call
         buildPack.setGuid(UUID.fromString(guid));
-        buildPackService.updateBuildPack(buildPack);
+        buildPackServiceV3.updateBuildPack(buildPack);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
 
         LOGGER.info("updateBuildPack End ");

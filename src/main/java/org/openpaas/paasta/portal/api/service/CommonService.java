@@ -102,7 +102,6 @@ public class CommonService {
      * @param reqToken   the req token
      * @return map map
      */
-    //@HystrixCommand(commandKey = "procCommonApiRestTemplate")
     public Map<String, Object> procCommonApiRestTemplate(String reqUrl, HttpMethod httpMethod, Object obj, String reqToken) {
         restTemplate = new RestTemplate();
         HttpHeaders reqHeaders = new HttpHeaders();
@@ -127,7 +126,6 @@ public class CommonService {
      * @param reqToken   the req token
      * @return map map
      */
-    //@HystrixCommand(commandKey = "procStorageApiRestTemplate")
     public <T> ResponseEntity<T> procStorageApiRestTemplate(String reqUrl, HttpMethod httpMethod, Object bodyObject, String reqToken, Class<T> resClazz) {
         restTemplate = new RestTemplate();
 

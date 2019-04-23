@@ -7,8 +7,9 @@ import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
-import java.util.UUID;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -26,7 +27,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/start"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/start"})
     public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
         Map resultMap = appService.startApp(app, token);
@@ -41,7 +42,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/stop"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/stop"})
     public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
         Map resultMap = appService.stopApp(app, token);
@@ -59,53 +60,10 @@ public class AppControllerV3 extends Common {
     @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/summary"}, method = RequestMethod.GET)
     public void getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppSummary Start : " + guid);
-
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-        GetApplicationResponse getApplicationResponse = reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
-        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
-        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().applicationId(guid).build()).block();
-        GetApplicationProcessStatisticsResponse processStatisticsResponse = reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(guid).build()).block();
-
-
+        appService.getSummary(token, guid);
 
 
     }
 
 
-
-    /**
-     * App env 변수 업데이트 (PATCH /v3/apps/:guid/environment_variables)
-     * The updated environment variables will not take effect until the app is restarted.
-     *
-     * @param appGuid the appGuid
-     * @param app the app
-     * @param token the token
-     * @return UpdateApplicationEnvironmentVariablesResponse
-     *
-     * 권한 : 사용자 권한
-     *
-     */
-    @PutMapping(value = Constants.V3_URL + "/apps/{appGuid}")
-    public UpdateApplicationEnvironmentVariablesResponse setAppEnv(@PathVariable String appGuid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        LOGGER.info("사용자 토큰 :::: " + token);
-
-        // TODO ::: AppV3 모델 쓰면 appGuid 가 UUID -> String 으로 바뀔 예정.
-        app.setGuid(UUID.fromString(appGuid));
-
-        return appService.setAppEnv(app, token);
-    }
-
-
-    /**
-     * App 삭제
-     *
-     * @param appGuid the appGuid
-     * @param token the token
-     * 권한 : 사용자 권한
-     *
-     */
-    @DeleteMapping(value = Constants.V3_URL + "/apps/{appGuid}")
-    public void deleteApp(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        appService.deleteApp(appGuid, token);
-    }
 }

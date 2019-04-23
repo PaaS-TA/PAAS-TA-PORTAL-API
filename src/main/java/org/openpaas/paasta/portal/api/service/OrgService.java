@@ -79,10 +79,9 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    //@HystrixCommand(commandKey = "createOrg")
     public Map createOrg(final Org org, final String token) {
         try {
-            final CreateOrganizationResponse response = cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
+            final CreateOrganizationResponse response = cloudFoundryClient(tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
             return new HashMap() {{
                 put("RESULT", "SUCCESS");
             }};
@@ -94,7 +93,6 @@ public class OrgService extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "isExistOrgName")
     public boolean isExistOrgName(final String orgName) {
         try {
             return orgName.equals(getOrgUsingName(orgName).getName());
@@ -103,7 +101,6 @@ public class OrgService extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "isExistOrg")
     public boolean isExistOrg(final String orgId) {
         try {
             return orgId.equals(getOrg(orgId).getMetadata().getId());
@@ -112,7 +109,6 @@ public class OrgService extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "getOrg")
     public GetOrganizationResponse getOrg(final String orgId) {
         return getOrg(orgId, null);
     }
@@ -127,7 +123,6 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    //@HystrixCommand(commandKey = "getOrg")
     public GetOrganizationResponse getOrg(final String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         return reactorCloudFoundryClient.organizations().get(GetOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
@@ -142,9 +137,8 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    //@HystrixCommand(commandKey = "getOrgSummary")
     public SummaryOrganizationResponse getOrgSummary(final String orgId, final String token) {
-        return cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
+        return cloudFoundryClient(tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
 
     //@HystrixCommand(commandKey = "getOrgSummaryMap")
@@ -214,9 +208,8 @@ public class OrgService extends Common {
      * @since 2018.4.22
      */
     @Deprecated
-    //@HystrixCommand(commandKey = "getOrgs")
     public List<OrganizationResource> getOrgs(String token) {
-        return cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block().getResources();
+        return cloudFoundryClient(tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block().getResources();
     }
 
     /**
@@ -242,7 +235,7 @@ public class OrgService extends Common {
      * @since 2018.8.17
      */
     public ListOrganizationsResponse getAllOrgsForUser(String token) {
-        return cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block();
+        return cloudFoundryClient(tokenProvider(token)).organizations().list(ListOrganizationsRequest.builder().build()).block();
     }
 
 
@@ -254,9 +247,8 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    //@HystrixCommand(commandKey = "getOrgsForAdmin")
     public ListOrganizationsResponse getOrgsForAdmin() {
-        return cloudFoundryClient(connectionContext(), tokenProvider()).organizations().list(ListOrganizationsRequest.builder().build()).block();
+        return cloudFoundryClient().organizations().list(ListOrganizationsRequest.builder().build()).block();
     }
 
 
@@ -274,12 +266,10 @@ public class OrgService extends Common {
         return getOrgUsingName(orgName, token).getId();
     }
 
-    //@HystrixCommand(commandKey = "getOrgUsingName")
     public OrganizationDetail getOrgUsingName(final String name) {
         return getOrgUsingName(name, null);
     }
 
-    //@HystrixCommand(commandKey = "getOrgUsingName")
     public OrganizationDetail getOrgUsingName(final String name, final String token) {
         final TokenProvider internalTokenProvider;
         if (null != token && !"".equals(token)) internalTokenProvider = tokenProvider(token);
@@ -298,12 +288,11 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    //@HystrixCommand(commandKey = "renameOrg")
     public Map renameOrg(Org org, String token) {
         Map resultMap = new HashMap();
 
         try {
-            cloudFoundryClient(connectionContext(), tokenProvider(token)).organizations().update(UpdateOrganizationRequest.builder().organizationId(org.getGuid().toString()).name(org.getNewOrgName()).build()).block();
+            cloudFoundryClient(tokenProvider(token)).organizations().update(UpdateOrganizationRequest.builder().organizationId(org.getGuid().toString()).name(org.getNewOrgName()).build()).block();
 
             resultMap.put("result", true);
         } catch (Exception e) {
@@ -327,7 +316,6 @@ public class OrgService extends Common {
      * @version 2.1
      * @since 2018.5.2
      */
-    //@HystrixCommand(commandKey = "deleteOrg")
     public Map deleteOrg(String orgId, boolean recursive, String token) throws Exception {
         Map resultMap = new HashMap();
         try {
@@ -401,7 +389,6 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    //@HystrixCommand(commandKey = "getOrgSpaces")
     public ListSpacesResponse getOrgSpaces(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         return spaceService.getSpaces(orgId, reactorCloudFoundryClient);
     }
@@ -419,7 +406,6 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    //@HystrixCommand(commandKey = "getOrgQuota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         GetOrganizationResponse org = getOrg(orgId, reactorCloudFoundryClient);
         String quotaId = org.getEntity().getQuotaDefinitionId();
@@ -439,12 +425,11 @@ public class OrgService extends Common {
      * @version 2.0
      * @since 2018.5.2
      */
-    //@HystrixCommand(commandKey = "updateOrgQuota")
     public Map updateOrgQuota(String orgId, Org org, String token) {
         Map resultMap = new HashMap();
 
         try {
-            cloudFoundryClient(connectionContext(), tokenProvider()).organizations().update(UpdateOrganizationRequest.builder().organizationId(orgId).quotaDefinitionId(org.getQuotaGuid()).build()).block();
+            cloudFoundryClient().organizations().update(UpdateOrganizationRequest.builder().organizationId(orgId).quotaDefinitionId(org.getQuotaGuid()).build()).block();
 
             resultMap.put("result", true);
         } catch (Exception e) {
@@ -502,7 +487,7 @@ public class OrgService extends Common {
 
     //@HystrixCommand(commandKey = "getOrgUserRolesByOrgName")
     public OrganizationUsers getOrgUserRolesByOrgName(String orgName, String token) {
-        return cloudFoundryOperations(connectionContext(), tokenProvider(token)).userAdmin().listOrganizationUsers(org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder().organizationName(orgName).build()).block();
+        return cloudFoundryOperations(tokenProvider(token)).userAdmin().listOrganizationUsers(org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder().organizationName(orgName).build()).block();
     }
 
     //@HystrixCommand(commandKey = "isOrgManagerUsingOrgName")
@@ -581,7 +566,7 @@ public class OrgService extends Common {
         try {
             final Object lock = blockingQueue.take();
             token = adminToken(token);
-            ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             Objects.requireNonNull(orgId, "Org Id");
             Objects.requireNonNull(userId, "User Id");
             Objects.requireNonNull(role, "role");
@@ -642,18 +627,18 @@ public class OrgService extends Common {
 
     private void removeOrgManager(String orgId, String userId) {
         LOGGER.debug("---->> Remove OrgManager role of member({}) in org({}).", userId, orgId);
-        cloudFoundryClient(connectionContext(), tokenProvider()).organizations().removeManager(RemoveOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
+        cloudFoundryClient().organizations().removeManager(RemoveOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
     }
 
 
     private void removeBillingManager(String orgId, String userId) {
         LOGGER.debug("---->> Remove BillingManager role of member({}) in org({}).", userId, orgId);
-        cloudFoundryClient(connectionContext(), tokenProvider()).organizations().removeBillingManager(RemoveOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
+        cloudFoundryClient().organizations().removeBillingManager(RemoveOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
     }
 
     private void removeOrgAuditor(String orgId, String userId) {
         LOGGER.debug("---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId);
-        cloudFoundryClient(connectionContext(), tokenProvider()).organizations().removeAuditor(RemoveOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
+        cloudFoundryClient().organizations().removeAuditor(RemoveOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
     }
 
 
@@ -774,7 +759,7 @@ public class OrgService extends Common {
             for (int i = 0; i < orgArray.size(); i++) {
                 JSONObject orgObj = (JSONObject) orgArray.get(i);
 
-                cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateUser(AssociateOrganizationUserRequest.builder().organizationId(orgGuid).userId(userId).build()).block();
+                cloudFoundryClient().organizations().associateUser(AssociateOrganizationUserRequest.builder().organizationId(orgGuid).userId(userId).build()).block();
 
                 if (orgObj.get("om").toString().equals("true")) {
                     LOGGER.info("om");
@@ -840,7 +825,7 @@ public class OrgService extends Common {
      */
     //@HystrixCommand(commandKey = "getOrgsForAdminAll")
     public ListOrganizationsResponse getOrgsForAdminAll(int number) {
-        return cloudFoundryClient(connectionContext(), tokenProvider()).organizations().list(ListOrganizationsRequest.builder().page(number).build()).block();
+        return cloudFoundryClient().organizations().list(ListOrganizationsRequest.builder().page(number).build()).block();
     }
 
     /**
@@ -852,7 +837,7 @@ public class OrgService extends Common {
      */
     public Map orgFlag(String flagname, String token) throws Exception {
         try {
-            GetFeatureFlagResponse getFeatureFlagResponse = cloudFoundryClient(this.connectionContext(), tokenProvider(token)).featureFlags().get(GetFeatureFlagRequest.builder().name(flagname).build()).block();
+            GetFeatureFlagResponse getFeatureFlagResponse = cloudFoundryClient(tokenProvider(token)).featureFlags().get(GetFeatureFlagRequest.builder().name(flagname).build()).block();
             return new HashMap() {{
                 put("RESULT", getFeatureFlagResponse.getEnabled());
             }};

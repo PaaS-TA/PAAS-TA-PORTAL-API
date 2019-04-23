@@ -54,7 +54,7 @@ public class AppControllerV2 extends Common {
     /**
      * 앱 실시간 상태를 조회한다.
      *
-     * @param guid    the app guid
+     * @param guid the app guid
      * @return ModelAndView model
      * @throws Exception the exception
      */
@@ -68,7 +68,7 @@ public class AppControllerV2 extends Common {
     /**
      * 앱을 변경한다.
      *
-     * @param app     the app
+     * @param app the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
@@ -76,7 +76,7 @@ public class AppControllerV2 extends Common {
     public Map renameApp(@PathVariable String guid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
-        Map result = appServiceV2.renameApp(app,token);
+        Map result = appServiceV2.renameApp(app, token);
         LOGGER.info("Rename App End ");
         return result;
     }
@@ -100,7 +100,7 @@ public class AppControllerV2 extends Common {
     /**
      * 앱을 실행한다.
      *
-     * @param app     the app
+     * @param app the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
@@ -118,7 +118,7 @@ public class AppControllerV2 extends Common {
     /**
      * 앱을 중지한다.
      *
-     * @param app     the app
+     * @param app the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
@@ -136,7 +136,7 @@ public class AppControllerV2 extends Common {
     /**
      * 앱을 리스테이징한다.
      *
-     * @param app     the app
+     * @param app   the app
      * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
@@ -155,7 +155,7 @@ public class AppControllerV2 extends Common {
     /**
      * 앱 인스턴스를 변경한다.
      *
-     * @param app     the app
+     * @param app   the app
      * @param token the request
      * @return ModelAndView model
      * @throws Exception the exception
@@ -222,8 +222,6 @@ public class AppControllerV2 extends Common {
         LOGGER.info("unbindService End ");
         return resultMap;
     }
-
-
 
 
     /**
@@ -353,33 +351,6 @@ public class AppControllerV2 extends Common {
         return mapLog;
     }
 
-    /**
-     * 앱 최근 로그를 가져온다.
-     *
-     * @param guid
-     * @param token the request
-     * @return Map
-     * @throws Exception the exception
-     */
-    @RequestMapping(value = {Constants.V2_URL + "/apps/{guid}/taillogs"}, method = RequestMethod.GET)
-    public Map getTailLogs(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-
-        LOGGER.info("getTailLogs Start ");
-
-        Map mapLog = new HashMap();
-        try {
-            List<LogMessage> respAppEvents = appServiceV2.getTailLog(guid, token);
-            mapLog.put("log", respAppEvents);
-        } catch (Exception e) {
-            LOGGER.info("################ ");
-            LOGGER.error(e.toString());
-            mapLog.put("log", "");
-        }
-
-        LOGGER.info("getTailLogs End ");
-
-        return mapLog;
-    }
 
     /**
      * 유저 프로바이드 credentials을 가져온다.
@@ -390,7 +361,7 @@ public class AppControllerV2 extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V2_URL + "/apps/{guid}/credentials")
-    public Map userProvideCredentials(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+    public Map userProvideCredentials(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         return appServiceV2.userProvideCredentials(guid, token);
     }
 

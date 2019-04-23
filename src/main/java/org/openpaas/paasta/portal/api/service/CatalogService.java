@@ -68,9 +68,8 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "getCatalogServicePlanList")
     public ListServicePlansResponse getCatalogServicePlanList(String servicename, String token) throws Exception {
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient( tokenProvider(token));
         ListServicesResponse listServicesResponse = reactorCloudFoundryClient.services().list(ListServicesRequest.builder().build()).block();
         Optional<ServiceResource> serviceResource = listServicesResponse.getResources().stream().filter(a -> a.getEntity().getLabel().equals(servicename)).findFirst();
         ListServicePlansResponse listServicePlansResponse = reactorCloudFoundryClient.servicePlans().list(ListServicePlansRequest.builder().serviceId(serviceResource.get().getMetadata().getId()).build()).block();
@@ -83,7 +82,6 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "getCatalogServicePlanList")
     public Map getCatalogServicePlanAdMinList() throws Exception {
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient();
         List<Map> List_service = new ArrayList<>();
@@ -116,9 +114,8 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "getCatalogAppList")
     public ListApplicationsResponse getCatalogAppList(String orgid, String spaceid, String token) throws Exception {
-        ListApplicationsResponse listApplicationsResponse = cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+        ListApplicationsResponse listApplicationsResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
         return listApplicationsResponse;
     }
 
@@ -132,10 +129,9 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "getCheckCatalogApplicationNameExists")
     public Map<String, Object> getCheckCatalogApplicationNameExists(String name, String orgid, String spaceid, String token, HttpServletResponse res) throws Exception {
 
-        ListApplicationsResponse listApplicationsResponse = cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
+        ListApplicationsResponse listApplicationsResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().list(ListApplicationsRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
 
         for (ApplicationResource applicationResource : listApplicationsResponse.getResources()) {
             if (applicationResource.getEntity().getName().equals(name)) {
@@ -222,7 +218,7 @@ public class CatalogService extends Common {
      */
     //@HystrixCommand(commandKey = "createApp")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) {
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         String applicationid = "applicationID";
         String routeid = "route ID";
         File file = null;
@@ -269,7 +265,7 @@ public class CatalogService extends Common {
      */
     //@HystrixCommand(commandKey = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) {
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         String applicationid = "applicationID";
         String routeid = "route ID";
         boolean appcreated = false;
@@ -429,7 +425,6 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "procCatalogCreateServiceInstanceV2")
     public Map procCatalogCreateServiceInstanceV2(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -466,7 +461,6 @@ public class CatalogService extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "procCatalogBindService")
     public CreateServiceBindingResponse procCatalogBindService(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> bindparameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {

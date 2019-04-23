@@ -42,9 +42,9 @@ public class DomainServiceTest {
     @Test
     public void testGetOrgPrivateDomain() throws Exception {
         ListDomainsResponse listDomainsResponse = ListDomainsResponse.builder().build();
-        when(domainService.getOrgPrivateDomain(anyString(), anyString())).thenReturn(listDomainsResponse);
+        when(domainService.getOrgPrivateDomain(anyString())).thenReturn(listDomainsResponse);
 
-        ListDomainsResponse result = domainService.getOrgPrivateDomain("token", "orguid");
+        ListDomainsResponse result = domainService.getOrgPrivateDomain("orguid");
         Assert.assertEquals(listDomainsResponse, result);
     }
 
@@ -68,9 +68,9 @@ public class DomainServiceTest {
     @Test
     public void testAddPrivateDomain() throws Exception {
         CreatePrivateDomainResponse createPrivateDomainResponse = CreatePrivateDomainResponse.builder().build();
-        when(domainService.addPrivateDomain(any(), any(), anyString(), anyString())).thenReturn(createPrivateDomainResponse);
+        when(domainService.addPrivateDomain(anyString(), anyString())).thenReturn(createPrivateDomainResponse);
 
-        CreatePrivateDomainResponse result = domainService.addPrivateDomain(null, new TokenGrantTokenProvider("token"), "domainName", "orgId");
+        CreatePrivateDomainResponse result = domainService.addPrivateDomain("domainName", "orgId");
         Assert.assertEquals(createPrivateDomainResponse, result);
     }
 

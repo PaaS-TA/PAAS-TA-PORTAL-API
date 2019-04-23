@@ -18,8 +18,6 @@ public class ClientService extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientService.class);
 
-    //V2
-    //@HystrixCommand(commandKey = "getClientList")
     public ListClientsResponse getClientList() throws Exception {
         return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).log().block();
     }
@@ -31,7 +29,6 @@ public class ClientService extends Common {
      * @return GetClientResponse
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getClient")
     public GetClientResponse getClient(String clientId) throws Exception {
         return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).log().block();
     }
@@ -44,7 +41,6 @@ public class ClientService extends Common {
      * @return CreateClientResponse
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "registerClient")
     public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -59,7 +55,6 @@ public class ClientService extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "updateClient")
     public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
 
         ClientService.ClientOption clientOption = new ClientService.ClientOption();
@@ -69,10 +64,7 @@ public class ClientService extends Common {
 
         //Secret, Token Validity 는 생성 이후 수정 불가
         return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId)
-                //.clientSecret(clientOption.clientSecret)
                 .name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders)
-                //.accessTokenValidity(clientOption.accessTokenValidity)
-                //.refreshTokenValidity(clientOption.refreshTokenValidity)
                 .build()).log().block();
     }
 

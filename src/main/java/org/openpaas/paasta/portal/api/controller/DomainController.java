@@ -85,7 +85,7 @@ public class DomainController extends Common {
      */
     @GetMapping(Constants.V2_URL + "/{guid}/domains")
     public PaginatedResponse getOrgPrivateDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
-        return domainService.getOrgPrivateDomain(token, guid);
+        return domainService.getOrgPrivateDomain(guid);
     }
 
     /**
