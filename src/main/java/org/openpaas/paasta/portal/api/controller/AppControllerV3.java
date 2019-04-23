@@ -1,9 +1,13 @@
 package org.openpaas.paasta.portal.api.controller;
 
-import org.cloudfoundry.client.v3.applications.StartApplicationResponse;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
+import org.cloudfoundry.client.v3.applications.*;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
+import org.openpaas.paasta.portal.api.model.AppV3;
 import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,13 +68,12 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/summary"}, method = RequestMethod.GET)
-    public void getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getAppSummary Start : " + guid);
-        appService.getSummary(token, guid);
-
-
+    @GetMapping(Constants.V3_URL + "/apps/{guid}/summary")
+    public AppV3 getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        AppV3 respApp = appService.getAppSummary(guid, token);
+        return respApp;
     }
 
 
 }
+
