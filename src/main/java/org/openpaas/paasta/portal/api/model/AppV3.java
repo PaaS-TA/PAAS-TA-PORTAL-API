@@ -16,179 +16,109 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppV3 {
 
+    @JsonProperty("name")
     private String name;
 
+    @JsonProperty("state")
     private String state;
 
+    @JsonProperty("guid")
     private String guid;
 
+    @JsonProperty("spaceGuid")
     private String spaceGuid;
 
+    @JsonProperty("spaceName")
     private String spaceName;
 
+    @JsonProperty("type")
     private String type;
 
+    @JsonProperty("executionMetadata")
     private String executionMetadata;
 
-    private String command;
+    @JsonProperty("detected_start_command")
+    private String detected_start_command;
 
+    @JsonProperty("stack")
     private String stack;
 
+    @JsonProperty("dropletState")
     private String dropletState;
 
+    @JsonProperty("image")
     private String image;
 
-    private Integer instance;
+    @JsonProperty("buildpack")
+    private String buildpack;
 
-    private Integer disk;
+    @JsonProperty("detected_buildpack")
+    private String detected_buildpack;
 
+    @JsonProperty("instances")
+    private Integer instances;
+
+    @JsonProperty("disk_quota")
+    private Integer disk_quota;
+
+    @JsonProperty("memory")
     private Integer memory;
 
+    @JsonProperty("applicationEnvironmentVariables")
     private Map<String, Object> applicationEnvironmentVariables;
 
+    @JsonProperty("environmentVariables")
     private Map<String, Object> environmentVariables;
 
+    @JsonProperty("runningEnvironmentVariables")
     private Map<String, Object> runningEnvironmentVariables;
 
+    @JsonProperty("stagingEnvironmentVariables")
     private Map<String, Object> stagingEnvironmentVariables;
 
+    @JsonProperty("systemEnvironmentVariables")
     private Map<String, Object> systemEnvironmentVariables;
 
+    @JsonProperty("processTypes")
     private Map<String, String> processTypes;
 
+    @JsonProperty("healthCheck")
     private HealthCheck healthCheck;
 
+    @JsonProperty("processStatisticsResources")
     private List<ProcessStatisticsResource> processStatisticsResources;
 
+    @JsonProperty("buildpacks")
     private List<Buildpack> buildpacks;
 
+    @JsonProperty("checksum")
     private Checksum checksum;
 
     @JsonProperty("lifecycle")
     private LifecycleData lifecycle;
 
+    @JsonProperty("lifecycleType")
     private String lifecycleType;
 
-    public String getName() {
-        return name;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public String getSpaceGuid() {
-        return spaceGuid;
-    }
-
-    public String getSpaceName() {
-        return spaceName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getExecutionMetadata() {
-        return executionMetadata;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public String getStack() {
-        return stack;
-    }
-
-    public String getDropletState() {
-        return dropletState;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public Integer getInstance() {
-        return instance;
-    }
-
-    public Integer getDisk() {
-        return disk;
-    }
-
-    public Integer getMemory() {
-        return memory;
-    }
-
-    public Map<String, Object> getApplicationEnvironmentVariables() {
-        return applicationEnvironmentVariables;
-    }
-
-    public Map<String, Object> getEnvironmentVariables() {
-        return environmentVariables;
-    }
-
-    public Map<String, Object> getRunningEnvironmentVariables() {
-        return runningEnvironmentVariables;
-    }
-
-    public Map<String, Object> getStagingEnvironmentVariables() {
-        return stagingEnvironmentVariables;
-    }
-
-    public Map<String, Object> getSystemEnvironmentVariables() {
-        return systemEnvironmentVariables;
-    }
-
-    public Map<String, String> getProcessTypes() {
-        return processTypes;
-    }
-
-    public HealthCheck getHealthCheck() {
-        return healthCheck;
-    }
-
-    public List<ProcessStatisticsResource> getProcessStatisticsResources() {
-        return processStatisticsResources;
-    }
-
-    public List<Buildpack> getBuildpacks() {
-        return buildpacks;
-    }
-
-    public Checksum getChecksum() {
-        return checksum;
-    }
-
-    public LifecycleData getLifecycle() {
-        return lifecycle;
-    }
-
-    public String getLifecycleType() {
-        return lifecycleType;
-    }
+    @JsonProperty("package_updated_at")
+    private String package_updated_at;
 
     @Override
     public String toString() {
         return "AppV3{" +
                 "name='" + name + '\'' +
-                ", state='" + state + '\'' +
+                ", package_state='" + state + '\'' +
                 ", guid='" + guid + '\'' +
                 ", spaceGuid='" + spaceGuid + '\'' +
                 ", spaceName='" + spaceName + '\'' +
                 ", type='" + type + '\'' +
                 ", executionMetadata='" + executionMetadata + '\'' +
-                ", command='" + command + '\'' +
+                ", detected_start_command='" + detected_start_command + '\'' +
                 ", stack='" + stack + '\'' +
                 ", dropletState='" + dropletState + '\'' +
                 ", image='" + image + '\'' +
-                ", instance=" + instance +
-                ", disk=" + disk +
+                ", instances=" + instances +
+                ", disk_quota=" + disk_quota +
                 ", memory=" + memory +
                 ", applicationEnvironmentVariables=" + applicationEnvironmentVariables +
                 ", environmentVariables=" + environmentVariables +
@@ -202,6 +132,7 @@ public class AppV3 {
                 ", checksum=" + checksum +
                 ", lifecycle=" + lifecycle +
                 ", lifecycleType='" + lifecycleType + '\'' +
+                ", package_updated_at='" + package_updated_at + '\'' +
                 '}';
     }
 
@@ -224,6 +155,7 @@ public class AppV3 {
         this.state = builder.applicationResponse.getState().getValue();
         this.lifecycle = builder.applicationResponse.getLifecycle().getData();
         this.lifecycleType = builder.applicationResponse.getLifecycle().getType().getValue();
+        this.package_updated_at = builder.applicationResponse.getUpdatedAt();
     }
 
     private void ApplicationEnvironmentResponseBuild(AppV3.Builder builder){
@@ -236,12 +168,13 @@ public class AppV3 {
 
     private void ApplicationProcessResponseBuild(AppV3.Builder builder){
         this.healthCheck = builder.applicationProcessResponse.getHealthCheck();
-        this.disk = builder.applicationProcessResponse.getDiskInMb();
+        this.disk_quota = builder.applicationProcessResponse.getDiskInMb();
         this.guid = builder.applicationProcessResponse.getId();
-        this.instance = builder.applicationProcessResponse.getInstances();
+        this.instances = builder.applicationProcessResponse.getInstances();
         this.memory = builder.applicationProcessResponse.getMemoryInMb();
         this.type = builder.applicationProcessResponse.getType();
-        this.command = builder.applicationProcessResponse.getCommand();
+        this.detected_start_command = builder.applicationProcessResponse.getCommand();
+
     }
 
     private void ApplicationProcessStatisticsResponseBuild(AppV3.Builder builder){
@@ -257,6 +190,7 @@ public class AppV3 {
         this.stack = builder.applicationCurrentDropletResponse.getStack();
         this.dropletState = builder.applicationCurrentDropletResponse.getState().getValue();
         this.guid = builder.applicationCurrentDropletResponse.getId();
+        this.buildpack = builder.applicationCurrentDropletResponse.getBuildpacks().get(0).getName();
     }
 
 
