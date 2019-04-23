@@ -11,7 +11,7 @@ import java.util.Map;
 
 @EnableAsync
 @Service
-public class IsolationSegmentsService extends Common {
+public class IsolationSegmentsServiceV3 extends Common {
 
     /**
      * Segments 할당 리스트를 조회한다.

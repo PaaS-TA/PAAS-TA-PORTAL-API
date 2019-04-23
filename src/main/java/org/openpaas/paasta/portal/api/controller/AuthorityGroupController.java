@@ -18,6 +18,11 @@ import java.util.Map;
 @RestController
 public class AuthorityGroupController extends Common {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     @Autowired
     private AuthorityGroupService authorityGroupService;
     private final String V2_URL = "/v2";

@@ -27,13 +27,17 @@ import java.util.Map;
 @RestController
 public class AppControllerV2 extends Common {
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV2.class);
 
     @Autowired
     private AppServiceV2 appServiceV2;
 
-//    @Autowired
-//    private LoginService loginService;
 
     /**
      * 앱 요약 정보를 조회한다.

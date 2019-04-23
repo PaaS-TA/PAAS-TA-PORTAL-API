@@ -31,6 +31,12 @@ import java.util.*;
 @RestController
 public class OrgController extends Common {
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     /**
      * V1 URL HEAD = (empty string)
      */
@@ -66,10 +72,7 @@ public class OrgController extends Common {
     @Autowired
     UserService userService;
 
-    //////////////////////////////////////////////////////////////////////
-    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
-    //////   Document : http://apidocs.cloudfoundry.org             //////
-    //////////////////////////////////////////////////////////////////////
+
 
     /**
      * 조직 정보를 조회한다.

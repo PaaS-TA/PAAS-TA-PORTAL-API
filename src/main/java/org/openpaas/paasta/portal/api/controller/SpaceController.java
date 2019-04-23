@@ -24,6 +24,12 @@ import java.util.*;
 @RestController
 public class SpaceController extends Common {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceController.class);
     private final String V2_URL = "/v2";
     /**

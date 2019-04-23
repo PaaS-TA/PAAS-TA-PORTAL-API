@@ -16,6 +16,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 @RequestMapping(value = {"/app"})
 public class AppAutoscalingController {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private final Logger LOGGER = getLogger(AppAutoscalingController.class);
     private final AppAutoscalingService appAutoscalingService;
 

@@ -3,17 +3,22 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v3.isolationsegments.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.service.IsolationSegmentsService;
+import org.openpaas.paasta.portal.api.service.IsolationSegmentsServiceV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
-public class IsolationSegmentsController extends Common {
+public class IsolationSegmentsControllerV3 extends Common {
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 3                                    //////
+    //////   Document : http://v3-apidocs.cloudfoundry.org/version/3.69.0/index.html //////
+    ///////////////////////////////////////////////////////////////////////////////////////
 
     @Autowired
-    IsolationSegmentsService isolationSegmentsService;
+    IsolationSegmentsServiceV3 isolationSegmentsServiceV3;
 
     /**
      * Segments 할당 리스트를 조회한다.
@@ -23,7 +28,7 @@ public class IsolationSegmentsController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments")
     public ListIsolationSegmentsResponse getIsolationSegments() throws Exception {
-        return isolationSegmentsService.getIsolationSegments();
+        return isolationSegmentsServiceV3.getIsolationSegments();
     }
 
     /**
@@ -35,7 +40,7 @@ public class IsolationSegmentsController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/organizations/{organizationsId:.+}")
     public ListIsolationSegmentsResponse getIsolationSegmentsByOrgGuid(@PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.getIsolationSegmentsByOrgGuid(organizationsId);
+        return isolationSegmentsServiceV3.getIsolationSegmentsByOrgGuid(organizationsId);
     }
 
     /**
@@ -47,7 +52,7 @@ public class IsolationSegmentsController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations")
     public ListIsolationSegmentEntitledOrganizationsResponse getIsolationSegmentsOrgs(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.getIsolationSegmentsOrgs(isolationSegmentId);
+        return isolationSegmentsServiceV3.getIsolationSegmentsOrgs(isolationSegmentId);
     }
 
     /**
@@ -59,7 +64,7 @@ public class IsolationSegmentsController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/relationships/organizations")
     public ListIsolationSegmentOrganizationsRelationshipResponse getIsolationSegmentsOrgsRelationships(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.getIsolationSegmentsOrgsRelationships(isolationSegmentId);
+        return isolationSegmentsServiceV3.getIsolationSegmentsOrgsRelationships(isolationSegmentId);
     }
 
     /**
@@ -72,7 +77,7 @@ public class IsolationSegmentsController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/spaces")
     public ListIsolationSegmentSpacesRelationshipResponse getIsolationSegmentsSpaces(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.getIsolationSegmentsSpaces(isolationSegmentId);
+        return isolationSegmentsServiceV3.getIsolationSegmentsSpaces(isolationSegmentId);
     }
 
     /**
@@ -84,7 +89,7 @@ public class IsolationSegmentsController extends Common {
      */
     @PostMapping(Constants.V3_URL+"/isolationSegments/{segmentName:.+}")
     public CreateIsolationSegmentResponse createIsolationSegments(@PathVariable String segmentName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.createIsolationSegments(segmentName);
+        return isolationSegmentsServiceV3.createIsolationSegments(segmentName);
     }
 
     /**
@@ -96,7 +101,7 @@ public class IsolationSegmentsController extends Common {
      */
     @DeleteMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}")
     public Map deleteIsolationSegments(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.deleteIsolationSegments(isolationSegmentId);
+        return isolationSegmentsServiceV3.deleteIsolationSegments(isolationSegmentId);
     }
 
     /**
@@ -109,7 +114,7 @@ public class IsolationSegmentsController extends Common {
      */
     @PostMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
     public AddIsolationSegmentOrganizationEntitlementResponse enableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.enableIsolationSegments(isolationSegmentId, organizationsId);
+        return isolationSegmentsServiceV3.enableIsolationSegments(isolationSegmentId, organizationsId);
     }
 
     /**
@@ -122,6 +127,6 @@ public class IsolationSegmentsController extends Common {
      */
     @DeleteMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
     public Map disableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return isolationSegmentsService.disableIsolationSegments(isolationSegmentId, organizationsId);
+        return isolationSegmentsServiceV3.disableIsolationSegments(isolationSegmentId, organizationsId);
     }
 }

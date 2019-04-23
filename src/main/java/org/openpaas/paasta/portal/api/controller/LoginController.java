@@ -23,6 +23,12 @@ import java.util.Map;
 @RestController
 public class LoginController extends Common {
 
+
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 1                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired

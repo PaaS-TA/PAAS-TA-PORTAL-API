@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class RootController {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
 
     @RequestMapping(value = "/", method = {RequestMethod.OPTIONS, RequestMethod.GET})
     @ResponseBody
