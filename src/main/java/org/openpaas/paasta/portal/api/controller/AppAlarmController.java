@@ -16,6 +16,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 @RequestMapping(value = {"/app"})
 public class AppAlarmController {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private final Logger LOGGER = getLogger(AppAlarmController.class);
     private final AlarmService alarmService;
 

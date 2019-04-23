@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 /**
  * Created by swmoon on 2018-03-15.
  */
+
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.UserDetail;
 import org.openpaas.paasta.portal.api.service.LoginService;
@@ -21,6 +22,12 @@ import java.util.Map;
 
 @RestController
 public class LoginController extends Common {
+
+
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 1                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
@@ -75,6 +82,8 @@ public class LoginController extends Common {
         result.put("id", id);
         result.put("password", password);
         result.put("auth", auths);
+        LOGGER.info("Token :: " + token.getValue());
+
         return result;
     }
 

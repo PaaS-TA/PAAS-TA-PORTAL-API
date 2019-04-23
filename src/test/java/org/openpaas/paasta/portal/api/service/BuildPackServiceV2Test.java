@@ -24,12 +24,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest(Common.class)
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class BuildPackServiceTest {
+public class BuildPackServiceV2Test {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV2.class);
 
     @Mock
-    private BuildPackService buildPackService;
+    private BuildPackServiceV2 buildPackServiceV2;
 
 
 
@@ -47,9 +47,9 @@ public class BuildPackServiceTest {
 
     @Test
     public void testGetBuildPacks() throws Exception {
-        when(buildPackService.getBuildPacks()).thenReturn(thenReturn);
+        when(buildPackServiceV2.getBuildPacks()).thenReturn(thenReturn);
 
-        Map<String, Object> result = buildPackService.getBuildPacks();
+        Map<String, Object> result = buildPackServiceV2.getBuildPacks();
         Assert.assertEquals(thenReturn, result);
     }
 
@@ -60,9 +60,9 @@ public class BuildPackServiceTest {
         buildPack.setPosition(1);
         buildPack.setEnable(true);
         buildPack.setLock(true);
-        when(buildPackService.updateBuildPack(buildPack)).thenReturn(true);
+        when(buildPackServiceV2.updateBuildPack(buildPack)).thenReturn(true);
 
-        boolean result = buildPackService.updateBuildPack(buildPack);
+        boolean result = buildPackServiceV2.updateBuildPack(buildPack);
         Assert.assertEquals(true, result);
     }
 

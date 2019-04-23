@@ -44,10 +44,8 @@ public class AppServiceV2 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV2.class);
 
 
-    //@HystrixCommand(commandKey = "getAppSummary")
     public SummaryApplicationResponse getAppSummary(String guid, String token) {
-        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(connectionContext(), tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
-
+        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
         return summaryApplicationResponse;
     }
 
@@ -59,9 +57,8 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @return the app stats
      */
-    //@HystrixCommand(commandKey = "getAppStats")
     public ApplicationStatisticsResponse getAppStats(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
         ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(guid).build()).block();
 
@@ -75,11 +72,10 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "renameApp")
     public Map renameApp(App app, String token) {
         HashMap result = new HashMap();
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             UpdateApplicationResponse response = cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getNewName()).build()).block();
 
             LOGGER.info("Update app response :", response);
@@ -104,12 +100,11 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "startApp")
     public Map startApp(App app, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state("STARTED").build()).block();
 
@@ -131,12 +126,11 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "stopApp")
     public Map stopApp(App app, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             cloudFoundryClient.applicationsV3().stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
             resultMap.put("result", true);
@@ -156,7 +150,6 @@ public class AppServiceV2 extends Common {
      * @param guid the app
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "deleteApp")
     public Map deleteApp(String guid) {
         HashMap result = new HashMap();
         try {
@@ -193,12 +186,11 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @the exception
      */
-    //@HystrixCommand(commandKey = "restageApp")
     public Map restageApp(App app, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             cloudFoundryClient.applicationsV2().restage(RestageApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
 
@@ -219,11 +211,10 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @the exception
      */
-    //@HystrixCommand(commandKey = "updateApp")
     public Map updateApp(App app, String token) {
         Map resultMap = new HashMap();
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             if (app.getInstances() > 0) {
                 cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).instances(app.getInstances()).build()).block();
             }
@@ -259,12 +250,11 @@ public class AppServiceV2 extends Common {
      * @param token the client
      * @the exception
      */
-    //@HystrixCommand(commandKey = "bindService")
     public Map bindService(Map body, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parameterMap = mapper.readValue(body.get("parameter").toString(), new TypeReference<Map<String, Object>>() {
@@ -292,12 +282,11 @@ public class AppServiceV2 extends Common {
      * @param token             the client
      * @the exception
      */
-    //@HystrixCommand(commandKey = "unbindService")
     public Map unbindService(String serviceInstanceId, String applicationId, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             ListServiceInstanceServiceBindingsResponse listServiceInstanceServiceBindingsResponse = cloudFoundryClient.serviceInstances().listServiceBindings(ListServiceInstanceServiceBindingsRequest.builder().applicationId(applicationId).serviceInstanceId(serviceInstanceId).build()).block();
             String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
@@ -323,12 +312,11 @@ public class AppServiceV2 extends Common {
      * @param token             the client
      * @the exception
      */
-    //@HystrixCommand(commandKey = "unbindService")
     public Map unbindUserProvideService(String serviceInstanceId, String applicationId, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             ListUserProvidedServiceInstanceServiceBindingsResponse listUserProvidedServiceInstanceServiceBindingsResponse = cloudFoundryClient.userProvidedServiceInstances().listServiceBindings(ListUserProvidedServiceInstanceServiceBindingsRequest.builder().applicationId(applicationId).userProvidedServiceInstanceId(serviceInstanceId).build()).block();
             String instancesUserProvidedServiceBindingGuid = listUserProvidedServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
             DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2().delete(DeleteServiceBindingRequest.builder().serviceBindingId(instancesUserProvidedServiceBindingGuid).build()).block();
@@ -352,9 +340,8 @@ public class AppServiceV2 extends Common {
      * @return the app events
      * @the exception
      */
-    //@HystrixCommand(commandKey = "getAppEvents")
     public ListEventsResponse getAppEvents(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
         ListEventsRequest.Builder requestBuilder = ListEventsRequest.builder().actee(guid).resultsPerPage(100).orderDirection(OrderDirection.DESCENDING);
         ListEventsResponse listEventsResponse = cloudFoundryClient.events().list(requestBuilder.build()).block();
@@ -372,9 +359,8 @@ public class AppServiceV2 extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    //@HystrixCommand(commandKey = "getApplicationEnv")
     public ApplicationEnvironmentResponse getApplicationEnv(String guid, String token) {
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
         ApplicationEnvironmentResponse applicationEnvironmentResponse = cloudFoundryClient.applicationsV2().environment(ApplicationEnvironmentRequest.builder().applicationId(guid).build()).block();
 
@@ -391,12 +377,11 @@ public class AppServiceV2 extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    //@HystrixCommand(commandKey = "addApplicationRoute")
     public Map addApplicationRoute(Map body, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             CreateRouteResponse createRouteResponse = cloudFoundryClient.routes().create(CreateRouteRequest.builder().host(body.get("host").toString()).domainId(body.get("domainId").toString()).spaceId(body.get("spaceId").toString()).build()).block();
 
@@ -423,12 +408,11 @@ public class AppServiceV2 extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    //@HystrixCommand(commandKey = "removeApplicationRoute")
     public Map removeApplicationRoute(String guid, String route_guid, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             cloudFoundryClient.applicationsV2().removeRoute(RemoveApplicationRouteRequest.builder().applicationId(guid).routeId(route_guid).build()).block();
 
@@ -453,12 +437,11 @@ public class AppServiceV2 extends Common {
      * @return the map
      * @the exception
      */
-    //@HystrixCommand(commandKey = "terminateInstance")
     public Map terminateInstance(String guid, String index, String token) {
         Map resultMap = new HashMap();
 
         try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
             TerminateApplicationInstanceRequest.Builder requestBuilder = TerminateApplicationInstanceRequest.builder();
             requestBuilder.applicationId(guid);
@@ -475,7 +458,6 @@ public class AppServiceV2 extends Common {
         return resultMap;
     }
 
-    //@HystrixCommand(commandKey = "getRecentLog")
     public List<Envelope> getRecentLog(String guid, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
         ReactorDopplerClient reactorDopplerClient = dopplerClient(connectionContext(), tokenProvider);
@@ -491,7 +473,7 @@ public class AppServiceV2 extends Common {
     public Map userProvideCredentials(String guid, String token) {
         Map resultMap = new HashMap();
         ArrayList resultlist = new ArrayList();
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
         GetUserProvidedServiceInstanceResponse getUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().get(GetUserProvidedServiceInstanceRequest.builder().userProvidedServiceInstanceId(guid).build()).block();
         String str = getUserProvidedServiceInstanceResponse.getEntity().getCredentials().toString();
@@ -508,23 +490,6 @@ public class AppServiceV2 extends Common {
         }
         resultMap.put("List", resultlist);
         return resultMap;
-    }
-
-    private void printLog(LogMessage msg) {
-        LOGGER.info(" [" + msg.getSourceType() + "/" + msg.getSourceInstance() + "] [" + msg.getMessageType() + msg.getMessageType() + "] " + msg.getMessage());
-    }
-
-    public List<LogMessage> getTailLog(String guid, String token) {
-        DefaultCloudFoundryOperations cloudFoundryOperations = null;
-//                cloudFoundryOperations(connectionContext(), tokenProvider(token), "demo.org", "dev");
-
-        cloudFoundryOperations.applications().logs(LogsRequest.builder().name("github-test-app2").build()).subscribe((msg) -> {
-            printLog(msg);
-        }, (error) -> {
-            error.printStackTrace();
-        });
-
-        return null;
     }
 
 }

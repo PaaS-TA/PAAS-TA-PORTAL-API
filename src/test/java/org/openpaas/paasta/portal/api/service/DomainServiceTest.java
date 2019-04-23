@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,9 +42,9 @@ public class DomainServiceTest {
     @Test
     public void testGetOrgPrivateDomain() throws Exception {
         ListDomainsResponse listDomainsResponse = ListDomainsResponse.builder().build();
-        when(domainService.getOrgPrivateDomain(anyString(), anyString())).thenReturn(listDomainsResponse);
+        when(domainService.getOrgPrivateDomain(anyString())).thenReturn(listDomainsResponse);
 
-        ListDomainsResponse result = domainService.getOrgPrivateDomain("token", "orguid");
+        ListDomainsResponse result = domainService.getOrgPrivateDomain("orguid");
         Assert.assertEquals(listDomainsResponse, result);
     }
 
@@ -67,9 +68,9 @@ public class DomainServiceTest {
     @Test
     public void testAddPrivateDomain() throws Exception {
         CreatePrivateDomainResponse createPrivateDomainResponse = CreatePrivateDomainResponse.builder().build();
-        when(domainService.addPrivateDomain(any(), any(), anyString(), anyString())).thenReturn(createPrivateDomainResponse);
+        when(domainService.addPrivateDomain(anyString(), anyString())).thenReturn(createPrivateDomainResponse);
 
-        CreatePrivateDomainResponse result = domainService.addPrivateDomain(null, new TokenGrantTokenProvider("token"), "domainName", "orgId");
+        CreatePrivateDomainResponse result = domainService.addPrivateDomain("domainName", "orgId");
         Assert.assertEquals(createPrivateDomainResponse, result);
     }
 

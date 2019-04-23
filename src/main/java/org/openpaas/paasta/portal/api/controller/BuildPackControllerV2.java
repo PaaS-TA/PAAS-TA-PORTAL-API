@@ -3,7 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.BuildPack;
-import org.openpaas.paasta.portal.api.service.BuildPackService;
+import org.openpaas.paasta.portal.api.service.BuildPackServiceV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +18,18 @@ import java.util.UUID;
  * Created by swmoon on 2017-12-19.
  */
 @RestController
-public class BuildPackController extends Common {
+public class BuildPackControllerV2 extends Common {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackController.class);
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackControllerV2.class);
     private final String V2_URL = "/v2";
 
     @Autowired
-    private BuildPackService buildPackService;
+    private BuildPackServiceV2 buildPackServiceV2;
 
 
     /**
@@ -38,7 +43,7 @@ public class BuildPackController extends Common {
     public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start");
-        Map<String, Object> buildPacks = buildPackService.getBuildPacks();
+        Map<String, Object> buildPacks = buildPackServiceV2.getBuildPacks();
         LOGGER.info("getBuildPacks End ");
 
         return buildPacks;
@@ -59,11 +64,9 @@ public class BuildPackController extends Common {
 
         LOGGER.info("updateBuildPack Start : " + guid);
         Map<String, Object> resultMap = new HashMap<>();
-        //service call
         buildPack.setGuid(UUID.fromString(guid));
-        buildPackService.updateBuildPack(buildPack);
+        buildPackServiceV2.updateBuildPack(buildPack);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-
         LOGGER.info("updateBuildPack End ");
 
         return resultMap;

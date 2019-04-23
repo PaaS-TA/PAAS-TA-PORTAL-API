@@ -18,6 +18,11 @@ import java.util.Map;
 @RestController
 public class DomainController extends Common {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainController.class);
 
     @Autowired
@@ -85,7 +90,7 @@ public class DomainController extends Common {
      */
     @GetMapping(Constants.V2_URL + "/{guid}/domains")
     public PaginatedResponse getOrgPrivateDomain(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
-        return domainService.getOrgPrivateDomain(token, guid);
+        return domainService.getOrgPrivateDomain(guid);
     }
 
     /**

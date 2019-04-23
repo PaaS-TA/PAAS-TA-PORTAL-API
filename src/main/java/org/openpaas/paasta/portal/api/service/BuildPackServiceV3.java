@@ -7,12 +7,13 @@ import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @EnableAsync
-@org.springframework.stereotype.Service
-public class BuildPackService extends Common {
+@Service
+public class BuildPackServiceV3 extends Common {
 
     /**
      * 빌드팩 리스트 조회
@@ -20,10 +21,9 @@ public class BuildPackService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getBuildPacks")
     public Map<String, Object> getBuildPacks() throws Exception {
         ListBuildpacksResponse listBuildpacksResponse =
-        cloudFoundryClient(connectionContext(), tokenProvider())
+        cloudFoundryClient()
                 .buildpacks()
                 .list(ListBuildpacksRequest.builder().build())
                 .block();
@@ -38,7 +38,6 @@ public class BuildPackService extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "updateBuildPack")
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
         cloudFoundryClient(connectionContext(), tokenProvider())

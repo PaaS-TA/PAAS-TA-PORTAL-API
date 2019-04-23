@@ -17,6 +17,11 @@ import java.util.Map;
 @RestController
 public class ClientController extends Common {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientController.class);
 
     @Autowired

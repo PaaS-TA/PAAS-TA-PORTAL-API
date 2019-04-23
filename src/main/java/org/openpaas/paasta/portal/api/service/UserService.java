@@ -46,7 +46,7 @@ public class UserService extends Common {
         LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient();
             reactorUaaClient.users().create(CreateUserRequest.builder().userName(userDetail.getUserId()).password(userDetail.getPassword()).active(userDetail.getActive()).email(Email.builder().value(userDetail.getUserId()).primary(false).build()).build()).block();
 
             result.put("result", true);
@@ -74,7 +74,7 @@ public class UserService extends Common {
         LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient();
             reactorUaaClient.users().update(UpdateUserRequest.builder().userName(userDetail.getUserId()).phoneNumber(PhoneNumber.builder().value(userDetail.getTellPhone()).build()).email(Email.builder().value(userDetail.getUserName()).build()).build()).block();
 
             //TODO : ORG 권한 부여
@@ -106,11 +106,8 @@ public class UserService extends Common {
         LOGGER.debug("updateUserPassword ::: " + newPassword);
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(userId, oldPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient(tokenProvider(userId, oldPassword));
             reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).map(UserInfoResponse::toString).subscribe(System.out::println).dispose();
-            //User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userId);
-            //Name name = Name.builder().familyName((user.getName().getFamilyName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getFamilyName()).givenName((user.getName().getGivenName()==null)||(user.getName().getFamilyName().equals(""))?user.getId():user.getName().getGivenName()).build();
-            //reactorUaaClient.users().update(UpdateUserRequest.builder().name(name).userName(user.getUserName()).version(user.getMeta().getVersion().toString()).email(user.getEmail().get(0)).id(user.getId()).build()).block();
             ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userGuid).oldPassword(oldPassword).password(newPassword).build()).block();
             result.put("result", true);
             result.put("token", loginService.login(userId, newPassword));
@@ -135,7 +132,7 @@ public class UserService extends Common {
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient();
 
 
             GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
@@ -180,7 +177,7 @@ public class UserService extends Common {
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient();
             reactorUaaClient.users().expirePassword(ExpirePasswordRequest.builder().passwordChangeRequired(true).userId(userGuid).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -206,7 +203,7 @@ public class UserService extends Common {
 
         Map result = new HashMap();
         try {
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient();
             DeleteUserResponse deleteUserResponse = reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -231,7 +228,7 @@ public class UserService extends Common {
 
     //@HystrixCommand(commandKey = "getUsernameFromToken")
     public String getUsernameFromToken(String token) {
-        return Common.uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
+        return uaaClient(tokenProvider(token)).getUsername().block();
     }
 
     //@HystrixCommand(commandKey = "getUser")
@@ -249,7 +246,7 @@ public class UserService extends Common {
     public GetUserResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
 
         LOGGER.info("getUser ::: ");
-        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient();
         GetUserResponse getUserResponse = cloudFoundryClient.users().get(GetUserRequest.builder().userId(userGuid).build()).block();
         return getUserResponse;
     }
@@ -265,7 +262,7 @@ public class UserService extends Common {
         List<User> users = new ArrayList<>();
         try {
             LOGGER.info("allUsers ::: ");
-            ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
+            ReactorUaaClient reactorUaaClient = uaaClient();
             ListUsersResponse listUsersResponse = reactorUaaClient.users().list(ListUsersRequest.builder().build().builder().build()).block();
             users = listUsersResponse.getResources();
             return users;
@@ -310,7 +307,7 @@ public class UserService extends Common {
      */
     //@HystrixCommand(commandKey = "getUserIdByUsername")
     public String getUserIdByUsername(String username) {
-        final List<User> userList = Common.uaaClient(connectionContext(), tokenProvider()).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Username, username)).build()).block().getResources();
+        final List<User> userList = uaaClient().users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Username, username)).build()).block().getResources();
         if (userList.size() <= 0) {
             //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User name cannot find" );
             return null;
@@ -327,7 +324,7 @@ public class UserService extends Common {
      */
     //@HystrixCommand(commandKey = "getUsernameByUserId")
     public String getUsernameByUserId(String userId) {
-        final List<User> userList = Common.uaaClient(connectionContext(), tokenProvider()).users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Id, userId)).build()).block().getResources();
+        final List<User> userList = uaaClient().users().list(ListUsersRequest.builder().filter(createUserLookupFilter(UaaUserLookupFilterType.Id, userId)).build()).block().getResources();
         if (userList.size() <= 0) {
             //throw new CloudFoundryException( HttpStatus.NOT_FOUND, "User ID cannot find" );
             return null;
@@ -337,7 +334,7 @@ public class UserService extends Common {
     }
 
     private User getUserSummaryWithFilter(UaaUserLookupFilterType filterType, String filterValue) {
-        final ListUsersResponse response = Common.uaaClient(connectionContext(), tokenProvider()).users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
+        final ListUsersResponse response = uaaClient().users().list(org.cloudfoundry.uaa.users.ListUsersRequest.builder().filter(createUserLookupFilter(filterType, filterValue)).build()).block();
         if (response.getResources().size() <= 0)
             throw new CloudFoundryException(HttpStatus.NOT_FOUND, (filterType.name() + " of user cannot find"));
 
@@ -360,7 +357,7 @@ public class UserService extends Common {
      * @throws Exception Exception(자바클래스)
      */
     public UpdateUserResponse UpdateUserActive(String userGuid) throws Exception {
-        ReactorUaaClient uaaClient = Common.uaaClient(connectionContext(), tokenProvider());
+        ReactorUaaClient uaaClient = uaaClient();
         User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
         if (user.getUserName().equals("admin")) {
             return null;

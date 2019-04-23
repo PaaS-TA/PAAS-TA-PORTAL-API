@@ -39,6 +39,11 @@ import java.util.UUID;
 @RestController
 public class CommonController extends Common {
 
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonController.class);
 
 
