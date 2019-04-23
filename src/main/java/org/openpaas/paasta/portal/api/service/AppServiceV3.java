@@ -1,9 +1,12 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v3.applications.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.App;
+import org.openpaas.paasta.portal.api.model.AppV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -99,6 +102,24 @@ public class AppServiceV3 extends Common {
 
 
 
+    }
+
+    public AppV3 getAppSummary(String guid, String token) {
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+        SummaryApplicationResponse summaryApplicationResponse = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
+        GetApplicationResponse getApplicationResponse= reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
+        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
+        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().type("web").applicationId(guid).build()).block();
+        GetApplicationProcessStatisticsResponse processStatisticsResponse =  reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().type("web").applicationId(guid).build()).block();
+        GetApplicationEnvironmentResponse getApplicationEnvironmentResponse = reactorCloudFoundryClient.applicationsV3().getEnvironment(GetApplicationEnvironmentRequest.builder().applicationId(guid).build()).block();
+        AppV3 app = AppV3.builder()
+                .applicationResponse(getApplicationResponse)
+                .applicationEnvironmentResponse(getApplicationEnvironmentResponse)
+                .applicationProcessResponse(getApplicationProcessResponse)
+                .applicationCurrentDropletResponse(getApplicationCurrentDropletResponse)
+                .applicationProcessStatisticsResponse(processStatisticsResponse)
+                .summaryApplicationResponse(summaryApplicationResponse).build();
+        return app;
     }
 
 

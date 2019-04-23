@@ -1,6 +1,10 @@
 package org.openpaas.paasta.portal.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
+import org.cloudfoundry.client.v2.domains.Domain;
+import org.cloudfoundry.client.v2.routes.Route;
+import org.cloudfoundry.client.v2.serviceinstances.ServiceInstance;
 import org.cloudfoundry.client.v3.Checksum;
 import org.cloudfoundry.client.v3.LifecycleData;
 import org.cloudfoundry.client.v3.applications.*;
@@ -103,6 +107,15 @@ public class AppV3 {
     @JsonProperty("package_updated_at")
     private String package_updated_at;
 
+    @JsonProperty("routes")
+    List<Route> routes;
+
+    @JsonProperty("available_domains")
+    List<Domain> domains;
+
+    @JsonProperty("services")
+    private List<ServiceInstance> serviceInstances;
+
     @Override
     public String toString() {
         return "AppV3{" +
@@ -144,7 +157,9 @@ public class AppV3 {
         } if(builder.applicationProcessResponse != null){
             this.ApplicationProcessResponseBuild(builder);
         } if(builder.applicationCurrentDropletResponse != null){
-            ApplicationCurrentDropletResponseBuild(builder);
+            this.ApplicationCurrentDropletResponseBuild(builder);
+        } if(builder.summaryApplicationResponse != null){
+            this.SummaryApplicationResponseBuild(builder);
         }
     }
 
@@ -193,6 +208,12 @@ public class AppV3 {
         this.buildpack = builder.applicationCurrentDropletResponse.getBuildpacks().get(0).getName();
     }
 
+    private void SummaryApplicationResponseBuild(AppV3.Builder builder){
+        this.serviceInstances = builder.summaryApplicationResponse.getServices();
+        this.domains = builder.summaryApplicationResponse.getAvailableDomains();
+        this.routes = builder.summaryApplicationResponse.getRoutes();
+    }
+
 
     public static AppV3.Builder builder() {
         return new AppV3.Builder();
@@ -204,6 +225,7 @@ public class AppV3 {
         private GetApplicationProcessResponse applicationProcessResponse;
         private GetApplicationProcessStatisticsResponse applicationProcessStatisticsResponse;
         private GetApplicationCurrentDropletResponse applicationCurrentDropletResponse;
+        private SummaryApplicationResponse summaryApplicationResponse;
 
         private Builder() {
 
@@ -234,6 +256,11 @@ public class AppV3 {
             return this;
         }
 
+        //v3 기능나오면 대체 바람
+        public final Builder summaryApplicationResponse(SummaryApplicationResponse response){
+            this.summaryApplicationResponse = Objects.requireNonNull(response, "summaryApplicationResponse");
+            return this;
+        }
 
         public AppV3 build() {
             return new AppV3(this);
