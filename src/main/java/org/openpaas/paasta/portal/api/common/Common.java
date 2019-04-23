@@ -79,12 +79,12 @@ public class Common {
         return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient(connectionContext, tokenProvider)).dopplerClient(dopplerClient(connectionContext, tokenProvider)).uaaClient(uaaClient(connectionContext, tokenProvider)).build();
     }
 
-    public DefaultCloudFoundryOperations cloudFoundryOperations() {
-        return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient(connectionContext(), tokenProvider())).dopplerClient(dopplerClient(connectionContext(), tokenProvider())).uaaClient(uaaClient(connectionContext(), tokenProvider)).build();
-    }
-
     public DefaultCloudFoundryOperations cloudFoundryOperations(TokenProvider tokenProvider) {
         return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient(connectionContext(), tokenProvider)).dopplerClient(dopplerClient(connectionContext(), tokenProvider)).uaaClient(uaaClient(connectionContext(), tokenProvider)).build();
+    }
+
+    public DefaultCloudFoundryOperations cloudFoundryOperations() {
+        return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient(connectionContext(), tokenProvider())).dopplerClient(dopplerClient(connectionContext(), tokenProvider())).uaaClient(uaaClient(connectionContext(), tokenProvider)).build();
     }
 
     /**
@@ -98,12 +98,12 @@ public class Common {
         return ReactorCloudFoundryClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
 
-    public ReactorCloudFoundryClient cloudFoundryClient() {
-        return ReactorCloudFoundryClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider()).build();
-    }
-
     public ReactorCloudFoundryClient cloudFoundryClient(TokenProvider tokenProvider) {
         return ReactorCloudFoundryClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider).build();
+    }
+
+    public ReactorCloudFoundryClient cloudFoundryClient() {
+        return ReactorCloudFoundryClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider()).build();
     }
 
     /**
@@ -117,6 +117,14 @@ public class Common {
         return ReactorDopplerClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
     }
 
+    public ReactorDopplerClient dopplerClient(TokenProvider tokenProvider) {
+        return ReactorDopplerClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider).build();
+    }
+
+    public ReactorDopplerClient dopplerClient() {
+        return ReactorDopplerClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider()).build();
+    }
+
     /**
      * ReactorUaaClient 생성하여, 반환한다.
      *
@@ -124,8 +132,16 @@ public class Common {
      * @param tokenProvider
      * @return ReactorUaaClient
      */
-    public static ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+    public ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorUaaClient.builder().connectionContext(connectionContext).tokenProvider(tokenProvider).build();
+    }
+
+    public ReactorUaaClient uaaClient(TokenProvider tokenProvider) {
+        return ReactorUaaClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider).build();
+    }
+
+    public ReactorUaaClient uaaClient() {
+        return ReactorUaaClient.builder().connectionContext(connectionContext()).tokenProvider(tokenProvider()).build();
     }
 
 
@@ -138,7 +154,7 @@ public class Common {
      * @return ReactorUaaClient
      */
     public ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String adminUserName, String adminPassword, String uaaAdminClientId, String uaaAdminClientSecret) {
-        ReactorUaaClient reactorUaaClient = Common.uaaClient(connectionContext, tokenProvider(adminUserName, adminPassword));
+        ReactorUaaClient reactorUaaClient = uaaClient(connectionContext, tokenProvider(adminUserName, adminPassword));
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
         return uaaClient(connectionContext, tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
