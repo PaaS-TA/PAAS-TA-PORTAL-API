@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import com.unboundid.scim.wink.PATCH;
 import org.cloudfoundry.client.v3.applications.StartApplicationResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class AppControllerV3 extends Common {
 
     @Autowired
-    private AppServiceV3 appService;
+    private AppServiceV3 appServiceV3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV3.class);
 
@@ -33,28 +34,26 @@ public class AppControllerV3 extends Common {
      *
      * @return ModelAndView model
      * @throws Exception the exception
+     *
      */
     @PostMapping(value = {Constants.V3_URL + "/apps/{appGuid}/actions/start"})
     public void startApp(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
-        appService.startApp(appGuid,token);
+        appServiceV3.startApp(appGuid,token);
         LOGGER.info("startApp End ");
-//        return resultMap;
     }
 
     /**
      * 앱을 중지한다.
      *
-     * @param app     the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/stop"})
-    public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    @PostMapping(value = {Constants.V3_URL + "/apps/{appGuid}/actions/stop"})
+    public void stopApp(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
-        Map resultMap = appService.stopApp(app, token);
+        appServiceV3.stopApp(appGuid, token);
         LOGGER.info("stopApp End ");
-        return resultMap;
     }
 
     /**
@@ -67,9 +66,7 @@ public class AppControllerV3 extends Common {
     @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/summary"}, method = RequestMethod.GET)
     public void getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppSummary Start : " + guid);
-        appService.getSummary(token, guid);
-
-
+        appServiceV3.getSummary(token, guid);
     }
 
 

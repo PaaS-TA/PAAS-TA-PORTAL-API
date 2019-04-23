@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 public class ClientServiceTest {
 
     @Mock
-    ClientService clientService;
+    ClientServiceV2 clientService;
 
 
     @Before

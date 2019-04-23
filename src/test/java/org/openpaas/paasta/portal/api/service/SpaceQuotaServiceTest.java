@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 public class SpaceQuotaServiceTest {
 
     @Mock
-    SpaceQuotaService spaceQuotaService;
+    SpaceQuotaServiceV2 spaceQuotaService;
 
     Map thenReturn;
 

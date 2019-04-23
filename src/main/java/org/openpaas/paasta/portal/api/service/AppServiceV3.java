@@ -23,7 +23,7 @@ public class AppServiceV3 extends Common {
      *
      * @param token the client
      * @throws Exception the exception
-     * 권한 사용자 권한
+     * 권한:사용자 권한
      */
     public void startApp(String appGuid, String token) {
         Map resultMap = new HashMap();
@@ -43,17 +43,17 @@ public class AppServiceV3 extends Common {
     /**
      * 앱을 중지한다.
      *
-     * @param app     the app
+     * @param token     the client
      * @return ModelAndView model
      * @throws Exception the exception
+     * 권한:사용자 권한
      */
-    public Map stopApp(App app, String token) {
+    public void stopApp(String appGuid, String token) {
         Map resultMap = new HashMap();
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            cloudFoundryClient.applicationsV3().stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
-
+            cloudFoundryClient.applicationsV3().stop(StopApplicationRequest.builder().applicationId(appGuid).build()).block();
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +61,6 @@ public class AppServiceV3 extends Common {
             resultMap.put("msg", e.getMessage());
         }
 
-        return resultMap;
     }
 
     /**
@@ -101,6 +100,7 @@ public class AppServiceV3 extends Common {
 
 
     }
+
 
 
 }
