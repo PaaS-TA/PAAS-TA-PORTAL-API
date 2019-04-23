@@ -108,7 +108,7 @@ public class AppControllerV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/startApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/startApp"}, method = RequestMethod.POST)
     public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
 
@@ -126,7 +126,7 @@ public class AppControllerV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/stopApp"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V2_URL + "/apps/stopApp"}, method = RequestMethod.POST)
     public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
 
