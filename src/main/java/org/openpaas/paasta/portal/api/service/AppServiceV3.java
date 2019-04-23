@@ -1,6 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
-import org.apache.wink.common.model.app.AppService;
+import org.cloudfoundry.client.v3.applications.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.App;
@@ -11,27 +11,26 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Service
-public class AppServiceV3 extends Common{
+public class AppServiceV3 extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
+
 
 
     /**
      * 앱을 실행한다.
      *
-     * @param app   the app
      * @param token the client
      * @throws Exception the exception
+     * 권한 사용자 권한
      */
-    //@HystrixCommand(commandKey = "startApp")
-    public Map startApp(App app, String token) {
+    public void startApp(String appGuid, String token) {
         Map resultMap = new HashMap();
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            cloudFoundryClient.applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+            cloudFoundryClient.applicationsV3().start(StartApplicationRequest.builder().applicationId(appGuid).build()).block();
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,7 +38,6 @@ public class AppServiceV3 extends Common{
             resultMap.put("msg", e.getMessage());
         }
 
-        return resultMap;
     }
 
     /**
@@ -49,7 +47,6 @@ public class AppServiceV3 extends Common{
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "stopApp")
     public Map stopApp(App app, String token) {
         Map resultMap = new HashMap();
 
@@ -89,6 +86,20 @@ public class AppServiceV3 extends Common{
 
         LOGGER.info("변경사항 있는 환경변수들은요~~~ ::: " + updatedAppEnvVar.toString());
         return updatedAppEnvVar;
+    }
+
+
+
+    public void getSummary(String token,String guid){
+
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+        GetApplicationResponse getApplicationResponse = reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
+        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
+        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().applicationId(guid).build()).block();
+        GetApplicationProcessStatisticsResponse processStatisticsResponse = reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(guid).build()).block();
+
+
+
     }
 
 

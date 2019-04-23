@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import org.cloudfoundry.client.v3.applications.StartApplicationResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
@@ -23,16 +24,15 @@ public class AppControllerV3 extends Common {
     /**
      * 앱을 실행한다.
      *
-     * @param app     the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/start"})
-    public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    @PostMapping(value = {Constants.V3_URL + "/apps/{appGuid}/actions/start"})
+    public void startApp(@PathVariable String appGuid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
-        Map resultMap = appService.startApp(app, token);
+        appService.startApp(appGuid,token);
         LOGGER.info("startApp End ");
-        return resultMap;
+//        return resultMap;
     }
 
     /**
