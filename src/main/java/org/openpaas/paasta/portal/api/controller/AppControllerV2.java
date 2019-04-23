@@ -6,7 +6,6 @@ import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
 import org.cloudfoundry.doppler.Envelope;
-import org.cloudfoundry.doppler.LogMessage;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
@@ -368,17 +367,5 @@ public class AppControllerV2 extends Common {
     public Map userProvideCredentials(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         return appServiceV2.userProvideCredentials(guid, token);
     }
-
-
-//    public SocketIOClient socketTailLogs(SocketIOClient client, String appName, String orgName, String spaceName) {
-//        try {
-//            LOGGER.info("Starting TailLog :::::");
-//            client = appService.socketTailLogs(client, appName, orgName, spaceName, this.getToken());
-//        } catch (Exception e) {
-//            LOGGER.error(e.toString());
-//        }
-//        return client;
-//    }
-
 
 }

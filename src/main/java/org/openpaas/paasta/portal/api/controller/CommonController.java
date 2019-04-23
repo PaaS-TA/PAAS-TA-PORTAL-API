@@ -18,8 +18,7 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Service;
 import org.openpaas.paasta.portal.api.model.ServiceBroker;
-import org.openpaas.paasta.portal.api.service.AppServiceV2;
-import org.openpaas.paasta.portal.api.service.ServiceService;
+import org.openpaas.paasta.portal.api.service.ServiceServiceV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class CommonController extends Common {
 
 
     @Autowired
-    private ServiceService serviceService;
+    private ServiceServiceV2 serviceServiceV2;
 
     /**
      * 서비스 인스턴스 이름을 변경한다.
@@ -62,7 +61,7 @@ public class CommonController extends Common {
     public Map renameInstance(@PathVariable String guid, @RequestBody Service service, HttpServletRequest request) throws Exception {
         LOGGER.info("Rename InstanceService Start : " + guid + " : " + service.getName() + " : " + service.getNewName());
         //service call
-        Map result = serviceService.renameInstance(service, guid);
+        Map result = serviceServiceV2.renameInstance(service, guid);
         LOGGER.info("Rename InstanceService End ");
         return result;
     }
@@ -77,7 +76,7 @@ public class CommonController extends Common {
     public Map deleteInstance(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("delete InstanceService Start : " + guid);
         //service call
-        Map result = serviceService.deleteInstance(guid, token);
+        Map result = serviceServiceV2.deleteInstance(guid, token);
         LOGGER.info("delete InstanceService End ");
         return result;
     }
@@ -95,7 +94,7 @@ public class CommonController extends Common {
     @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.GET)
     public GetUserProvidedServiceInstanceResponse getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
         LOGGER.info("getUserProvidedService Start");
-        return serviceService.getUserProvided(token, guid);
+        return serviceServiceV2.getUserProvided(token, guid);
     }
 
     /**
@@ -113,7 +112,7 @@ public class CommonController extends Common {
     public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
         LOGGER.info("createUserProvided Start");
-        Map result = serviceService.createUserProvided(token, service);
+        Map result = serviceServiceV2.createUserProvided(token, service);
         LOGGER.info("createUserProvided End");
         return result;
     }
@@ -133,7 +132,7 @@ public class CommonController extends Common {
     public Map updateUserProvided(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
         LOGGER.info("updateUserProvidedService Start");
-        Map result = serviceService.updateUserProvided(guid, token, service);
+        Map result = serviceServiceV2.updateUserProvided(guid, token, service);
         LOGGER.info("updateUserProvidedService End");
         return result;
     }
@@ -148,7 +147,7 @@ public class CommonController extends Common {
     @GetMapping(value = {Constants.V2_URL + "/servicebrokers"})
     public ListServiceBrokersResponse getServiceBrokers(HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBrokers Start:");
-        return serviceService.getServiceBrokers(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.getServiceBrokers(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -162,7 +161,7 @@ public class CommonController extends Common {
     @GetMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
     public GetServiceBrokerResponse getServiceBroker(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
-        return serviceService.getServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.getServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -177,7 +176,7 @@ public class CommonController extends Common {
     public CreateServiceBrokerResponse createServiceBroker(@RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         LOGGER.info("createServiceBroker Start : " + serviceBroker.getName());
-        return serviceService.createServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.createServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -193,7 +192,7 @@ public class CommonController extends Common {
 
         LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName());
         serviceBroker.setGuid(UUID.fromString(guid));
-        return serviceService.updateServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.updateServiceBroker(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -208,7 +207,7 @@ public class CommonController extends Common {
     public Map<String, Object> deleteServiceBroker(@PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("deleteServiceBroker Start : " + guid);
-        serviceService.deleteServiceBroker(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        serviceServiceV2.deleteServiceBroker(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -219,7 +218,7 @@ public class CommonController extends Common {
     public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicesInstances Start ");
 
-        ListServiceInstancesResponse respServicesInstances = serviceService.getServicesInstances(guid);
+        ListServiceInstancesResponse respServicesInstances = serviceServiceV2.getServicesInstances(guid);
 
         LOGGER.info("getServicesInstances End ");
 
@@ -236,7 +235,7 @@ public class CommonController extends Common {
     @GetMapping(value = {Constants.V2_URL + "/serviceplans"})
     public ListServicePlansResponse getServicePlans(HttpServletRequest request) throws Exception {
         LOGGER.info("getServicePlans Start:");
-        return serviceService.getServicePlans(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.getServicePlans(request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -250,7 +249,7 @@ public class CommonController extends Common {
     @GetMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
     public GetServicePlanResponse getServicePlan(@ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicePlan Start : " + serviceBroker.getGuid());
-        return serviceService.getServicePlan(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.getServicePlan(serviceBroker, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -264,7 +263,7 @@ public class CommonController extends Common {
     @PutMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
     public UpdateServicePlanResponse updateServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() + "   " + serviceBroker.getPubliclyVisible() + "   " + serviceBroker.getServiceName());
-        return serviceService.updateServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.updateServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -278,7 +277,7 @@ public class CommonController extends Common {
     @DeleteMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
     public DeleteServicePlanResponse deleteServicePlan(@RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("deleteServicePlan Start : " + serviceBroker.getGuid() + "   " + serviceBroker.getPubliclyVisible() + "   " + serviceBroker.getServiceName());
-        return serviceService.deleteServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.deleteServicePlan(serviceBroker, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -290,7 +289,7 @@ public class CommonController extends Common {
      */
     @GetMapping(value = {Constants.V2_URL + "/serviceplans/{serviceplanId}/visibilites"})
     public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(@PathVariable String serviceplanId) throws Exception {
-        return serviceService.getServicePlanVisibilites(serviceplanId);
+        return serviceServiceV2.getServicePlanVisibilites(serviceplanId);
     }
 
     /**
@@ -304,7 +303,7 @@ public class CommonController extends Common {
     @PutMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
     public CreateServicePlanVisibilityResponse updateServicePlanVisibility(@RequestBody Map<String, Object> bodyMap, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("serviceplanvisibilities Start : " + guid + "   " + bodyMap.get("servicePlanGuid").toString() + "   " + bodyMap.get("orgGuid").toString());
-        return serviceService.updateServicePlanVisibility(bodyMap, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.updateServicePlanVisibility(bodyMap, guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -316,7 +315,7 @@ public class CommonController extends Common {
      */
     @DeleteMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
     public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(@PathVariable String guid, HttpServletRequest request) throws Exception {
-        return serviceService.deleteServicePlanVisibility(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return serviceServiceV2.deleteServicePlanVisibility(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -328,7 +327,7 @@ public class CommonController extends Common {
      */
     @DeleteMapping(Constants.V2_URL + "/serviceplanvisibilities/all/{guid}")
     public Map allDeleteServicePlanVisibility(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        return serviceService.allDeleteServicePlanVisibility(guid);
+        return serviceServiceV2.allDeleteServicePlanVisibility(guid);
     }
 
 }
