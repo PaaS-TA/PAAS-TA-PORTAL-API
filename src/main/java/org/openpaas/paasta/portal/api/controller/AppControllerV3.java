@@ -65,7 +65,7 @@ public class AppControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/apps/{guid}/summary")
     public AppV3 getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        AppV3 appV3 = appService.getAppSummary(guid, token);
+        AppV3 appV3 = appServiceV3.getAppSummary(guid, token);
         return appV3;
     }
 
