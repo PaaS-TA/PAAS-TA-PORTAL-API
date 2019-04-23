@@ -849,28 +849,4 @@ public class OrgServiceV2 extends Common {
         }
     }
 
-    /**
-     * Organizations 에 Isolation Segments default 를 설정한다.
-     *
-     * @param organizationsId    the organizations id
-     * @param isolationSegmentId the isolation segement id
-     * @return AddIsolationSegmentOrganizationEntitlementResponse
-     * @throws Exception the exception
-     */
-    public AssignOrganizationDefaultIsolationSegmentResponse setOrgDefaultIsolationSegments(String organizationsId, String isolationSegmentId) throws Exception {
-        return cloudFoundryClient().organizationsV3().assignDefaultIsolationSegment(AssignOrganizationDefaultIsolationSegmentRequest.builder().organizationId(organizationsId).data(Relationship.builder().id(isolationSegmentId).build()).build()).block();
-    }
-
-    /**
-     * Organizations 에 Isolation Segments default 를 재설정한다.
-     *
-     * @param organizationsId the organizations id
-     * @return AddIsolationSegmentOrganizationEntitlementResponse
-     * @throws Exception the exception
-     */
-    public AssignOrganizationDefaultIsolationSegmentResponse resetOrgDefaultIsolationSegments(String organizationsId) throws Exception {
-        return cloudFoundryClient().organizationsV3().assignDefaultIsolationSegment(AssignOrganizationDefaultIsolationSegmentRequest.builder().organizationId(organizationsId).build()).block();
-    }
-
-
 }
