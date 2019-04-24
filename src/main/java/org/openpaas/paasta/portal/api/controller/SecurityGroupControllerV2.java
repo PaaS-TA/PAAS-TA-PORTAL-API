@@ -30,11 +30,11 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티그룹을 상세조회한다.
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @return GetSecurityGroupResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}")
+    @GetMapping(Constants.V2_URL + "/securitygroup/{securityid}")
     public GetSecurityGroupResponse getSecurityGroup(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.getSecurityGroup(securityid);
     }
@@ -42,11 +42,11 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티그룹을 조회한다.
      *
-     * @param page  ListSecurityGroups page
+     * @param page ListSecurityGroups page
      * @return ListSecurityGroupsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygroups/{page}")
+    @GetMapping(Constants.V2_URL + "/securitygroups/{page}")
     public ListSecurityGroupsResponse listSecurityGroups(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("시작");
         return securityGroupService.listSecurityGroups(page);
@@ -56,12 +56,12 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티그룹을 생성한다.
      *
-     * @param groupname  the SecurityGroup Name
-     * @param rule the RuleEntity
+     * @param groupname the SecurityGroup Name
+     * @param rule      the RuleEntity
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V2_URL+"/securitygroup/{groupname:.+}")
+    @PostMapping(Constants.V2_URL + "/securitygroup/{groupname:.+}")
     public Map createSecurityGroup(@PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.createSecurityGroup(groupname, rule);
     }
@@ -70,19 +70,19 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티그룹을 수정한다.
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @param groupname  the SecurityGroup Name
-     * @param rule the RuleEntity
+     * @param rule       the RuleEntity
      * @return CreateSecurityGroupResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/{groupname:.+}")
+    @PutMapping(Constants.V2_URL + "/securitygroup/{securityid}/{groupname:.+}")
     public Map updateSecurityGroup(@PathVariable String securityid, @PathVariable String groupname, @RequestBody List<RuleEntity> rule, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         try {
             return new HashMap<String, Object>() {{
                 put("RESULT", securityGroupService.updateSecurityGroup(securityid, groupname, rule));
             }};
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new HashMap<String, Object>() {{
                 put("message", e.getMessage());
@@ -94,18 +94,18 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티그룹을 삭제한다.
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @return DeleteSecurityGroupResponse
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}")
+    @DeleteMapping(Constants.V2_URL + "/securitygroup/{securityid}")
     public Map deleteSecurityGroup(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         try {
             securityGroupService.deleteSecurityGroup(securityid);
             return new HashMap<String, Object>() {{
                 put("RESULT", "SUCCESS");
             }};
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new HashMap<String, Object>() {{
                 put("message", e.getMessage());
@@ -117,12 +117,12 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티그룹과 공간을 연결한다.
      *
-     * @param securityid  the security guid
-     * @param spaceid the space guid
+     * @param securityid the security guid
+     * @param spaceid    the space guid
      * @return AssociateSecurityGroupSpaceResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
+    @PutMapping(Constants.V2_URL + "/securitygroup/{securityid}/spaces/{spaceid}")
     public AssociateSecurityGroupSpaceResponse associateSecurityGroupSpace(@PathVariable String securityid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.associateSecurityGroupSpace(securityid, spaceid);
     }
@@ -131,12 +131,12 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 공간 시큐리티 그룹을 언바인드 한다.
      *
-     * @param securityid  the security guid
-     * @param spaceid the space guid
+     * @param securityid the security guid
+     * @param spaceid    the space guid
      * @return Map
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/spaces/{spaceid}")
+    @DeleteMapping(Constants.V2_URL + "/securitygroup/{securityid}/spaces/{spaceid}")
     public Map removeSecurityGroupSpace(@PathVariable String securityid, @PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.removeSecurityGroupSpace(securityid, spaceid);
     }
@@ -145,11 +145,11 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 준비 응용 프로그램에 사용할 보안 그룹 목록에 보안 그룹을 바인딩합니다.
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @return SetSecurityGroupStagingDefaultResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
+    @PutMapping(Constants.V2_URL + "/securitygroup/{securityid}/staging")
     public SetSecurityGroupStagingDefaultResponse setSecurityGroupStagingDefault(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.setSecurityGroupStagingDefault(securityid);
     }
@@ -158,11 +158,11 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 시큐리티 스테이징 그룹을 조회한다.
      *
-     * @param page  listStagingDefaults page
+     * @param page listStagingDefaults page
      * @return ListSecurityGroupStagingDefaultsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygroup/{page}/staging")
+    @GetMapping(Constants.V2_URL + "/securitygroup/{page}/staging")
     public ListSecurityGroupStagingDefaultsResponse listSecurityGroupStagingDefault(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.listSecurityGroupStagingDefaultsResponse(page);
     }
@@ -171,25 +171,24 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 스테이징 시큐리티 그룹을 언바인드 한다.
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @return Map
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/staging")
+    @DeleteMapping(Constants.V2_URL + "/securitygroup/{securityid}/staging")
     public Map removeSecurityGroupStaging(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.removeSecurityGroupStaging(securityid);
     }
 
 
     /**
-     *
      * 응용 프로그램 실행에 사용할 보안 그룹 목록에 보안 그룹을 바인딩합니다.
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @return SetSecurityGroupRunningDefaultResponse
      * @throws Exception the exception
      */
-    @PutMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
+    @PutMapping(Constants.V2_URL + "/securitygroup/{securityid}/running")
     public SetSecurityGroupRunningDefaultResponse setSecurityGroupRunningDefault(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.setSecurityGroupRunningDefault(securityid);
     }
@@ -198,11 +197,11 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 실행중인 응용 프로그램에 대한 시큐리티 그룹 조회
      *
-     * @param page  ListSecurityGroups page
+     * @param page ListSecurityGroups page
      * @return ListSecurityGroupRunningDefaultsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygroup/{page}/running")
+    @GetMapping(Constants.V2_URL + "/securitygroup/{page}/running")
     public ListSecurityGroupRunningDefaultsResponse listSecurityGroupRunningDefaults(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.listSecurityGroupRunningDefaults(page);
     }
@@ -211,30 +210,28 @@ public class SecurityGroupControllerV2 extends Common {
     /**
      * 실행중인 응용 프로그램에 대한 시큐리티 그룹 언바인드
      *
-     * @param securityid  the security guid
+     * @param securityid the security guid
      * @return Map
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL+"/securitygroup/{securityid}/running")
+    @DeleteMapping(Constants.V2_URL + "/securitygroup/{securityid}/running")
     public Map removeSecurityGroupRunning(@PathVariable String securityid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return securityGroupService.removeSecurityGroupRunning(securityid);
     }
 
 
-
     /**
      * 공간 시큐리티그룹을 조회한다.
      *
-     * @param page  ListSecurityGroups page
+     * @param page       ListSecurityGroups page
      * @param securityid the security guid
      * @return ListSecurityGroupSpacesResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V2_URL+"/securitygroup/{securityid}/{page}")
+    @GetMapping(Constants.V2_URL + "/securitygroup/{securityid}/{page}")
     public ListSecurityGroupSpacesResponse listSecurityGroupSpaces(@PathVariable String securityid, @PathVariable int page) throws Exception {
         return securityGroupService.listSecurityGroupSpaces(securityid, page);
     }
-
 
 
 }

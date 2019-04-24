@@ -33,7 +33,7 @@ public class UserControllerV3 extends Common {
     private UserServiceV3 userServiceV3;
 
     private Runtime r = Runtime.getRuntime();
-   
+
     /**
      * Update user password map.
      *
@@ -50,7 +50,7 @@ public class UserControllerV3 extends Common {
         String oldPassword = (String) body.get("oldPassword");
         String newPassword = (String) body.get("password");
         String userGuid = (String) body.get("userGuid");
-        Map<String, Object> result = userServiceV3.updateUserPassword(userId,userGuid, oldPassword, newPassword, token);
+        Map<String, Object> result = userServiceV3.updateUserPassword(userId, userGuid, oldPassword, newPassword, token);
         return result;
     }
 
@@ -149,7 +149,7 @@ public class UserControllerV3 extends Common {
     /**
      * 유저 이름(user name)으로 유저의 GUID(user id)를 가져온다.
      *
-     * @param username  user name
+     * @param username user name
      * @return User ID
      * @throws Exception the exception
      */
@@ -161,7 +161,7 @@ public class UserControllerV3 extends Common {
     /**
      * 유저 GUID(user id)로 유저의 이름(user name)을 가져온다.
      *
-     * @param userId  user Id
+     * @param userId user Id
      * @return User name
      * @throws Exception the exception
      */
@@ -173,7 +173,7 @@ public class UserControllerV3 extends Common {
     /**
      * 실행중인 응용 프로그램에 대한 시큐리티 그룹 조회
      *
-     * @param userIdentifier  ListSecurityGroups page
+     * @param userIdentifier ListSecurityGroups page
      * @return ListSecurityGroupRunningDefaultsResponse
      * @throws Exception the exception
      */
@@ -195,7 +195,7 @@ public class UserControllerV3 extends Common {
     /**
      * 사용자 포탈 접속 가능 유무 수정
      *
-     * @param userid     userId
+     * @param userid userId
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */

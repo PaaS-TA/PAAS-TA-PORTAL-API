@@ -51,7 +51,7 @@ public class OrgQuotaControllerV2 extends Common {
     @GetMapping(Constants.V2_URL + "/orgs/quota-definitions/{quotaId}")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
         LOGGER.info("getOrgQuotaDefinition Start : ");
-        return orgQuotaServiceV2.getOrgQuotaDefinitions(quotaId ,request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgQuotaServiceV2.getOrgQuotaDefinitions(quotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
     }
 
     /**
@@ -71,7 +71,7 @@ public class OrgQuotaControllerV2 extends Common {
      * 해당 조직 할당량 정의를 수정한다.
      *
      * @param quotaId The guid of the Organization Quota Definition
-     * @param quota Quota Info
+     * @param quota   Quota Info
      * @param request the request
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
@@ -108,7 +108,7 @@ public class OrgQuotaControllerV2 extends Common {
     public boolean setOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         // Name : 사용자가 입력하는 값이기 떄문에 URL 값으로 받지 않음
         LOGGER.info("setOrgQuotaDefinitions Start : ");
-         orgQuotaServiceV2.setOrgQuotaDefinitions(quota);
+        orgQuotaServiceV2.setOrgQuotaDefinitions(quota);
         return true;
     }
 }

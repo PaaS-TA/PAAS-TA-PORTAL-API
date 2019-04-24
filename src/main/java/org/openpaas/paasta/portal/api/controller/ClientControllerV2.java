@@ -34,7 +34,7 @@ public class ClientControllerV2 extends Common {
      * @return Map client list
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL+ "/clients"})
+    @GetMapping(value = {Constants.V2_URL + "/clients"})
     public ListClientsResponse getClientList() throws Exception {
         return clientServiceV2.getClientList();
     }
@@ -46,7 +46,7 @@ public class ClientControllerV2 extends Common {
      * @return Map client
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL+ "/clients/{clientId}"})
+    @GetMapping(value = {Constants.V2_URL + "/clients/{clientId}"})
     public GetClientResponse getClient(@PathVariable String clientId) throws Exception {
         return clientServiceV2.getClient(clientId);
     }
@@ -58,7 +58,7 @@ public class ClientControllerV2 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V2_URL+ "/clients"})
+    @PostMapping(value = {Constants.V2_URL + "/clients"})
     public CreateClientResponse registerClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientServiceV2.registerClient(param);
     }
@@ -70,7 +70,7 @@ public class ClientControllerV2 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @PutMapping(value = {Constants.V2_URL+ "/clients"})
+    @PutMapping(value = {Constants.V2_URL + "/clients"})
     public UpdateClientResponse updateClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientServiceV2.updateClient(param);
     }
@@ -82,7 +82,7 @@ public class ClientControllerV2 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {Constants.V2_URL+ "/clients/{clientId}"})
+    @DeleteMapping(value = {Constants.V2_URL + "/clients/{clientId}"})
     public DeleteClientResponse deleteClient(@PathVariable String clientId) throws Exception {
         return clientServiceV2.deleteClient(clientId);
     }

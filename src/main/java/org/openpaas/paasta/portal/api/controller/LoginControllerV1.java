@@ -34,8 +34,6 @@ public class LoginControllerV1 extends Common {
     @Autowired
     private LoginServiceV1 loginServiceV1;
 
-    @Autowired
-    private UserServiceV2 userServiceV2;
 
     /**
      * Login map.
@@ -45,7 +43,7 @@ public class LoginControllerV1 extends Common {
      * @throws Exception the exception
      */
     @CrossOrigin
-    @RequestMapping(value = {"/login"}, method = RequestMethod.POST, consumes = "application/json")
+    @PostMapping(value = {"/login"}, consumes = "application/json")
     public Map<String, Object> login(@RequestBody Map<String, Object> body) throws Exception {
         String id = (String) body.get("id");
         String password = (String) body.get("password");

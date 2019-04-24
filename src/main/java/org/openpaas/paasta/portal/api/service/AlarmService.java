@@ -10,12 +10,12 @@ import java.util.Map;
  * Created by indra on 2018-05-11.
  */
 @Service
-public class AlarmServiceV3 {
+public class AlarmService {
     private final MonitoringRestTemplateService monitoringRestTemplateService;
     private static final String url = "/v2/paas/app/alarm";
 
     @Autowired
-    public AlarmServiceV3(MonitoringRestTemplateService monitoringRestTemplateService) {
+    public AlarmService(MonitoringRestTemplateService monitoringRestTemplateService) {
         this.monitoringRestTemplateService = monitoringRestTemplateService;
     }
 

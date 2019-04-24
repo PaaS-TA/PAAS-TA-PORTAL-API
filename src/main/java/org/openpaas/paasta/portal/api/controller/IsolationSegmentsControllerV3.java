@@ -26,7 +26,7 @@ public class IsolationSegmentsControllerV3 extends Common {
      * @return GetSecurityGroupResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/isolationSegments")
+    @GetMapping(Constants.V3_URL + "/isolationSegments")
     public ListIsolationSegmentsResponse getIsolationSegments() throws Exception {
         return isolationSegmentsServiceV3.getIsolationSegments();
     }
@@ -34,11 +34,11 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * Segments 할당 리스트를 조회한다. (organizationsId)
      *
-     * @param organizationsId  the organizations id
+     * @param organizationsId the organizations id
      * @return ListIsolationSegmentsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/isolationSegments/organizations/{organizationsId:.+}")
+    @GetMapping(Constants.V3_URL + "/isolationSegments/organizations/{organizationsId:.+}")
     public ListIsolationSegmentsResponse getIsolationSegmentsByOrgGuid(@PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.getIsolationSegmentsByOrgGuid(organizationsId);
     }
@@ -46,11 +46,11 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * isolationSegmentId 로 org 리스트를 조회한다.
      *
-     * @param isolationSegmentId  the isolation segement id
+     * @param isolationSegmentId the isolation segement id
      * @return ListIsolationSegmentEntitledOrganizationsResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations")
+    @GetMapping(Constants.V3_URL + "/isolationSegments/{isolationSegmentId:.+}/organizations")
     public ListIsolationSegmentEntitledOrganizationsResponse getIsolationSegmentsOrgs(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.getIsolationSegmentsOrgs(isolationSegmentId);
     }
@@ -58,11 +58,11 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * isolationSegmentId 로 org 리스트를 조회한다. (relationships)
      *
-     * @param isolationSegmentId  the isolation segement id
+     * @param isolationSegmentId the isolation segement id
      * @return ListIsolationSegmentOrganizationsRelationshipResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/relationships/organizations")
+    @GetMapping(Constants.V3_URL + "/isolationSegments/{isolationSegmentId:.+}/relationships/organizations")
     public ListIsolationSegmentOrganizationsRelationshipResponse getIsolationSegmentsOrgsRelationships(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.getIsolationSegmentsOrgsRelationships(isolationSegmentId);
     }
@@ -71,11 +71,11 @@ public class IsolationSegmentsControllerV3 extends Common {
      * TODO 미사용
      * isolationSegmentId 로 space 리스트를 조회한다.
      *
-     * @param isolationSegmentId  the isolation segement id
+     * @param isolationSegmentId the isolation segement id
      * @return ListIsolationSegmentSpacesRelationshipResponse
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/spaces")
+    @GetMapping(Constants.V3_URL + "/isolationSegments/{isolationSegmentId:.+}/spaces")
     public ListIsolationSegmentSpacesRelationshipResponse getIsolationSegmentsSpaces(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.getIsolationSegmentsSpaces(isolationSegmentId);
     }
@@ -83,11 +83,11 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * Isolation Segments를 생성한다.
      *
-     * @param segmentName  the segment name
+     * @param segmentName the segment name
      * @return CreateIsolationSegmentResponse
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V3_URL+"/isolationSegments/{segmentName:.+}")
+    @PostMapping(Constants.V3_URL + "/isolationSegments/{segmentName:.+}")
     public CreateIsolationSegmentResponse createIsolationSegments(@PathVariable String segmentName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.createIsolationSegments(segmentName);
     }
@@ -95,11 +95,11 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * Isolation Segments를 삭제한다.
      *
-     * @param isolationSegmentId  the isolation segement id
+     * @param isolationSegmentId the isolation segement id
      * @return Map
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}")
+    @DeleteMapping(Constants.V3_URL + "/isolationSegments/{isolationSegmentId:.+}")
     public Map deleteIsolationSegments(@PathVariable String isolationSegmentId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.deleteIsolationSegments(isolationSegmentId);
     }
@@ -107,12 +107,12 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * Isolation Segments에 조직 권한을 부여한다.
      *
-     * @param isolationSegmentId  the isolation segement id
-     * @param organizationsId  the organizations id
+     * @param isolationSegmentId the isolation segement id
+     * @param organizationsId    the organizations id
      * @return AddIsolationSegmentOrganizationEntitlementResponse
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
+    @PostMapping(Constants.V3_URL + "/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
     public AddIsolationSegmentOrganizationEntitlementResponse enableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.enableIsolationSegments(isolationSegmentId, organizationsId);
     }
@@ -120,12 +120,12 @@ public class IsolationSegmentsControllerV3 extends Common {
     /**
      * Isolation Segments에 조직 권한을 해제한다.
      *
-     * @param isolationSegmentId  the isolation segement id
-     * @param organizationsId  the organizations id
+     * @param isolationSegmentId the isolation segement id
+     * @param organizationsId    the organizations id
      * @return AddIsolationSegmentOrganizationEntitlementResponse
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V3_URL+"/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
+    @DeleteMapping(Constants.V3_URL + "/isolationSegments/{isolationSegmentId:.+}/organizations/{organizationsId:.+}")
     public Map disableIsolationSegments(@PathVariable String isolationSegmentId, @PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return isolationSegmentsServiceV3.disableIsolationSegments(isolationSegmentId, organizationsId);
     }

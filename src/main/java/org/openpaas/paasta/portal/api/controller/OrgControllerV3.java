@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
-
 /**
  * Created by cheolhan on 2019-04-24.
  */
@@ -34,27 +33,27 @@ public class OrgControllerV3 extends Common {
     /**
      * Organizations 정보를 가져온다.
      *
-     * @param organizationsId    the organization id
-     * @param  token    user token
+     * @param organizationsId the organization id
+     * @param token           user token
      * @return GetOrganizationResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/orgs/{organizationsId:.+}")
-    public GetOrganizationResponse getOrg(@PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+    @GetMapping(Constants.V3_URL + "/orgs/{organizationsId:.+}")
+    public GetOrganizationResponse getOrg(@PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         return orgServiceV3.getOrg(organizationsId, token);
     }
 
     /**
      * Organizations 리스트 정보를 가져온다.
      *
-     * @param  token    user token
+     * @param token user token
      * @return ListOrganizationsResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/orgs")
-    public ListOrganizationsResponse listOrg(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+    @GetMapping(Constants.V3_URL + "/orgs")
+    public ListOrganizationsResponse listOrg(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         return orgServiceV3.listOrg(token);
     }
 
@@ -65,13 +64,14 @@ public class OrgControllerV3 extends Common {
      * 권한 : 관리자 권한
      * @throws Exception the exception
      */
-    @GetMapping(Constants.V3_URL+"/orgs-admin")
-    public ListOrganizationsResponse listOrgAdmin(){
+    @GetMapping(Constants.V3_URL + "/orgs-admin")
+    public ListOrganizationsResponse listOrgAdmin() {
         return orgServiceV3.listOrgAdmin();
     }
 
     /**
      * 조직명 중복검사를 실행한다.
+     *
      * @return boolean
      * 권한 : 사용자
      */
@@ -84,14 +84,14 @@ public class OrgControllerV3 extends Common {
     /**
      * Organizations 을 생성한다.
      *
-     * @param name    the organization name
-     * @param token    user token
+     * @param name  the organization name
+     * @param token user token
      * @return CreateOrganizationResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V3_URL+"/orgs")
-    public CreateOrganizationResponse createOrg(@RequestBody String name,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+    @PostMapping(Constants.V3_URL + "/orgs")
+    public CreateOrganizationResponse createOrg(@RequestBody String name, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         return orgServiceV3.createOrg(name, token);
     }
 

@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.identity.uaa.scim.ScimGroup;
 import org.cloudfoundry.identity.uaa.scim.ScimGroupMember;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.service.AuthorityGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,6 @@ public class AuthorityGroupController extends Common {
 
     @Autowired
     private AuthorityGroupService authorityGroupService;
-    private final String V2_URL = "/v2";
 
 
     /**
@@ -34,7 +34,7 @@ public class AuthorityGroupController extends Common {
      * @return Map (자바 클래스)
      * @throws Exception the exception
      */
-    @GetMapping(V2_URL + "/authority")
+    @GetMapping(Constants.V2_URL + "/authority")
     public Map<String, Object> getAuthorityGroups() throws Exception {
         Collection<ScimGroup> groups = authorityGroupService.getAuthorityGroups();
         return new HashMap<String, Object>() {{
@@ -50,7 +50,7 @@ public class AuthorityGroupController extends Common {
      * @return Map (자바 클래스)
      * @throws Exception the exception
      */
-    @PostMapping(V2_URL + "/authority/group")
+    @PostMapping(Constants.V2_URL + "/authority/group")
     public Map<String, Object> createAuthorityGroup(@RequestBody Map<String, Object> body) throws Exception {
         String displayName = (String) body.get("displayName");
         List<ScimGroupMember> memberList = (List) body.get("memberList");
@@ -67,9 +67,8 @@ public class AuthorityGroupController extends Common {
      * @param body (자바 클래스)
      * @return Map (자바 클래스)
      * @throws Exception the exception
-
      */
-    @DeleteMapping(V2_URL + "/authority/group/{groupguid}")
+    @DeleteMapping(Constants.V2_URL + "/authority/group/{groupguid}")
     public Map<String, Object> deleteAuthorityGroup(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception {
         authorityGroupService.deleteAuthorityGroup(groupguid);
         return new HashMap<String, Object>() {{
@@ -86,7 +85,7 @@ public class AuthorityGroupController extends Common {
      * @return map
      * @throws Exception the exception
      */
-    @PostMapping(V2_URL + "/authority/member")
+    @PostMapping(Constants.V2_URL + "/authority/member")
     public Map<String, Object> addGroupMembers(@RequestBody Map<String, Object> body) throws Exception {
         String groupGuid = (String) body.get("groupGuid");
         List<String> memberUserNameList = (List<String>) body.get("memberUserNameList");
@@ -104,7 +103,7 @@ public class AuthorityGroupController extends Common {
      * @return map
      * @throws Exception the exception
      */
-    @DeleteMapping(V2_URL + "/authority/member/{groupguid}")
+    @DeleteMapping(Constants.V2_URL + "/authority/member/{groupguid}")
     public Map<String, Object> deleteGroupMembers(@PathVariable String groupguid, @RequestBody Map<String, Object> body) throws Exception {
         List<String> memberUserNameList = (List<String>) body.get("memberUserNameList");
         ScimGroup group = authorityGroupService.deleteGroupMembers(groupguid, memberUserNameList);

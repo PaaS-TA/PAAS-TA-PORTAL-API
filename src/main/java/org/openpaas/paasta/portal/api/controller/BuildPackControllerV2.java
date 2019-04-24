@@ -26,7 +26,7 @@ public class BuildPackControllerV2 extends Common {
     //////////////////////////////////////////////////////////////////////
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildPackControllerV2.class);
-    private final String V2_URL = "/v2";
+
 
     @Autowired
     private BuildPackServiceV2 buildPackServiceV2;
@@ -35,11 +35,11 @@ public class BuildPackControllerV2 extends Common {
     /**
      * 빌드팩 리스트 가져오기
      *
-     * @param request   the request
+     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @GetMapping(value = {V2_URL + "/buildpacks"})
+    @GetMapping(value = {Constants.V2_URL + "/buildpacks"})
     public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
 
         LOGGER.info("getBuildPacks Start");
@@ -59,8 +59,8 @@ public class BuildPackControllerV2 extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PutMapping(value = {V2_URL + "/buildpacks/{guid}"})
-    public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack,@PathVariable String guid,HttpServletRequest request) throws Exception {
+    @PutMapping(value = {Constants.V2_URL + "/buildpacks/{guid}"})
+    public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack, @PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateBuildPack Start : " + guid);
         Map<String, Object> resultMap = new HashMap<>();

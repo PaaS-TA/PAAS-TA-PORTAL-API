@@ -24,10 +24,10 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(properties = {"spring.config.location = classpath:/application.yml","eureka.client.enabled=false"}) // Push 용
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AlarmServiceV2Test {
+public class AlarmServiceTest {
 
     @Mock
-    AlarmServiceV2 alarmServiceV2;
+    AlarmService alarmService;
 
     Map thenReturn;
 
@@ -41,26 +41,26 @@ public class AlarmServiceV2Test {
 
     @Test
     public void testGetAlarmList() throws Exception {
-        when(alarmServiceV2.getAlarmList(any(), any(), any(), any(), any())).thenReturn(thenReturn);
+        when(alarmService.getAlarmList(any(), any(), any(), any(), any())).thenReturn(thenReturn);
 
-        Map result = alarmServiceV2.getAlarmList("appGuid", "pageItems", "pageIndex", "resourceType", "alarmLevel");
+        Map result = alarmService.getAlarmList("appGuid", "pageItems", "pageIndex", "resourceType", "alarmLevel");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testGetAlarm() throws Exception {
 
-        when(alarmServiceV2.getAlarm(any())).thenReturn(thenReturn);
+        when(alarmService.getAlarm(any())).thenReturn(thenReturn);
 
-        Map result = alarmServiceV2.getAlarm("appGuid");
+        Map result = alarmService.getAlarm("appGuid");
         Assert.assertEquals(thenReturn, result);
     }
 
     @Test
     public void testUpdateAlarm() throws Exception {
-        when(alarmServiceV2.updateAlarm(any())).thenReturn(thenReturn);
+        when(alarmService.updateAlarm(any())).thenReturn(thenReturn);
 
-        Map result = alarmServiceV2.updateAlarm(new HashMap() {{
+        Map result = alarmService.updateAlarm(new HashMap() {{
             put("String", "String");
         }});
         Assert.assertEquals(thenReturn, result);
