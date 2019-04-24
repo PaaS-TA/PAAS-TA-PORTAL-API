@@ -14,26 +14,63 @@ import org.springframework.stereotype.Service;
 public class DropletServiceV3 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(DropletServiceV3.class);
 
-
+    /**
+     * droplet 정보를 가져온다.
+     *
+     * @param dropletId    the droplet id
+     * @param  token    user token
+     * @return GetDropletResponse
+     * 권한 : 사용자권한
+     * @throws Exception the exception
+     */
     public GetDropletResponse getDroplet(String dropletId, String token){
         ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient(tokenProvider(token));
         return reactorCloudFoundryClient.droplets().get(GetDropletRequest.builder().dropletId(dropletId).build()).block();
     }
 
-    public ListDropletsResponse listDroplet(Droplet droplet, String token){
+    /**
+     * droplet 리스트를 가져온다.
+     *
+     * @param orgId    the organization id
+     * @param spaceId    the space id
+     * @param dropletId    the droplet id
+     * @param  token    user token
+     * @return ListDropletsResponse
+     * 권한 : 사용자권한
+     * @throws Exception the exception
+     */
+    public ListDropletsResponse listDroplet(String orgId, String spaceId, String dropletId, String token){
         ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient(tokenProvider(token));
-        return reactorCloudFoundryClient.droplets().list(ListDropletsRequest.builder().organizationId(droplet.getOrgId()).spaceId(droplet.getSpaceId()).applicationId(droplet.getAppId()).build()).block();
+        return reactorCloudFoundryClient.droplets().list(ListDropletsRequest.builder().organizationId(orgId).spaceId(spaceId).applicationId(dropletId).build()).block();
     }
 
+    /**
+     * droplet을 복사한다.
+     *
+     * @param droplet    the Droplet
+     * @param  token    user token
+     * @return CopyDropletResponse
+     * 권한 : 사용자권한
+     * @throws Exception the exception
+     */
     public CopyDropletResponse copyDroplet(Droplet droplet, String token){
         ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient(tokenProvider(token));
         return reactorCloudFoundryClient.droplets().copy(CopyDropletRequest.builder().relationships(DropletRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(droplet.getAppId()).build()).build()).build())
                 .sourceDropletId(droplet.getGuid()).build()).block();
     }
 
-    public String deleteDroplet(Droplet droplet, String token){
+    /**
+     * droplet을 복사한다.
+     *
+     * @param dropletId    the Droplet Id
+     * @param  token    user token
+     * @return String
+     * 권한 : 사용자권한
+     * @throws Exception the exception
+     */
+    public String deleteDroplet(String dropletId, String token){
         ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient(tokenProvider(token));
-        return reactorCloudFoundryClient.droplets().delete(DeleteDropletRequest.builder().dropletId(droplet.getGuid()).build()).block();
+        return reactorCloudFoundryClient.droplets().delete(DeleteDropletRequest.builder().dropletId(dropletId).build()).block();
     }
 
 
