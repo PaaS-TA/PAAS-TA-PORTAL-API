@@ -1,5 +1,7 @@
 package org.openpaas.paasta.portal.api.service;
 
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsRequest;
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v3.applications.*;
@@ -109,6 +111,21 @@ public class AppServiceV3 extends Common {
         GetApplicationEnvironmentResponse getApplicationEnvironmentResponse = reactorCloudFoundryClient.applicationsV3().getEnvironment(GetApplicationEnvironmentRequest.builder().applicationId(guid).build()).block();
         AppV3 app = AppV3.builder().applicationResponse(getApplicationResponse).applicationEnvironmentResponse(getApplicationEnvironmentResponse).applicationProcessResponse(getApplicationProcessResponse).applicationCurrentDropletResponse(getApplicationCurrentDropletResponse).applicationProcessStatisticsResponse(processStatisticsResponse).summaryApplicationResponse(summaryApplicationResponse).build();
         return app;
+    }
+
+    /**
+     * 앱 실시간 상태를 조회한다.
+     *
+     * @param guid  the app guid
+     * @param token the client
+     * @return the app stats
+     */
+    public ApplicationStatisticsResponse getAppStats(String guid, String token) {
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+
+        ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(guid).build()).block();
+
+        return applicationStatisticsResponse;
     }
 
 
