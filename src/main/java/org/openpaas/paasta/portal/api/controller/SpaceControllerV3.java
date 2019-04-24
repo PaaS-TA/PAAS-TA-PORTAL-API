@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 
 import org.cloudfoundry.client.v3.spaces.*;
+import org.openpaas.paasta.portal.api.model.Space;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.service.SpaceServiceV3;
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * Created by cheolhan on 2019-04-24.
@@ -84,16 +87,15 @@ public class SpaceControllerV3 extends Common {
     /**
      * Space 을 생성한다.
      *
-     * @param  guid    the organization guid
-     * @param  name    the space name
+     * @param  space    the space
      * @param token    user token
      * @return CreateOrganizationResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/spaces")
-    public CreateSpaceResponse createSpace(@RequestBody String name, @RequestBody String guid, @PathVariable String organizationId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return spaceServiceV3.createSpace(name,guid, token);
+    public CreateSpaceResponse createSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return spaceServiceV3.createSpace(space.getSpaceName(), space.getOrgGuid(), token);
     }
 
     /**
