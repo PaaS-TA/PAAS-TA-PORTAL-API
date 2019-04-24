@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v3.organizations.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
+import org.openpaas.paasta.portal.api.model.Org;
 import org.openpaas.paasta.portal.api.model.UserRole;
 import org.openpaas.paasta.portal.api.service.*;
 import org.slf4j.Logger;
@@ -84,15 +85,15 @@ public class OrgControllerV3 extends Common {
     /**
      * Organizations 을 생성한다.
      *
-     * @param name    the organization name
+     * @param org    the organization
      * @param token    user token
      * @return CreateOrganizationResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/orgs")
-    public CreateOrganizationResponse createOrg(@RequestBody String name,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return orgServiceV3.createOrg(name, token);
+    public CreateOrganizationResponse createOrg(@RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return orgServiceV3.createOrg(org.getOrgName(), token);
     }
 
 

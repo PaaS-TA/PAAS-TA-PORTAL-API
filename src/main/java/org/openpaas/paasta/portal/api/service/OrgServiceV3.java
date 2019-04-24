@@ -73,9 +73,9 @@ public class OrgServiceV3 extends Common {
         ListOrganizationsResponse listOrganizationsResponse = this.listOrgAdmin();
         long number = listOrganizationsResponse.getResources().stream().filter(org -> org.getName().equals(name)).count();
         if(number > 0){
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
