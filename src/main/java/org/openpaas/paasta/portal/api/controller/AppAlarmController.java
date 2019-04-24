@@ -1,7 +1,7 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.service.AlarmServiceV3;
+import org.openpaas.paasta.portal.api.service.AlarmService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,18 +15,20 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @RestController
 @RequestMapping(value = {"/app"})
-public class AppAlarmControllerV3 {
+public class AppAlarmController {
 
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
 
-    private final Logger LOGGER = getLogger(AppAlarmControllerV3.class);
+    private final Logger LOGGER = getLogger(AppAlarmController.class);
+    private final AlarmService alarmService;
 
     @Autowired
-    private AlarmServiceV3 alarmServiceV3;
-
+    public AppAlarmController(AlarmService alarmService) {
+        this.alarmService = alarmService;
+    }
 
     /**
      * 알람 정보 리스트를 가져온다.
@@ -38,12 +40,12 @@ public class AppAlarmControllerV3 {
      * @param alarmLevel
      * @return Map
      */
-    @RequestMapping(value = {Constants.V3_URL + "/alarm/list"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.EXTERNAL_URL + "/alarm/list"}, method = RequestMethod.GET)
     public Map getAlarmList(@RequestParam(value = "appGuid") String appGuid, @RequestParam(value = "pageItems") String pageItems, @RequestParam(value = "pageIndex") String pageIndex, @RequestParam(value = "resourceType") String resourceType, @RequestParam(value = "alarmLevel") String alarmLevel) {
 
         LOGGER.info("AlarmController Start");
 
-        return alarmServiceV3.getAlarmList(appGuid, pageItems, pageIndex, resourceType, alarmLevel);
+        return alarmService.getAlarmList(appGuid, pageItems, pageIndex, resourceType, alarmLevel);
     }
 
     /**
@@ -52,11 +54,11 @@ public class AppAlarmControllerV3 {
      * @param appGuid
      * @return Map
      */
-    @RequestMapping(value = {Constants.V3_URL + "/alarm/policy"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.EXTERNAL_URL + "/alarm/policy"}, method = RequestMethod.GET)
     public Map getAlarm(@RequestParam(value = "appGuid") String appGuid) {
         LOGGER.info("AlarmController Get Start");
 
-        return alarmServiceV3.getAlarm(appGuid);
+        return alarmService.getAlarm(appGuid);
     }
 
     /**
@@ -66,10 +68,10 @@ public class AppAlarmControllerV3 {
      * @return Map
      * @throws Exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/alarm/policy"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.EXTERNAL_URL + "/alarm/policy"}, method = RequestMethod.POST)
     public Map updateAlarm(@RequestBody Map body) throws Exception {
         LOGGER.info("AlarmController Update Start");
 
-        return alarmServiceV3.updateAlarm(body);
+        return alarmService.updateAlarm(body);
     }
 }

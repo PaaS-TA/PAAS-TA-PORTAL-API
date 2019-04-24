@@ -33,7 +33,7 @@ public class SpaceControllerV2 extends Common {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceControllerV2.class);
-    private final String V2_URL = "/v2";
+
     /**
      * The Space service.
      */
@@ -162,7 +162,7 @@ public class SpaceControllerV2 extends Common {
         return resultMap;
     }
 
-    @GetMapping(V2_URL + "/spaces/{spaceid}")
+    @GetMapping(Constants.V2_URL +  "/spaces/{spaceid}")
     public GetSpaceResponse getSpace(@PathVariable String spaceId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String authHeader) {
         authHeader = orgServiceV2.adminToken(authHeader);
         return spaceServiceV2.getSpace(spaceId, authHeader);
@@ -179,7 +179,7 @@ public class SpaceControllerV2 extends Common {
      * @author hgcho
      * @since 2018.5.8
      */
-    @PutMapping(V2_URL + "/spaces")
+    @PutMapping(Constants.V2_URL + "/spaces")
     public Map renameSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("renameSpace Start ");
         token = orgServiceV2.adminToken(token);
@@ -200,7 +200,7 @@ public class SpaceControllerV2 extends Common {
      * @author hgcho
      * @since 2018.5.8
      */
-    @DeleteMapping(V2_URL + "/spaces/{guid}")
+    @DeleteMapping(Constants.V2_URL +  "/spaces/{guid}")
     public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("deleteSpace Start ");
         token = orgServiceV2.adminToken(token);
@@ -221,7 +221,7 @@ public class SpaceControllerV2 extends Common {
      * @author hgcho
      * @since 2018.5.8
      */
-    @PostMapping(V2_URL + "/spaces")
+    @PostMapping(Constants.V2_URL + "/spaces")
     public Map createSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("createSpace Start ");
         token = orgServiceV2.adminToken(token);
@@ -252,20 +252,20 @@ public class SpaceControllerV2 extends Common {
      * @version 2.0
      * @since 2018.5.16
      */
-    @GetMapping(V2_URL + "/spaces/{spaceId}/user-roles")
+    @GetMapping(Constants.V2_URL + "/spaces/{spaceId}/user-roles")
     public ListSpaceUserRolesResponse getSpaceUserRoles(@PathVariable String spaceId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         token = orgServiceV2.adminToken(token);
         return spaceServiceV2.getSpaceUserRoles(spaceId, token);
 
     }
 
-    @PutMapping(V2_URL + "/spaces/{spaceId}/user-roles")
+    @PutMapping(Constants.V2_URL + "/spaces/{spaceId}/user-roles")
     public boolean associateSpaceUserRoles(@PathVariable String spaceId, @RequestBody List<UserRole> Roles, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         token = orgServiceV2.adminToken(token);
         return spaceServiceV2.associateSpaceUserRoles(spaceId, Roles, token);
     }
 
-    @DeleteMapping(V2_URL + "/spaces/{spaceId}/user-roles")
+    @DeleteMapping(Constants.V2_URL + "/spaces/{spaceId}/user-roles")
     public void removeSpaceUserRoles(@PathVariable String spaceId, @RequestParam String userId, @RequestParam String role, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         token = orgServiceV2.adminToken(token);
         spaceServiceV2.removeSpaceUserRole(spaceId, userId, role);

@@ -35,7 +35,7 @@ public class ClientControllerV3 extends Common {
      * @return Map client list
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V3_URL+ "/clients"})
+    @GetMapping(value = {Constants.V3_URL + "/clients"})
     public ListClientsResponse getClientList() throws Exception {
         return clientServiceV3.getClientList();
     }
@@ -47,7 +47,7 @@ public class ClientControllerV3 extends Common {
      * @return Map client
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V3_URL+ "/clients/{clientId}"})
+    @GetMapping(value = {Constants.V3_URL + "/clients/{clientId}"})
     public GetClientResponse getClient(@PathVariable String clientId) throws Exception {
         return clientServiceV3.getClient(clientId);
     }
@@ -59,7 +59,7 @@ public class ClientControllerV3 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V3_URL+ "/clients"})
+    @PostMapping(value = {Constants.V3_URL + "/clients"})
     public CreateClientResponse registerClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientServiceV3.registerClient(param);
     }
@@ -71,7 +71,7 @@ public class ClientControllerV3 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @PutMapping(value = {Constants.V3_URL+ "/clients"})
+    @PutMapping(value = {Constants.V3_URL + "/clients"})
     public UpdateClientResponse updateClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientServiceV3.updateClient(param);
     }
@@ -83,7 +83,7 @@ public class ClientControllerV3 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {Constants.V3_URL+ "/clients/{clientId}"})
+    @DeleteMapping(value = {Constants.V3_URL + "/clients/{clientId}"})
     public DeleteClientResponse deleteClient(@PathVariable String clientId) throws Exception {
         return clientServiceV3.deleteClient(clientId);
     }

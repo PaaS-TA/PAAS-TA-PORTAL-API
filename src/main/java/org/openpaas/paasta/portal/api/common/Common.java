@@ -156,7 +156,7 @@ public class Common {
     public ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String adminUserName, String adminPassword, String uaaAdminClientId, String uaaAdminClientSecret) {
         ReactorUaaClient reactorUaaClient = uaaClient(connectionContext, tokenProvider(adminUserName, adminPassword));
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
-        return uaaClient(connectionContext, tokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
+        return uaaClient(connectionContext, clinetTokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
 
 
@@ -186,11 +186,24 @@ public class Common {
         /**
          * 토큰 상태 체크
          */
+        LOGGER.info("토큰체크1");
         uaaClient(connectionContext(), tokenProvider).getUsername().block();
+        LOGGER.info("토큰체크2");
 
         return tokenProvider;
 
     }
+
+    public TokenGrantTokenProvider clinetTokenProvider(String token) {
+
+        if (token.indexOf("bearer") < 0) {
+            token = "bearer " + token;
+        }
+        TokenGrantTokenProvider tokenProvider = new TokenGrantTokenProvider(token);
+        return tokenProvider;
+
+    }
+
 
     public PasswordGrantTokenProvider tokenProvider(String username, String password) {
         return PasswordGrantTokenProvider.builder().password(password).username(username).build();
