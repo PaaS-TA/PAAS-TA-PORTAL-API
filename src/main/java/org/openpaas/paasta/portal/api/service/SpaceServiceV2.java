@@ -490,27 +490,4 @@ public class SpaceServiceV2 extends Common {
         });
         return true;
     }
-
-    /**
-     * Space Isolation 에 Isolation Segments default 를 설정한다.
-     *
-     * @param spaceId            the space id
-     * @param isolationSegmentId the isolation segement id
-     * @return AssignSpaceIsolationSegmentResponse
-     * @throws Exception the exception
-     */
-    public AssignSpaceIsolationSegmentResponse setSpaceDefaultIsolationSegments(String spaceId, String isolationSegmentId) throws Exception {
-        return cloudFoundryClient().spacesV3().assignIsolationSegment(AssignSpaceIsolationSegmentRequest.builder().spaceId(spaceId).data(Relationship.builder().id(isolationSegmentId).build()).build()).block();
-    }
-
-    /**
-     * Space Isolation 에 Isolation Segments default 를 해제한다.
-     *
-     * @param spaceId the space id
-     * @return AssignSpaceIsolationSegmentResponse
-     * @throws Exception the exception
-     */
-    public AssignSpaceIsolationSegmentResponse resetSpaceDefaultIsolationSegments(String spaceId) throws Exception {
-        return cloudFoundryClient().spacesV3().assignIsolationSegment(AssignSpaceIsolationSegmentRequest.builder().spaceId(spaceId).build()).block();
-    }
 }

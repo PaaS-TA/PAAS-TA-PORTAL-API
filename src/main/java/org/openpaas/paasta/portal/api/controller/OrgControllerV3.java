@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
- * Created by cheolhan on 2018-03-26.
+ * Created by cheolhan on 2019-04-24.
  */
 @RestController
 public class OrgControllerV3 extends Common {
@@ -75,12 +75,10 @@ public class OrgControllerV3 extends Common {
      * @return boolean
      * 권한 : 사용자
      */
-    @GetMapping(Constants.V3_URL + "/orgs/{orgName}/exist")
+    @GetMapping(Constants.V3_URL + "/orgs/{orgName:.+}/exist")
     public boolean isExistOrgName(@PathVariable String orgName) {
         return orgServiceV3.isExistOrgName(orgName);
     }
-
-
 
 
     /**
