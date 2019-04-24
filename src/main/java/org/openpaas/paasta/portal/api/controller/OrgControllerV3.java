@@ -59,6 +59,31 @@ public class OrgControllerV3 extends Common {
     }
 
     /**
+     * Organizations 리스트 정보를 가져온다.
+     *
+     * @return ListOrganizationsResponse
+     * 권한 : 관리자 권한
+     * @throws Exception the exception
+     */
+    @GetMapping(Constants.V3_URL+"/orgs-admin")
+    public ListOrganizationsResponse listOrgAdmin(){
+        return orgServiceV3.listOrgAdmin();
+    }
+
+    /**
+     * 조직명 중복검사를 실행한다.
+     * @return boolean
+     * 권한 : 사용자
+     */
+    @GetMapping(Constants.V3_URL + "/orgs/{orgName}/exist")
+    public boolean isExistOrgName(@PathVariable String orgName) {
+        return orgServiceV3.isExistOrgName(orgName);
+    }
+
+
+
+
+    /**
      * Organizations 을 생성한다.
      *
      * @param name    the organization name

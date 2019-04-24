@@ -49,6 +49,36 @@ public class OrgServiceV3 extends Common {
     }
 
     /**
+     * Organizations 리스트 정보를 가져온다.
+     * @return ListOrganizationsResponse
+     * 권한 : 관리자
+     * @throws Exception the exception
+     */
+    public  ListOrganizationsResponse listOrgAdmin(){
+        ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient();
+        ListOrganizationsResponse listOrganizationsResponse = reactorCloudFoundryClient.organizationsV3().list(ListOrganizationsRequest.builder().build()).block();
+        int i;
+        for(i = 1 ; listOrganizationsResponse.getPagination().getTotalPages().intValue() > i ; i++){
+            listOrganizationsResponse.getResources().addAll(reactorCloudFoundryClient.organizationsV3().list(ListOrganizationsRequest.builder().page(i+1).build()).block().getResources());
+        }
+        return listOrganizationsResponse;
+    }
+
+    /**
+     * 조직명 중복검사를 실행한다.
+     * @return boolean
+     * 권한 : 사용자
+     */
+    public boolean isExistOrgName(String name){
+        ListOrganizationsResponse listOrganizationsResponse = this.listOrgAdmin();
+        long number = listOrganizationsResponse.getResources().stream().filter(org -> org.getName().equals(name)).count();
+        if(number > 0){
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Organizations 을 생성한다.
      *
      * @param name    the organization name
