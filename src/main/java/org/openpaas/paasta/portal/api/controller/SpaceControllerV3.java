@@ -92,7 +92,7 @@ public class SpaceControllerV3 extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/spaces/{organizationId:.+}")
-    public CreateSpaceResponse createOrg(@RequestBody String name, @PathVariable String organizationId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+    public CreateSpaceResponse createSpace(@RequestBody String name, @PathVariable String organizationId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         return spaceServiceV3.createSpace(name,organizationId, token);
     }
 
