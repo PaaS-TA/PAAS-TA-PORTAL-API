@@ -84,16 +84,16 @@ public class SpaceControllerV3 extends Common {
     /**
      * Space 을 생성한다.
      *
-     * @param  organizationId    the organization guid
+     * @param  guid    the organization guid
      * @param  name    the space name
      * @param token    user token
      * @return CreateOrganizationResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    @PostMapping(Constants.V3_URL+"/spaces/{organizationId:.+}")
-    public CreateSpaceResponse createOrg(@RequestBody String name, @PathVariable String organizationId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return spaceServiceV3.createSpace(name,organizationId, token);
+    @PostMapping(Constants.V3_URL+"/spaces")
+    public CreateSpaceResponse createSpace(@RequestBody String name, @RequestBody String guid, @PathVariable String organizationId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        return spaceServiceV3.createSpace(name,guid, token);
     }
 
     /**
