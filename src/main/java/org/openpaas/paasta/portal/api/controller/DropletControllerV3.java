@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class DropletControllerV3 extends Common {
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////                            * CLOUD FOUNDRY CLIENT API VERSION 3                                      //////
+    //////             Document : https://v3-apidocs.cloudfoundry.org/version/3.69.0/#droplets                  //////
+    //////                                     Not-implemented                                                  //////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Autowired
     DropletServiceV3 dropletServiceV3;
 
