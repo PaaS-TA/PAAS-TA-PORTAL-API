@@ -177,18 +177,20 @@ public class Common {
      * @return DefaultConnectionContext
      * @throws Exception
      */
-    public TokenGrantTokenProvider tokenProvider(String token) {
+    public TokenProvider tokenProvider(String token) {
 
         if (token.indexOf("bearer") < 0) {
             token = "bearer " + token;
         }
-        TokenGrantTokenProvider tokenProvider = new TokenGrantTokenProvider(token);
-        /**
-         * 토큰 상태 체크
-         */
-        LOGGER.info("토큰체크1");
-        uaaClient(connectionContext(), tokenProvider).getUsername().block();
-        LOGGER.info("토큰체크2");
+        TokenProvider tokenProvider = new TokenGrantTokenProvider(token);
+
+        LOGGER.info("Token validation check....Start");
+        String name = uaaClient(connectionContext(), tokenProvider).getUsername().block();
+        LOGGER.info("Token validation check....End");
+
+        if (name.equals("admin")) {
+            return tokenProvider();
+        }
 
         return tokenProvider;
 
@@ -211,14 +213,6 @@ public class Common {
 
     public PasswordGrantTokenProvider tokenProvider() {
         return tokenProvider;
-    }
-
-    public String adminToken(String token) {
-        String name = uaaClient(connectionContext(), tokenProvider(token)).getUsername().block();
-        if (name.equals("admin")) {
-            return tokenProvider().getToken(connectionContext()).block();
-        }
-        return token;
     }
 
 

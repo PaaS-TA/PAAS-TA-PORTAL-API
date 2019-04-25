@@ -25,11 +25,12 @@ public class RootController extends Common {
 
         Map map = new HashMap();
         Map info = new HashMap();
-        info.put("version", "branch v3");
+
         info.put("cf-api", apiTarget);
         info.put("uaa-api", uaaTarget);
         info.put("monitoring-api", monitoringApiTarget);
         map.put("info", info);
+        map.put("version", "v3");
         map.put("name", "PaaS-TA API");
         return map;
     }

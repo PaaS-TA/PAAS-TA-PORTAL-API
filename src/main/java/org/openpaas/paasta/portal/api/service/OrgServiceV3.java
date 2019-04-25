@@ -559,7 +559,6 @@ public class OrgServiceV3 extends Common {
     public AbstractOrganizationResource associateOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             final Object lock = blockingQueue.take();
-            token = adminToken(token);
             ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             Objects.requireNonNull(orgId, "Org Id");
             Objects.requireNonNull(userId, "User Id");
@@ -871,6 +870,8 @@ public class OrgServiceV3 extends Common {
         for(i = 1 ; listOrganizationsResponse.getPagination().getTotalPages().intValue() > i ; i++){
             listOrganizationsResponse.getResources().addAll(reactorCloudFoundryClient.organizationsV3().list(org.cloudfoundry.client.v3.organizations.ListOrganizationsRequest.builder().page(i+1).build()).block().getResources());
         }
+
+        LOGGER.info(listOrganizationsResponse.toString());
         return listOrganizationsResponse;
     }
 

@@ -112,7 +112,6 @@ public class CatalogControllerV3 extends Common {
      */
     @PostMapping(Constants.V3_URL + "/catalogs/serviceinstances")
     public Map procCatalogCreateServiceInstanceV2(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        token = adminToken(token);
         return catalogServiceV3.procCatalogCreateServiceInstanceV2(param, cloudFoundryClient(connectionContext(), tokenProvider(token)));
     }
 
@@ -127,7 +126,6 @@ public class CatalogControllerV3 extends Common {
      */
     @PostMapping(Constants.V3_URL + "/catalogs/app")
     public Map<String, Object> createApp(@RequestBody Catalog param, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestHeader("User-Agent") String token2, HttpServletResponse response) throws Exception {
-        token = adminToken(token);
         return catalogServiceV3.createApp(param, token, token2, response);
     }
 

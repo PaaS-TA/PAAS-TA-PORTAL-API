@@ -63,7 +63,6 @@ public class SpaceControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summary")
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        token = adminToken(token);
         GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, cloudFoundryClient(connectionContext(), tokenProvider(token)));
         return respSapceSummary;
     }
@@ -94,7 +93,6 @@ public class SpaceControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
-        token = orgServiceV3.adminToken(token);
         GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, cloudFoundryClient(tokenProvider(token)));
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -178,7 +176,6 @@ public class SpaceControllerV3 extends Common {
     @PutMapping(Constants.V3_URL + "/spaces")
     public Map renameSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("renameSpace Start ");
-        token = orgServiceV3.adminToken(token);
         Map resultMap = spaceServiceV3.renameSpace(space, token);
 
         LOGGER.info("renameSpace End ");
@@ -199,7 +196,7 @@ public class SpaceControllerV3 extends Common {
     @DeleteMapping(Constants.V3_URL +  "/spaces/{guid}")
     public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("deleteSpace Start ");
-        token = orgServiceV3.adminToken(token);
+
         Map resultMap = spaceServiceV3.deleteSpace(guid, recursive, token);
 
         LOGGER.info("deleteSpace End ");
@@ -229,20 +226,17 @@ public class SpaceControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/{spaceId}/user-roles")
     public ListSpaceUserRolesResponse getSpaceUserRoles(@PathVariable String spaceId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        token = orgServiceV3.adminToken(token);
         return spaceServiceV3.getSpaceUserRoles(spaceId, token);
 
     }
 
     @PutMapping(Constants.V3_URL + "/spaces/{spaceId}/user-roles")
     public boolean associateSpaceUserRoles(@PathVariable String spaceId, @RequestBody List<UserRole> Roles, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        token = orgServiceV3.adminToken(token);
         return spaceServiceV3.associateSpaceUserRoles(spaceId, Roles, token);
     }
 
     @DeleteMapping(Constants.V3_URL + "/spaces/{spaceId}/user-roles")
     public void removeSpaceUserRoles(@PathVariable String spaceId, @RequestParam String userId, @RequestParam String role, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        token = orgServiceV3.adminToken(token);
         spaceServiceV3.removeSpaceUserRole(spaceId, userId, role);
     }
 

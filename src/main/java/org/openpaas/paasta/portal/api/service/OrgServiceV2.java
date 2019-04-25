@@ -565,7 +565,6 @@ public class OrgServiceV2 extends Common {
     public AbstractOrganizationResource associateOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             final Object lock = blockingQueue.take();
-            token = adminToken(token);
             ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             Objects.requireNonNull(orgId, "Org Id");
             Objects.requireNonNull(userId, "User Id");
