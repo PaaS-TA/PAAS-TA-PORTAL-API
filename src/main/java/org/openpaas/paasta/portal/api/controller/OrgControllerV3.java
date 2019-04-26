@@ -366,14 +366,6 @@ public class OrgControllerV3 extends Common {
         return true;
     }
 
-    // TODO invite user
-    public void inviteUser() {
-
-    }
-
-    // TODO cancel invite user
-    public void cancelInvitionUser() {
-    }
 
     // TODO cancel member
     @DeleteMapping(Constants.V3_URL + "/orgs/{orgId}/member")

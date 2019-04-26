@@ -320,7 +320,6 @@ public class SpaceServiceV3 extends Common {
         return response.getResources();
     }
 
-    //@HystrixCommand(commandKey = "listSpaceAuditorUsers")
     private List<UserResource> listSpaceAuditorUsers(String spaceId, String token) {
         final ListSpaceAuditorsResponse response = cloudFoundryClient(tokenProvider(token)).spaces().listAuditors(ListSpaceAuditorsRequest.builder().spaceId(spaceId).build()).block();
 
@@ -488,7 +487,7 @@ public class SpaceServiceV3 extends Common {
             }
             ;
             if (manager) {
-                cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
+                cloudFoundryClient(tokenProvider(token)).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
             }
             if (audiotr) {
                 cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
