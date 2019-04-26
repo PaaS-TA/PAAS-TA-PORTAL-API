@@ -63,7 +63,7 @@ public class SpaceControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summary")
     public GetSpaceSummaryResponse getSpaceSummary(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, cloudFoundryClient(connectionContext(), tokenProvider(token)));
+        GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, token);
         return respSapceSummary;
     }
 
@@ -77,7 +77,7 @@ public class SpaceControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summary-admin")
     public GetSpaceSummaryResponse getSpaceSummaryAdmin(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, cloudFoundryClient());
+        GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, token);
         return respSapceSummary;
     }
 
@@ -93,7 +93,7 @@ public class SpaceControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
-        GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid, cloudFoundryClient(tokenProvider(token)));
+        GetSpaceSummaryResponse respSapceSummary = spaceServiceV3.getSpaceSummary(spaceid,token);
 
         Map<String, Object> resultMap = new HashMap<>();
         List<SpaceApplicationSummary> appsArray = new ArrayList<>();
