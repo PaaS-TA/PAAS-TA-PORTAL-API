@@ -3,11 +3,11 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.AbstractOrganizationResource;
+import org.cloudfoundry.client.v2.organizations.GetOrganizationResponse;
 import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentResponse;
 import org.cloudfoundry.client.v3.organizations.CreateOrganizationResponse;
-import org.cloudfoundry.client.v3.organizations.GetOrganizationResponse;
 import org.cloudfoundry.operations.useradmin.OrganizationUsers;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -31,14 +31,13 @@ import java.util.*;
 @RestController
 public class OrgControllerV3 extends Common {
 
-
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrgControllerV3.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrgControllerV2.class);
 
     /**
      * The User controller.
@@ -65,6 +64,19 @@ public class OrgControllerV3 extends Common {
 
 
     /**
+     * 조직 정보를 조회한다.
+     *
+     * @param orgId
+     * @param token
+     * @return information of the organization
+     */
+    @GetMapping(Constants.V3_URL + "/orgs/{orgId}")
+    public GetOrganizationResponse getOrg(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+        LOGGER.info("get org start : " + orgId);
+        return orgServiceV3.getOrg(orgId, token);
+    }
+
+    /**
      * 조직 요약 정보를 조회한다.
      *
      * @param orgId the org id
@@ -74,8 +86,7 @@ public class OrgControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/summary")
     public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("org summary : " + orgId);
-        ReactorCloudFoundryClient reactorClients = cloudFoundryClient(connectionContext(), tokenProvider(token));
-        return orgServiceV3.getOrgSummaryMap(orgId, reactorClients);
+        return orgServiceV3.getOrgSummaryMap(orgId, token);
     }
 
     /**
@@ -87,8 +98,32 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/summary-admin")
     public Map getOrgSummaryAdmin(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        ReactorCloudFoundryClient reactorClients = cloudFoundryClient();
-        return orgServiceV3.getOrgSummaryMap(orgId, reactorClients);
+        return orgServiceV3.getOrgSummaryMap(orgId, token);
+    }
+
+
+    /**
+     * 관리자/사용자 권한으로 조직 목록을 조회한다.
+     *
+     * @param token
+     * @return ListOrganizationsResponse
+     * @throws Exception the exception
+     */
+    @GetMapping(Constants.V3_URL + "/orgs")
+    public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        LOGGER.debug("Org list by user");
+        return orgServiceV3.getAllOrgsForUser(token);
+    }
+
+    /**
+     * 관리자 권한으로 조직 목록을 조회한다.
+     *
+     * @return ListOrganizationsResponse
+     */
+    @GetMapping(Constants.V3_URL + "/orgs-admin")
+    public ListOrganizationsResponse getOrgsForAdmin() {
+        LOGGER.debug("Org list for admin");
+        return orgServiceV3.getOrgsForAdmin();
     }
 
     /**
@@ -97,7 +132,7 @@ public class OrgControllerV3 extends Common {
      * @return ListOrganizationsResponse
      */
     @GetMapping(Constants.V3_URL + "/orgs-admin/{number}")
-    public org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
+    public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
         LOGGER.debug("Org list for admin");
         return orgServiceV3.getOrgsForAdminAll(number);
     }
@@ -119,7 +154,7 @@ public class OrgControllerV3 extends Common {
     public Map<?, ?> getSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.debug("Get Spaces " + orgId);
         final Map<String, Object> result = new HashMap<>();
-        result.put("spaceList", orgServiceV3.getOrgSpaces(orgId, cloudFoundryClient(connectionContext(), tokenProvider(token))));
+        result.put("spaceList", orgServiceV3.getOrgSpaces(orgId, token));
 
         return result;
     }
@@ -139,12 +174,34 @@ public class OrgControllerV3 extends Common {
     public Map<?, ?> getSpacesAdmin(@PathVariable String orgId) {
         LOGGER.debug("Get Spaces " + orgId);
         final Map<String, Object> result = new HashMap<>();
-        result.put("spaceList", orgServiceV3.getOrgSpaces(orgId, cloudFoundryClient()));
+        result.put("spaceList", orgServiceV3.getOrgSpaces(orgId));
 
         return result;
     }
 
 
+    /**
+     * 조직명 중복검사를 실행한다.
+     *
+     * @param orgName the org
+     * @return boolean
+     */
+    @GetMapping(Constants.V3_URL + "/orgs/{orgName}/exist")
+    public boolean isExistOrgName(@PathVariable String orgName) {
+        return orgServiceV3.isExistOrgName(orgName);
+    }
+
+    /**
+     * 조직을 생성한다.
+     *
+     * @param org
+     * @param token
+     * @return Map
+     */
+    @PostMapping(Constants.V3_URL + "/orgs")
+    public Map createOrg(@RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+        return orgServiceV3.createOrg(org, token);
+    }
 
     /**
      * 사용자의 조직의 이름을 변경한다.
@@ -194,8 +251,7 @@ public class OrgControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/quota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         LOGGER.info("Get quota of org {}" + orgId);
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
-        return orgServiceV3.getOrgQuota(orgId, reactorCloudFoundryClient);
+        return orgServiceV3.getOrgQuota(orgId, token);
     }
 
     /**
@@ -208,8 +264,7 @@ public class OrgControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/quota-admin")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaAdmin(@PathVariable String orgId) {
         LOGGER.info("Get quota of org {}" + orgId);
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
-        return orgServiceV3.getOrgQuota(orgId, reactorCloudFoundryClient);
+        return orgServiceV3.getOrgQuota(orgId);
     }
 
     /**
@@ -342,27 +397,14 @@ public class OrgControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/orgList/{page}")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable int page) throws Exception {
         LOGGER.info("orgList Start");
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
-
-        ListOrganizationsResponse listOrganizationsResponse = orgServiceV3.getOrgsForUser(reactorCloudFoundryClient, page);
+        ListOrganizationsResponse listOrganizationsResponse = orgServiceV3.getOrgsForUser(page, token);
         LOGGER.info("OrgsForUser");
         listOrganizationsResponse.getResources().forEach(orgs -> {
             Map orgMap = new HashMap();
-
             try {
                 orgMap.put("org", orgs);
-
-//                ListSpacesResponse listSpacesResponse = orgService.getOrgSpaces(orgs.getMetadata().getId(), reactorCloudFoundryClient);
-//                orgMap.put("space", listSpacesResponse);
-//
-//                Map<String, Collection<UserRole>> userRoles = orgService.getOrgUserRoles(orgs.getMetadata().getId(), reactorCloudFoundryClient);
-//                orgMap.put("userRoles", userRoles);
-//
-//                GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgService.getOrgQuota(orgs.getMetadata().getId(), reactorCloudFoundryClient);
-//                orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
-
                 orgList.add(orgMap);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -370,7 +412,6 @@ public class OrgControllerV3 extends Common {
         });
         LOGGER.info("listOrganizationsResponse");
         resultMap.put("result", orgList);
-
         LOGGER.debug("orgList End");
         return resultMap;
     }
@@ -378,29 +419,9 @@ public class OrgControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/orgDetail/{guid}")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
         LOGGER.info("orgDetail Start");
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         Map resultMap = new HashMap();
-        List<Map> orgList = new ArrayList<Map>();
-
-        Map orgMap = new HashMap();
-
-        try {
-            ListSpacesResponse listSpacesResponse = orgServiceV3.getOrgSpaces(guid, reactorCloudFoundryClient);
-            orgMap.put("space", listSpacesResponse);
-
-            Map<String, Collection<UserRole>> userRoles = orgServiceV3.getOrgUserRoles(guid, reactorCloudFoundryClient);
-            orgMap.put("userRoles", userRoles);
-
-            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgServiceV3.getOrgQuota(guid, reactorCloudFoundryClient);
-            orgMap.put("quota", getOrganizationQuotaDefinitionResponse);
-
-            orgList.add(orgMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        Map orgMap = orgServiceV3.getOrgDetail(guid, token);
         resultMap.put("result", orgMap);
-
         LOGGER.debug("orgDetail End");
         return resultMap;
     }
@@ -417,104 +438,5 @@ public class OrgControllerV3 extends Common {
     @GetMapping(Constants.V3_URL + "/{flagname}/orgflag")
     public Map orgFlag(@PathVariable String flagname, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return orgServiceV3.orgFlag(flagname.toLowerCase(), token);
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////                            * CLOUD FOUNDRY CLIENT API VERSION 3                                      //////
-    //////   Document : https://v3-apidocs.cloudfoundry.org/version/3.69.0/index.html#organizations             //////
-    //////                                     Not-implemented                                                  //////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    /**
-     * Organizations 정보를 가져온다.
-     *
-     * @param organizationsId the organization id
-     * @param token           user token
-     * @return GetOrganizationResponse
-     * 권한 : 사용자권한
-     * @throws Exception the exception
-     */
-    @GetMapping(Constants.V3_URL + "/orgs/{organizationsId:.+}")
-    public GetOrganizationResponse getOrg(@PathVariable String organizationsId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        return orgServiceV3.getOrgV3(organizationsId, token);
-    }
-
-    /**
-     * Organizations 리스트 정보를 가져온다.
-     *
-     * @param token user token
-     * @return ListOrganizationsResponse
-     * 권한 : 사용자권한
-     * @throws Exception the exception
-     */
-    @GetMapping(Constants.V3_URL + "/orgs")
-    public org.cloudfoundry.client.v3.organizations.ListOrganizationsResponse listOrg(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        return orgServiceV3.listOrg(token);
-    }
-
-    /**
-     * Organizations 리스트 정보를 가져온다.
-     *
-     * @return ListOrganizationsResponse
-     * 권한 : 관리자 권한
-     * @throws Exception the exception
-     */
-    @GetMapping(Constants.V3_URL + "/orgs-admin")
-    public org.cloudfoundry.client.v3.organizations.ListOrganizationsResponse listOrgAdmin() {
-        return orgServiceV3.listOrgAdmin();
-    }
-
-    /**
-     * 조직명 중복검사를 실행한다.
-     *
-     * @return boolean
-     * 권한 : 사용자
-     */
-    @GetMapping(Constants.V3_URL + "/orgs/{orgName:.+}/exist")
-    public boolean isExistOrgName(@PathVariable String orgName) {
-        return orgServiceV3.isExistOrgName(orgName);
-    }
-
-
-    /**
-     * Organizations 을 생성한다.
-     *
-     * @param org   the organization
-     * @param token user token
-     * @return CreateOrganizationResponse
-     * 권한 : 사용자권한
-     * @throws Exception the exception
-     */
-    @PostMapping(Constants.V3_URL + "/orgs")
-    public CreateOrganizationResponse createOrg(@RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        return orgServiceV3.createOrg(org.getOrgName(), token);
-    }
-
-
-    /**
-     * Organizations 에 Isolation Segments default 를 설정한다.
-     *
-     * @param organizationsId    the organizations id
-     * @param isolationSegmentId the isolation segement id
-     * @return AddIsolationSegmentOrganizationEntitlementResponse
-     * @throws Exception the exception
-     */
-    @PutMapping(Constants.V3_URL + "/orgs/{organizationsId:.+}/isolationSegments/{isolationSegmentId:.+}")
-    public AssignOrganizationDefaultIsolationSegmentResponse setOrgDefaultIsolationSegments(@PathVariable String organizationsId, @PathVariable String isolationSegmentId) throws Exception {
-        return orgServiceV3.setOrgDefaultIsolationSegments(organizationsId, isolationSegmentId);
-    }
-
-    /**
-     * Organizations 에 Isolation Segments default 를 재설정한다.
-     *
-     * @param organizationsId the organizations id
-     * @return AddIsolationSegmentOrganizationEntitlementResponse
-     * @throws Exception the exception
-     */
-    @PutMapping(Constants.V3_URL + "/orgs/{organizationsId:.+}/isolationSegments/reset")
-    public AssignOrganizationDefaultIsolationSegmentResponse resetOrgDefaultIsolationSegments(@PathVariable String organizationsId) throws Exception {
-        return orgServiceV3.resetOrgDefaultIsolationSegments(organizationsId);
     }
 }
