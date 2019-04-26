@@ -42,52 +42,52 @@ public class SpaceQuotaControllerV3 extends Common {
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL + "/spaces/quota-definitions")
-    public ListSpaceQuotaDefinitionsResponse listSpaceQuotaDefinitions(HttpServletRequest request) throws Exception {
+    public ListSpaceQuotaDefinitionsResponse listSpaceQuotaDefinitions(HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("listSpaceQuotaDefinitions Start : ");
-        return spaceQuotaServiceV3.getSpaceQuotaDefinitionsList(request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.getSpaceQuotaDefinitionsList(token);
     }
 
     /**
      * 특정 공간의 할당량 정의를 조회한다.
      *
      * @param spaceQuotaId The guid of the Space Quota Definition
-     * @param request the request
+     * @param request      the request
      * @return GetSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}")
-    public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
+    public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getSpaceQuotaDefinitions Start : ");
-        return spaceQuotaServiceV3.getSpaceQuotaDefinitions(spaceQuotaId ,request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.getSpaceQuotaDefinitions(spaceQuotaId, token);
     }
 
     /**
      * 공간 할당량 리스트를 등록한다.
      *
-     * @param quota Quota Info
+     * @param quota   Quota Info
      * @param request the request
      * @return CreateSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL + "/spaces/quota-definitions")
-    public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
+    public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("summary Start : ");
-        return spaceQuotaServiceV3.createSpaceQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.createSpaceQuotaDefinitions(quota, token);
     }
 
     /**
      * 해당 조직 할당량 정의를 삭제한다.
      *
-     * @param guid The guid of the Organization Quota Definition
+     * @param guid    The guid of the Organization Quota Definition
      * @param request the request
      * @return DeleteSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V3_URL + "/spaces/quota-definitions/{guid}")
-    public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(@PathVariable String guid, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("deleteSpaceQuotaDefinitions Start : ");
 
-        return spaceQuotaServiceV3.deleteSpaceQuotaDefinitions(guid, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.deleteSpaceQuotaDefinitions(guid, token);
     }
 
 
@@ -95,69 +95,66 @@ public class SpaceQuotaControllerV3 extends Common {
      * 공간 할당량 정의를 특정 공간에 지정한다.
      *
      * @param spaceQuotaId The guid of the Space Quota Definition
-     * @param spaceId The guid of the Space
-     * @param quota Quota Info
-     * @param request the request
+     * @param spaceId      The guid of the Space
+     * @param quota        Quota Info
+     * @param request      the request
      * @return AssociateSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
     @PutMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces/{spaceId}")
-    public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId,
-                                                                                @RequestBody Quota quota, HttpServletRequest request) throws Exception {
+    public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId, @RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("associateSpaceQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(spaceQuotaId));
         quota.setSpaceGuid(UUID.fromString(spaceId));
-        return spaceQuotaServiceV3.associateSpaceQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.associateSpaceQuotaDefinitions(quota, token);
     }
 
     /**
      * 해당 공간 할당량 정의를 사용하는 공간 리스트를 조회한다.
      *
      * @param spaceQuotaId The guid of the Space Quota Definition
-     * @param request the request
+     * @param request      the request
      * @return ListSpaceQuotaDefinitionSpacesResponse
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces")
-    public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request) throws Exception {
+    public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
-        return spaceQuotaServiceV3.getListSpaceUsedSpaceQuotaDefinitions(spaceQuotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.getListSpaceUsedSpaceQuotaDefinitions(spaceQuotaId, token);
     }
 
     /**
      * 해당 공간에 설정된 할당량 정의를 삭제한다.
      *
      * @param spaceQuotaId The guid of the Space Quota Definition
-     * @param spaceId The guid of the Space
-     * @param quota Quota Info
-     * @param request the request
+     * @param spaceId      The guid of the Space
+     * @param quota        Quota Info
+     * @param request      the request
      * @return boolean
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces/{spaceId}")
-    public boolean getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId,
-                                                                                        @RequestBody Quota quota, HttpServletRequest request) throws Exception {
+    public boolean getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId, @RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(spaceQuotaId));
         quota.setSpaceGuid(UUID.fromString(spaceId));
-        return spaceQuotaServiceV3.removeSpaceQuotaDefinitionsFromSpace(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.removeSpaceQuotaDefinitionsFromSpace(quota, token);
     }
 
     /**
      * 공간 할당량 정의를 수정한다.
      *
      * @param spaceQuotaId The guid of the Space Quota Definition
-     * @param quota Quota Info
-     * @param request the request
+     * @param quota        Quota Info
+     * @param request      the request
      * @return UpdateSpaceQuotaDefinitionResponse
      * @throws Exception the exception
      */
     @PutMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}")
-    public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @RequestBody Quota quota,
-                                                                             HttpServletRequest request) throws Exception {
+    public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("updateSpaceQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(spaceQuotaId));
-        return spaceQuotaServiceV3.updateSpaceQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return spaceQuotaServiceV3.updateSpaceQuotaDefinitions(quota, token);
     }
 
 }

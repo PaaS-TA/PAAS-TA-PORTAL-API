@@ -44,27 +44,25 @@ public class OrgQuotaControllerV3 extends Common {
      * 특정 조직의 할당량 정의를 조회한다.
      *
      * @param quotaId The guid of the Organization Quota Definition
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @GetMapping(Constants.V3_URL + "/orgs/quota-definitions/{quotaId}")
-    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
+    public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getOrgQuotaDefinition Start : ");
-        return orgQuotaServiceV3.getOrgQuotaDefinitions(quotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgQuotaServiceV3.getOrgQuotaDefinitions(quotaId, token);
     }
 
     /**
      * 조직 할당량 리스트를 등록한다.
      *
-     * @param request the request
      * @return ModelAndView model
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL + "/orgs/quota-definitions")
-    public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
+    public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(@RequestBody Quota quota, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("createOrgQuotaDefinitions Start : ");
-        return orgQuotaServiceV3.createOrgQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgQuotaServiceV3.createOrgQuotaDefinitions(quota, token);
     }
 
     /**
@@ -72,29 +70,27 @@ public class OrgQuotaControllerV3 extends Common {
      *
      * @param quotaId The guid of the Organization Quota Definition
      * @param quota   Quota Info
-     * @param request the request
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
     @PutMapping(Constants.V3_URL + "/orgs/quota-definitions/{quotaId}")
-    public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(@PathVariable String quotaId, @RequestBody Quota quota, HttpServletRequest request) throws Exception {
+    public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(@PathVariable String quotaId, @RequestBody Quota quota, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("updateOrgQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(quotaId));
-        return orgQuotaServiceV3.updateOrgQuotaDefinitions(quota, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgQuotaServiceV3.updateOrgQuotaDefinitions(quota, token);
     }
 
     /**
      * 해당 조직 할당량 정의를 삭제한다.
      *
      * @param quotaId The guid of the Organization Quota Definition
-     * @param request the request
      * @return UpdateOrganizationQuotaDefinitionResponse Response Object
      * @throws Exception the exception
      */
     @DeleteMapping(Constants.V3_URL + "/orgs/quota-definitions/{quotaId}")
-    public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, HttpServletRequest request) throws Exception {
+    public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("deleteOrgQuotaDefinitions Start : ");
-        return orgQuotaServiceV3.deleteOrgQuotaDefinitions(quotaId, request.getHeader(AUTHORIZATION_HEADER_KEY));
+        return orgQuotaServiceV3.deleteOrgQuotaDefinitions(quotaId, token);
     }
 
     /**
