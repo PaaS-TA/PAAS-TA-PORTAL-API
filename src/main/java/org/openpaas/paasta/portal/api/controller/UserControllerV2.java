@@ -39,13 +39,11 @@ public class UserControllerV2 extends Common {
      *
      * @param userId   the user id
      * @param body     the body
-     * @param request  the request
-     * @param response the response
      * @return the map
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V2_URL + "/users/{userId}/password/update"})
-    public Map updateUserPassword(@PathVariable String userId, @RequestBody Map<String, Object> body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Map updateUserPassword(@PathVariable String userId, @RequestBody Map<String, Object> body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("> into updateUserPassword");
         String oldPassword = (String) body.get("oldPassword");
         String newPassword = (String) body.get("password");
@@ -59,13 +57,11 @@ public class UserControllerV2 extends Common {
      * Update user password map.
      *
      * @param body     the body
-     * @param request  the request
-     * @param response the response
      * @return the map
      * @throws Exception the exception
      */
     @PostMapping(value = {Constants.V2_URL + "/users/password/reset"})
-    public Map resetPassword(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Map resetPassword(@RequestBody Map<String, Object> body) throws Exception {
         LOGGER.info("> into resetPassword");
         String newPassword = (String) body.get("password");
         String userId = (String) body.get("userId");
@@ -78,13 +74,11 @@ public class UserControllerV2 extends Common {
      * Update user password map.
      *
      * @param userGuid the user id
-     * @param body     the body
-     * @param request  the request
      * @return the map
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V2_URL + "/users/{userGuid}/password/expired"})
-    public Map expiredPassword(@PathVariable String userGuid, @RequestBody Map<String, Object> body, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Map expiredPassword(@PathVariable String userGuid) throws Exception {
         LOGGER.info("> into expiredPassword");
         Map<String, Object> result = userServiceV2.expiredPassword(userGuid);
         return result;
@@ -99,7 +93,7 @@ public class UserControllerV2 extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(value = {Constants.V2_URL + "/users/{guid}"})
-    public Map deleteUser(@PathVariable String guid, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Map deleteUser(@PathVariable String guid) throws Exception {
         LOGGER.info("> into deleteUser");
         Map result = userServiceV2.deleteUser(guid);
         return result;
@@ -113,7 +107,7 @@ public class UserControllerV2 extends Common {
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V2_URL + "/users"})
-    public List<User> getAllUserName(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public List<User> getAllUserName() throws Exception {
         List<User> userInfo = userServiceV2.allUsers();
         Map<String, Object> resultMap = new HashMap();
         return userInfo;
@@ -127,7 +121,7 @@ public class UserControllerV2 extends Common {
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V2_URL + "/users/{userId}"})
-    public GetUserResponse getUser(@PathVariable String userId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public GetUserResponse getUser(@PathVariable String userId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return userServiceV2.getUser(userId, token);
     }
 
@@ -136,12 +130,11 @@ public class UserControllerV2 extends Common {
      * 계정생성 화면
      *
      * @param userDetail the request
-     * @param response   the response
      * @return map
      */
     @PostMapping(value = Constants.V2_URL + "/users")
     @ResponseBody
-    public Map<String, Object> addUser(@RequestBody UserDetail userDetail, HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, Object> addUser(@RequestBody UserDetail userDetail) {
         Map result = userServiceV2.createUser(userDetail);
         return result;
     }

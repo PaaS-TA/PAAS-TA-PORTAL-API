@@ -14,7 +14,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Created by indra on 2018-05-14.
  */
 @RestController
-@RequestMapping(value = {"/app"})
 public class AppAutoscalingController {
 
     //////////////////////////////////////////////////////////////////////

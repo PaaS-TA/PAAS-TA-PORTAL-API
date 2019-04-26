@@ -47,6 +47,11 @@ public class AppServiceV3 extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
 
+    public SummaryApplicationResponse getAppSummary(String guid, String token) {
+        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
+        return summaryApplicationResponse;
+    }
+
 
     /**
      * 앱 실시간 상태를 조회한다.
@@ -569,16 +574,16 @@ public class AppServiceV3 extends Common {
 
     }
 
-    public AppV3 getAppSummary(String guid, String token) {
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-        SummaryApplicationResponse summaryApplicationResponse = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
-        org.cloudfoundry.client.v3.applications.GetApplicationResponse getApplicationResponse = reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
-        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
-        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().type("web").applicationId(guid).build()).block();
-        GetApplicationProcessStatisticsResponse processStatisticsResponse = reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().type("web").applicationId(guid).build()).block();
-        GetApplicationEnvironmentResponse getApplicationEnvironmentResponse = reactorCloudFoundryClient.applicationsV3().getEnvironment(GetApplicationEnvironmentRequest.builder().applicationId(guid).build()).block();
-        AppV3 app = AppV3.builder().applicationResponse(getApplicationResponse).applicationEnvironmentResponse(getApplicationEnvironmentResponse).applicationProcessResponse(getApplicationProcessResponse).applicationCurrentDropletResponse(getApplicationCurrentDropletResponse).applicationProcessStatisticsResponse(processStatisticsResponse).summaryApplicationResponse(summaryApplicationResponse).build();
-        return app;
-    }
+//    public AppV3 getAppSummary(String guid, String token) {
+//        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+//        SummaryApplicationResponse summaryApplicationResponse = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
+//        org.cloudfoundry.client.v3.applications.GetApplicationResponse getApplicationResponse = reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
+//        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
+//        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().type("web").applicationId(guid).build()).block();
+//        GetApplicationProcessStatisticsResponse processStatisticsResponse = reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().type("web").applicationId(guid).build()).block();
+//        GetApplicationEnvironmentResponse getApplicationEnvironmentResponse = reactorCloudFoundryClient.applicationsV3().getEnvironment(GetApplicationEnvironmentRequest.builder().applicationId(guid).build()).block();
+//        AppV3 app = AppV3.builder().applicationResponse(getApplicationResponse).applicationEnvironmentResponse(getApplicationEnvironmentResponse).applicationProcessResponse(getApplicationProcessResponse).applicationCurrentDropletResponse(getApplicationCurrentDropletResponse).applicationProcessStatisticsResponse(processStatisticsResponse).summaryApplicationResponse(summaryApplicationResponse).build();
+//        return app;
+//    }
 
 }
