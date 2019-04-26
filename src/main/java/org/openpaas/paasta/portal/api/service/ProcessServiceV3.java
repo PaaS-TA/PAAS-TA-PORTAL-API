@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
-public class ProcessesServiceV3 extends Common {
+public class ProcessServiceV3 extends Common {
     private final Logger LOGGER = getLogger(this.getClass());
 
 

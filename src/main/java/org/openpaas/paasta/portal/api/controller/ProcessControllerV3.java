@@ -2,24 +2,25 @@ package org.openpaas.paasta.portal.api.controller;
 
 
 import org.cloudfoundry.client.v3.processes.*;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Process;
-import org.openpaas.paasta.portal.api.service.ProcessesServiceV3;
+import org.openpaas.paasta.portal.api.service.ProcessServiceV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-public class ProcessesController extends Common {
+
+@RestController
+public class ProcessControllerV3 extends Common {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////                            * CLOUD FOUNDRY CLIENT API VERSION 3                                      //////
-    //////             Document : https://v3-apidocs.cloudfoundry.org/version/3.69.0/#processes                  //////
+    //////             Document : https://v3-apidocs.cloudfoundry.org/version/3.69.0/#processes                 //////
     //////                                     Not-implemented                                                  //////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Autowired
-    ProcessesServiceV3 processesServiceV3;
+    ProcessServiceV3 processServiceV3;
 
     /**
      * process 정보를 가져온다.
@@ -30,7 +31,7 @@ public class ProcessesController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/processes/{processId:.+}")
     public GetProcessResponse getProcess(@PathVariable String processId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-       return processesServiceV3.getProcess(processId, token);
+       return processServiceV3.getProcess(processId, token);
     }
 
     /**
@@ -42,7 +43,7 @@ public class ProcessesController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/processes/{processId:.+}")
     public GetProcessStatisticsResponse getProcessStatistics(@PathVariable String processId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return processesServiceV3.getProcessStatistics(processId, token);
+        return processServiceV3.getProcessStatistics(processId, token);
     }
 
     /**
@@ -53,7 +54,7 @@ public class ProcessesController extends Common {
      */
     @GetMapping(Constants.V3_URL+"/processes")
     public ListProcessesResponse listProcesses(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return processesServiceV3.listProcesses(token);
+        return processServiceV3.listProcesses(token);
     }
 
     /**
@@ -65,7 +66,7 @@ public class ProcessesController extends Common {
      */
     @PostMapping(Constants.V3_URL+"/processes")
     public ScaleProcessResponse scaleProcess(@RequestBody Process process, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-      return processesServiceV3.scaleProcess(process, token);
+      return processServiceV3.scaleProcess(process, token);
     }
 
 }
