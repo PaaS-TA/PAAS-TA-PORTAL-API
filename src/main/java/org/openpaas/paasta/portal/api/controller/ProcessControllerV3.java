@@ -41,7 +41,7 @@ public class ProcessControllerV3 extends Common {
      * @return GetProcessStatisticsResponse
      * 권한 : 사용자권한
      */
-    @GetMapping(Constants.V3_URL+"/processes/{processId:.+}")
+    @GetMapping(Constants.V3_URL+"/processes/{processId:.+}/statistics")
     public GetProcessStatisticsResponse getProcessStatistics(@PathVariable String processId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
         return processServiceV3.getProcessStatistics(processId, token);
     }
