@@ -1,6 +1,11 @@
 package org.openpaas.paasta.portal.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.cloudfoundry.Nullable;
+import org.cloudfoundry.client.v2.Metadata;
+import org.cloudfoundry.client.v2.applications.ApplicationEntity;
+import org.cloudfoundry.client.v2.applications.DockerCredentials;
+import org.cloudfoundry.client.v2.applications.Resource;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.domains.Domain;
 import org.cloudfoundry.client.v2.routes.Route;
@@ -106,6 +111,15 @@ public class AppV3 {
 
     @JsonProperty("package_updated_at")
     private String package_updated_at;
+
+    @JsonProperty("resources")
+    private List<Resources> resources;
+
+    @JsonProperty("entity")
+    private Entity entity;
+
+    @JsonProperty("metadata")
+    private Metadata metadata;
 
     @JsonProperty("routes")
     List<Route> routes;
@@ -244,7 +258,19 @@ public class AppV3 {
         return serviceInstances;
     }
 
-    @Override
+    public void setResource(List<Resources> resources) {
+        this.resources = resources;
+    }
+
+    public void setEntity(Entity entity) {
+        this.entity = entity;
+    }
+
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
+    }
+
+
     public String toString() {
         return "AppV3{" +
                 "name='" + name + '\'' +
@@ -347,6 +373,635 @@ public class AppV3 {
         this.routes = builder.summaryApplicationResponse.getRoutes();
     }
 
+    public static class Resources{
+
+        private Entity entity;
+
+        private Metadata metadata;
+
+        @JsonProperty("entity")
+        public Entity getEntity() {
+            return entity;
+        }
+
+        public void setEntity(Entity entity) {
+            this.entity = entity;
+        }
+
+        @JsonProperty("metadata")
+        public Metadata getMetadata() {
+            return metadata;
+        }
+
+        public void setMetadata(Metadata metadata) {
+            this.metadata = metadata;
+        }
+
+        public Resources(org.cloudfoundry.client.v2.applications.ApplicationResource applicationResource){
+            entity = new Entity(applicationResource.getEntity());
+            metadata = new Metadata(applicationResource.getMetadata());
+        }
+
+        public Resources(){
+
+        }
+
+    }
+
+    public static class Entity {
+        private String detectedBuildpack;
+        private String detectedBuildpackId;
+        private Boolean enableSsh;
+        private String eventsUrl;
+        private String packageState;
+        private String packageUpdatedAt;
+        private List<Integer> ports;
+        private String routeMappingsUrl;
+        private String routesUrl;
+        private String serviceBindingsUrl;
+        private String spaceUrl;
+        private String stackUrl;
+        private String version;
+        private String buildpack;
+        private String command;
+        private Boolean console;
+        private String debug;
+        private String detectedStartCommand;
+        private Boolean diego;
+        private Integer diskQuota;
+        private DockerCredentials dockerCredentials;
+        private Map<String, Object> dockerCredentialsJsons;
+        private String dockerImage;
+        private Map<String, Object> environmentJsons;
+        private String healthCheckHttpEndpoint;
+        private Integer healthCheckTimeout;
+        private String healthCheckType;
+        private Integer instances;
+        private Integer memory;
+        private String name;
+        private Boolean production;
+        private String spaceId;
+        private String stackId;
+        private String stagingFailedDescription;
+        private String stagingFailedReason;
+        private String stagingTaskId;
+        private String state;
+
+        public Entity(){
+
+        }
+
+        public Entity(ApplicationEntity entity){
+            this.detectedBuildpack = entity.getDetectedBuildpack();
+            this.detectedBuildpackId = entity.getDetectedBuildpackId();
+            this.enableSsh = entity.getEnableSsh();
+            this.eventsUrl = entity.getEventsUrl();
+            this.packageState = entity.getPackageState();
+            this.packageUpdatedAt = entity.getPackageUpdatedAt();
+            this.ports = entity.getPorts();
+            this.routeMappingsUrl = entity.getRouteMappingsUrl();
+            this.routesUrl = entity.getRoutesUrl();
+            this.serviceBindingsUrl = entity.getServiceBindingsUrl();
+            this.spaceUrl = entity.getSpaceUrl();
+            this.stackUrl = entity.getStackUrl();
+            this.version = entity.getVersion();
+            this.buildpack = entity.getBuildpack();
+            this.command = entity.getCommand();
+            this.console = entity.getConsole();
+            this.debug = entity.getDebug();
+            this.detectedStartCommand = entity.getDetectedStartCommand();
+            this.diego = entity.getDiego();
+            this.diskQuota = entity.getDiskQuota();
+            this.dockerCredentials = entity.getDockerCredentials();
+            this.dockerCredentialsJsons = entity.getDockerCredentialsJsons();
+            this.dockerImage = entity.getDockerImage();
+            this.environmentJsons = entity.getEnvironmentJsons();
+            this.healthCheckHttpEndpoint = entity.getHealthCheckHttpEndpoint();
+            this.healthCheckTimeout = entity.getHealthCheckTimeout();
+            this.healthCheckType = entity.getHealthCheckType();
+            this.instances = entity.getInstances();
+            this.memory = entity.getMemory();
+            this.name = entity.getName();
+            this.production = entity.getProduction();
+            this.spaceId = entity.getSpaceId();
+            this.stackId = entity.getStackId();
+            this.stagingFailedDescription = entity.getStagingFailedDescription();
+            this.stagingFailedReason = entity.getStagingFailedReason();
+            this.stagingTaskId = entity.getStagingTaskId();
+            this.state = entity.getState();
+        }
+
+        /**
+         * The detected buildpack
+         */
+        @JsonProperty("detected_buildpack")
+        public @Nullable String getDetectedBuildpack() {
+            return detectedBuildpack;
+        }
+
+        /**
+         * The detected buildpack id
+         */
+        @JsonProperty("detected_buildpack_guid")
+        public @Nullable String getDetectedBuildpackId() {
+            return detectedBuildpackId;
+        }
+
+        /**
+         * Whether SSH is enabled
+         */
+        @JsonProperty("enable_ssh")
+        public @Nullable Boolean getEnableSsh() {
+            return enableSsh;
+        }
+
+        /**
+         * The events url
+         */
+        @JsonProperty("events_url")
+        public @Nullable String getEventsUrl() {
+            return eventsUrl;
+        }
+
+        /**
+         * The package state
+         */
+        @JsonProperty("package_state")
+        public @Nullable String getPackageState() {
+            return packageState;
+        }
+
+        /**
+         * When the package was update
+         */
+        @JsonProperty("package_updated_at")
+        public @Nullable String getPackageUpdatedAt() {
+            return packageUpdatedAt;
+        }
+
+        /**
+         * The ports
+         */
+        @JsonProperty("ports")
+        public @Nullable List<Integer> getPorts() {
+            return ports;
+        }
+
+        /**
+         * The route mappings url
+         */
+        @JsonProperty("route_mappings_url")
+        public @Nullable String getRouteMappingsUrl() {
+            return routeMappingsUrl;
+        }
+
+        /**
+         * The routes url
+         */
+        @JsonProperty("routes_url")
+        public @Nullable String getRoutesUrl() {
+            return routesUrl;
+        }
+
+        /**
+         * The service bindings url
+         */
+        @JsonProperty("service_bindings_url")
+        public @Nullable String getServiceBindingsUrl() {
+            return serviceBindingsUrl;
+        }
+
+        /**
+         * The space url
+         */
+        @JsonProperty("space_url")
+        public @Nullable String getSpaceUrl() {
+            return spaceUrl;
+        }
+
+        /**
+         * The stack url
+         */
+        @JsonProperty("stack_url")
+        public @Nullable String getStackUrl() {
+            return stackUrl;
+        }
+
+        /**
+         * The version
+         */
+        @JsonProperty("version")
+        public @Nullable String getVersion() {
+            return version;
+        }
+
+        /**
+         * The buildpack
+         */
+        @JsonProperty("buildpack")
+        public @Nullable String getBuildpack() {
+            return buildpack;
+        }
+
+        /**
+         * The command
+         */
+        @JsonProperty("command")
+        public @Nullable String getCommand() {
+            return command;
+        }
+
+        /**
+         * The console
+         */
+        @JsonProperty("console")
+        @Deprecated
+        public @Nullable Boolean getConsole() {
+            return console;
+        }
+
+        /**
+         * Debug
+         */
+        @JsonProperty("debug")
+        @Deprecated
+        public @Nullable String getDebug() {
+            return debug;
+        }
+
+        /**
+         * The detected start command
+         */
+        @JsonProperty("detected_start_command")
+        public @Nullable String getDetectedStartCommand() {
+            return detectedStartCommand;
+        }
+
+        /**
+         * Diego
+         */
+        @JsonProperty("diego")
+        public @Nullable Boolean getDiego() {
+            return diego;
+        }
+
+        /**
+         * The disk quota in megabytes
+         */
+        @JsonProperty("disk_quota")
+        public @Nullable Integer getDiskQuota() {
+            return diskQuota;
+        }
+
+        /**
+         * The docker credentials
+         */
+        @JsonProperty("docker_credentials")
+        public @Nullable DockerCredentials getDockerCredentials() {
+            return dockerCredentials;
+        }
+
+        /**
+         * The docker credentials JSONs
+         */
+        @JsonProperty("docker_credentials_json")
+        public @Nullable Map<String, Object> getDockerCredentialsJsons() {
+            return dockerCredentialsJsons;
+        }
+
+        /**
+         * The docker image
+         */
+        @JsonProperty("docker_image")
+        public @Nullable String getDockerImage() {
+            return dockerImage;
+        }
+
+        /**
+         * The environment JSONs
+         */
+        @JsonProperty("environment_json")
+        public @Nullable Map<String, Object> getEnvironmentJsons() {
+            return environmentJsons;
+        }
+
+        /**
+         * The health check HTTP endpoint
+         */
+        @JsonProperty("health_check_http_endpoint")
+        public @Nullable String getHealthCheckHttpEndpoint() {
+            return healthCheckHttpEndpoint;
+        }
+
+        /**
+         * The health check timeout
+         */
+        @JsonProperty("health_check_timeout")
+        public @Nullable Integer getHealthCheckTimeout() {
+            return healthCheckTimeout;
+        }
+
+        /**
+         * The health check type
+         */
+        @JsonProperty("health_check_type")
+        public @Nullable String getHealthCheckType() {
+            return healthCheckType;
+        }
+
+        /**
+         * The instances
+         */
+        @JsonProperty("instances")
+        public @Nullable Integer getInstances() {
+            return instances;
+        }
+
+        /**
+         * The memory in megabytes
+         */
+        @JsonProperty("memory")
+        public @Nullable Integer getMemory() {
+            return memory;
+        }
+
+        /**
+         * The name
+         */
+        @JsonProperty("name")
+        public @Nullable String getName() {
+            return name;
+        }
+
+        /**
+         * Production
+         */
+        @JsonProperty("production")
+        @Deprecated
+        public @Nullable Boolean getProduction() {
+            return production;
+        }
+
+        /**
+         * The space id
+         */
+        @JsonProperty("space_guid")
+        public @Nullable String getSpaceId() {
+            return spaceId;
+        }
+
+        /**
+         * The stack id
+         */
+        @JsonProperty("stack_guid")
+        public @Nullable String getStackId() {
+            return stackId;
+        }
+
+        /**
+         * The staging failed description
+         */
+        @JsonProperty("staging_failed_description")
+        public @Nullable String getStagingFailedDescription() {
+            return stagingFailedDescription;
+        }
+
+        /**
+         * The staging failed reason
+         */
+        @JsonProperty("staging_failed_reason")
+        public @Nullable String getStagingFailedReason() {
+            return stagingFailedReason;
+        }
+
+        /**
+         * The staging task id
+         */
+        @JsonProperty("staging_task_id")
+        public @Nullable String getStagingTaskId() {
+            return stagingTaskId;
+        }
+
+        /**
+         * The state
+         */
+        @JsonProperty("state")
+        public @Nullable String getState() {
+            return state;
+        }
+
+        public void setDetectedBuildpack(String detectedBuildpack) {
+            this.detectedBuildpack = detectedBuildpack;
+        }
+
+        public void setDetectedBuildpackId(String detectedBuildpackId) {
+            this.detectedBuildpackId = detectedBuildpackId;
+        }
+
+        public void setEnableSsh(Boolean enableSsh) {
+            this.enableSsh = enableSsh;
+        }
+
+        public void setEventsUrl(String eventsUrl) {
+            this.eventsUrl = eventsUrl;
+        }
+
+        public void setPackageState(String packageState) {
+            this.packageState = packageState;
+        }
+
+        public void setPackageUpdatedAt(String packageUpdatedAt) {
+            this.packageUpdatedAt = packageUpdatedAt;
+        }
+
+        public void setPorts(List<Integer> ports) {
+            this.ports = ports;
+        }
+
+        public void setRouteMappingsUrl(String routeMappingsUrl) {
+            this.routeMappingsUrl = routeMappingsUrl;
+        }
+
+        public void setRoutesUrl(String routesUrl) {
+            this.routesUrl = routesUrl;
+        }
+
+        public void setServiceBindingsUrl(String serviceBindingsUrl) {
+            this.serviceBindingsUrl = serviceBindingsUrl;
+        }
+
+        public void setSpaceUrl(String spaceUrl) {
+            this.spaceUrl = spaceUrl;
+        }
+
+        public void setStackUrl(String stackUrl) {
+            this.stackUrl = stackUrl;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public void setBuildpack(String buildpack) {
+            this.buildpack = buildpack;
+        }
+
+        public void setCommand(String command) {
+            this.command = command;
+        }
+
+        public void setConsole(Boolean console) {
+            this.console = console;
+        }
+
+        public void setDebug(String debug) {
+            this.debug = debug;
+        }
+
+        public void setDetectedStartCommand(String detectedStartCommand) {
+            this.detectedStartCommand = detectedStartCommand;
+        }
+
+        public void setDiego(Boolean diego) {
+            this.diego = diego;
+        }
+
+        public void setDiskQuota(Integer diskQuota) {
+            this.diskQuota = diskQuota;
+        }
+
+        public void setDockerCredentials(DockerCredentials dockerCredentials) {
+            this.dockerCredentials = dockerCredentials;
+        }
+
+        public void setDockerCredentialsJsons(Map<String, Object> dockerCredentialsJsons) {
+            this.dockerCredentialsJsons = dockerCredentialsJsons;
+        }
+
+        public void setDockerImage(String dockerImage) {
+            this.dockerImage = dockerImage;
+        }
+
+        public void setEnvironmentJsons(Map<String, Object> environmentJsons) {
+            this.environmentJsons = environmentJsons;
+        }
+
+        public void setHealthCheckHttpEndpoint(String healthCheckHttpEndpoint) {
+            this.healthCheckHttpEndpoint = healthCheckHttpEndpoint;
+        }
+
+        public void setHealthCheckTimeout(Integer healthCheckTimeout) {
+            this.healthCheckTimeout = healthCheckTimeout;
+        }
+
+        public void setHealthCheckType(String healthCheckType) {
+            this.healthCheckType = healthCheckType;
+        }
+
+        public void setInstances(Integer instances) {
+            this.instances = instances;
+        }
+
+        public void setMemory(Integer memory) {
+            this.memory = memory;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setProduction(Boolean production) {
+            this.production = production;
+        }
+
+        public void setSpaceId(String spaceId) {
+            this.spaceId = spaceId;
+        }
+
+        public void setStackId(String stackId) {
+            this.stackId = stackId;
+        }
+
+        public void setStagingFailedDescription(String stagingFailedDescription) {
+            this.stagingFailedDescription = stagingFailedDescription;
+        }
+
+        public void setStagingFailedReason(String stagingFailedReason) {
+            this.stagingFailedReason = stagingFailedReason;
+        }
+
+        public void setStagingTaskId(String stagingTaskId) {
+            this.stagingTaskId = stagingTaskId;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+    }
+
+    public static class Metadata{
+        private String guid;
+        private String url;
+        private String created_at;
+        private String updated_at;
+
+        @JsonProperty("guid")
+        public String getGuid() {
+            return guid;
+        }
+
+        public void setGuid(String guid) {
+            this.guid = guid;
+        }
+
+        @JsonProperty("url")
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        @JsonProperty("created_at")
+        public String getCreated_at() {
+            return created_at;
+        }
+
+        public void setCreated_at(String created_at) {
+            this.created_at = created_at;
+        }
+
+        @JsonProperty("updated_at")
+        public String getUpdated_at() {
+            return updated_at;
+        }
+
+        public void setUpdated_at(String updated_at) {
+            this.updated_at = updated_at;
+        }
+
+        public Metadata(){
+
+        }
+
+        public Metadata(org.cloudfoundry.client.v2.Metadata metadata){
+            this.guid = metadata.getId();
+            this.url = metadata.getUrl();
+            this.created_at = metadata.getCreatedAt();
+            this.updated_at = metadata.getUpdatedAt();
+        }
+
+        @Override
+        public String toString() {
+            return "Metadata{" +
+                    "guid='" + guid + '\'' +
+                    ", url='" + url + '\'' +
+                    ", created_at='" + created_at + '\'' +
+                    ", updated_at='" + updated_at + '\'' +
+                    '}';
+        }
+    }
 
     public static AppV3.Builder builder() {
         return new AppV3.Builder();
