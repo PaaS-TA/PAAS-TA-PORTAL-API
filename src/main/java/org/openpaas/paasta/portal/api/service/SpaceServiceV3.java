@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 
 
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.client.v3.Relationship;
@@ -38,6 +39,9 @@ public class SpaceServiceV3 extends Common {
     @Autowired
     @Lazy // To resolve circular reference
     private OrgServiceV3 orgServiceV3;
+
+    @Autowired
+    private AppServiceV3 appServiceV3;
 
 
     /**
@@ -260,6 +264,78 @@ public class SpaceServiceV3 extends Common {
 
         GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
         return respSapceSummary;
+    }
+
+    public Map getSpaceSummary2(String spaceid, String token) {
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+        GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceid).build()).block();
+
+        Map<String, Object> resultMap = new HashMap<>();
+        List<SpaceApplicationSummary> appsArray = new ArrayList<>();
+        List<Map<String, Object>> appArray = new ArrayList<>();
+
+        //TODO
+        resultMap.put("apps", respSapceSummary.getApplications());
+        resultMap.put("guid", respSapceSummary.getId());
+        resultMap.put("name", respSapceSummary.getName());
+        resultMap.put("services", respSapceSummary.getServices());
+
+        for (SpaceApplicationSummary sapceApplicationSummary : respSapceSummary.getApplications()) {
+            Map<String, Object> resultMap2 = new HashMap<>();
+
+            try {
+                if (sapceApplicationSummary.getState().equals("STARTED")) {
+                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), token);
+
+
+                    Double cpu = 0.0;
+                    Double mem = 0.0;
+                    Double disk = 0.0;
+                    int cnt = 0;
+                    for (int i = 0; i < applicationStatisticsResponse.getInstances().size(); i++) {
+                        if (applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getState().equals("RUNNING")) {
+                            Double instanceCpu = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getCpu();
+                            Long instanceMem = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getMemory();
+                            Long instanceMemQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getMemoryQuota();
+                            Long instanceDisk = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getDisk();
+                            Long instanceDiskQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getDiskQuota();
+
+                            if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
+                            if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;
+                            if (instanceDisk != null)
+                                disk = disk + (double) instanceDisk / (double) instanceDiskQuota * 100;
+
+                            cnt++;
+                        }
+                    }
+
+                    cpu = cpu / cnt;
+                    mem = mem / cnt;
+                    disk = disk / cnt;
+
+                    resultMap2.put("guid", sapceApplicationSummary.getId());
+                    resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
+                    resultMap2.put("memPer", Math.round(mem));
+                    resultMap2.put("diskPer", Math.round(disk));
+                } else {
+                    resultMap2.put("guid", sapceApplicationSummary.getId());
+                    resultMap2.put("cpuPer", 0);
+                    resultMap2.put("memPer", 0);
+                    resultMap2.put("diskPer", 0);
+                }
+
+                appsArray.add(sapceApplicationSummary);
+                appArray.add(resultMap2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        resultMap.put("apps", appsArray);
+        resultMap.put("appsPer", appArray);
+
+        LOGGER.info("Get SpaceSummary End ");
+
+        return resultMap;
     }
 
 
