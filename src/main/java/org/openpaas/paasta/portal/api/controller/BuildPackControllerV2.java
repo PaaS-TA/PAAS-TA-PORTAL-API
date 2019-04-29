@@ -35,12 +35,11 @@ public class BuildPackControllerV2 extends Common {
     /**
      * 빌드팩 리스트 가져오기
      *
-     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V2_URL + "/buildpacks"})
-    public Map<String, Object> getBuildPacks(HttpServletRequest request) throws Exception {
+    public Map<String, Object> getBuildPacks() throws Exception {
 
         LOGGER.info("getBuildPacks Start");
         Map<String, Object> buildPacks = buildPackServiceV2.getBuildPacks();
@@ -55,12 +54,11 @@ public class BuildPackControllerV2 extends Common {
      * 빌드팩 정보 수정
      *
      * @param buildPack the buildPack
-     * @param request   the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V2_URL + "/buildpacks/{guid}"})
-    public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack, @PathVariable String guid, HttpServletRequest request) throws Exception {
+    public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack, @PathVariable String guid) throws Exception {
 
         LOGGER.info("updateBuildPack Start : " + guid);
         Map<String, Object> resultMap = new HashMap<>();

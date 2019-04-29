@@ -36,13 +36,29 @@ public class AppControllerV3 extends Common {
 
 
     /**
+     * 앱 요약 정보를 조회한다.
+     *
+     * @param guid
+     * @return ModelAndView model
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/summary"})
+    public SummaryApplicationResponse getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        LOGGER.info("getAppSummary Start : " + guid);
+
+        SummaryApplicationResponse respApp = appServiceV3.getAppSummary(guid, token);
+
+        return respApp;
+    }
+
+    /**
      * 앱 실시간 상태를 조회한다.
      *
      * @param guid the app guid
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/stats"}, method = RequestMethod.GET)
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/stats"})
     public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         //service call
         ApplicationStatisticsResponse applicationStatisticsResponse = appServiceV3.getAppStats(guid, token);
@@ -56,7 +72,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/rename"}, method = RequestMethod.PUT)
+    @PutMapping(value = {Constants.V3_URL + "/apps/{guid}/rename"})
     public Map renameApp(@PathVariable String guid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
@@ -72,7 +88,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = {Constants.V3_URL + "/apps/{guid}"})
     public Map deleteApp(@PathVariable String guid) throws Exception {
         LOGGER.info("delete App Start : " + guid);
         Map result = appServiceV3.deleteApp(guid);
@@ -88,7 +104,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/startApp"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/apps/startApp"})
     public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
 
@@ -106,7 +122,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/stopApp"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/apps/stopApp"})
     public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
 
@@ -125,7 +141,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/restageApp"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/apps/restageApp"})
     public Map restageApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("restageApp Start ");
 
@@ -144,7 +160,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/updateApp"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/apps/updateApp"})
     public Map updateApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("updateApp Start ");
 
@@ -162,7 +178,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/service-bindings"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/service-bindings"})
     public Map bindService(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("bindService Start ");
 
@@ -180,7 +196,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = {Constants.V3_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"})
     public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("unbindService Start ");
 
@@ -216,7 +232,7 @@ public class AppControllerV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/app-usage-events/{guid}"}, method = RequestMethod.GET)
+    @GetMapping(value = {Constants.V3_URL + "/apps/app-usage-events/{guid}"})
     public ListEventsResponse getAppEvents(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getAppEvents Start : " + guid);
 
@@ -238,7 +254,7 @@ public class AppControllerV3 extends Common {
      * @version 1.0
      * @since 2016.6.29 최초작성
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/env"}, method = RequestMethod.GET)
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/env"})
     public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("getApplicationEnv Start : " + guid);
 
@@ -257,7 +273,7 @@ public class AppControllerV3 extends Common {
      * @throws Exception the exception
      * @version 1.0
      */
-    @RequestMapping(value = {Constants.V3_URL + "/routes"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.V3_URL + "/routes"})
     public Map addApplicationRoute(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("addApplicationRoute Start ");
 
@@ -278,7 +294,7 @@ public class AppControllerV3 extends Common {
      * @version 1.0
      * @since 2016.7.6 최초작성
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/routes/{route_guid}"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = {Constants.V3_URL + "/apps/{guid}/routes/{route_guid}"})
     public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("removeApplicationRoute Start ");
 
@@ -296,7 +312,7 @@ public class AppControllerV3 extends Common {
      * @return map map
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/instances/{index}"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = {Constants.V3_URL + "/apps/{guid}/instances/{index}"})
     public Map terminateInstance(@PathVariable String guid, @PathVariable String index, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("terminateInstance Start");
 
@@ -314,7 +330,7 @@ public class AppControllerV3 extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V3_URL + "/apps/{guid}/recentlogs"}, method = RequestMethod.GET)
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/recentlogs"})
     public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
 
 
@@ -382,19 +398,19 @@ public class AppControllerV3 extends Common {
         return resultMap;
     }
 
-    /**
-     * 앱 요약 정보를 조회한다.
-     *
-     * @param guid
-     * @return AppV3 appV3
-     * @throws Exception the exception
-     * 권한 : 사용자 권한
-     */
-    @GetMapping(Constants.V3_URL + "/apps/{guid}/summary")
-    public AppV3 getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        AppV3 appV3 = appServiceV3.getAppSummary(guid, token);
-        return appV3;
-    }
+//    /**
+//     * 앱 요약 정보를 조회한다.
+//     *
+//     * @param guid
+//     * @return AppV3 appV3
+//     * @throws Exception the exception
+//     * 권한 : 사용자 권한
+//     */
+//    @GetMapping(Constants.V3_URL + "/apps/{guid}/summary")
+//    public AppV3 getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+//        AppV3 appV3 = appServiceV3.getAppSummary(guid, token);
+//        return appV3;
+//    }
 
 }
 
