@@ -10,7 +10,6 @@ import org.cloudfoundry.client.v3.ToOneRelationship;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentRequest;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentResponse;
 import org.cloudfoundry.client.v3.spaces.SpaceRelationships;
-import org.cloudfoundry.client.v3.spaces.SpacesV3;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.mariadb.jdbc.internal.logging.Logger;
@@ -51,14 +50,12 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    //@HystrixCommand(commandKey = "getSpaces")
     public ListSpacesResponse getSpaces(String orgId, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         ListSpacesResponse response = reactorCloudFoundryClient.spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
 
         return response;
     }
 
-    //@HystrixCommand(commandKey = "getSpacesWithOrgName")
     public ListSpacesResponse getSpacesWithOrgName(String orgName, ReactorCloudFoundryClient reactorCloudFoundryClient, String token) {
         final String orgId = orgServiceV3.getOrgId(orgName, token);
 
@@ -76,7 +73,6 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    //@HystrixCommand(commandKey = "getSpaces")
     public ListSpacesResponse getSpaces(Org org, String token) {
         String orgId = null;
         if (org.getGuid() != null) {
@@ -88,7 +84,7 @@ public class SpaceServiceV3 extends Common {
         }
 
         Objects.requireNonNull(orgId, "Org id must not be null.");
-        ListSpacesResponse response = cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
+        ListSpacesResponse response = cloudFoundryClient(tokenProvider(token)).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
 
         return response;
     }
@@ -108,7 +104,6 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    //@HystrixCommand(commandKey = "createSpace")
     public Map createSpace(Space space, String token) {
         Map resultMap = new HashMap();
 
@@ -116,7 +111,7 @@ public class SpaceServiceV3 extends Common {
             Objects.requireNonNull(space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid).");
             Objects.requireNonNull(space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid).");
 
-            final CreateSpaceResponse response = cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().create(CreateSpaceRequest.builder().name(space.getSpaceName()).organizationId(space.getOrgGuid()).build()).block();
+            final CreateSpaceResponse response = cloudFoundryClient(tokenProvider(token)).spaces().create(CreateSpaceRequest.builder().name(space.getSpaceName()).organizationId(space.getOrgGuid()).build()).block();
 
             associateSpaceManager(response.getMetadata().getId(), space.getUserId());
             associateSpaceDeveloper(response.getMetadata().getId(), space.getUserId());
@@ -145,7 +140,6 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    //@HystrixCommand(commandKey = "getSpace")
     public GetSpaceResponse getSpace(String spaceId, String token) {
         Objects.requireNonNull(spaceId, "Space Id");
 
@@ -153,15 +147,13 @@ public class SpaceServiceV3 extends Common {
         if (null != token && !"".equals(token)) internalTokenProvider = tokenProvider(token);
         else internalTokenProvider = tokenProvider();
 
-        return cloudFoundryClient(connectionContext(), internalTokenProvider).spaces().get(GetSpaceRequest.builder().spaceId(spaceId).build()).block();
+        return cloudFoundryClient(internalTokenProvider).spaces().get(GetSpaceRequest.builder().spaceId(spaceId).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "getSpace")
     public GetSpaceResponse getSpace(String spaceId) {
         return getSpace(spaceId, null);
     }
 
-    //@HystrixCommand(commandKey = "getSpaceUsingName")
     public SpaceResource getSpaceUsingName(String orgName, String spaceName, String token) {
         final TokenProvider internalTokenProvider;
         if (null != token && !"".equals(token)) {
@@ -169,7 +161,7 @@ public class SpaceServiceV3 extends Common {
         } else {
             internalTokenProvider = tokenProvider();
         }
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), internalTokenProvider);
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(internalTokenProvider);
         final ListSpacesResponse response = this.getSpacesWithOrgName(orgName, reactorCloudFoundryClient, token);
         if (response.getTotalResults() <= 0) return null;
         else if (response.getResources() != null && response.getResources().size() <= 0) return null;
@@ -181,7 +173,6 @@ public class SpaceServiceV3 extends Common {
     }
 
 
-    //@HystrixCommand(commandKey = "isExistSpace")
     public boolean isExistSpace(final String spaceId) {
         try {
             return spaceId.equals(getSpace(spaceId).getMetadata().getId());
@@ -201,7 +192,6 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    //@HystrixCommand(commandKey = "renameSpace")
     public Map renameSpace(Space space, String token) {
         Map resultMap = new HashMap();
 
@@ -237,7 +227,6 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.3
      */
-    //@HystrixCommand(commandKey = "deleteSpace")
     public Map deleteSpace(String guid, boolean recursive, String token) {
         Map resultMap = new HashMap();
 
@@ -266,7 +255,6 @@ public class SpaceServiceV3 extends Common {
      * @return space summary
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getSpaceSummary")
     public GetSpaceSummaryResponse getSpaceSummary(String spaceId,String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
@@ -285,7 +273,6 @@ public class SpaceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.4.30
      */
-    //@HystrixCommand(commandKey = "getSpaceServices")
     public ListSpaceServicesResponse getSpaceServices(String spaceId) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient();
 
@@ -299,55 +286,46 @@ public class SpaceServiceV3 extends Common {
         SpaceManager, SpaceDeveloper, SpaceAuditor, SPACEMANAGER, SPACEDEVELOPER, SPACEAUDITOR,
     }
 
-    //@HystrixCommand(commandKey = "listAllSpaceUsers")
     private List<UserSpaceRoleResource> listAllSpaceUsers(String spaceId, String token) {
         final ListSpaceUserRolesResponse response = cloudFoundryClient(tokenProvider(token)).spaces().listUserRoles(ListSpaceUserRolesRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    //@HystrixCommand(commandKey = "listSpaceManagerUsers")
     private List<UserResource> listSpaceManagerUsers(String spaceId, String token) {
         final ListSpaceManagersResponse response = cloudFoundryClient(tokenProvider(token)).spaces().listManagers(ListSpaceManagersRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    //@HystrixCommand(commandKey = "listSpaceDeveloperUsers")
     private List<UserResource> listSpaceDeveloperUsers(String spaceId, String token) {
         final ListSpaceDevelopersResponse response = cloudFoundryClient(tokenProvider(token)).spaces().listDevelopers(ListSpaceDevelopersRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    //@HystrixCommand(commandKey = "listSpaceAuditorUsers")
     private List<UserResource> listSpaceAuditorUsers(String spaceId, String token) {
         final ListSpaceAuditorsResponse response = cloudFoundryClient(tokenProvider(token)).spaces().listAuditors(ListSpaceAuditorsRequest.builder().spaceId(spaceId).build()).block();
 
         return response.getResources();
     }
 
-    //@HystrixCommand(commandKey = "getSpaceUserRoles")
     public ListSpaceUserRolesResponse getSpaceUserRoles(String spaceId, String token) {
         return cloudFoundryClient(tokenProvider(token)).spaces().listUserRoles(ListSpaceUserRolesRequest.builder().spaceId(spaceId).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "associateSpaceManager")
     private AssociateSpaceManagerResponse associateSpaceManager(String spaceId, String userId) {
         return cloudFoundryClient().spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "associateSpaceDeveloper")
     private AssociateSpaceDeveloperResponse associateSpaceDeveloper(String spaceId, String userId) {
         return cloudFoundryClient().spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "associateSpaceAuditor")
     private AssociateSpaceAuditorResponse associateSpaceAuditor(String spaceId, String userId) {
         return cloudFoundryClient().spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "associateSpaceUserRole")
     public AbstractSpaceResource associateSpaceUserRole(String spaceId, String userId, String role) {
         Objects.requireNonNull(spaceId, "Space Id");
         Objects.requireNonNull(userId, "User Id");
@@ -376,7 +354,6 @@ public class SpaceServiceV3 extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "associateAllSpaceUserRolesByOrgId")
     public List<AbstractSpaceResource> associateAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles, ReactorCloudFoundryClient reactorCloudFoundryClient) {
         final List<AbstractSpaceResource> responses = new LinkedList<>();
         final List<String> spaceIds = this.getSpaces(orgId, reactorCloudFoundryClient).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
@@ -421,7 +398,6 @@ public class SpaceServiceV3 extends Common {
      * @param userId
      * @param role
      */
-    //@HystrixCommand(commandKey = "removeSpaceUserRole")
     public void removeSpaceUserRole(String spaceId, String userId, String role) {
         Objects.requireNonNull(spaceId, "Space Id");
         Objects.requireNonNull(userId, "User Id");
@@ -452,7 +428,6 @@ public class SpaceServiceV3 extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "removeAllSpaceUserRolesByOrgId")
     public void removeAllSpaceUserRolesByOrgId(String orgId, String userId, Iterable<String> roles) {
         final List<String> spaceIds = this.getSpaces(orgId, cloudFoundryClient()).getResources().stream().map(space -> space.getMetadata().getId()).filter(id -> null != id).collect(Collectors.toList());
         for (String role : roles) {
@@ -461,7 +436,6 @@ public class SpaceServiceV3 extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "associateSpaceUserRoles")
     public boolean associateSpaceUserRoles(String spaceid, List<UserRole> Roles, String token) {
         Roles.forEach(userRole -> {
             boolean manager = true;
@@ -471,30 +445,30 @@ public class SpaceServiceV3 extends Common {
                 switch (spacerole) {
                     case "space_manager": {
                         manager = false;
-                        cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
+                        cloudFoundryClient(tokenProvider(token)).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
                         break;
                     }
                     case "space_auditor": {
-                        audiotr = false;
-                        cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
+                               audiotr = false;
+                        cloudFoundryClient(tokenProvider(token)).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
                         break;
                     }
                     case "space_developer": {
                         developer = false;
-                        cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
+                        cloudFoundryClient(tokenProvider(token)).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
                         break;
                     }
                 }
             }
             ;
             if (manager) {
-                cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
+                cloudFoundryClient(tokenProvider(token)).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
             }
             if (audiotr) {
-                cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
+                cloudFoundryClient(tokenProvider(token)).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
             }
             if (developer) {
-                cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
+                cloudFoundryClient(tokenProvider(token)).spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
             }
         });
         return true;
@@ -528,7 +502,7 @@ public class SpaceServiceV3 extends Common {
     }
 
     /**
-     * Space 리스트 정보를 가져온다.
+          * Space 리스트 정보를 가져온다.
      *
      * @param  organizationId    the organization guid
      * @return ListSpacesResponse

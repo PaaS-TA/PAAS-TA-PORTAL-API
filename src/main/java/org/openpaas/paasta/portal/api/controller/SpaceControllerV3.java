@@ -5,8 +5,6 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v3.spaces.*;
-import org.cloudfoundry.client.v3.spaces.GetSpaceResponse;
-import org.cloudfoundry.client.v3.spaces.ListSpacesResponse;
 import org.openpaas.paasta.portal.api.model.Space;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -90,6 +88,7 @@ public class SpaceControllerV3 extends Common {
      * @return Space respSpace
      * @throws Exception the exception
      */
+    /*
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("Get SpaceSummary Start : " + spaceid);
@@ -161,6 +160,7 @@ public class SpaceControllerV3 extends Common {
 
         return resultMap;
     }
+     */
 
     /**
      * 공간명을 변경한다.
