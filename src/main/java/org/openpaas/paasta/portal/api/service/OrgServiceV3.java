@@ -747,7 +747,6 @@ public class OrgServiceV3 extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "associateOrgUserRole2")
     public boolean associateOrgUserRole2(Map body) {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);

@@ -36,7 +36,6 @@ public class ServiceServiceV3 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "renameInstance")
     public Map renameInstance(Service service, String guid) throws Exception {
         HashMap result = new HashMap();
 
@@ -59,7 +58,6 @@ public class ServiceServiceV3 extends Common {
      * @param guid the service
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "deleteInstance")
     public Map deleteInstance(String guid, String token) throws Exception {
         HashMap result = new HashMap();
         try {
@@ -84,7 +82,6 @@ public class ServiceServiceV3 extends Common {
      * @version 1.0
      * @since 2016.8.4 최초작성
      */
-    //@HystrixCommand(commandKey = "getUserProvided")
     public GetUserProvidedServiceInstanceResponse getUserProvided(String token, String userProvidedServiceInstanceId) throws Exception {
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
@@ -141,7 +138,6 @@ public class ServiceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    //@HystrixCommand(commandKey = "createUserProvided")
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
         Map<String, Object> map = new HashMap<>();
@@ -189,7 +185,6 @@ public class ServiceServiceV3 extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    //@HystrixCommand(commandKey = "updateUserProvided")
     public Map updateUserProvided(String guid, String token, Service service) throws Exception {
 
         HashMap result = new HashMap();
@@ -224,7 +219,6 @@ public class ServiceServiceV3 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getServiceBrokers")
     public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
         return cloudFoundryClient().serviceBrokers().list(ListServiceBrokersRequest.builder().build()).log().block();
     }
@@ -237,7 +231,6 @@ public class ServiceServiceV3 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getServiceBroker")
     public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return cloudFoundryClient().serviceBrokers().get(GetServiceBrokerRequest.builder().serviceBrokerId(serviceBroker.getGuid().toString()).build()).log().block();
     }
@@ -249,7 +242,6 @@ public class ServiceServiceV3 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "createServiceBroker")
     public CreateServiceBrokerResponse createServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
         return cloudFoundryClient().serviceBrokers().create(CreateServiceBrokerRequest.builder().name(serviceBroker.getName()).brokerUrl(serviceBroker.getUrl()).authenticationUsername(serviceBroker.getUsername()).authenticationPassword(serviceBroker.getPassword()).build()).block();
     }
@@ -262,7 +254,6 @@ public class ServiceServiceV3 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "updateServiceBroker")
     public UpdateServiceBrokerResponse updateServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
 
         return cloudFoundryClient().serviceBrokers().update(UpdateServiceBrokerRequest.builder().serviceBrokerId(serviceBroker.getGuid().toString()).name(serviceBroker.getName()).authenticationUsername(serviceBroker.getUsername()).authenticationPassword(serviceBroker.getPassword()).brokerUrl(serviceBroker.getUrl()).build()).block();
@@ -275,7 +266,6 @@ public class ServiceServiceV3 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "deleteServiceBroker")
     public boolean deleteServiceBroker(String guid, String token) throws Exception {
 
         cloudFoundryClient().serviceBrokers().delete(DeleteServiceBrokerRequest.builder().serviceBrokerId(guid).build()).block();
@@ -283,7 +273,6 @@ public class ServiceServiceV3 extends Common {
     }
 
 
-    //@HystrixCommand(commandKey = "getServicesInstances")
     public ListServiceInstancesResponse getServicesInstances(String guid) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient();
 

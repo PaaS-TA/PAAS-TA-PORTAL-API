@@ -141,7 +141,6 @@ public class OrgServiceV2 extends Common {
         return cloudFoundryClient(tokenProvider(token)).organizations().summary(SummaryOrganizationRequest.builder().organizationId(orgId).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "getOrgSummaryMap")
     public Map getOrgSummaryMap(final String orgId, final ReactorCloudFoundryClient reactorClients) {
         LOGGER.info(DateTime.now().toString());
         LOGGER.info("===========================");
@@ -485,35 +484,29 @@ public class OrgServiceV2 extends Common {
         return result;
     }
 
-    //@HystrixCommand(commandKey = "getOrgUserRolesByOrgName")
     public OrganizationUsers getOrgUserRolesByOrgName(String orgName, String token) {
         return cloudFoundryOperations(tokenProvider(token)).userAdmin().listOrganizationUsers(org.cloudfoundry.operations.useradmin.ListOrganizationUsersRequest.builder().organizationName(orgName).build()).block();
     }
 
-    //@HystrixCommand(commandKey = "isOrgManagerUsingOrgName")
     public boolean isOrgManagerUsingOrgName(String orgName, String token) {
         final String orgId = getOrgId(orgName, token);
         final String userId = userServiceV2.getUser(token).getId();
         return isOrgManager(orgId, userId);
     }
 
-    //@HystrixCommand(commandKey = "isOrgManagerUsingToken")
     public boolean isOrgManagerUsingToken(String orgId, String token) {
         final String userId = userServiceV2.getUser(token).getId();
         return isOrgManager(orgId, userId);
     }
 
-    //@HystrixCommand(commandKey = "isOrgManager")
     public boolean isOrgManager(String orgId, String userId) {
         return hasOrgRole(orgId, userId, OrgRole.OrgManager.name());
     }
 
-    //@HystrixCommand(commandKey = "isBillingManager")
     public boolean isBillingManager(String orgId, String userId) {
         return hasOrgRole(orgId, userId, OrgRole.BillingManager.name());
     }
 
-    //@HystrixCommand(commandKey = "isOrgAuditor")
     public boolean isOrgAuditor(String orgId, String userId) {
         return hasOrgRole(orgId, userId, OrgRole.OrgAuditor.name());
     }
@@ -666,7 +659,6 @@ public class OrgServiceV2 extends Common {
      * @param role
      * @param token  (but ignore a token because of removing manager forced)
      */
-    //@HystrixCommand(commandKey = "removeOrgUserRole")
     public void removeOrgUserRole(String orgId, String userId, String role, String token) {
         try {
             Objects.requireNonNull(orgId, "Org Id");
@@ -712,7 +704,6 @@ public class OrgServiceV2 extends Common {
     }
 
     // TODO cancel member
-    //@HystrixCommand(commandKey = "cancelOrganizationMember")
     public boolean cancelOrganizationMember(String orgId, String userId, String token) {
         final boolean isManager = isOrgManager(orgId, userId);
         LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
@@ -729,7 +720,6 @@ public class OrgServiceV2 extends Common {
         }
     }
 
-    //@HystrixCommand(commandKey = "associateOrgUserRole2")
     public boolean associateOrgUserRole2(Map body) {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
@@ -822,7 +812,6 @@ public class OrgServiceV2 extends Common {
      * @version 2.0
      * @since 2018.4.22
      */
-    //@HystrixCommand(commandKey = "getOrgsForAdminAll")
     public ListOrganizationsResponse getOrgsForAdminAll(int number) {
         return cloudFoundryClient().organizations().list(ListOrganizationsRequest.builder().page(number).build()).block();
     }

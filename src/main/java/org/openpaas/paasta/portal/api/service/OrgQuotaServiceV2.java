@@ -38,7 +38,6 @@ public class OrgQuotaServiceV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getOrgQuotaDefinitions")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return cloudFoundryClient().organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).build()).log().block();
@@ -52,7 +51,6 @@ public class OrgQuotaServiceV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "createOrgQuotaDefinitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         /* required
@@ -77,7 +75,6 @@ public class OrgQuotaServiceV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "updateOrgQuotaDefinitions")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
         return cloudFoundryClient().organizationQuotaDefinitions().update(UpdateOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quota.getGuid().toString()).name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).log().block();
@@ -90,7 +87,6 @@ public class OrgQuotaServiceV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "deleteOrgQuotaDefinitions")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return cloudFoundryClient().organizationQuotaDefinitions().delete(DeleteOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).async(false) // background async 처리 여부(recommend:true)
@@ -104,7 +100,6 @@ public class OrgQuotaServiceV2 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "setOrgQuotaDefinitions")
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)

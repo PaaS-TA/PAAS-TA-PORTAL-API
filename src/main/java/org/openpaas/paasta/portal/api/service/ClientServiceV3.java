@@ -75,7 +75,6 @@ public class ClientServiceV3 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "deleteClient")
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
         return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
     }

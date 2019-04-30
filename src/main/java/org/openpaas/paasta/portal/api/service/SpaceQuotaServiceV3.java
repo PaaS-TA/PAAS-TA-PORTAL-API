@@ -26,7 +26,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getSpaceQuotaDefinitionsList")
     public ListSpaceQuotaDefinitionsResponse getSpaceQuotaDefinitionsList(String token) throws Exception {
 
         return cloudFoundryClient()
@@ -45,7 +44,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getSpaceQuotaDefinitions")
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(String spaceQuotaId, String token) throws Exception {
 
         return cloudFoundryClient()
@@ -65,7 +63,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "createSpaceQuotaDefinitions")
     public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(Quota quota, String token) throws ClientV2Exception {
 
         return cloudFoundryClient()
@@ -92,7 +89,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "deleteSpaceQuotaDefinitions")
     public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
         return cloudFoundryClient()
@@ -113,7 +109,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "associateSpaceQuotaDefinitions")
     public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
 
         /* required
@@ -138,7 +133,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "getListSpaceUsedSpaceQuotaDefinitions")
     public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(String guid, String token) throws Exception {
 
         return cloudFoundryClient()
@@ -158,7 +152,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "removeSpaceQuotaDefinitionsFromSpace")
     public boolean removeSpaceQuotaDefinitionsFromSpace(Quota quota, String token) throws Exception {
 
         cloudFoundryClient()
@@ -179,7 +172,6 @@ public class SpaceQuotaServiceV3 extends Common {
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    //@HystrixCommand(commandKey = "updateSpaceQuotaDefinitions")
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(Quota quota, String token) throws Exception {
 
         return cloudFoundryClient()

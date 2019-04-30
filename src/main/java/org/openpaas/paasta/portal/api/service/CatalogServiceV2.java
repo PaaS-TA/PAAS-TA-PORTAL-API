@@ -216,7 +216,6 @@ public class CatalogServiceV2 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "createApp")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) {
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         String applicationid = "applicationID";
@@ -263,7 +262,6 @@ public class CatalogServiceV2 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "createAppTemplate")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) {
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         String applicationid = "applicationID";
@@ -480,7 +478,6 @@ public class CatalogServiceV2 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    //@HystrixCommand(commandKey = "listServiceInstancesResponse")
     public ListServiceInstancesResponse listServiceInstancesResponse(String orgid, String spaceid, String token) {
         ListServiceInstancesResponse listServiceInstancesResponse = cloudFoundryClient(connectionContext(), tokenProvider(token)).
                 serviceInstances().list(ListServiceInstancesRequest.builder().organizationId(orgid).spaceId(spaceid).build()).block();
@@ -492,7 +489,6 @@ public class CatalogServiceV2 extends Common {
      *
      * @return ListServicesResponse
      */
-    //@HystrixCommand(commandKey = "getService")
     public ListServicesResponse getService() throws Exception {
         return cloudFoundryClient(connectionContext(), tokenProvider()).services().list(ListServicesRequest.builder().build()).log().block();
     }
