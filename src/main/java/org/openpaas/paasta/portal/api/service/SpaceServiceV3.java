@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 
 
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.client.v3.Relationship;
@@ -10,7 +11,6 @@ import org.cloudfoundry.client.v3.ToOneRelationship;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentRequest;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentResponse;
 import org.cloudfoundry.client.v3.spaces.SpaceRelationships;
-import org.cloudfoundry.client.v3.spaces.SpacesV3;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.mariadb.jdbc.internal.logging.Logger;
@@ -39,6 +39,9 @@ public class SpaceServiceV3 extends Common {
     @Autowired
     @Lazy // To resolve circular reference
     private OrgServiceV3 orgServiceV3;
+
+    @Autowired
+    private AppServiceV3 appServiceV3;
 
 
     /**
@@ -85,7 +88,7 @@ public class SpaceServiceV3 extends Common {
         }
 
         Objects.requireNonNull(orgId, "Org id must not be null.");
-        ListSpacesResponse response = cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
+        ListSpacesResponse response = cloudFoundryClient(tokenProvider(token)).spaces().list(ListSpacesRequest.builder().organizationId(orgId).build()).block();
 
         return response;
     }
@@ -112,7 +115,7 @@ public class SpaceServiceV3 extends Common {
             Objects.requireNonNull(space.getSpaceName(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid).");
             Objects.requireNonNull(space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid).");
 
-            final CreateSpaceResponse response = cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().create(CreateSpaceRequest.builder().name(space.getSpaceName()).organizationId(space.getOrgGuid()).build()).block();
+            final CreateSpaceResponse response = cloudFoundryClient(tokenProvider(token)).spaces().create(CreateSpaceRequest.builder().name(space.getSpaceName()).organizationId(space.getOrgGuid()).build()).block();
 
             associateSpaceManager(response.getMetadata().getId(), space.getUserId());
             associateSpaceDeveloper(response.getMetadata().getId(), space.getUserId());
@@ -148,7 +151,7 @@ public class SpaceServiceV3 extends Common {
         if (null != token && !"".equals(token)) internalTokenProvider = tokenProvider(token);
         else internalTokenProvider = tokenProvider();
 
-        return cloudFoundryClient(connectionContext(), internalTokenProvider).spaces().get(GetSpaceRequest.builder().spaceId(spaceId).build()).block();
+        return cloudFoundryClient(internalTokenProvider).spaces().get(GetSpaceRequest.builder().spaceId(spaceId).build()).block();
     }
 
     public GetSpaceResponse getSpace(String spaceId) {
@@ -162,7 +165,7 @@ public class SpaceServiceV3 extends Common {
         } else {
             internalTokenProvider = tokenProvider();
         }
-        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), internalTokenProvider);
+        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(internalTokenProvider);
         final ListSpacesResponse response = this.getSpacesWithOrgName(orgName, reactorCloudFoundryClient, token);
         if (response.getTotalResults() <= 0) return null;
         else if (response.getResources() != null && response.getResources().size() <= 0) return null;
@@ -261,6 +264,78 @@ public class SpaceServiceV3 extends Common {
 
         GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
         return respSapceSummary;
+    }
+
+    public Map getSpaceSummary2(String spaceid, String token) {
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+        GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceid).build()).block();
+
+        Map<String, Object> resultMap = new HashMap<>();
+        List<SpaceApplicationSummary> appsArray = new ArrayList<>();
+        List<Map<String, Object>> appArray = new ArrayList<>();
+
+        //TODO
+        resultMap.put("apps", respSapceSummary.getApplications());
+        resultMap.put("guid", respSapceSummary.getId());
+        resultMap.put("name", respSapceSummary.getName());
+        resultMap.put("services", respSapceSummary.getServices());
+
+        for (SpaceApplicationSummary sapceApplicationSummary : respSapceSummary.getApplications()) {
+            Map<String, Object> resultMap2 = new HashMap<>();
+
+            try {
+                if (sapceApplicationSummary.getState().equals("STARTED")) {
+                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), token);
+
+
+                    Double cpu = 0.0;
+                    Double mem = 0.0;
+                    Double disk = 0.0;
+                    int cnt = 0;
+                    for (int i = 0; i < applicationStatisticsResponse.getInstances().size(); i++) {
+                        if (applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getState().equals("RUNNING")) {
+                            Double instanceCpu = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getCpu();
+                            Long instanceMem = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getMemory();
+                            Long instanceMemQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getMemoryQuota();
+                            Long instanceDisk = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getDisk();
+                            Long instanceDiskQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getDiskQuota();
+
+                            if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
+                            if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;
+                            if (instanceDisk != null)
+                                disk = disk + (double) instanceDisk / (double) instanceDiskQuota * 100;
+
+                            cnt++;
+                        }
+                    }
+
+                    cpu = cpu / cnt;
+                    mem = mem / cnt;
+                    disk = disk / cnt;
+
+                    resultMap2.put("guid", sapceApplicationSummary.getId());
+                    resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
+                    resultMap2.put("memPer", Math.round(mem));
+                    resultMap2.put("diskPer", Math.round(disk));
+                } else {
+                    resultMap2.put("guid", sapceApplicationSummary.getId());
+                    resultMap2.put("cpuPer", 0);
+                    resultMap2.put("memPer", 0);
+                    resultMap2.put("diskPer", 0);
+                }
+
+                appsArray.add(sapceApplicationSummary);
+                appArray.add(resultMap2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        resultMap.put("apps", appsArray);
+        resultMap.put("appsPer", appArray);
+
+        LOGGER.info("Get SpaceSummary End ");
+
+        return resultMap;
     }
 
 
@@ -446,17 +521,17 @@ public class SpaceServiceV3 extends Common {
                 switch (spacerole) {
                     case "space_manager": {
                         manager = false;
-                        cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
+                        cloudFoundryClient(tokenProvider(token)).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
                         break;
                     }
                     case "space_auditor": {
-                        audiotr = false;
-                        cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
+                               audiotr = false;
+                        cloudFoundryClient(tokenProvider(token)).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
                         break;
                     }
                     case "space_developer": {
                         developer = false;
-                        cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
+                        cloudFoundryClient(tokenProvider(token)).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
                         break;
                     }
                 }
@@ -466,10 +541,10 @@ public class SpaceServiceV3 extends Common {
                 cloudFoundryClient(tokenProvider(token)).spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceid).managerId(userRole.getUserId()).build()).block();
             }
             if (audiotr) {
-                cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
+                cloudFoundryClient(tokenProvider(token)).spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceid).auditorId(userRole.getUserId()).build()).block();
             }
             if (developer) {
-                cloudFoundryClient(connectionContext(), tokenProvider(token)).spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
+                cloudFoundryClient(tokenProvider(token)).spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
             }
         });
         return true;
@@ -503,7 +578,7 @@ public class SpaceServiceV3 extends Common {
     }
 
     /**
-     * Space 리스트 정보를 가져온다.
+          * Space 리스트 정보를 가져온다.
      *
      * @param  organizationId    the organization guid
      * @return ListSpacesResponse
