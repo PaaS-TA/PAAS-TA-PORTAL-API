@@ -36,14 +36,14 @@ import java.util.UUID;
  * @since 2018.2.20 최초작성
  */
 @RestController
-public class CommonController extends Common {
+public class CommonControllerV3 extends Common {
 
     //////////////////////////////////////////////////////////////////////
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommonController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonControllerV3.class);
 
 
     @Autowired
@@ -57,7 +57,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL + "/service/{guid}/rename"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {Constants.V3_URL + "/service/{guid}/rename"}, method = RequestMethod.PUT)
     public Map renameInstance(@PathVariable String guid, @RequestBody Service service, HttpServletRequest request) throws Exception {
         LOGGER.info("Rename InstanceService Start : " + guid + " : " + service.getName() + " : " + service.getNewName());
         //service call
@@ -72,7 +72,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @RequestMapping(value = {Constants.V2_URL + "/service/{guid}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {Constants.V3_URL + "/service/{guid}"}, method = RequestMethod.DELETE)
     public Map deleteInstance(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("delete InstanceService Start : " + guid);
         //service call
@@ -91,7 +91,7 @@ public class CommonController extends Common {
      * @version 2.0
      * @since 2018.5.24 최초작성
      */
-    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V3_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.GET)
     public GetUserProvidedServiceInstanceResponse getUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
         LOGGER.info("getUserProvidedService Start");
         return serviceServiceV2.getUserProvided(token, guid);
@@ -108,7 +108,7 @@ public class CommonController extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
+    @RequestMapping(value = {Constants.V3_URL + "/service/userprovidedserviceinstances"}, method = RequestMethod.POST)
     public Map createUserProvided(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
         LOGGER.info("createUserProvided Start");
@@ -128,7 +128,7 @@ public class CommonController extends Common {
      * @version 2.0
      * @since 2018.5.30 최초작성
      */
-    @RequestMapping(value = {Constants.V2_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {Constants.V3_URL + "/service/userprovidedserviceinstances/{guid}"}, method = RequestMethod.PUT)
     public Map updateUserProvided(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Service service) throws Exception {
 
         LOGGER.info("updateUserProvidedService Start");
@@ -144,7 +144,7 @@ public class CommonController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL + "/servicebrokers"})
+    @GetMapping(value = {Constants.V3_URL + "/servicebrokers"})
     public ListServiceBrokersResponse getServiceBrokers(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBrokers Start:");
         return serviceServiceV2.getServiceBrokers(token);
@@ -158,7 +158,7 @@ public class CommonController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
+    @GetMapping(value = {Constants.V3_URL + "/servicebrokers/{guid}"})
     public GetServiceBrokerResponse getServiceBroker(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServiceBroker Start : " + serviceBroker.getGuid());
         return serviceServiceV2.getServiceBroker(serviceBroker, token);
@@ -172,7 +172,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V2_URL + "/servicebrokers"})
+    @PostMapping(value = {Constants.V3_URL + "/servicebrokers"})
     public CreateServiceBrokerResponse createServiceBroker(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody ServiceBroker serviceBroker, HttpServletRequest request) throws Exception {
 
         LOGGER.info("createServiceBroker Start : " + serviceBroker.getName());
@@ -187,7 +187,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PutMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
+    @PutMapping(value = {Constants.V3_URL + "/servicebrokers/{guid}"})
     public UpdateServiceBrokerResponse updateServiceBroker(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("updateServiceBroker Start : " + serviceBroker.getName());
@@ -203,7 +203,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {Constants.V2_URL + "/servicebrokers/{guid}"})
+    @DeleteMapping(value = {Constants.V3_URL + "/servicebrokers/{guid}"})
     public Map<String, Object> deleteServiceBroker(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid, HttpServletRequest request) throws Exception {
 
         LOGGER.info("deleteServiceBroker Start : " + guid);
@@ -214,7 +214,7 @@ public class CommonController extends Common {
         return resultMap;
     }
 
-    @RequestMapping(value = {Constants.V2_URL + "/service-instances/space/{guid}"}, method = RequestMethod.GET)
+    @RequestMapping(value = {Constants.V3_URL + "/service-instances/space/{guid}"}, method = RequestMethod.GET)
     public ListServiceInstancesResponse getServicesInstances(@PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicesInstances Start ");
 
@@ -232,7 +232,7 @@ public class CommonController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL + "/serviceplans"})
+    @GetMapping(value = {Constants.V3_URL + "/serviceplans"})
     public ListServicePlansResponse getServicePlans(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicePlans Start:");
         return serviceServiceV2.getServicePlans(token);
@@ -246,7 +246,7 @@ public class CommonController extends Common {
      * @return CloudServiceInstance cloudServiceInstance
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
+    @GetMapping(value = {Constants.V3_URL + "/serviceplans/{guid}"})
     public GetServicePlanResponse getServicePlan(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @ModelAttribute ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("getServicePlan Start : " + serviceBroker.getGuid());
         return serviceServiceV2.getServicePlan(serviceBroker, token);
@@ -260,7 +260,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PutMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
+    @PutMapping(value = {Constants.V3_URL + "/serviceplans/{guid}"})
     public UpdateServicePlanResponse updateServicePlan(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("updateServicePlan Start : " + serviceBroker.getGuid() + "   " + serviceBroker.getPubliclyVisible() + "   " + serviceBroker.getServiceName());
         return serviceServiceV2.updateServicePlan(serviceBroker, guid, token);
@@ -274,7 +274,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {Constants.V2_URL + "/serviceplans/{guid}"})
+    @DeleteMapping(value = {Constants.V3_URL + "/serviceplans/{guid}"})
     public DeleteServicePlanResponse deleteServicePlan(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody ServiceBroker serviceBroker, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("deleteServicePlan Start : " + serviceBroker.getGuid() + "   " + serviceBroker.getPubliclyVisible() + "   " + serviceBroker.getServiceName());
         return serviceServiceV2.deleteServicePlan(serviceBroker, guid, token);
@@ -287,7 +287,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @GetMapping(value = {Constants.V2_URL + "/serviceplans/{serviceplanId}/visibilites"})
+    @GetMapping(value = {Constants.V3_URL + "/serviceplans/{serviceplanId}/visibilites"})
     public ListServicePlanVisibilitiesResponse getServicePlanVisibilites(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String serviceplanId) throws Exception {
         return serviceServiceV2.getServicePlanVisibilites(serviceplanId);
     }
@@ -300,7 +300,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @PutMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
+    @PutMapping(value = {Constants.V3_URL + "/serviceplanvisibilities/{guid}"})
     public CreateServicePlanVisibilityResponse updateServicePlanVisibility(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @RequestBody Map<String, Object> bodyMap, @PathVariable String guid, HttpServletRequest request) throws Exception {
         LOGGER.info("serviceplanvisibilities Start : " + guid + "   " + bodyMap.get("servicePlanGuid").toString() + "   " + bodyMap.get("orgGuid").toString());
         return serviceServiceV2.updateServicePlanVisibility(bodyMap, guid, token);
@@ -313,7 +313,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(value = {Constants.V2_URL + "/serviceplanvisibilities/{guid}"})
+    @DeleteMapping(value = {Constants.V3_URL + "/serviceplanvisibilities/{guid}"})
     public DeleteServicePlanVisibilityResponse deleteServicePlanVisibility(@PathVariable String guid, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return serviceServiceV2.deleteServicePlanVisibility(guid, token);
     }
@@ -325,7 +325,7 @@ public class CommonController extends Common {
      * @return boolean boolean
      * @throws Exception the exception
      */
-    @DeleteMapping(Constants.V2_URL + "/serviceplanvisibilities/all/{guid}")
+    @DeleteMapping(Constants.V3_URL + "/serviceplanvisibilities/all/{guid}")
     public Map allDeleteServicePlanVisibility(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         return serviceServiceV2.allDeleteServicePlanVisibility(guid);
     }
