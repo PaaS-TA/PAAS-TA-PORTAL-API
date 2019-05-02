@@ -48,7 +48,6 @@ public class SecurityGroupControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/securitygroups/{page}")
     public ListSecurityGroupsResponse listSecurityGroups(@PathVariable int page, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("시작");
         return securityGroupService.listSecurityGroups(page);
     }
 

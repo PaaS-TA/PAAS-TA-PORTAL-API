@@ -1,8 +1,6 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-
-
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
@@ -31,10 +29,6 @@ import java.util.stream.Collectors;
 public class SpaceServiceV3 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceServiceV3.class);
 
-
-
-    @Autowired
-    private UserServiceV3 userServiceV3;
 
     @Autowired
     @Lazy // To resolve circular reference
@@ -116,6 +110,7 @@ public class SpaceServiceV3 extends Common {
             Objects.requireNonNull(space.getOrgGuid(), "Space name must not be null. Required request body is space name(spaceName) and org GUID (orgGuid).");
 
             final CreateSpaceResponse response = cloudFoundryClient(tokenProvider(token)).spaces().create(CreateSpaceRequest.builder().name(space.getSpaceName()).organizationId(space.getOrgGuid()).build()).block();
+
 
             associateSpaceManager(response.getMetadata().getId(), space.getUserId());
             associateSpaceDeveloper(response.getMetadata().getId(), space.getUserId());
@@ -254,12 +249,12 @@ public class SpaceServiceV3 extends Common {
     /**
      * 공간 요약 정보를 조회한다.
      *
-     * @param spaceId            the spaceId
-     * @param token              the token
+     * @param spaceId the spaceId
+     * @param token   the token
      * @return space summary
      * @throws Exception the exception
      */
-    public GetSpaceSummaryResponse getSpaceSummary(String spaceId,String token) throws Exception {
+    public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
         GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
@@ -525,7 +520,7 @@ public class SpaceServiceV3 extends Common {
                         break;
                     }
                     case "space_auditor": {
-                               audiotr = false;
+                        audiotr = false;
                         cloudFoundryClient(tokenProvider(token)).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(spaceid).developerId(userRole.getUserId()).build()).block();
                         break;
                     }
@@ -551,64 +546,64 @@ public class SpaceServiceV3 extends Common {
     }
 
 
-
     /**
      * Space 정보를 가져온다.
      *
-     * @param spaceId    the space guid
-     * @param  token    user token
+     * @param spaceId the space guid
+     * @param token   user token
      * @return GetSpaceResponse
      * 권한 : 사용자권한
      */
-    public org.cloudfoundry.client.v3.spaces.GetSpaceResponse getSpaceV3(String spaceId, String token){
+    public org.cloudfoundry.client.v3.spaces.GetSpaceResponse getSpaceV3(String spaceId, String token) {
         return cloudFoundryClient(tokenProvider(token)).spacesV3().get(org.cloudfoundry.client.v3.spaces.GetSpaceRequest.builder().spaceId(spaceId).build()).block();
     }
 
     /**
      * Space 리스트 정보를 가져온다.
      *
-     * @param  organizationId    the organization guid
-     * @param  token    user token
+     * @param organizationId the organization guid
+     * @param token          user token
      * @return ListSpacesResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    public org.cloudfoundry.client.v3.spaces.ListSpacesResponse listSpace(String organizationId, String token){
+    public org.cloudfoundry.client.v3.spaces.ListSpacesResponse listSpace(String organizationId, String token) {
         return this.allSpaceList(cloudFoundryClient(tokenProvider(token)), organizationId);
     }
 
     /**
-          * Space 리스트 정보를 가져온다.
+     * Space 리스트 정보를 가져온다.
      *
-     * @param  organizationId    the organization guid
+     * @param organizationId the organization guid
      * @return ListSpacesResponse
      * 권한 : 관리자 권한
      * @throws Exception the exception
      */
-    public org.cloudfoundry.client.v3.spaces.ListSpacesResponse listSpaceAdmin(String organizationId){
+    public org.cloudfoundry.client.v3.spaces.ListSpacesResponse listSpaceAdmin(String organizationId) {
         return this.allSpaceList(cloudFoundryClient(), organizationId);
     }
 
-    private org.cloudfoundry.client.v3.spaces.ListSpacesResponse allSpaceList(ReactorCloudFoundryClient reactorCloudFoundryClient, String orgGuid){
+    private org.cloudfoundry.client.v3.spaces.ListSpacesResponse allSpaceList(ReactorCloudFoundryClient reactorCloudFoundryClient, String orgGuid) {
         org.cloudfoundry.client.v3.spaces.ListSpacesResponse listSpacesResponse = reactorCloudFoundryClient.spacesV3().list(org.cloudfoundry.client.v3.spaces.ListSpacesRequest.builder().organizationId(orgGuid).build()).block();
         int i;
-        for(i = 1 ; listSpacesResponse.getPagination().getTotalPages().intValue() > i ; i++){
-            listSpacesResponse.getResources().addAll(reactorCloudFoundryClient.spacesV3().list(org.cloudfoundry.client.v3.spaces.ListSpacesRequest.builder().page(i+1).build()).block().getResources());
+        for (i = 1; listSpacesResponse.getPagination().getTotalPages().intValue() > i; i++) {
+            listSpacesResponse.getResources().addAll(reactorCloudFoundryClient.spacesV3().list(org.cloudfoundry.client.v3.spaces.ListSpacesRequest.builder().page(i + 1).build()).block().getResources());
         }
         return listSpacesResponse;
     }
 
     /**
      * Space명 중복검사를 실행한다.
-     * @param  organizationId    the organization guid
-     * @param  spaceName                this space name
+     *
+     * @param organizationId the organization guid
+     * @param spaceName      this space name
      * @return boolean
      * 권한 : 사용자
      */
-    public boolean isExistSpaceName(String organizationId, String spaceName){
+    public boolean isExistSpaceName(String organizationId, String spaceName) {
         org.cloudfoundry.client.v3.spaces.ListSpacesResponse listSpacesResponse = this.listSpaceAdmin(organizationId);
         long number = listSpacesResponse.getResources().stream().filter(space -> space.getName().equals(spaceName)).count();
-        if(number > 0){
+        if (number > 0) {
             return false;
         }
         return true;
@@ -617,18 +612,15 @@ public class SpaceServiceV3 extends Common {
     /**
      * Space 을 생성한다.
      *
-     * @param  organizationId    the organization guid
-     * @param  name    the space name
-     * @param token    user token
+     * @param organizationId the organization guid
+     * @param name           the space name
+     * @param token          user token
      * @return CreateOrganizationResponse
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    public org.cloudfoundry.client.v3.spaces.CreateSpaceResponse createSpace(String name,String organizationId, String token){
-        return cloudFoundryClient(tokenProvider(token)).spacesV3().create(org.cloudfoundry.client.v3.spaces.CreateSpaceRequest.builder().name(name)
-                .relationships(SpaceRelationships.builder()
-                        .organization(ToOneRelationship.builder()
-                                .data(Relationship.builder().id(organizationId).build()).build()).build()).build()).block();
+    public org.cloudfoundry.client.v3.spaces.CreateSpaceResponse createSpace(String name, String organizationId, String token) {
+        return cloudFoundryClient(tokenProvider(token)).spacesV3().create(org.cloudfoundry.client.v3.spaces.CreateSpaceRequest.builder().name(name).relationships(SpaceRelationships.builder().organization(ToOneRelationship.builder().data(Relationship.builder().id(organizationId).build()).build()).build()).build()).block();
     }
 
     /**

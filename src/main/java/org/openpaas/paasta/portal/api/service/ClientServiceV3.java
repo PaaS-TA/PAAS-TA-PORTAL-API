@@ -63,9 +63,7 @@ public class ClientServiceV3 extends Common {
         LOGGER.info(clientOption.toString());
 
         //Secret, Token Validity 는 생성 이후 수정 불가
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId)
-                .name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders)
-                .build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).build()).log().block();
     }
 
     /**
@@ -147,27 +145,17 @@ public class ClientServiceV3 extends Common {
                 if (key.equals("authorized_grant_types")) {
                     if (value.getClass().equals(ArrayList.class)) {
                         for (Object obj : (ArrayList) value) {
-                            switch ((String) obj) {
-                                case "client_credentials":
-                                    authorizedGrantTypes.add(GrantType.CLIENT_CREDENTIALS);
-                                    continue;
-                                case "authorization_code":
-                                    authorizedGrantTypes.add(GrantType.AUTHORIZATION_CODE);
-                                    continue;
-                                case "implicit":
-                                    authorizedGrantTypes.add(GrantType.IMPLICIT);
-                                    continue;
-                                case "password":
-                                    authorizedGrantTypes.add(GrantType.PASSWORD);
-                                    continue;
-                                case "refresh_token":
-                                    authorizedGrantTypes.add(GrantType.REFRESH_TOKEN);
-                                    continue;
-                                default:
-                                    continue;
-                            }
+                            authorizedGrantTypes.add(grantType(obj.toString()));
+                        }
+                    } else if (value.getClass().equals(String.class)) {
+                        String agts = value.toString().replace("\"","").replace("[","").replace("]","");
+                        String[] agts_split = agts.split(",");
+                        for (String obj : agts_split) {
+                            obj = obj.trim();
+                            authorizedGrantTypes.add(grantType(obj));
                         }
                     }
+
                 }
 
                 // List Item proc
@@ -218,6 +206,26 @@ public class ClientServiceV3 extends Common {
             }
             return this;
         }
+
+
+        private GrantType grantType(String obj){
+            switch (obj.toLowerCase()) {
+                case "client_credentials":
+                    return GrantType.CLIENT_CREDENTIALS;
+                case "authorization_code":
+                    return GrantType.AUTHORIZATION_CODE;
+                case "implicit":
+                    return GrantType.IMPLICIT;
+                case "password":
+                    return GrantType.PASSWORD;
+                case "refresh_token":
+                    return GrantType.REFRESH_TOKEN;
+                default:
+                    return null;
+            }
+        }
+
+
 
         @Override
         public String toString() {
