@@ -95,57 +95,6 @@ public class AppServiceV3 extends Common {
 
     }
 
-
-    /**
-     * 앱을 실행한다.
-     *
-     * @param app   the app
-     * @param token the client
-     * @throws Exception the exception
-     */
-    public Map startApp(App app, String token) {
-        Map resultMap = new HashMap();
-
-        try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            //cloudFoundryClient.applicationsV2().update(org.cloudfoundry.client.v2.applications.UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state("STARTED").build()).block();
-            cloudFoundryClient.applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
-            resultMap.put("result", true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultMap.put("result", false);
-            resultMap.put("msg", e.getMessage());
-        }
-
-        return resultMap;
-    }
-
-
-    /**
-     * 앱을 중지한다.
-     *
-     * @param app   the app
-     * @param token the client
-     * @throws Exception the exception
-     */
-    public Map stopApp(App app, String token) {
-        Map resultMap = new HashMap();
-
-        try {
-            ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-
-            cloudFoundryClient.applicationsV3().stop(org.cloudfoundry.client.v3.applications.StopApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
-            resultMap.put("result", true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultMap.put("result", false);
-            resultMap.put("msg", e);
-        }
-
-        return resultMap;
-    }
-
-
     /**
      * 앱을 삭제한다.
      *
