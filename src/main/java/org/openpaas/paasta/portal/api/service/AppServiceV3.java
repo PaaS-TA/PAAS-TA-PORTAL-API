@@ -108,9 +108,8 @@ public class AppServiceV3 extends Common {
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-
-            cloudFoundryClient.applicationsV2().update(org.cloudfoundry.client.v2.applications.UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state("STARTED").build()).block();
-
+            //cloudFoundryClient.applicationsV2().update(org.cloudfoundry.client.v2.applications.UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).state("STARTED").build()).block();
+            cloudFoundryClient.applicationsV3().start(org.cloudfoundry.client.v3.applications.StartApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
