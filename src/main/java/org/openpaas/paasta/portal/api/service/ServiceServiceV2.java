@@ -10,6 +10,9 @@ import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceplans.*;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.*;
+import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
+import org.cloudfoundry.client.v2.services.GetServiceRequest;
+import org.cloudfoundry.client.v2.services.ListServicesRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -266,9 +269,21 @@ public class ServiceServiceV2 extends Common {
      * @return the boolean
      * @throws Exception the exception
      */
-    public boolean deleteServiceBroker(String guid, String token) throws Exception {
+    public boolean deleteServiceBroker(String guid, String token, boolean purge) throws Exception {
+        if(purge){
+            cloudFoundryClient().serviceBrokers().list(ListServiceBrokersRequest.builder().build()).block().getResources()
+                    .forEach(resource -> {
+                        if(resource.getMetadata().getId().equals(guid)){
+                            cloudFoundryClient().services().list(ListServicesRequest.builder().serviceBrokerId(guid).build()).block().getResources()
+                                    .forEach(service -> {
+                                        cloudFoundryClient().services().delete(DeleteServiceRequest.builder().purge(true).serviceId(service.getMetadata().getId()).build()).block();
+                                    });
+                        }
+                    });
+        }
 
         cloudFoundryClient().serviceBrokers().delete(DeleteServiceBrokerRequest.builder().serviceBrokerId(guid).build()).block();
+
         return true;
     }
 
