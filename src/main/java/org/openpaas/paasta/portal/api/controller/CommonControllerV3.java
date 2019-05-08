@@ -199,15 +199,15 @@ public class CommonControllerV3 extends Common {
      * 서비스 브로커를 삭제한다.
      *
      * @param guid    the cloudServiceBroker
-     * @param request the request
      * @return boolean boolean
      * @throws Exception the exception
      */
     @DeleteMapping(value = {Constants.V3_URL + "/servicebrokers/{guid}"})
-    public Map<String, Object> deleteServiceBroker(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid, HttpServletRequest request) throws Exception {
+    public Map<String, Object> deleteServiceBroker(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid, @RequestParam boolean purge) throws Exception {
 
         LOGGER.info("deleteServiceBroker Start : " + guid);
-        serviceServiceV2.deleteServiceBroker(guid, token);
+        LOGGER.info("requestParam: " + purge);
+        serviceServiceV2.deleteServiceBroker(guid, token, purge);
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);

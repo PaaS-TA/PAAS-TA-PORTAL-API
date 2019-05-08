@@ -96,43 +96,6 @@ public class AppControllerV3 extends Common {
         return result;
     }
 
-
-    /**
-     * 앱을 실행한다.
-     *
-     * @param app the app
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    @PostMapping(value = {Constants.V3_URL + "/apps/startApp"})
-    public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("startApp Start ");
-
-        Map resultMap = appServiceV3.startApp(app, token);
-
-        LOGGER.info("startApp End ");
-        return resultMap;
-    }
-
-
-    /**
-     * 앱을 중지한다.
-     *
-     * @param app the app
-     * @return ModelAndView model
-     * @throws Exception the exception
-     */
-    @PostMapping(value = {Constants.V3_URL + "/apps/stopApp"})
-    public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("stopApp Start ");
-
-        Map resultMap = appServiceV3.stopApp(app, token);
-
-        LOGGER.info("stopApp End ");
-        return resultMap;
-    }
-
-
     /**
      * 앱을 리스테이징한다.
      *
