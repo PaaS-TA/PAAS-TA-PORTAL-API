@@ -4,6 +4,7 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.v2.organizationquotadefinitions.GetOrganizationQuotaDefinitionResponse;
 import org.cloudfoundry.client.v2.organizations.AbstractOrganizationResource;
 import org.cloudfoundry.client.v2.organizations.GetOrganizationResponse;
+import org.cloudfoundry.client.v2.organizations.GetOrganizationUserRolesResponse;
 import org.cloudfoundry.client.v2.organizations.ListOrganizationsResponse;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v3.organizations.AssignOrganizationDefaultIsolationSegmentResponse;
@@ -364,6 +365,13 @@ public class OrgControllerV3 extends Common {
     public boolean removeOrgUserRoles(@PathVariable String orgId, @RequestParam String userId, @RequestParam String role, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
         orgServiceV3.removeOrgUserRole(orgId, userId, role, token);
         return true;
+    }
+
+
+    // TODO cancel member
+    @GetMapping(Constants.V3_URL + "/orgs/{orgId}/member")
+    public GetOrganizationUserRolesResponse getOrgMembers(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
+       return orgServiceV3.getOrganizationMembers(orgId, token);
     }
 
 
