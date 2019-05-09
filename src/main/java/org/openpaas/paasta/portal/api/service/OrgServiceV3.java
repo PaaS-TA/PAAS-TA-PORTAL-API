@@ -79,7 +79,7 @@ public class OrgServiceV3 extends Common {
      */
     public Map createOrg(Org org, String token) {
         try {
-            CreateOrganizationResponse response = cloudFoundryClient(tokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
+            CreateOrganizationResponse response = cloudFoundryClient(clinetTokenProvider(token)).organizations().create(CreateOrganizationRequest.builder().name(org.getOrgName()).quotaDefinitionId(org.getQuotaGuid()).build()).block();
             return new HashMap() {{
                 put("RESULT", "SUCCESS");
             }};
