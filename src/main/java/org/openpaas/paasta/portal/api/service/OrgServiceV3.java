@@ -747,6 +747,12 @@ public class OrgServiceV3 extends Common {
         }
     }
 
+    // TODO cancel member
+    public GetOrganizationUserRolesResponse getOrganizationMembers(String orgId, String token) {
+        return cloudFoundryClient().organizations().getUserRoles(GetOrganizationUserRolesRequest.builder().organizationId(orgId).build()).block();
+    }
+
+
     public boolean associateOrgUserRole2(Map body) {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);

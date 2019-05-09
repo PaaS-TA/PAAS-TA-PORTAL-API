@@ -20,6 +20,7 @@ import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebindings.ServiceBindingResource;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsRequest;
