@@ -114,23 +114,23 @@ public class ServiceServiceV2Test {
         Assert.assertEquals(createServiceBrokerResponse, result);
     }
 
-    @Test
-    public void testUpdateServiceBroker() throws Exception {
-
-        UpdateServiceBrokerResponse updateServiceBrokerResponse = UpdateServiceBrokerResponse.builder().build();
-        when(serviceServiceV2.updateServiceBroker(any(), anyString())).thenReturn(updateServiceBrokerResponse);
-
-        UpdateServiceBrokerResponse result = serviceServiceV2.updateServiceBroker(new ServiceBroker(), "token");
-        Assert.assertEquals(updateServiceBrokerResponse, result);
-    }
-
-    @Test
-    public void testDeleteServiceBroker() throws Exception {
-        when(serviceServiceV2.deleteServiceBroker(anyString(), anyString())).thenReturn(true);
-
-        boolean result = serviceServiceV2.deleteServiceBroker("guid", "token");
-        Assert.assertEquals(true, result);
-    }
+//    @Test
+//    public void testUpdateServiceBroker() throws Exception {
+//
+//        UpdateServiceBrokerResponse updateServiceBrokerResponse = UpdateServiceBrokerResponse.builder().build();
+//        when(serviceServiceV2.updateServiceBroker(any(), anyString())).thenReturn(updateServiceBrokerResponse);
+//
+//        UpdateServiceBrokerResponse result = serviceServiceV2.updateServiceBroker(new ServiceBroker(), "token");
+//        Assert.assertEquals(updateServiceBrokerResponse, result);
+//    }
+//
+//    @Test
+//    public void testDeleteServiceBroker() throws Exception {
+//        when(serviceServiceV2.deleteServiceBroker(anyString(), anyString())).thenReturn(true);
+//
+//        boolean result = serviceServiceV2.deleteServiceBroker("guid", "token");
+//        Assert.assertEquals(true, result);
+//    }
 
     @Test
     public void testGetServicesInstances() throws Exception {

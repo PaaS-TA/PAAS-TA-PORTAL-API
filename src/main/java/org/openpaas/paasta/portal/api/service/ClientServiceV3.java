@@ -1,6 +1,9 @@
 package org.openpaas.paasta.portal.api.service;
 
 
+import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.uaa.UaaException;
 import org.cloudfoundry.uaa.clients.*;
 import org.cloudfoundry.uaa.tokens.GrantType;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -8,10 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLClientInfoException;
+import java.util.*;
 
 @Service
 public class ClientServiceV3 extends Common {
@@ -41,11 +42,32 @@ public class ClientServiceV3 extends Common {
      * @return CreateClientResponse
      * @throws Exception the exception
      */
-    public CreateClientResponse registerClient(Map<String, Object> param) throws Exception {
+    public Map registerClient(Map<String, Object> param) throws Exception {
 
         ClientServiceV3.ClientOption clientOption = new ClientServiceV3.ClientOption();
         clientOption = clientOption.setClientOptionByMap(param);
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).log().block();
+        LOGGER.info("ClientOPTION ::: " + clientOption.toString());
+        Map result = new HashMap();
+        try {
+            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).log().block();
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        } catch (UaaException n) {
+
+            if(n.getStatusCode() == 400) {
+                result.put("result", false);
+                result.put("msg", "If authorized_grant_types type contains authorization_code, enter redirect_uri.");
+            }else{
+                result.put("result", false);
+                result.put("msg", n.getMessage());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -55,15 +77,23 @@ public class ClientServiceV3 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    public UpdateClientResponse updateClient(Map<String, Object> param) throws Exception {
+    public Map updateClient(Map<String, Object> param) {
 
         ClientServiceV3.ClientOption clientOption = new ClientServiceV3.ClientOption();
         clientOption = clientOption.setClientOptionByMap(param);
 
-        LOGGER.info(clientOption.toString());
 
-        //Secret, Token Validity 는 생성 이후 수정 불가
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).build()).log().block();
+        Map result = new HashMap();
+        try {
+            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).build()).log().block();
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -73,8 +103,19 @@ public class ClientServiceV3 extends Common {
      * @return Map map
      * @throws Exception the exception
      */
-    public DeleteClientResponse deleteClient(String clientId) throws Exception {
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
+    public Map deleteClient(String clientId) {
+        Map result = new HashMap();
+        try {
+            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
+            result.put("result", true);
+            result.put("msg", "You have successfully completed the task.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", false);
+            result.put("msg", e.getMessage());
+        }
+        return result;
+
     }
 
     /**
@@ -148,7 +189,7 @@ public class ClientServiceV3 extends Common {
                             authorizedGrantTypes.add(grantType(obj.toString()));
                         }
                     } else if (value.getClass().equals(String.class)) {
-                        String agts = value.toString().replace("\"","").replace("[","").replace("]","");
+                        String agts = value.toString().replace("\"", "").replace("[", "").replace("]", "");
                         String[] agts_split = agts.split(",");
                         for (String obj : agts_split) {
                             obj = obj.trim();
@@ -159,7 +200,7 @@ public class ClientServiceV3 extends Common {
                 }
 
                 // List Item proc
-                if (key.equals("authorities") || key.equals("scope") || key.equals("resource_ids") || key.equals("redirect_uri") || key.equals("autoapprove") || key.equals("allowedproviders ") || key.equals("name")) {
+                if (key.equals("authorities") || key.equals("scope") || key.equals("resource_ids") || key.equals("redirect_uri") || key.equals("autoapprove") || key.equals("allowedproviders") || key.equals("name")) {
                     if (value.getClass().equals(ArrayList.class)) {
 
                         for (Object obj : (ArrayList) value) {
@@ -182,33 +223,42 @@ public class ClientServiceV3 extends Common {
                                 case "allowedproviders": // allowedProviders
                                     allowedProviders.add((String) obj);
                                     continue;
-                                    // 아래부터는 단건이지만 Front에서 List로 전달하고 있음
-                                case "name": // name
-                                    name = (String) obj;
-                                    break;
-                                case "token_salt": // tokenSalt
-                                    tokenSalt = (String) obj;
-                                    break;
-                                case "access_token_validity": // accessTokenValidity(unit: seconds)
-                                    accessTokenValidity = Long.parseLong((String) obj);
-                                    break;
-                                case "refresh_token_validity": // refreshTokenValidity(unit: seconds)
-                                    refreshTokenValidity = Long.parseLong((String) obj);
-                                    break;
                                 default:
                                     continue;
                             }
 
                         }
                     }
+                } else if (key.equals("name") || key.equals("token_salt") || key.equals("access_token_validity") || key.equals("refresh_token_validity")) {
+                    switch (key) {
+                        case "name": // name
+                            name = (String) value;
+                            break;
+                        case "token_salt": // tokenSalt
+                            tokenSalt = (String) value;
+                            break;
+                        case "access_token_validity": // accessTokenValidity(unit: seconds)
+                            if (value != "" && value != null) {
+                                accessTokenValidity = Long.parseLong((String) value);
+                            }
+                            break;
+                        case "refresh_token_validity": // refreshTokenValidity(unit: seconds)
+                            if (value != "" && value != null) {
+                                refreshTokenValidity = Long.parseLong((String) value);
+                            }
+                            break;
+                        default:
+                            continue;
+                    }
                 }
+
 
             }
             return this;
         }
 
 
-        private GrantType grantType(String obj){
+        private GrantType grantType(String obj) {
             switch (obj.toLowerCase()) {
                 case "client_credentials":
                     return GrantType.CLIENT_CREDENTIALS;
@@ -224,7 +274,6 @@ public class ClientServiceV3 extends Common {
                     return null;
             }
         }
-
 
 
         @Override
