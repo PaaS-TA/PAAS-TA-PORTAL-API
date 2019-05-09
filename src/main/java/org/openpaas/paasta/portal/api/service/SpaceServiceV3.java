@@ -619,8 +619,14 @@ public class SpaceServiceV3 extends Common {
      * 권한 : 사용자권한
      * @throws Exception the exception
      */
-    public org.cloudfoundry.client.v3.spaces.CreateSpaceResponse createSpace(String name, String organizationId, String token) {
-        return cloudFoundryClient(tokenProvider(token)).spacesV3().create(org.cloudfoundry.client.v3.spaces.CreateSpaceRequest.builder().name(name).relationships(SpaceRelationships.builder().organization(ToOneRelationship.builder().data(Relationship.builder().id(organizationId).build()).build()).build()).build()).block();
+    public org.cloudfoundry.client.v3.spaces.CreateSpaceResponse createSpace(String name, String organizationId, String usrid, String token) {
+
+        org.cloudfoundry.client.v3.spaces.CreateSpaceResponse response =  cloudFoundryClient(tokenProvider(token)).spacesV3().create(org.cloudfoundry.client.v3.spaces.CreateSpaceRequest.builder().name(name).relationships(SpaceRelationships.builder().organization(ToOneRelationship.builder().data(Relationship.builder().id(organizationId).build()).build()).build()).build()).block();
+
+        associateSpaceManager(response.getId(), usrid);
+        associateSpaceDeveloper(response.getId(), usrid);
+        associateSpaceAuditor(response.getId(), usrid);
+         return response;
     }
 
     /**

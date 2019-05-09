@@ -10,6 +10,8 @@ import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.UpdateServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceplans.*;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.*;
+import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
+import org.cloudfoundry.client.v2.services.DeleteServiceResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -377,6 +379,7 @@ public class ServiceServiceV3 extends Common {
     public Map allDeleteServicePlanVisibility(String guid) throws Exception {
         try {
             ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient();
+
             ListServicePlanVisibilitiesResponse listServicePlanVisibilitiesResponse = reactorCloudFoundryClient.servicePlanVisibilities().list(ListServicePlanVisibilitiesRequest.builder().servicePlanId(guid).build()).block();
             listServicePlanVisibilitiesResponse.getResources().forEach(resource -> {
                 reactorCloudFoundryClient.servicePlanVisibilities().delete(DeleteServicePlanVisibilityRequest.builder().servicePlanVisibilityId(resource.getMetadata().getId()).async(false).build()).block();
@@ -389,6 +392,14 @@ public class ServiceServiceV3 extends Common {
                 put("RESULT", "FALE");
             }};
         }
+    }
+
+    public void PurgeService(String guid) throws Exception {
+        cloudFoundryClient().serviceBrokers().list(ListServiceBrokersRequest.builder().build()).block().getResources().forEach(resource -> {
+            if(resource.getMetadata().getId().equals(guid)){
+               cloudFoundryClient().services().delete(DeleteServiceRequest.builder().purge(true).serviceId(guid).build()).block();
+            };
+        });
     }
 }
 
