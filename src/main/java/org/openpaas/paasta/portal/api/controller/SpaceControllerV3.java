@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -235,8 +236,10 @@ public class SpaceControllerV3 extends Common {
      * @throws Exception the exception
      */
     @PostMapping(Constants.V3_URL+"/spaces")
-    public org.cloudfoundry.client.v3.spaces.CreateSpaceResponse createSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
-        return spaceServiceV3.createSpace(space.getSpaceName(), space.getOrgGuid(), token);
+    public Map<?,?> createSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+        final Map<String, Object> result = new HashMap<>();
+        result.put("result", spaceServiceV3.createSpace(space.getSpaceName(), space.getOrgGuid(), space.getUserId(), token));
+        return result;
     }
 
     /**
