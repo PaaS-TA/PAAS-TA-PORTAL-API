@@ -60,7 +60,9 @@ public class ClientControllerV3 extends Common {
      * @throws Exception the exception
      */
     @PostMapping(value = {Constants.V3_URL + "/clients"})
-    public CreateClientResponse registerClient(@RequestBody Map<String, Object> param) throws Exception {
+    public Map registerClient(@RequestBody Map<String, Object> param) throws Exception {
+        LOGGER.info("PARAM " + param.toString());
+
         return clientServiceV3.registerClient(param);
     }
 
@@ -72,7 +74,7 @@ public class ClientControllerV3 extends Common {
      * @throws Exception the exception
      */
     @PutMapping(value = {Constants.V3_URL + "/clients"})
-    public UpdateClientResponse updateClient(@RequestBody Map<String, Object> param) throws Exception {
+    public Map updateClient(@RequestBody Map<String, Object> param) throws Exception {
         return clientServiceV3.updateClient(param);
     }
 
@@ -84,7 +86,7 @@ public class ClientControllerV3 extends Common {
      * @throws Exception the exception
      */
     @DeleteMapping(value = {Constants.V3_URL + "/clients/{clientId}"})
-    public DeleteClientResponse deleteClient(@PathVariable String clientId) throws Exception {
+    public Map deleteClient(@PathVariable String clientId) throws Exception {
         return clientServiceV3.deleteClient(clientId);
     }
 
