@@ -1,6 +1,8 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.openpaas.paasta.portal.api.common.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,12 +19,12 @@ public class RootController extends Common {
     //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
     //////   Document : http://apidocs.cloudfoundry.org             //////
     //////////////////////////////////////////////////////////////////////
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpaceControllerV2.class);
 
     @RequestMapping(value = {"/", "/info", "/index"}, method = {RequestMethod.GET})
     @ResponseBody
     public Map index() throws Exception {
-
+        LOGGER.info("index()");
         Map map = new HashMap();
         Map info = new HashMap();
 
