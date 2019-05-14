@@ -1,7 +1,6 @@
 # PAAS-TA-PORTAL-API
 ## 버전 정보
-Portal v2.0-BETA - CF API 제공하는 서비스
-
+Portal v3.0-BETA - CF API 제공하는 서비스
 
 ## Portal API
 Portal API 란? CF API 제공하는 서비스이다.
