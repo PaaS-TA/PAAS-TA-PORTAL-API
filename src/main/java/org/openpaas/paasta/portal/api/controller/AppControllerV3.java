@@ -336,27 +336,30 @@ public class AppControllerV3 extends Common {
     /**
      * 앱을 실행한다.
      *
+     * @param app the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/start"})
-    public Map startApp(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    @PostMapping(value = {Constants.V3_URL + "/apps/startApp"})
+    public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("startApp Start ");
-        Map resultMap = appServiceV3.startApp(guid, token);
+        Map resultMap = appServiceV3.startApp(app.getGuid().toString(), token);
         LOGGER.info("startApp End ");
         return resultMap;
     }
 
+
     /**
      * 앱을 중지한다.
      *
+     * @param app the app
      * @return ModelAndView model
      * @throws Exception the exception
      */
-    @PostMapping(value = {Constants.V3_URL + "/apps/{guid}/actions/stop"})
-    public Map stopApp(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    @PostMapping(value = {Constants.V3_URL + "/apps/stopApp"})
+    public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         LOGGER.info("stopApp Start ");
-        Map resultMap = appServiceV3.stopApp(guid, token);
+        Map resultMap = appServiceV3.stopApp(app.getGuid().toString(), token);
         LOGGER.info("stopApp End ");
         return resultMap;
     }

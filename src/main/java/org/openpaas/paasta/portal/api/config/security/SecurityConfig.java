@@ -62,7 +62,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-				.csrf().disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -78,6 +77,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .csrf().disable().cors().configurationSource(corsConfiguration());
+
 //        http
 //
 //                .authorizeRequests()
@@ -86,6 +86,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .permitAll()
 //                .and()
 //                .csrf().disable();
+    }
+
+    private CorsConfigurationSource corsConfiguration(){
+        return new CorsConfigurationSource() {
+            @Override
+            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedHeaders(Collections.singletonList("*"));
+                config.setAllowedMethods(Collections.singletonList("*"));
+                config.addAllowedOrigin("*");
+                config.setAllowCredentials(true);
+                return config;
+            }
+        };
     }
 
 //    .antMatchers("/info**").permitAll()
@@ -116,18 +130,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/health/**").permitAll()
 //    //Spring boot Admin 정보 접근 URL - 끝
 
-    private CorsConfigurationSource corsConfiguration(){
-        return new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedHeaders(Collections.singletonList("*"));
-                config.setAllowedMethods(Collections.singletonList("*"));
-                config.addAllowedOrigin("*");
-                config.setAllowCredentials(true);
-                return config;
-            }
-        };
-    }
+
 
 }
