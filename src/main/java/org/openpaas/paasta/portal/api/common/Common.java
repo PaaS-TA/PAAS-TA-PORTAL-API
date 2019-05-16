@@ -166,6 +166,9 @@ public class Common {
      * @return DefaultConnectionContext
      */
     public DefaultConnectionContext connectionContext() {
+        if(connectionContext == null){
+            connectionContext = DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build();
+        }
         return connectionContext;
     }
 
@@ -212,6 +215,9 @@ public class Common {
     }
 
     public PasswordGrantTokenProvider tokenProvider() {
+        if (tokenProvider == null) {
+            tokenProvider = PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build();
+        }
         return tokenProvider;
     }
 
