@@ -426,44 +426,34 @@ public class CatalogServiceV3 extends Common {
      */
     public Map procCatalogCreateServiceInstanceV2(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> parameterMap = new HashMap<String, Object>();
         try {
-            String on_demand = reactorCloudFoundryClient.servicePlans().get(GetServicePlanRequest.builder().servicePlanId(param.getServicePlan()).build()).block().getEntity().getDescription();
-            if(on_demand.toUpperCase().indexOf("ON-DEMAND") > 0 && !param.getAppGuid().equals("(id_dummy)")){
-                Map<String, Object> parameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
+            if (param.getOnDemandYn().equals("Y") && !param.getAppGuid().equals("(id_dummy)")) {
+                parameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
                 });
-                if(parameterMap.get("app_guid").toString().equals("default")){
+                if(parameterMap.get("app_guid").toString().equals("default")) {
                     parameterMap.put("app_guid", param.getAppGuid());
                 }
-                CreateServiceInstanceResponse createserviceinstanceresponse = reactorCloudFoundryClient.
-                        serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
-                if (param.getCatalogType() != null) {
-                    commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
-                }
-                return new HashMap() {{
-                    put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-                    put("SERVICEID", createserviceinstanceresponse.getEntity().getServiceId());
-                }};
-            }
-             else {
-                Map<String, Object> parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
+            } else {
+                parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
                 });
-
-                CreateServiceInstanceResponse createserviceinstanceresponse = reactorCloudFoundryClient.
-                        serviceInstances().create(CreateServiceInstanceRequest.builder().name(param.getName()).spaceId(param.getSpaceId()).parameters(parameterMap).servicePlanId(param.getServicePlan()).build()).block();
-
-                if (!param.getAppGuid().equals("(id_dummy)")) {
-                    param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
-                    procCatalogBindService(param, reactorCloudFoundryClient);
-                }
-                if (param.getCatalogType() != null) {
-                    commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
-                }
-
-                return new HashMap() {{
-                    put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-                    put("SERVICEID", createserviceinstanceresponse.getEntity().getServiceId());
-                }};
             }
+            CreateServiceInstanceResponse createserviceinstanceresponse = reactorCloudFoundryClient.serviceInstances()
+                    .create(CreateServiceInstanceRequest.builder()
+                            .name(param.getName())
+                            .spaceId(param.getSpaceId())
+                            .parameters(parameterMap)
+                            .servicePlanId(param.getServicePlan())
+                            .build()).block();
+            if (param.getOnDemandYn().equals("N") && !param.getAppGuid().equals("(id_dummy)")) {
+                param.setServiceInstanceGuid(createserviceinstanceresponse.getMetadata().getId());
+                procCatalogBindService(param, reactorCloudFoundryClient);
+            } if (param.getCatalogType() != null) {
+                commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
+            } return new HashMap() {{
+                put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+                put("SERVICEID", createserviceinstanceresponse.getEntity().getServiceId());
+            }};
         } catch (Exception e) {
             return new HashMap() {{
                 put("RESULT", Constants.RESULT_STATUS_FAIL);
