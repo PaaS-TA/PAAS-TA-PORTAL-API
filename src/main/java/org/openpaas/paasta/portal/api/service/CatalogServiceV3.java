@@ -288,7 +288,7 @@ public class CatalogServiceV3 extends Common {
                             serviceplan.setAppGuid(appid);
                         }
                         serviceplan.setServiceInstanceGuid("");
-                        serviceplan.setServiceInstanceGuid(procCatalogCreateServiceInstanceV2(serviceplan, reactorCloudFoundryClient).get("SERVICEID").toString());
+                        serviceplan.setServiceInstanceGuid(procCatalogCreateServiceInstanceV2(true,serviceplan, reactorCloudFoundryClient).get("SERVICEID").toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -424,18 +424,14 @@ public class CatalogServiceV3 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public Map procCatalogCreateServiceInstanceV2(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+    public Map procCatalogCreateServiceInstanceV2(boolean tmp, Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         LOGGER.info(param.toString());
         try {
-            if (param.getOnDemandYn().equals("Y") && !param.getAppGuid().equals("(id_dummy)")) {
-                parameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
-                });
-                parameterMap.put("app_guid", param.getAppGuid());
-            } else {
-                parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
-                });
+            parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {});
+            if(tmp){
+                parameterMap.put("app_guid",param.getAppGuid());
             }
             CreateServiceInstanceResponse createserviceinstanceresponse = reactorCloudFoundryClient.serviceInstances()
                     .create(CreateServiceInstanceRequest.builder()
