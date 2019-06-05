@@ -54,6 +54,7 @@ public class Catalog {
     private int diskSize;
     private int memorySize;
     private String dashboardUseYn;
+    private String onDemandYn;
 
     /**
      * GETTER 카탈로그 번호
@@ -943,6 +944,14 @@ public class Catalog {
         this.dashboardUseYn = dashboardUseYn;
     }
 
+    public String getOnDemandYn() {
+        return onDemandYn;
+    }
+
+    public void setOnDemandYn(String onDemandYn) {
+        this.onDemandYn = onDemandYn;
+    }
+
     @Override
     public String toString() {
         return "Catalog{" +
@@ -973,11 +982,12 @@ public class Catalog {
                 ", servicePlan='" + servicePlan + '\'' +
                 ", appName='" + appName + '\'' +
                 ", orgName='" + orgName + '\'' +
+                ", orgId='" + orgId + '\'' +
                 ", spaceName='" + spaceName + '\'' +
                 ", spaceId='" + spaceId + '\'' +
                 ", serviceInstanceName='" + serviceInstanceName + '\'' +
-                ", appGuid=" + appGuid +
-                ", serviceInstanceGuid=" + serviceInstanceGuid +
+                ", appGuid='" + appGuid + '\'' +
+                ", serviceInstanceGuid='" + serviceInstanceGuid + '\'' +
                 ", servicePlanList=" + servicePlanList +
                 ", limitSize=" + limitSize +
                 ", hostName='" + hostName + '\'' +
@@ -992,8 +1002,9 @@ public class Catalog {
                 ", parameter='" + parameter + '\'' +
                 ", app_bind_parameter='" + app_bind_parameter + '\'' +
                 ", diskSize=" + diskSize +
-                ", MemorySize=" + memorySize +
+                ", memorySize=" + memorySize +
                 ", dashboardUseYn='" + dashboardUseYn + '\'' +
+                ", onDemandYn='" + onDemandYn + '\'' +
                 '}';
     }
 }
