@@ -427,6 +427,7 @@ public class CatalogServiceV3 extends Common {
     public Map procCatalogCreateServiceInstanceV2(Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = new HashMap<String, Object>();
+        LOGGER.info(param.toString());
         try {
             if (param.getOnDemandYn().equals("Y") && !param.getAppGuid().equals("(id_dummy)")) {
                 parameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
