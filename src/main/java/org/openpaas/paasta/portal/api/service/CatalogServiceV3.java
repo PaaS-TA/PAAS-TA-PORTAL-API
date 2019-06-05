@@ -431,9 +431,7 @@ public class CatalogServiceV3 extends Common {
             if (param.getOnDemandYn().equals("Y") && !param.getAppGuid().equals("(id_dummy)")) {
                 parameterMap = mapper.readValue(param.getApp_bind_parameter(), new TypeReference<Map<String, Object>>() {
                 });
-                if(parameterMap.get("app_guid").toString().equals("default")) {
-                    parameterMap.put("app_guid", param.getAppGuid());
-                }
+                parameterMap.put("app_guid", param.getAppGuid());
             } else {
                 parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {
                 });
