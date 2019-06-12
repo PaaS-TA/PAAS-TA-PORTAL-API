@@ -3,17 +3,20 @@ package org.openpaas.paasta.portal.api.config.cloudfoundry.provider;
 
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.openpaas.paasta.portal.api.common.PaastaConnectionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Date;
 
 @Configuration
 public class CloudFoundryConfigProvider {
 
 
     @Bean
-    DefaultConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiTarget, @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation) {
-        return DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(sslSkipValidation).keepAlive(true).build();
+    PaastaConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiTarget, @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation) {
+        return new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(sslSkipValidation).keepAlive(true).build(), new Date());
     }
 
     @Bean
