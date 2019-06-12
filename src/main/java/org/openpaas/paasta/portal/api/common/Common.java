@@ -169,16 +169,20 @@ public class Common {
      */
     public DefaultConnectionContext connectionContext() {
         if (paastaConnectionContext == null) {
-            paastaConnectionContext.getConnectionContext().dispose();
-            paastaConnectionContext = null;
             paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
         } else {
-            Calendar now = Calendar.getInstance();
-            Calendar create_time = Calendar.getInstance();
-            create_time.setTime(paastaConnectionContext.getCreate_time());
-            create_time.add(Calendar.MINUTE, 10);
-            if (create_time.getTimeInMillis() > now.getTimeInMillis()) {
-                paastaConnectionContext.getConnectionContext().dispose();
+            if(paastaConnectionContext.getCreate_time() != null) {
+                Calendar now = Calendar.getInstance();
+                Calendar create_time = Calendar.getInstance();
+                create_time.setTime(paastaConnectionContext.getCreate_time());
+                create_time.add(Calendar.MINUTE, 10);
+
+                if (create_time.getTimeInMillis() > now.getTimeInMillis()) {
+                    paastaConnectionContext.getConnectionContext().dispose();
+                    paastaConnectionContext = null;
+                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                }
+            }else{
                 paastaConnectionContext = null;
                 paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
             }
