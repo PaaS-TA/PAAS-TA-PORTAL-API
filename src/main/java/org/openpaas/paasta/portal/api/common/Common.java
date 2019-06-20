@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Common {
 
@@ -60,7 +62,7 @@ public class Common {
 
 
     @Autowired
-    DefaultConnectionContext connectionContext;
+    PaastaConnectionContext paastaConnectionContext;
 
     @Autowired
     PasswordGrantTokenProvider tokenProvider;
@@ -166,10 +168,26 @@ public class Common {
      * @return DefaultConnectionContext
      */
     public DefaultConnectionContext connectionContext() {
-        if(connectionContext == null){
-            connectionContext = DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build();
+        if (paastaConnectionContext == null) {
+            paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+        } else {
+            if(paastaConnectionContext.getCreate_time() != null) {
+                Calendar now = Calendar.getInstance();
+                Calendar create_time = Calendar.getInstance();
+                create_time.setTime(paastaConnectionContext.getCreate_time());
+                create_time.add(Calendar.MINUTE, 10);
+
+                if (create_time.getTimeInMillis() > now.getTimeInMillis()) {
+                    paastaConnectionContext.getConnectionContext().dispose();
+                    paastaConnectionContext = null;
+                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                }
+            }else{
+                paastaConnectionContext = null;
+                paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+            }
         }
-        return connectionContext;
+        return paastaConnectionContext.getConnectionContext();
     }
 
 
