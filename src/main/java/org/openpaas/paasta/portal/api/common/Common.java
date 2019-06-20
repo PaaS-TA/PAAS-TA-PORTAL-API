@@ -61,6 +61,8 @@ public class Common {
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
 
+    private Long currentTimeMiils = System.currentTimeMillis();
+
 
     @Autowired
     PaastaConnectionContext paastaConnectionContext;
@@ -234,7 +236,8 @@ public class Common {
     }
 
     public PasswordGrantTokenProvider tokenProvider() {
-        if (tokenProvider == null) {
+        if (tokenProvider == null || (System.currentTimeMillis() - currentTimeMiils)/1000 > 300) {
+            currentTimeMiils = System.currentTimeMillis();
             tokenProvider = PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build();
         }
         return tokenProvider;
