@@ -15,12 +15,10 @@ import java.util.Date;
 public class CloudFoundryConfigProvider {
 
 
-
-
     @Bean
-    PaastaConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiTarget, @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation) {
+    PaastaConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiTarget, @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation, @Value("${cloudfoundry.cc.api.proxyUrl}") String proxyUrl) {
         Common common = new Common();
-        return new PaastaConnectionContext(common.defaultConnectionContextBuild(), new Date());
+        return new PaastaConnectionContext(common.defaultConnectionContextBuild(apiTarget, proxyUrl, sslSkipValidation), new Date());
     }
 
     @Bean

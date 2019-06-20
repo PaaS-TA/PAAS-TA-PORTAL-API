@@ -33,8 +33,8 @@ public class Common {
     @Value("${cloudfoundry.cc.api.url}")
     public String apiTarget;
 
-    @Value("${cloudfoundry.cc.api.proxy}")
-    public String proxy;
+    @Value("${cloudfoundry.cc.api.proxyUrl}")
+    public String proxyUrl;
 
     @Value("${cloudfoundry.cc.api.uaaUrl}")
     public String uaaTarget;
@@ -172,8 +172,7 @@ public class Common {
     }
 
 
-    private ProxyConfiguration proxyConfiguration() {
-        String proxyHost = proxy;
+    private ProxyConfiguration proxyConfiguration(String proxyHost) {
         int proxyPort = 9022;
         String proxyIP = null;
         if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
@@ -184,18 +183,17 @@ public class Common {
                 throw new Error("Unable to resolve proxyhost", e);
             }
         } else {
-            // the address specified is already an IP address
             proxyIP = proxyHost;
         }
-        LOGGER.info(proxyHost +  " -> Proxy :: " + proxyIP + ":" + proxyPort);
+        LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
 
         return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
 
     }
 
 
-    public DefaultConnectionContext defaultConnectionContextBuild() {
-        return DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration()).build();
+    public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl,String proxyUrl, boolean cfskipSSLValidation) {
+        return DefaultConnectionContext.builder().apiHost(cfApiUrl.replace("https://", "").replace("http://", "")).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
     }
 
     /**
@@ -207,7 +205,7 @@ public class Common {
 
 
         if (paastaConnectionContext == null) {
-            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(), new Date());
+            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget,proxyUrl,cfskipSSLValidation), new Date());
         } else {
             if (paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
@@ -219,12 +217,12 @@ public class Common {
                     tokenProvider = null;
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
-                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(), new Date());
+                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget,proxyUrl,cfskipSSLValidation), new Date());
 
                 }
             } else {
                 paastaConnectionContext = null;
-                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(), new Date());
+                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget,proxyUrl,cfskipSSLValidation), new Date());
             }
         }
         return paastaConnectionContext.getConnectionContext();
