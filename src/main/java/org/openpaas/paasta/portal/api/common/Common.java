@@ -208,8 +208,6 @@ public class Common {
             token = "bearer " + token;
         }
         TokenProvider tokenProvider = new TokenGrantTokenProvider(token);
-        LOGGER.info("User Name :: " + cloudFoundryClient(connectionContext(), tokenProvider).users().get(GetUserRequest.builder().build()).block().getEntity().getUsername());
-
         String name = uaaClient(connectionContext(), tokenProvider).getUsername().block();
 
         if (name.equals("admin")) {
