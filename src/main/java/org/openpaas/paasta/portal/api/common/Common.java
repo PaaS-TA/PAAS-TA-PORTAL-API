@@ -172,7 +172,7 @@ public class Common {
      */
     public DefaultConnectionContext connectionContext() {
         if (paastaConnectionContext == null) {
-            paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+            paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9023).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
         } else {
             if(paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
@@ -184,11 +184,11 @@ public class Common {
                     tokenProvider = null;
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
-                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9023).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
                 }
             }else{
                 paastaConnectionContext = null;
-                paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9023).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
             }
         }
         return paastaConnectionContext.getConnectionContext();
