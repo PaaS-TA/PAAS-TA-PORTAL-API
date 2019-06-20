@@ -33,6 +33,9 @@ public class Common {
     @Value("${cloudfoundry.cc.api.url}")
     public String apiTarget;
 
+    @Value("${cloudfoundry.cc.api.proxy}")
+    public String proxy;
+
     @Value("${cloudfoundry.cc.api.uaaUrl}")
     public String uaaTarget;
 
@@ -170,7 +173,7 @@ public class Common {
 
 
     private ProxyConfiguration proxyConfiguration() {
-        String proxyHost = apiTarget;
+        String proxyHost = proxy;
         int proxyPort = 9022;
         String proxyIP = null;
         if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
