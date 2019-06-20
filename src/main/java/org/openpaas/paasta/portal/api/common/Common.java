@@ -187,6 +187,7 @@ public class Common {
             // the address specified is already an IP address
             proxyIP = proxyHost;
         }
+        LOGGER.info(proxyHost +  " -> Proxy :: " + proxyIP + ":" + proxyPort);
 
         return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
 
