@@ -1,9 +1,11 @@
 package org.openpaas.paasta.portal.api.common;
 
+import org.apache.http.conn.util.InetAddressUtils;
 import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
+import org.cloudfoundry.reactor.ProxyConfiguration;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
@@ -18,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -56,7 +60,7 @@ public class Common {
     public String uaaAdminClientSecret;
 
     @Value("${cloudfoundry.user.uaaClient.skipSSLValidation}")
-    public boolean skipSSLValidation;
+    public boolean uaaskipSSLValidation;
 
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
@@ -165,30 +169,58 @@ public class Common {
     }
 
 
+    private ProxyConfiguration proxyConfiguration() {
+        String proxyHost = apiTarget;
+        int proxyPort = 9022;
+        String proxyIP = null;
+        if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
+            try {
+                InetAddress ia = InetAddress.getByName(proxyHost);
+                proxyIP = ia.getHostAddress();
+            } catch (UnknownHostException e) {
+                throw new Error("Unable to resolve proxyhost", e);
+            }
+        } else {
+            // the address specified is already an IP address
+            proxyIP = proxyHost;
+        }
+
+        return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
+
+    }
+
+
+    private DefaultConnectionContext defaultConnectionContextBuild() {
+        return DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration()).build();
+    }
+
     /**
      * DefaultConnectionContext 가져온다.
      *
      * @return DefaultConnectionContext
      */
     public DefaultConnectionContext connectionContext() {
+
+
         if (paastaConnectionContext == null) {
-            paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(), new Date());
         } else {
-            if(paastaConnectionContext.getCreate_time() != null) {
+            if (paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
                 Calendar create_time = Calendar.getInstance();
                 create_time.setTime(paastaConnectionContext.getCreate_time());
                 create_time.add(Calendar.MINUTE, 5);
                 if (create_time.getTimeInMillis() < now.getTimeInMillis()) {
-                    LOGGER.info("create_time.getTimeInMillis() :::: " + create_time.getTimeInMillis() + " ,  now.getTimeInMillis() ::::   "+ now.getTimeInMillis());
+                    LOGGER.info("create_time.getTimeInMillis() :::: " + create_time.getTimeInMillis() + " ,  now.getTimeInMillis() ::::   " + now.getTimeInMillis());
                     tokenProvider = null;
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
-                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(), new Date());
+
                 }
-            }else{
+            } else {
                 paastaConnectionContext = null;
-                paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(), new Date());
             }
         }
         return paastaConnectionContext.getConnectionContext();
