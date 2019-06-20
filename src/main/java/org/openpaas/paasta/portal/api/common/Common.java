@@ -180,6 +180,7 @@ public class Common {
                 Calendar create_time = Calendar.getInstance();
                 create_time.setTime(paastaConnectionContext.getCreate_time());
                 create_time.add(Calendar.MINUTE, 10);
+
                 if (create_time.getTimeInMillis() > now.getTimeInMillis()) {
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
