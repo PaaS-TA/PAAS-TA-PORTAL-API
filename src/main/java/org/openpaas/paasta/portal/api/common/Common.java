@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.common;
 
+import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
@@ -171,6 +172,7 @@ public class Common {
         if (paastaConnectionContext == null) {
             paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
         } else {
+            LOGGER.info("connection time is :::::: "+paastaConnectionContext.getCreate_time()+"");
             if(paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
                 Calendar create_time = Calendar.getInstance();
@@ -204,7 +206,10 @@ public class Common {
             token = "bearer " + token;
         }
         TokenProvider tokenProvider = new TokenGrantTokenProvider(token);
+        LOGGER.info("User Name :: " + cloudFoundryClient(connectionContext(), tokenProvider).users().get(GetUserRequest.builder().build()).block().getEntity().getUsername());
+
         String name = uaaClient(connectionContext(), tokenProvider).getUsername().block();
+
         if (name.equals("admin")) {
             return tokenProvider();
         }
