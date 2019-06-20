@@ -45,7 +45,7 @@ public class AppServiceV2 extends Common {
 
 
     public SummaryApplicationResponse getAppSummary(String guid, String token) {
-        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
+        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
         return summaryApplicationResponse;
     }
 

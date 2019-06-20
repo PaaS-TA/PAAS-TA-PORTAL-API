@@ -49,7 +49,7 @@ public class AppServiceV3 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
 
     public SummaryApplicationResponse getAppSummary(String guid, String token) {
-        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).log().block();
+        SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
         return summaryApplicationResponse;
     }
 

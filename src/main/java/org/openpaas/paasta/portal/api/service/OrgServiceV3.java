@@ -176,7 +176,7 @@ public class OrgServiceV3 extends Common {
             LOGGER.info("Org Quotaid :: " + getOrganizationResponse.getEntity().getQuotaDefinitionId());
             String quotaDefinitionId = getOrganizationResponse.getEntity().getQuotaDefinitionId();
 
-            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = reactorClients.organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaDefinitionId).build()).log().block();
+            GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = reactorClients.organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaDefinitionId).build()).block();
             Map quota = objectMapper.convertValue(getOrganizationQuotaDefinitionResponse, Map.class);
             quota.remove("metadata");
             map.put("quota", quota.get("entity"));

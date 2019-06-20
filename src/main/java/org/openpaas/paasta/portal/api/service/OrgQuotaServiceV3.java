@@ -28,7 +28,7 @@ public class OrgQuotaServiceV3 extends Common {
      */
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitionsList(String token) throws Exception {
 
-        return cloudFoundryClient().organizationQuotaDefinitions().list(ListOrganizationQuotaDefinitionsRequest.builder().build()).log().block();
+        return cloudFoundryClient().organizationQuotaDefinitions().list(ListOrganizationQuotaDefinitionsRequest.builder().build()).block();
     }
 
     /**
@@ -40,7 +40,7 @@ public class OrgQuotaServiceV3 extends Common {
      */
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
-        return cloudFoundryClient().organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).build()).log().block();
+        return cloudFoundryClient().organizationQuotaDefinitions().get(GetOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).build()).block();
     }
 
     /**
@@ -65,7 +65,7 @@ public class OrgQuotaServiceV3 extends Common {
         */
 
 
-        return cloudFoundryClient().organizationQuotaDefinitions().create(CreateOrganizationQuotaDefinitionRequest.builder().name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).log().block();
+        return cloudFoundryClient().organizationQuotaDefinitions().create(CreateOrganizationQuotaDefinitionRequest.builder().name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).block();
     }
 
     /**
@@ -77,7 +77,7 @@ public class OrgQuotaServiceV3 extends Common {
      */
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(Quota quota, String token) throws Exception {
 
-        return cloudFoundryClient().organizationQuotaDefinitions().update(UpdateOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quota.getGuid().toString()).name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).log().block();
+        return cloudFoundryClient().organizationQuotaDefinitions().update(UpdateOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quota.getGuid().toString()).name(quota.getName()).nonBasicServicesAllowed(quota.isNonBasicServicesAllowed()).totalServices(quota.getTotalServices()).totalRoutes(quota.getTotalRoutes()).totalReservedRoutePorts(quota.getTotalReservedRoutePorts()).memoryLimit(quota.getMemoryLimit()).instanceMemoryLimit(quota.getInstanceMemoryLimit()).applicationInstanceLimit(quota.getAppInstanceLimit()).build()).block();
     }
 
     /**
@@ -90,7 +90,7 @@ public class OrgQuotaServiceV3 extends Common {
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(String quotaGuid, String token) throws Exception {
 
         return cloudFoundryClient().organizationQuotaDefinitions().delete(DeleteOrganizationQuotaDefinitionRequest.builder().organizationQuotaDefinitionId(quotaGuid).async(false) // background async 처리 여부(recommend:true)
-                .build()).log().block();
+                .build()).block();
     }
 
     /**
@@ -103,7 +103,7 @@ public class OrgQuotaServiceV3 extends Common {
     public boolean setOrgQuotaDefinitions(Quota quota) throws Exception {
 
         // 공간할당량 셋팅은 operation 에서 구현(admin권한)
-        cloudFoundryOperations().organizationAdmin().setQuota(SetQuotaRequest.builder().quotaName(quota.getName()).organizationName(quota.getOrganizationName()).build()).log().block();
+        cloudFoundryOperations().organizationAdmin().setQuota(SetQuotaRequest.builder().quotaName(quota.getName()).organizationName(quota.getOrganizationName()).build()).block();
 
         return true;
     }

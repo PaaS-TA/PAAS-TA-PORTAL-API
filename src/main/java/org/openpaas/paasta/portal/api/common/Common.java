@@ -186,11 +186,7 @@ public class Common {
             token = "bearer " + token;
         }
         TokenProvider tokenProvider = new TokenGrantTokenProvider(token);
-
-        LOGGER.info("Token validation check....Start");
         String name = uaaClient(connectionContext(), tokenProvider).getUsername().block();
-        LOGGER.info("Token validation check....End");
-
         if (name.equals("admin")) {
             return tokenProvider();
         }

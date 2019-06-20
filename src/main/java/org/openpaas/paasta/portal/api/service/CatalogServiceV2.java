@@ -512,6 +512,6 @@ public class CatalogServiceV2 extends Common {
      * @return ListServicesResponse
      */
     public ListServicesResponse getService() throws Exception {
-        return cloudFoundryClient(connectionContext(), tokenProvider()).services().list(ListServicesRequest.builder().build()).log().block();
+        return cloudFoundryClient(connectionContext(), tokenProvider()).services().list(ListServicesRequest.builder().build()).block();
     }
 }

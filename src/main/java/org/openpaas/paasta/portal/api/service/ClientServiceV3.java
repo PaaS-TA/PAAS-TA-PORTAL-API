@@ -20,7 +20,7 @@ public class ClientServiceV3 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientServiceV3.class);
 
     public ListClientsResponse getClientList() throws Exception {
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).block();
     }
 
     /**
@@ -31,7 +31,7 @@ public class ClientServiceV3 extends Common {
      * @throws Exception the exception
      */
     public GetClientResponse getClient(String clientId) throws Exception {
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).block();
     }
 
     /**
@@ -49,7 +49,7 @@ public class ClientServiceV3 extends Common {
         LOGGER.info("ClientOPTION ::: " + clientOption.toString());
         Map result = new HashMap();
         try {
-            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).log().block();
+            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (UaaException n) {
@@ -85,7 +85,7 @@ public class ClientServiceV3 extends Common {
 
         Map result = new HashMap();
         try {
-            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).build()).log().block();
+            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {
@@ -106,7 +106,7 @@ public class ClientServiceV3 extends Common {
     public Map deleteClient(String clientId) {
         Map result = new HashMap();
         try {
-            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
+            uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {

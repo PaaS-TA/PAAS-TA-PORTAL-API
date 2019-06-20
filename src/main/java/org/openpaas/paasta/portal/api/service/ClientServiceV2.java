@@ -19,7 +19,7 @@ public class ClientServiceV2 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientServiceV2.class);
 
     public ListClientsResponse getClientList() throws Exception {
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().list(ListClientsRequest.builder().build()).block();
     }
 
     /**
@@ -30,7 +30,7 @@ public class ClientServiceV2 extends Common {
      * @throws Exception the exception
      */
     public GetClientResponse getClient(String clientId) throws Exception {
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().get(GetClientRequest.builder().clientId(clientId).build()).block();
     }
 
     /**
@@ -45,7 +45,7 @@ public class ClientServiceV2 extends Common {
 
         ClientServiceV2.ClientOption clientOption = new ClientServiceV2.ClientOption();
         clientOption = clientOption.setClientOptionByMap(param);
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).block();
     }
 
     /**
@@ -65,7 +65,7 @@ public class ClientServiceV2 extends Common {
         //Secret, Token Validity 는 생성 이후 수정 불가
         return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId)
                 .name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders)
-                .build()).log().block();
+                .build()).block();
     }
 
     /**
@@ -76,7 +76,7 @@ public class ClientServiceV2 extends Common {
      * @throws Exception the exception
      */
     public DeleteClientResponse deleteClient(String clientId) throws Exception {
-        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).log().block();
+        return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().delete(DeleteClientRequest.builder().clientId(clientId).build()).block();
     }
 
     /**

@@ -32,7 +32,7 @@ public class SpaceQuotaServiceV3 extends Common {
                .spaceQuotaDefinitions()
                 .list(ListSpaceQuotaDefinitionsRequest.builder()
                         .build()
-                ).log()
+                )
                 .block();
     }
 
@@ -51,7 +51,7 @@ public class SpaceQuotaServiceV3 extends Common {
                 .get(GetSpaceQuotaDefinitionRequest.builder()
                         .spaceQuotaDefinitionId(spaceQuotaId)
                         .build()
-                ).log()
+                )
                 .block();
     }
 
@@ -78,7 +78,7 @@ public class SpaceQuotaServiceV3 extends Common {
                         .applicationInstanceLimit(quota.getAppInstanceLimit())
                         .organizationId(quota.getOrginazationGuid().toString())
                         .build()
-                ).log()
+                )
                 .block();
     }
 
@@ -97,7 +97,7 @@ public class SpaceQuotaServiceV3 extends Common {
                         .spaceQuotaDefinitionId(guid)
                         .async(false)  // background async 처리 여부(recommend:true)
                         .build()
-                ).log()
+                )
                 .block();
     }
 
@@ -121,7 +121,7 @@ public class SpaceQuotaServiceV3 extends Common {
                         .spaceQuotaDefinitionId(quota.getGuid().toString())
                         .spaceId(quota.getSpaceGuid().toString())
                         .build()
-                ).log()
+                )
                 .block();
     }
 
@@ -140,7 +140,7 @@ public class SpaceQuotaServiceV3 extends Common {
                 .listSpaces(ListSpaceQuotaDefinitionSpacesRequest.builder()
                         .spaceQuotaDefinitionId(guid)
                         .build()
-                ).log()
+                )
                 .block();
     }
 
@@ -160,8 +160,7 @@ public class SpaceQuotaServiceV3 extends Common {
                     .spaceQuotaDefinitionId(quota.getGuid().toString())
                     .spaceId(quota.getSpaceGuid().toString())
                     .build()
-            ).log()
-            .block();
+            ).block();
         return true;
     }
 
@@ -188,7 +187,7 @@ public class SpaceQuotaServiceV3 extends Common {
                         .applicationInstanceLimit(quota.getAppInstanceLimit())
                         .organizationId(quota.getOrginazationGuid().toString())
                         .build()
-                ).log()
+                )
                 .block();
     }
 

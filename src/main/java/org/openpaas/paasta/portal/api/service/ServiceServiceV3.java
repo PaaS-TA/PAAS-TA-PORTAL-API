@@ -222,7 +222,7 @@ public class ServiceServiceV3 extends Common {
      * @throws Exception the exception
      */
     public ListServiceBrokersResponse getServiceBrokers(String token) throws Exception {
-        return cloudFoundryClient().serviceBrokers().list(ListServiceBrokersRequest.builder().build()).log().block();
+        return cloudFoundryClient().serviceBrokers().list(ListServiceBrokersRequest.builder().build()).block();
     }
 
 
@@ -234,7 +234,7 @@ public class ServiceServiceV3 extends Common {
      * @throws Exception the exception
      */
     public GetServiceBrokerResponse getServiceBroker(ServiceBroker serviceBroker, String token) throws Exception {
-        return cloudFoundryClient().serviceBrokers().get(GetServiceBrokerRequest.builder().serviceBrokerId(serviceBroker.getGuid().toString()).build()).log().block();
+        return cloudFoundryClient().serviceBrokers().get(GetServiceBrokerRequest.builder().serviceBrokerId(serviceBroker.getGuid().toString()).build()).block();
     }
 
     /**
@@ -296,7 +296,7 @@ public class ServiceServiceV3 extends Common {
      * @throws Exception the exception
      */
     public ListServicePlansResponse getServicePlans(String token) throws Exception {
-        return cloudFoundryClient().servicePlans().list(ListServicePlansRequest.builder().build()).log().block();
+        return cloudFoundryClient().servicePlans().list(ListServicePlansRequest.builder().build()).block();
     }
 
     /**
@@ -307,7 +307,7 @@ public class ServiceServiceV3 extends Common {
      * @throws Exception the exception
      */
     public GetServicePlanResponse getServicePlan(ServiceBroker serviceBroker, String token) throws Exception {
-        return cloudFoundryClient().servicePlans().get(GetServicePlanRequest.builder().servicePlanId(serviceBroker.getGuid().toString()).build()).log().block();
+        return cloudFoundryClient().servicePlans().get(GetServicePlanRequest.builder().servicePlanId(serviceBroker.getGuid().toString()).build()).block();
     }
 
     /**
