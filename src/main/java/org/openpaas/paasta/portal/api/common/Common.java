@@ -159,7 +159,7 @@ public class Common {
      * @return ReactorUaaClient
      */
     public ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String adminUserName, String adminPassword, String uaaAdminClientId, String uaaAdminClientSecret) {
-        ReactorUaaClient reactorUaaClient = uaaClient(connectionContext, tokenProvider(adminUserName, adminPassword));
+        ReactorUaaClient reactorUaaClient = uaaClient(connectionContext, tokenProvider);
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
         return uaaClient(connectionContext, clinetTokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
@@ -172,24 +172,23 @@ public class Common {
      */
     public DefaultConnectionContext connectionContext() {
         if (paastaConnectionContext == null) {
-            paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+            paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
         } else {
-
             if(paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
                 Calendar create_time = Calendar.getInstance();
                 create_time.setTime(paastaConnectionContext.getCreate_time());
-                create_time.add(Calendar.MINUTE, 10);
-
+                create_time.add(Calendar.MINUTE, 5);
                 if (create_time.getTimeInMillis() < now.getTimeInMillis()) {
                     LOGGER.info("create_time.getTimeInMillis() :::: " + create_time.getTimeInMillis() + " ,  now.getTimeInMillis() ::::   "+ now.getTimeInMillis());
+                    tokenProvider = null;
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
-                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                    paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
                 }
             }else{
                 paastaConnectionContext = null;
-                paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
+                paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
             }
         }
         return paastaConnectionContext.getConnectionContext();
@@ -235,8 +234,7 @@ public class Common {
     }
 
     public PasswordGrantTokenProvider tokenProvider() {
-        if (tokenProvider == null || (System.currentTimeMillis() - currentTimeMiils)/1000 > 300) {
-            currentTimeMiils = System.currentTimeMillis();
+        if (tokenProvider == null) {
             tokenProvider = PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build();
         }
         return tokenProvider;
