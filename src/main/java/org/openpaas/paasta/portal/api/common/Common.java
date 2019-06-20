@@ -174,7 +174,7 @@ public class Common {
         if (paastaConnectionContext == null) {
             paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
         } else {
-            LOGGER.info("connection time is :::::: "+paastaConnectionContext.getCreate_time()+"");
+
             if(paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
                 Calendar create_time = Calendar.getInstance();
@@ -182,6 +182,7 @@ public class Common {
                 create_time.add(Calendar.MINUTE, 10);
 
                 if (create_time.getTimeInMillis() > now.getTimeInMillis()) {
+                    LOGGER.info("create_time.getTimeInMillis() :::: " + create_time.getTimeInMillis() + " ,  now.getTimeInMillis() ::::   now.getTimeInMillis()" );
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
                     paastaConnectionContext = new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).skipSslValidation(skipSSLValidation).keepAlive(true).build(), new Date());
