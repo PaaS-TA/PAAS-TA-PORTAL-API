@@ -197,7 +197,7 @@ public class AuthorityGroupService extends Common {
         URL uaaHost = new URL(uaaTarget);
 
         //ssl 유효성 체크 비활성
-        if (skipSSLValidation) {
+        if (uaaskipSSLValidation) {
             SSLUtils.turnOffSslChecking();
         }
 
