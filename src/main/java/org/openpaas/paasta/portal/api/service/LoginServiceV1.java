@@ -100,7 +100,7 @@ public class LoginServiceV1 extends Common {
      * @throws MalformedURLException, URISyntaxException the exception
      */
     public URL getTargetURL(String target) throws MalformedURLException, URISyntaxException {
-        return getTargetURI(target).toURL();
+        return getTargetURI(target+":9022").toURL();
     }
 
     /**
