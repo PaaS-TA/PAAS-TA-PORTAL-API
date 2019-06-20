@@ -16,7 +16,7 @@ public class CloudFoundryConfigProvider {
 
     @Bean
     PaastaConnectionContext connectionContext(@Value("${cloudfoundry.cc.api.url}") String apiTarget, @Value("${cloudfoundry.cc.api.sslSkipValidation}") Boolean sslSkipValidation) {
-        return new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("http://", "")).port(9022).skipSslValidation(sslSkipValidation).keepAlive(true).build(), new Date());
+        return new PaastaConnectionContext(DefaultConnectionContext.builder().apiHost(apiTarget.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(sslSkipValidation).keepAlive(true).build(), new Date());
     }
 
     @Bean
