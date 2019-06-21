@@ -1,6 +1,7 @@
 package org.openpaas.paasta.portal.api.common;
 
 import org.apache.http.conn.util.InetAddressUtils;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
@@ -19,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import reactor.ipc.netty.http.client.HttpClient;
+import reactor.ipc.netty.http.client.HttpClientOptions;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -192,9 +195,12 @@ public class Common {
 //    }
 
 
+
+
     public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl,String proxyUrl, boolean cfskipSSLValidation) {
 //        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
-        return DefaultConnectionContext.builder().apiHost(cfApiUrl).port(9022).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
+        HttpClient httpClient = HttpClient.builder().build();
+        return DefaultConnectionContext.builder().httpClient(HttpClient.create(cfApiUrl, 9022)).apiHost(cfApiUrl.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
     }
 
     /**
