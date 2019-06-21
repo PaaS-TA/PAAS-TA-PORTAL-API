@@ -172,28 +172,29 @@ public class Common {
     }
 
 
-    private ProxyConfiguration proxyConfiguration(String proxyHost) {
-        int proxyPort = 9022;
-        String proxyIP = null;
-        if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
-            try {
-                InetAddress ia = InetAddress.getByName(proxyHost);
-                proxyIP = ia.getHostAddress();
-            } catch (UnknownHostException e) {
-                throw new Error("Unable to resolve proxyhost", e);
-            }
-        } else {
-            proxyIP = proxyHost;
-        }
-        LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
-
-        return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
-
-    }
+//    private ProxyConfiguration proxyConfiguration(String proxyHost) {
+//        int proxyPort = 9022;
+//        String proxyIP = null;
+//        if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
+//            try {
+//                InetAddress ia = InetAddress.getByName(proxyHost);
+//                proxyIP = ia.getHostAddress();
+//            } catch (UnknownHostException e) {
+//                throw new Error("Unable to resolve proxyhost", e);
+//            }
+//        } else {
+//            proxyIP = proxyHost;
+//        }
+//        LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
+//
+//        return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
+//
+//    }
 
 
     public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl,String proxyUrl, boolean cfskipSSLValidation) {
-        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
+//        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
+        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
     }
 
     /**
