@@ -5,6 +5,7 @@ import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.PaastaConnectionContext;
+import org.openpaas.paasta.portal.api.common.PaastaTokenContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,7 @@ public class CloudFoundryConfigProvider {
     }
 
     @Bean
-    PasswordGrantTokenProvider tokenProvider(@Value("${cloudfoundry.user.admin.username}") String username, @Value("${cloudfoundry.user.admin.password}") String password) {
-        return PasswordGrantTokenProvider.builder().password(password).username(username).build();
+    PaastaTokenContext tokenProvider(@Value("${cloudfoundry.user.admin.username}") String username, @Value("${cloudfoundry.user.admin.password}") String password) {
+        return new PaastaTokenContext(PasswordGrantTokenProvider.builder().password(password).username(username).build(), new Date());
     }
 }

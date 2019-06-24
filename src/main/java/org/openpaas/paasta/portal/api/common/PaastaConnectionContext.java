@@ -5,7 +5,7 @@ import org.cloudfoundry.reactor.DefaultConnectionContext;
 
 import java.util.Date;
 
-public class PaastaConnectionContext {
+public class PaastaConnectionContext extends PaastaContextInterface {
 
     DefaultConnectionContext connectionContext;
     Date create_time;
@@ -19,6 +19,7 @@ public class PaastaConnectionContext {
         return connectionContext;
     }
 
+    @Override
     public Date getCreate_time() {
         return create_time;
     }

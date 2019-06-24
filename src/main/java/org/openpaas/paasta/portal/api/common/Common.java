@@ -73,7 +73,7 @@ public class Common {
     PaastaConnectionContext paastaConnectionContext;
 
     @Autowired
-    PasswordGrantTokenProvider tokenProvider;
+    PaastaTokenContext paastaTokenContext;
 
 
     public ObjectMapper objectMapper = new ObjectMapper();
@@ -203,19 +203,11 @@ public class Common {
         if (paastaConnectionContext == null) {
             paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
         } else {
-            if (paastaConnectionContext.getCreate_time() != null) {
-                Calendar now = Calendar.getInstance();
-                Calendar create_time = Calendar.getInstance();
-                create_time.setTime(paastaConnectionContext.getCreate_time());
-                create_time.add(Calendar.MINUTE, 5);
-                if (create_time.getTimeInMillis() < now.getTimeInMillis()) {
-                    LOGGER.info("create_time.getTimeInMillis() :::: " + create_time.getTimeInMillis() + " ,  now.getTimeInMillis() ::::   " + now.getTimeInMillis());
-                    tokenProvider = null;
+            if (paastaConnectionContext.getCreate_time() != null && ContextAndTokenTimeOut(paastaConnectionContext, 10)) {
+                    LOGGER.info("paastaConnectionContext reproduction");
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
                     paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
-
-                }
             } else {
                 paastaConnectionContext = null;
                 paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
@@ -255,7 +247,6 @@ public class Common {
         }
         TokenGrantTokenProvider tokenProvider = new TokenGrantTokenProvider(token);
         return tokenProvider;
-
     }
 
 
@@ -264,10 +255,21 @@ public class Common {
     }
 
     public PasswordGrantTokenProvider tokenProvider() {
-        if (tokenProvider == null) {
-            tokenProvider = PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build();
+        if (paastaTokenContext == null) {
+            paastaTokenContext = new PaastaTokenContext(PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build(), new Date());
+        } else if(paastaTokenContext.getCreate_time() != null && ContextAndTokenTimeOut(paastaTokenContext, 5)){
+            LOGGER.info("paastaTokenContext reproduction");
+            paastaTokenContext = new PaastaTokenContext(PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build(), new Date());
         }
-        return tokenProvider;
+        return paastaTokenContext.tokenProvider();
+    }
+
+    private boolean ContextAndTokenTimeOut(PaastaContextInterface paastaContextInterface, int timelimit){
+        Calendar now = Calendar.getInstance();
+        Calendar create_time = Calendar.getInstance();
+        create_time.setTime(paastaContextInterface.getCreate_time());
+        create_time.add(Calendar.MINUTE, timelimit);
+        return create_time.getTimeInMillis() < now.getTimeInMillis();
     }
 
 
