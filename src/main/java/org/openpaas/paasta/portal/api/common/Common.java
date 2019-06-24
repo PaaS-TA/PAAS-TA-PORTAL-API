@@ -94,7 +94,7 @@ public class Common {
     }
 
     public DefaultCloudFoundryOperations cloudFoundryOperations() {
-        return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient(connectionContext(), tokenProvider())).dopplerClient(dopplerClient(connectionContext(), tokenProvider())).uaaClient(uaaClient(connectionContext(), tokenProvider)).build();
+        return DefaultCloudFoundryOperations.builder().cloudFoundryClient(cloudFoundryClient(connectionContext(), tokenProvider())).dopplerClient(dopplerClient(connectionContext(), tokenProvider())).uaaClient(uaaClient(connectionContext(), tokenProvider())).build();
     }
 
     /**
@@ -164,7 +164,7 @@ public class Common {
      * @return ReactorUaaClient
      */
     public ReactorUaaClient uaaAdminClient(ConnectionContext connectionContext, String adminUserName, String adminPassword, String uaaAdminClientId, String uaaAdminClientSecret) {
-        ReactorUaaClient reactorUaaClient = uaaClient(connectionContext, tokenProvider);
+        ReactorUaaClient reactorUaaClient = uaaClient(connectionContext, tokenProvider());
         GetTokenByClientCredentialsResponse getTokenByClientCredentialsResponse = reactorUaaClient.tokens().getByClientCredentials(GetTokenByClientCredentialsRequest.builder().clientId(uaaAdminClientId).clientSecret(uaaAdminClientSecret).build()).block();
         return uaaClient(connectionContext, clinetTokenProvider(getTokenByClientCredentialsResponse.getAccessToken()));
     }
@@ -200,8 +200,6 @@ public class Common {
      * @return DefaultConnectionContext
      */
     public DefaultConnectionContext connectionContext() {
-
-
         if (paastaConnectionContext == null) {
             paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
         } else {
