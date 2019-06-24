@@ -203,11 +203,13 @@ public class Common {
         if (paastaConnectionContext == null) {
             paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
         } else {
-            if (paastaConnectionContext.getCreate_time() != null && ContextAndTokenTimeOut(paastaConnectionContext, 10)) {
+            if (paastaConnectionContext.getCreate_time() != null) {
+                if(ContextAndTokenTimeOut(paastaConnectionContext, 10)) {
                     LOGGER.info("paastaConnectionContext reproduction");
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
                     paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
+                }
             } else {
                 paastaConnectionContext = null;
                 paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
