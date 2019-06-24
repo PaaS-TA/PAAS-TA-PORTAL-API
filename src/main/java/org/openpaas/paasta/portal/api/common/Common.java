@@ -200,7 +200,7 @@ public class Common {
     public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl,String proxyUrl, boolean cfskipSSLValidation) {
 //        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
         HttpClient httpClient = HttpClient.builder().build();
-        return DefaultConnectionContext.builder().httpClient(HttpClient.create(cfApiUrl, 9022)).apiHost(cfApiUrl.replace("https://", "").replace("http://", "")).port(9022).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
+        return DefaultConnectionContext.builder().httpClient(HttpClient.create(cfApiUrl, 9022)).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
     }
 
     /**
