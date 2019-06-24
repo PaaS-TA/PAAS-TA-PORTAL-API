@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.common;
 
 import org.apache.http.conn.util.InetAddressUtils;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
@@ -20,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import reactor.ipc.netty.http.client.HttpClient;
-import reactor.ipc.netty.http.client.HttpClientOptions;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -36,8 +33,6 @@ public class Common {
     @Value("${cloudfoundry.cc.api.url}")
     public String apiTarget;
 
-    @Value("${cloudfoundry.cc.api.proxyUrl}")
-    public String proxyUrl;
 
     @Value("${cloudfoundry.cc.api.uaaUrl}")
     public String uaaTarget;
@@ -175,33 +170,28 @@ public class Common {
     }
 
 
-//    private ProxyConfiguration proxyConfiguration(String proxyHost) {
-//        int proxyPort = 9022;
-//        String proxyIP = null;
-//        if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
-//            try {
-//                InetAddress ia = InetAddress.getByName(proxyHost);
-//                proxyIP = ia.getHostAddress();
-//            } catch (UnknownHostException e) {
-//                throw new Error("Unable to resolve proxyhost", e);
-//            }
-//        } else {
-//            proxyIP = proxyHost;
-//        }
-//        LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
-//
-//        return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
-//
-//    }
+    private ProxyConfiguration proxyConfiguration(String proxyHost) {
+        int proxyPort = 9022;
+        String proxyIP = null;
+        if (!InetAddressUtils.isIPv4Address(proxyHost) && !InetAddressUtils.isIPv6Address(proxyHost)) {
+            try {
+                InetAddress ia = InetAddress.getByName(proxyHost);
+                proxyIP = ia.getHostAddress();
+            } catch (UnknownHostException e) {
+                throw new Error("Unable to resolve proxyhost", e);
+            }
+        } else {
+            proxyIP = proxyHost;
+        }
+        LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
+
+        return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
+
+    }
 
 
-    public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl, String proxyUrl, boolean cfskipSSLValidation) {
-        LOGGER.info("cfApiUrl ::: " + cfApiUrl);
-        LOGGER.info("cfskipSSLValidation ::: " + cfskipSSLValidation);
-
-//        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
-        HttpClient httpClient = HttpClient.builder().build();
-        return DefaultConnectionContext.builder().httpClient(HttpClient.create(cfApiUrl, 9022)).apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
+    public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl, boolean cfskipSSLValidation) {
+        return DefaultConnectionContext.builder().apiHost(cfApiUrl.replace("https://", "").replace("http://", "")).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
     }
 
     /**
@@ -213,7 +203,7 @@ public class Common {
 
 
         if (paastaConnectionContext == null) {
-            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, proxyUrl, cfskipSSLValidation), new Date());
+            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
         } else {
             if (paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
@@ -225,12 +215,12 @@ public class Common {
                     tokenProvider = null;
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
-                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, proxyUrl, cfskipSSLValidation), new Date());
+                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
 
                 }
             } else {
                 paastaConnectionContext = null;
-                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, proxyUrl, cfskipSSLValidation), new Date());
+                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
             }
         }
         return paastaConnectionContext.getConnectionContext();
