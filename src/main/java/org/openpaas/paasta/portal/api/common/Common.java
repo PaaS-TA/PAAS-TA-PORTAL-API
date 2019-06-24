@@ -195,12 +195,13 @@ public class Common {
 //    }
 
 
+    public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl, String proxyUrl, boolean cfskipSSLValidation) {
+        LOGGER.info("cfApiUrl ::: " + cfApiUrl);
+        LOGGER.info("cfskipSSLValidation ::: " + cfskipSSLValidation);
 
-
-    public DefaultConnectionContext defaultConnectionContextBuild(String cfApiUrl,String proxyUrl, boolean cfskipSSLValidation) {
 //        return DefaultConnectionContext.builder().apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).proxyConfiguration(proxyConfiguration(proxyUrl)).build();
         HttpClient httpClient = HttpClient.builder().build();
-        return DefaultConnectionContext.builder().httpClient(HttpClient.create(cfApiUrl, 9022)).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
+        return DefaultConnectionContext.builder().httpClient(HttpClient.create(cfApiUrl, 9022)).apiHost(cfApiUrl).skipSslValidation(cfskipSSLValidation).keepAlive(true).build();
     }
 
     /**
@@ -212,7 +213,7 @@ public class Common {
 
 
         if (paastaConnectionContext == null) {
-            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget,proxyUrl,cfskipSSLValidation), new Date());
+            paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, proxyUrl, cfskipSSLValidation), new Date());
         } else {
             if (paastaConnectionContext.getCreate_time() != null) {
                 Calendar now = Calendar.getInstance();
@@ -224,12 +225,12 @@ public class Common {
                     tokenProvider = null;
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
-                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget,proxyUrl,cfskipSSLValidation), new Date());
+                    paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, proxyUrl, cfskipSSLValidation), new Date());
 
                 }
             } else {
                 paastaConnectionContext = null;
-                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget,proxyUrl,cfskipSSLValidation), new Date());
+                paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, proxyUrl, cfskipSSLValidation), new Date());
             }
         }
         return paastaConnectionContext.getConnectionContext();
