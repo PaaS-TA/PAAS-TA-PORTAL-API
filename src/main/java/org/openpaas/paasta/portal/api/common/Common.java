@@ -271,7 +271,8 @@ public class Common {
         Calendar create_time = Calendar.getInstance();
         create_time.setTime(paastaContextInterface.getCreate_time());
         create_time.add(Calendar.MINUTE, timelimit);
-        LOGGER.info("Create time ::::: " + create_time.getTimeInMillis() + "Now Time :::::: "+now.getTimeInMillis());
+        long result = create_time.getTimeInMillis() - now.getTimeInMillis();
+        LOGGER.info("Create time ::::: " + create_time.getTimeInMillis() + "Now Time :::::: "+now.getTimeInMillis()+ "Result ::::: " + result);
         return create_time.getTimeInMillis() < now.getTimeInMillis();
     }
 
