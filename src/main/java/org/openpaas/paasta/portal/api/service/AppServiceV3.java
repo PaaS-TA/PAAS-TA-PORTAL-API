@@ -456,7 +456,7 @@ public class AppServiceV3 extends Common {
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            cloudFoundryClient.applicationsV3().start(StartApplicationRequest.builder().applicationId(appGuid).build()).block();
+            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(appGuid).state("STARTED").build()).block();
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
