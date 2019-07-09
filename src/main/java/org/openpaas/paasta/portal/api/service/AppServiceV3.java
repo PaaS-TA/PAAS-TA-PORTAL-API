@@ -119,7 +119,8 @@ public class AppServiceV3 extends Common {
             for (Route route : routes) {
                 reactorCloudFoundryClient.routes().delete(DeleteRouteRequest.builder().routeId(route.getId()).build()).block();
             }
-            reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(guid).build()).block();
+            //reactorCloudFoundryClient.applicationsV2().delete(DeleteApplicationRequest.builder().applicationId(guid).build()).block();
+            reactorCloudFoundryClient.applicationsV3().delete(org.cloudfoundry.client.v3.applications.DeleteApplicationRequest.builder().applicationId(guid).build()).block();
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
         } catch (Exception e) {

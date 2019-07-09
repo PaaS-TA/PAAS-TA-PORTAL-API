@@ -234,7 +234,7 @@ public class SpaceServiceV3 extends Common {
                 throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Required request body content is missing");
             }
 
-            cloudFoundryClient(tokenProvider(token)).spaces().delete(DeleteSpaceRequest.builder().spaceId(guid).recursive(recursive).async(true).build()).block();
+            cloudFoundryClient(tokenProvider(token)).spaces().delete(DeleteSpaceRequest.builder().spaceId(guid).recursive(recursive).async(false).build()).block();
 
             resultMap.put("result", true);
         } catch (Exception e) {

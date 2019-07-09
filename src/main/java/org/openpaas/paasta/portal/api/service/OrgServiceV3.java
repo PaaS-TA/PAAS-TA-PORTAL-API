@@ -323,7 +323,7 @@ public class OrgServiceV3 extends Common {
             if (isAdmin) {
                 // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
                 LOGGER.warn("Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName());
-                DeleteOrganizationResponse eleteOrganizationResponse = cloudFoundryClient().organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(true).async(true).build()).block();
+                DeleteOrganizationResponse eleteOrganizationResponse = cloudFoundryClient().organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(true).async(false).build()).block();
                 resultMap.put("result", true);
                 return resultMap;
             }
