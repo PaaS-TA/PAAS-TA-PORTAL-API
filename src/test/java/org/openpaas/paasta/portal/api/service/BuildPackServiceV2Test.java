@@ -1,20 +1,28 @@
 package org.openpaas.paasta.portal.api.service;
 
 import junit.framework.Assert;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.config.cloudfoundry.provider.TokenGrantTokenProvider;
 import org.openpaas.paasta.portal.api.controller.AppControllerV2;
 import org.openpaas.paasta.portal.api.model.BuildPack;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -28,14 +36,14 @@ public class BuildPackServiceV2Test {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppControllerV2.class);
 
+    @InjectMocks
+    Common common = new Common();
+
     @Mock
-    private BuildPackServiceV2 buildPackServiceV2;
-
-
-
-
+    private BuildPackServiceV2 buildPackServiceV2 = new BuildPackServiceV2();
 
     Map thenReturn;
+
 
     @Before
     public void setUp() {
