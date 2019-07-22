@@ -6,6 +6,7 @@ import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.cloudfoundry.client.v2.buildpacks.UpdateBuildpackRequest;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.model.BuildPack;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,11 @@ import java.util.Map;
 
 @EnableAsync
 @Service
-public class BuildPackServiceV2 extends Common {
+public class BuildPackServiceV2 {
+
+    @Autowired
+    Common common;
+
 
     /**
      * 빌드팩 리스트 조회
@@ -23,12 +28,12 @@ public class BuildPackServiceV2 extends Common {
      */
     public Map<String, Object> getBuildPacks() throws Exception {
         ListBuildpacksResponse listBuildpacksResponse =
-        cloudFoundryClient(connectionContext(), tokenProvider())
+                common.cloudFoundryClient(common.connectionContext(), common.tokenProvider())
                 .buildpacks()
                 .list(ListBuildpacksRequest.builder().build())
                 .block();
 
-        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
+        return common.objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
     /**
@@ -40,7 +45,7 @@ public class BuildPackServiceV2 extends Common {
      */
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
-        cloudFoundryClient(connectionContext(), tokenProvider())
+        common.cloudFoundryClient(common.connectionContext(), common.tokenProvider())
                 .buildpacks()
                 .update(UpdateBuildpackRequest.builder()
                         .buildpackId(buildPack.getGuid().toString())
