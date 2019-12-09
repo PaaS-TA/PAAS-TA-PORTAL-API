@@ -14,10 +14,7 @@ import java.util.Map;
 
 @EnableAsync
 @Service
-public class BuildPackServiceV2 {
-
-    @Autowired
-    Common common;
+public class BuildPackServiceV2 extends Common{
 
 
     /**
@@ -28,12 +25,12 @@ public class BuildPackServiceV2 {
      */
     public Map<String, Object> getBuildPacks() throws Exception {
         ListBuildpacksResponse listBuildpacksResponse =
-                common.cloudFoundryClient(common.connectionContext(), common.tokenProvider())
+                cloudFoundryClient(connectionContext(), tokenProvider())
                 .buildpacks()
                 .list(ListBuildpacksRequest.builder().build())
                 .block();
 
-        return common.objectMapper.convertValue(listBuildpacksResponse, Map.class);
+        return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
     /**
@@ -45,7 +42,7 @@ public class BuildPackServiceV2 {
      */
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
-        common.cloudFoundryClient(common.connectionContext(), common.tokenProvider())
+        cloudFoundryClient(connectionContext(), tokenProvider())
                 .buildpacks()
                 .update(UpdateBuildpackRequest.builder()
                         .buildpackId(buildPack.getGuid().toString())

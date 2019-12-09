@@ -12,7 +12,7 @@ import java.util.Map;
 @Service
 public class AppAutoscalingService {
     private final MonitoringRestTemplateService monitoringRestTemplateService;
-    private static final String url = "/v2/paas/app/autoscaling/";
+    private static final String url = "/v2/paas/app/autoscaling";
 
     @Autowired
     public AppAutoscalingService(MonitoringRestTemplateService monitoringRestTemplateService) {

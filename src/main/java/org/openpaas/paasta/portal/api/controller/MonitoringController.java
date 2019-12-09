@@ -34,7 +34,7 @@ public class MonitoringController {
      * @param type             the String
      * @return the map
      */
-    @GetMapping(value = {Constants.EXTERNAL_URL + "/app/{guid}/{idx}/cpuUsage"})
+    @GetMapping(value = {Constants.EXTERNAL_URL + "/{guid}/{idx}/cpuUsage"})
     public Map getCpuUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type) {
         LOGGER.info("### get guid ::: {}, idx :::{}, defaultTimeRange :::{}, groupBy :::{}", guid, idx, defaultTimeRange, groupBy);
         return monitoringService.getCpuUsage(guid, idx, defaultTimeRange, groupBy, type);
@@ -50,7 +50,7 @@ public class MonitoringController {
      * @param type             the String
      * @return the map
      */
-    @GetMapping(value = {Constants.EXTERNAL_URL + "/app/{guid}/{idx}/memoryUsage"})
+    @GetMapping(value = {Constants.EXTERNAL_URL + "/{guid}/{idx}/memoryUsage"})
     public Map getMemoryUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type) {
         return monitoringService.getMemoryUsage(guid, idx, defaultTimeRange, groupBy, type);
     }
@@ -65,7 +65,7 @@ public class MonitoringController {
      * @param type             the String
      * @return the map
      */
-    @GetMapping(value = {Constants.EXTERNAL_URL + "/app/{guid}/{idx}/getNetworkByte"})
+    @GetMapping(value = {Constants.EXTERNAL_URL + "/{guid}/{idx}/getNetworkByte"})
     public Map getNetworkByte(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type) {
         return monitoringService.getNetworkByte(guid, idx, defaultTimeRange, groupBy, type);
     }

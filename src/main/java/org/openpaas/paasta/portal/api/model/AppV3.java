@@ -473,7 +473,6 @@ public class AppV3 {
             this.diego = entity.getDiego();
             this.diskQuota = entity.getDiskQuota();
             this.dockerCredentials = entity.getDockerCredentials();
-            this.dockerCredentialsJsons = entity.getDockerCredentialsJsons();
             this.dockerImage = entity.getDockerImage();
             this.environmentJsons = entity.getEnvironmentJsons();
             this.healthCheckHttpEndpoint = entity.getHealthCheckHttpEndpoint();
