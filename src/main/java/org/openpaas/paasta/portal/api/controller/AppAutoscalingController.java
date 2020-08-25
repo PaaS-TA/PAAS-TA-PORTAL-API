@@ -1,5 +1,6 @@
 package org.openpaas.paasta.portal.api.controller;
 
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.service.AppAutoscalingService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +14,20 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Created by indra on 2018-05-14.
  */
 @RestController
-@RequestMapping(value = {"/app"})
 public class AppAutoscalingController {
+
+    //////////////////////////////////////////////////////////////////////
+    //////   * CLOUD FOUNDRY CLIENT API VERSION 2                   //////
+    //////   Document : http://apidocs.cloudfoundry.org             //////
+    //////////////////////////////////////////////////////////////////////
 
     private final Logger LOGGER = getLogger(AppAutoscalingController.class);
     private final AppAutoscalingService appAutoscalingService;
 
     @Autowired
-    public AppAutoscalingController(AppAutoscalingService appAutoscalingService) { this.appAutoscalingService = appAutoscalingService; }
+    public AppAutoscalingController(AppAutoscalingService appAutoscalingService) {
+        this.appAutoscalingService = appAutoscalingService;
+    }
 
     /**
      * 오토 스케일링 정보를 가져온다.
@@ -28,7 +35,7 @@ public class AppAutoscalingController {
      * @param appGuid
      * @return Map
      */
-    @RequestMapping(value = {"/autoscaling/policy"}, method = RequestMethod.GET)
+    @GetMapping(value = {Constants.EXTERNAL_URL + "/autoscaling/policy"})
     public Map getAutoscaling(@RequestParam(value = "appGuid") String appGuid) {
         LOGGER.info("AppAutoscalingController Get Start");
 
@@ -42,7 +49,7 @@ public class AppAutoscalingController {
      * @return Map
      * @throws Exception
      */
-    @RequestMapping(value = {"/autoscaling/policy"}, method = RequestMethod.POST)
+    @PostMapping(value = {Constants.EXTERNAL_URL + "/autoscaling/policy"})
     public Map updateAutoscaling(@RequestBody Map body) throws Exception {
         LOGGER.info("AppAutoscalingController Update Start");
 

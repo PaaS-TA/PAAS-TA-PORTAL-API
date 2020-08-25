@@ -143,4 +143,6 @@ public class Constants {
     public static final String V2_URL = "/v2";
     public static final String V3_URL = "/v3";
 
+    public static final String EXTERNAL_URL = "/ext/app";
+
 }
