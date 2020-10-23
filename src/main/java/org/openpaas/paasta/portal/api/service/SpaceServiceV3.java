@@ -280,8 +280,8 @@ public class SpaceServiceV3 extends Common {
 
             try {
                 if (sapceApplicationSummary.getState().equals("STARTED")) {
-                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), token);
-
+//                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), token);
+                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), cloudFoundryClient);
 
                     Double cpu = 0.0;
                     Double mem = 0.0;
@@ -325,6 +325,7 @@ public class SpaceServiceV3 extends Common {
                 e.printStackTrace();
             }
         }
+
         resultMap.put("apps", appsArray);
         resultMap.put("appsPer", appArray);
 

@@ -1,0 +1,55 @@
+---
+applications:
+- name: portal-api
+  memory: 4G
+  instances: 1
+  buildpacks:
+  - java_buildpack
+  path: build/libs/paas-ta-portal-api.jar
+  env:
+    server_port: 80
+
+    spring_application_name: PortalApi
+    spring_security_username: <SPRING_SECURITY_USERNAME>
+    spring_security_password: <SPRING_SECURITY_PASSWORD>
+    spring_flyway_enabled: false
+
+    tailsocket_port: 5555
+
+    management_security_enabled: false
+
+    ### paasta info
+    cloudfoundry_cc_api_url: https://api.<DOMAIN>
+    cloudfoundry_cc_api_uaaUrl: https://uaa.<DOMAIN>
+    cloudfoundry_cc_api_sslSkipValidation: true
+    cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>
+    cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>
+    cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ADMIN_ID>
+    cloudfoundry_user_uaaClient_clientSecret: <UAA_CLIENT_ADMIN_SECRET>
+    cloudfoundry_user_uaaClient_adminClientId: <UAA_CLIENT_ADMIN_ID>
+    cloudfoundry_user_uaaClient_adminClientSecret: <UAA_CLIENT_ADMIN_SECRET>
+    cloudfoundry_user_uaaClient_loginClientId: <UAA_CLIENT_ADMIN_ID>
+    cloudfoundry_user_uaaClient_loginClientSecret: <UAA_CLIENT_ADMIN_SECRET>
+    cloudfoundry_user_uaaClient_skipSSLValidation: true
+    cloudfoundry_authorization: cf-Authorization
+
+    paasta_portal_api_authorization_base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
+    paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.<DOMAIN>/portalapi
+    paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.<DOMAIN>/commonapi
+    paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.<DOMAIN>/storageapi
+    paasta_portal_storageapi_type: swift
+
+    eureka_client_serviceUrl_defaultZone: http://portal-registration.<DOMAIN>/eureka/
+    eureka_client_serviceUrl_registry-fetch-interval-seconds: 5
+    eureka_instance_hostname: ${vcap.application.uris[0]}
+    eureka_instance_nonSecurePort: 80
+    eureka_instance_lease-expiration-duration-in-seconds: 5
+    eureka_instance_lease-renewal-interval-in-seconds: 10
+
+    ### abacus
+    abacus_url: <ABACUS_URL>
+
+    ### monitoring
+    monitoring_api_url: <MONITORING_API_URL>
+    multipart_maxFileSize: 1000Mb
+    multipart_maxRequestSize: 1000Mb
