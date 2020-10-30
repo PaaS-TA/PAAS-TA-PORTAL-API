@@ -1,55 +1,54 @@
 ---
 applications:
-- name: portal-api
-  memory: 4G
-  instances: 1
-  buildpacks:
-  - java_buildpack
-  path: build/libs/paas-ta-portal-api.jar
-  env:
-    server_port: 80
+  - name: portal-api
+    memory: 2G
+    disk: 2G
+    instances: 1
+    buildpacks:
+    - java_buildpack_pinpoint
+    path: build/libs/paas-ta-portal-api.jar
+    env:
+      server_port: 80
 
-    spring_application_name: PortalApi
-    spring_security_username: <SPRING_SECURITY_USERNAME>
-    spring_security_password: <SPRING_SECURITY_PASSWORD>
-    spring_flyway_enabled: false
+      JBP_CONFIG_CONTAINER_SECURITY_PROVIDER: '{key_manager_enabled: false, trust_manager_enabled: false}'
+      spring_application_name: PortalApi
 
-    tailsocket_port: 5555
+      spring_security_username: admin
+      spring_security_password: openpaasta
 
-    management_security_enabled: false
+      tailsocket_port: 5555
 
-    ### paasta info
-    cloudfoundry_cc_api_url: https://api.<DOMAIN>
-    cloudfoundry_cc_api_uaaUrl: https://uaa.<DOMAIN>
-    cloudfoundry_cc_api_sslSkipValidation: true
-    cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>
-    cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>
-    cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ADMIN_ID>
-    cloudfoundry_user_uaaClient_clientSecret: <UAA_CLIENT_ADMIN_SECRET>
-    cloudfoundry_user_uaaClient_adminClientId: <UAA_CLIENT_ADMIN_ID>
-    cloudfoundry_user_uaaClient_adminClientSecret: <UAA_CLIENT_ADMIN_SECRET>
-    cloudfoundry_user_uaaClient_loginClientId: <UAA_CLIENT_ADMIN_ID>
-    cloudfoundry_user_uaaClient_loginClientSecret: <UAA_CLIENT_ADMIN_SECRET>
-    cloudfoundry_user_uaaClient_skipSSLValidation: true
-    cloudfoundry_authorization: cf-Authorization
+      management_security_enabled: false
+      management_health_ldap_enabled: false
 
-    paasta_portal_api_authorization_base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
-    paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.<DOMAIN>/portalapi
-    paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.<DOMAIN>/commonapi
-    paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.<DOMAIN>/storageapi
-    paasta_portal_storageapi_type: swift
+      ### paasta info
+      cloudfoundry_cc_api_url: https://api.<DOMAIN>
+      cloudfoundry_cc_api_uaaUrl: https://uaa.<DOMAIN>
+      cloudfoundry_cc_api_sslSkipValidation: true
+      cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>                    # (e.g. admin)
+      cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>                    # (e.g. admin)
+      cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ADMIN_ID>                   # (e.g. admin)
+      cloudfoundry_user_uaaClient_clientSecret: <UAA_CLIENT_ADMIN_SECRET>           # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_adminClientId: <UAA_CLIENT_ADMIN_ID>              # (e.g. admin)
+      cloudfoundry_user_uaaClient_adminClientSecret: <UAA_CLIENT_ADMIN_SECRET>      # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_loginClientId: <UAA_CLIENT_ADMIN_ID>              # (e.g. admin)
+      cloudfoundry_user_uaaClient_loginClientSecret: <UAA_CLIENT_ADMIN_SECRET>      # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_skipSSLValidation: true
+      cloudfoundry_authorization: cf-Authorization
 
-    eureka_client_serviceUrl_defaultZone: http://portal-registration.<DOMAIN>/eureka/
-    eureka_client_serviceUrl_registry-fetch-interval-seconds: 5
-    eureka_instance_hostname: ${vcap.application.uris[0]}
-    eureka_instance_nonSecurePort: 80
-    eureka_instance_lease-expiration-duration-in-seconds: 5
-    eureka_instance_lease-renewal-interval-in-seconds: 10
+      paasta_portal_api_authorization_base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
+      paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.<DOMAIN>/portalapi
+      paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.<DOMAIN>/commonapi
+      paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.<DOMAIN>/storageapi
+      paasta_portal_storageapi_type: swift
 
-    ### abacus
-    abacus_url: <ABACUS_URL>
+      eureka.client.serviceUrl.defaultZone: http://portal-registration.<DOMAIN>/eureka/
+      eureka.instance.hostname: ${vcap.application.uris[0]}
+      eureka.instance.nonSecurePort: 80
 
-    ### monitoring
-    monitoring_api_url: <MONITORING_API_URL>
-    multipart_maxFileSize: 1000Mb
-    multipart_maxRequestSize: 1000Mb
+      ### abacus
+      abacus_url: http://localhost
+
+      ## monitoring
+      monitoring_api_url: http://localhost
+

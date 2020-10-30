@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.common;
 
 import org.apache.http.conn.util.InetAddressUtils;
-import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
@@ -235,11 +234,6 @@ public class Common {
             token = "bearer " + token;
         }
         TokenProvider tokenProvider = new TokenGrantTokenProvider(token);
-        String name = uaaClient(connectionContext(), tokenProvider).getUsername().block();
-
-        if (name.equals("admin")) {
-            return tokenProvider();
-        }
 
         return tokenProvider;
 

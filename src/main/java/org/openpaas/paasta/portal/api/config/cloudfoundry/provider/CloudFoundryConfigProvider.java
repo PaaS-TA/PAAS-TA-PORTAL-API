@@ -1,7 +1,6 @@
 package org.openpaas.paasta.portal.api.config.cloudfoundry.provider;
 
 
-import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.PaastaConnectionContext;
