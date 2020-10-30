@@ -5,7 +5,7 @@ applications:
     disk: 2G
     instances: 1
     buildpacks:
-    - java_buildpack_pinpoint
+    - java_buildpack
     path: build/libs/paas-ta-portal-api.jar
     env:
       server_port: 80
