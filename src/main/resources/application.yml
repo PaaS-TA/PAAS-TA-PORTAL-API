@@ -9,67 +9,66 @@ spring:
     enabled: false
 
 server:
-  port: 2222
+  port: ${PORT:2222}
 
-#tailsocket:
-#  port: 5555
+tailsocket:
+  port: 5555
 
 management:     # If you set off security...
   security:
     enabled: false
 
 # paasta info
-#cloudfoundry:
-#  cc:
-#    api:
-#      url: https://api.<DOMAIN>
-#      uaaUrl: https://uaa.<DOMAIN>
-#      sslSkipValidation: true
-#  # CloudFoundry Login information
-#  user:
-#    admin:
-#      username: admin
-#      password: admin
-#    uaaClient:
-#      clientId: admin
-#      clientSecret: admin-secret
-#      adminClientId: admin
-#      adminClientSecret: admin-secret
-#      loginClientId: admin
-#      loginClientSecret: admin-secret
-#      skipSSLValidation: true
-#  authorization: cf-Authorization
+cloudfoundry:
+  cc:
+    api:
+      url: https://api.<DOMAIN>
+      uaaUrl: https://uaa.<DOMAIN>
+      sslSkipValidation: true
+  # CloudFoundry Login information
+  user:
+    admin:
+      username: <CF_USER_ADMIN_USERNAME>                # (e.g. admin)
+      password: <CF_USER_ADMIN_PASSWORD>                # (e.g. admin)
+    uaaClient:
+      clientId: <UAA_CLIENT_ID>                         # (e.g. admin)
+      clientSecret: <UAA_CLIENT_SECRET>                 # (e.g. admin-secret)
+      adminClientId: <UAA_ADMIN_CLIENT_ID>              # (e.g. admin)
+      adminClientSecret: <UAA_ADMIN_CLIENT_SECRET>      # (e.g. admin-secret)
+      loginClientId: <UAA_LOGIN_CLIENT_ID>              # (e.g. admin)
+      loginClientSecret: <UAA_LOGIN_CLIENT_SECRET>      # (e.g. admin-secret)
+      skipSSLValidation: true
+  authorization: cf-Authorization
 
-
-#abacus:
-#  url: http://abacus.<DOMAIN>
+abacus:
+  url: http://<ABACUS_URL>
 
 # 포탈 상세 모니터링
-#monitoring:
-#  api:
-#    url: http://monitoring.<DOMAIN>
+monitoring:
+  api:
+    url: http://<MONITORING_API_URL>
 
 multipart:
   maxFileSize: 1000Mb
   maxRequestSize: 1000Mb
 
 #paasta:
-#  portal:
-#    api:
-#      authorization:
-#        base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
-#      zuulUrl:
-#        cfapi: http://10.0.201.123:2225/portalapi
-#        commonapi: http://10.0.201.123:2225/commonapi
-#        storageapi: http://10.0.201.123:2225/storageapi
-#    storageapi:
-#      type: swift
+portal:
+  api:
+    authorization:
+      base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
+    zuulUrl:
+      cfapi: http://<PORTAL_GATEWAY_IP>:<PORTAL_GATEWAY_PORT>/portalapi
+      commonapi: http://<PORTAL_GATEWAY_IP>:<PORTAL_GATEWAY_PORT>/commonapi
+      storageapi: http://<PORTAL_GATEWAY_IP>:<PORTAL_GATEWAY_PORT>/storageapi
+  storageapi:
+    type: swift
 
 # Discovery Server Access
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://10.0.201.124:2221/eureka/
+      defaultZone: http://<PORTAL_REGISTRATION_IP>:<PORTAL_REGISTRATION_PORT>/eureka/
       registry-fetch-interval-seconds: 5
   instance:
     hostname: ${spring.cloud.client.hostname}

@@ -27,12 +27,12 @@ applications:
       cloudfoundry_cc_api_sslSkipValidation: true
       cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>                    # (e.g. admin)
       cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>                    # (e.g. admin)
-      cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ADMIN_ID>                   # (e.g. admin)
-      cloudfoundry_user_uaaClient_clientSecret: <UAA_CLIENT_ADMIN_SECRET>           # (e.g. admin-secret)
-      cloudfoundry_user_uaaClient_adminClientId: <UAA_CLIENT_ADMIN_ID>              # (e.g. admin)
-      cloudfoundry_user_uaaClient_adminClientSecret: <UAA_CLIENT_ADMIN_SECRET>      # (e.g. admin-secret)
-      cloudfoundry_user_uaaClient_loginClientId: <UAA_CLIENT_ADMIN_ID>              # (e.g. admin)
-      cloudfoundry_user_uaaClient_loginClientSecret: <UAA_CLIENT_ADMIN_SECRET>      # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ID>                         # (e.g. admin)
+      cloudfoundry_user_uaaClient_clientSecret: <UAA_CLIENT_SECRET>                 # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_adminClientId: <UAA_ADMIN_CLIENT_ID>              # (e.g. admin)
+      cloudfoundry_user_uaaClient_adminClientSecret: <UAA_ADMIN_CLIENT_SECRET>      # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_loginClientId: <UAA_LOGIN_CLIENT_ID>              # (e.g. admin)
+      cloudfoundry_user_uaaClient_loginClientSecret: <UAA_LOGIN_CLIENT_SECRET>      # (e.g. admin-secret)
       cloudfoundry_user_uaaClient_skipSSLValidation: true
       cloudfoundry_authorization: cf-Authorization
 
@@ -47,8 +47,8 @@ applications:
       eureka.instance.nonSecurePort: 80
 
       ### abacus
-      abacus_url: http://localhost
+      abacus_url: http://<ABACUS_URL>
 
       ## monitoring
-      monitoring_api_url: http://localhost
+      monitoring_api_url: http://<MONITORING_API_URL>
 
