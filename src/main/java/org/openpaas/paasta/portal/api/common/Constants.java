@@ -144,5 +144,7 @@ public class Constants {
     public static final String V3_URL = "/v3";
 
     public static final String EXTERNAL_URL = "/ext/app";
+    
+    public static final String SSH_URL = "/ssh/";
 
 }
