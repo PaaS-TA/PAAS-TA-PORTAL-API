@@ -56,10 +56,8 @@ public class SshController extends Common {
     @GetMapping(Constants.SSH_URL + "/ssh-code")
     public Map<String, Object> getSshCode(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
     	Map<String, Object> resultMap = new LinkedHashMap<>();
-    	OAuth2AccessToken accessToken = loginService.login("admin", "admin");
-
-    	DefaultCloudFoundryOperations cloudFoundryClient = cloudFoundryOperations(tokenProvider(accessToken.getValue()));
-    	Mono<String> sshCode = cloudFoundryClient.advanced().sshCode();
+    	
+    	Mono<String> sshCode = cloudFoundryOperations().advanced().sshCode();
     	
     	resultMap.put("sshCode", sshCode.block());
     	return resultMap;
