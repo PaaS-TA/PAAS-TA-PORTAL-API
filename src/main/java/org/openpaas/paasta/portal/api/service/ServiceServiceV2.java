@@ -156,7 +156,8 @@ public class ServiceServiceV2 extends Common {
             String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
             String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl");
             String routeServiceUrl = service.getRouteServiceUrl();
-            String tags = service.getTags();
+            String tag = service.getTags().replaceAll(" ", "");
+            String[] tags = tag.split(",");
 
             if (!stringNullCheck(orgName, spaceName, serviceInstanceName, service.getCredentials().toString())) {
             }
@@ -199,9 +200,11 @@ public class ServiceServiceV2 extends Common {
                 map = parsing(service.getCredentials());
             }
             String syslogDrainUrl = service.getSyslogDrainUrl();
+            String tag = service.getTags().replaceAll(" ", "");
+            String[] tags = tag.split(",");
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(service.getRouteServiceUrl()).tags(service.getTags()).build()).block();
+            UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(service.getRouteServiceUrl()).tags(tags).build()).block();
 
 
             result.put("result", true);
