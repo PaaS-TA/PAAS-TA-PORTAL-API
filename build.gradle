@@ -15,7 +15,7 @@ ext {
 }
 
 apply plugin: 'java'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: "io.spring.dependency-management"
 
 
@@ -36,6 +36,8 @@ dependencyManagement {
     }
 }
 dependencies {
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
     //Server Security
     compile ('org.springframework.boot:spring-boot-starter-security')
 
@@ -49,14 +51,14 @@ dependencies {
     compile ('org.springframework.cloud:spring-cloud-starter-eureka')
 
     //cloud foundry client
-    compile ('org.cloudfoundry:cloudfoundry-client-reactor:4.0.1.RELEASE')
-    compile ('org.cloudfoundry:cloudfoundry-operations:4.0.1.RELEASE')
-    compile ('org.cloudfoundry:cloudfoundry-client:4.0.1.RELEASE')
-    compile('org.cloudfoundry:cloudfoundry-client-lib:1.1.3')
-    compile ('org.cloudfoundry:cloudfoundry-util:4.0.1.RELEASE')
-    compile ('io.projectreactor:reactor-core:3.3.0.RELEASE')
+    compile ('org.cloudfoundry:cloudfoundry-client-reactor:3.17.1.RELEASE')
+    compile ('org.cloudfoundry:cloudfoundry-operations:3.17.1.RELEASE')
+    compile ('org.cloudfoundry:cloudfoundry-client:3.17.1.RELEASE')
+    compile ('org.cloudfoundry:cloudfoundry-client-lib:1.1.3')
+    compile ('org.cloudfoundry:cloudfoundry-util:3.17.1.RELEASE')
 
-    compile ('io.projectreactor.ipc:reactor-netty:0.7.15.RELEASE')
+    compile ('io.projectreactor:reactor-core:3.1.8.RELEASE')
+    compile ('io.projectreactor.netty:reactor-netty:0.8.4.RELEASE')
 
     // https://mvnrepository.com/artifact/com.corundumstudio.socketio/netty-socketio
 //    compile ('com.corundumstudio.socketio:netty-socketio:1.7.14')
@@ -76,12 +78,15 @@ dependencies {
 
     compile ('org.flywaydb:flyway-core:4.0.3')
 
+    // testCompile
+    testCompile ('org.cloudfoundry:cloudfoundry-client-reactor:3.17.1.RELEASE')
+    testCompile ('org.cloudfoundry:cloudfoundry-operations:3.17.1.RELEASE')
+    testCompile ('org.cloudfoundry:cloudfoundry-client:3.17.1.RELEASE')
+    testCompile ('org.cloudfoundry:cloudfoundry-client-lib:1.1.3')
+    testCompile ('org.cloudfoundry:cloudfoundry-util:3.17.1.RELEASE')
 
-    testCompile('org.cloudfoundry:cloudfoundry-client-reactor:4.0.1.RELEASE')
-    testCompile('org.cloudfoundry:cloudfoundry-operations:4.0.1.RELEASE')
-    testCompile('org.cloudfoundry:cloudfoundry-client-lib:1.1.3')
-    testCompile('io.projectreactor:reactor-core:4.0.1.RELEASE')
-    testCompile('io.projectreactor.ipc:reactor-netty:0.7.15.RELEASE')
+    testCompile ('io.projectreactor:reactor-core:3.1.8.RELEASE')
+    testCompile ('io.projectreactor.netty:reactor-netty:0.8.4.RELEASE')
 
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
