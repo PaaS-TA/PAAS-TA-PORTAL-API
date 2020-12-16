@@ -111,13 +111,13 @@ public class BuildPackServiceV2Test {
 
     }
 
-    @Test
-    public void testGetBuildPacks() throws Exception {
-//        when(buildPackServiceV2.getBuildPacks()).thenReturn(thenReturn);
-
-        Map<String, Object> result = buildPackServiceV2.getBuildPacks();
-        Assert.assertEquals(thenReturn, result);
-    }
+//    @Test
+//    public void testGetBuildPacks() throws Exception {
+////        when(buildPackServiceV2.getBuildPacks()).thenReturn(thenReturn);
+//
+//        Map<String, Object> result = buildPackServiceV2.getBuildPacks();
+//        Assert.assertEquals(thenReturn, result);
+//    }
 
 //    @Test
 //    public void testUpdateBuildPack() throws Exception {
