@@ -56,6 +56,9 @@ public class Service {
     @JsonProperty("routeServiceUrl")
     private String routeServiceUrl;
 
+    @JsonProperty("tags")
+    private String tags;
+
     public String getName() {
         return name;
     }
@@ -187,6 +190,14 @@ public class Service {
 
     public void setRouteServiceUrl(String routeServiceUrl) {
         this.routeServiceUrl = routeServiceUrl;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
