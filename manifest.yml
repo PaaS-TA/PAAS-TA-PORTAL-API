@@ -1,3 +1,4 @@
+---
 applications:
   - name: portal-api
     memory: 2G

@@ -15,9 +15,10 @@ ext {
 }
 
 apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: "io.spring.dependency-management"
-
 
 jar {
     baseName = 'paas-ta-portal-api'
@@ -35,17 +36,17 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
+
 dependencies {
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     //Server Security
     compile ('org.springframework.boot:spring-boot-starter-security')
-
     //Admin Server Setting
-//    compile ('de.codecentric:spring-boot-admin-starter-client:1.5.7')
+    //compile ('de.codecentric:spring-boot-admin-starter-client:1.5.7')
 
     //Config Server Setting
-//    compile('org.springframework.cloud:spring-cloud-starter-config')
+    //compile('org.springframework.cloud:spring-cloud-starter-config')
 
     //Eureka
     compile ('org.springframework.cloud:spring-cloud-starter-eureka')
@@ -60,9 +61,6 @@ dependencies {
     compile ('io.projectreactor:reactor-core:3.1.8.RELEASE')
     compile ('io.projectreactor.netty:reactor-netty:0.8.4.RELEASE')
 
-    // https://mvnrepository.com/artifact/com.corundumstudio.socketio/netty-socketio
-//    compile ('com.corundumstudio.socketio:netty-socketio:1.7.14')
-
     compile ('com.googlecode.json-simple:json-simple:1.1.1')
 
     //cloud foundry uaa
@@ -70,11 +68,6 @@ dependencies {
     compile ('org.cloudfoundry.identity:cloudfoundry-identity-scim:2.7.4'){
         exclude group: 'org.slf4j'
     }
-
-
-    //hystrix
-//    compile('org.springframework.cloud:spring-cloud-starter-hystrix:1.4.4.RELEASE')
-//    compile('org.springframework.boot:spring-boot-starter-actuator')
 
     compile ('org.flywaydb:flyway-core:4.0.3')
 
@@ -88,7 +81,6 @@ dependencies {
     testCompile ('io.projectreactor:reactor-core:3.1.8.RELEASE')
     testCompile ('io.projectreactor.netty:reactor-netty:0.8.4.RELEASE')
 
-
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.12'
     testCompile group: 'org.jsoup', name: 'jsoup', version: '1.9.2'
@@ -98,7 +90,6 @@ dependencies {
     testCompile "com.squareup.okhttp3:mockwebserver:3.11.0"
 
 }
-
 
 apply plugin: 'jacoco'
 

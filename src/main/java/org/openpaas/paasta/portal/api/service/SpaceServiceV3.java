@@ -325,6 +325,7 @@ public class SpaceServiceV3 extends Common {
                 e.printStackTrace();
             }
         }
+
         resultMap.put("apps", appsArray);
         resultMap.put("appsPer", appArray);
 
