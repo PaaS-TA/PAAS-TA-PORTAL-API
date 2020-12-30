@@ -14,6 +14,8 @@ ext {
     springCloudVersion = 'Edgware.RELEASE'
 }
 
+ext['tomcat.version'] = '8.5.61'
+
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
