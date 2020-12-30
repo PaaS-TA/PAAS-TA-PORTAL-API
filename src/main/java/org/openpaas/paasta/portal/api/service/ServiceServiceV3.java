@@ -155,12 +155,14 @@ public class ServiceServiceV3 extends Common {
             String serviceInstanceName = service.getServiceInstanceName();//("serviceInstanceName");
             String syslogDrainUrl = service.getSyslogDrainUrl();//("syslogDrainUrl");
             String routeServiceUrl = service.getRouteServiceUrl();
+            String tag = service.getTags().replaceAll(" ", "");
+            String[] tags = tag.split(",");
 
             if (!stringNullCheck(orgName, spaceName, serviceInstanceName, service.getCredentials().toString())) {
             }
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            CreateUserProvidedServiceInstanceResponse createUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName).spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(routeServiceUrl).build()).block();
+            CreateUserProvidedServiceInstanceResponse createUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName).spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(routeServiceUrl).tags(tags).build()).block();
 
 
             result.put("result", true);
@@ -197,9 +199,11 @@ public class ServiceServiceV3 extends Common {
                 map = parsing(service.getCredentials());
             }
             String syslogDrainUrl = service.getSyslogDrainUrl();
+            String tag = service.getTags().replaceAll(" ", "");
+            String[] tags = tag.split(",");
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(service.getRouteServiceUrl()).build()).block();
+            UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(service.getRouteServiceUrl()).tags(tags).build()).block();
 
 
             result.put("result", true);

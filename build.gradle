@@ -38,8 +38,8 @@ dependencyManagement {
 }
 
 dependencies {
-
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
     //Server Security
     compile ('org.springframework.boot:spring-boot-starter-security')
     //Admin Server Setting
@@ -79,7 +79,7 @@ dependencies {
     testCompile ('org.cloudfoundry:cloudfoundry-util:3.17.1.RELEASE')
 
     testCompile ('io.projectreactor:reactor-core:3.1.8.RELEASE')
-    compile ('io.projectreactor.netty:reactor-netty:0.8.4.RELEASE')
+    testCompile ('io.projectreactor.netty:reactor-netty:0.8.4.RELEASE')
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.12'

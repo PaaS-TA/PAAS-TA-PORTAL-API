@@ -51,4 +51,3 @@ applications:
 
       ## monitoring
       monitoring_api_url: http://<MONITORING_API_URL>
-
