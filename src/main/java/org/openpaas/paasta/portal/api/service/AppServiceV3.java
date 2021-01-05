@@ -549,19 +549,4 @@ public class AppServiceV3 extends Common {
 //        AppV3 app = AppV3.builder().applicationResponse(getApplicationResponse).applicationEnvironmentResponse(getApplicationEnvironmentResponse).applicationProcessResponse(getApplicationProcessResponse).applicationCurrentDropletResponse(getApplicationCurrentDropletResponse).applicationProcessStatisticsResponse(processStatisticsResponse).summaryApplicationResponse(summaryApplicationResponse).build();
 //        return app;
 //    }
-
-    /**
-     * 앱 실시간 상태를 조회한다.
-     *
-     * @param guid  the app guid
-     * @param cloudFoundryClient the ReactorCloudFoundryClient
-     * @return the app stats
-     */
-    public ApplicationStatisticsResponse getAppStats(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
-
-        ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(guid).build()).block();
-
-        return applicationStatisticsResponse;
-    }
-
 }
