@@ -46,7 +46,7 @@ public class ClientServiceV3 extends Common {
 
         ClientServiceV3.ClientOption clientOption = new ClientServiceV3.ClientOption();
         clientOption = clientOption.setClientOptionByMap(param);
-        LOGGER.info("ClientOPTION ::: " + clientOption.toString());
+        //LOGGER.info("ClientOPTION ::: " + clientOption.toString());
         Map result = new HashMap();
         try {
             uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().create(CreateClientRequest.builder().clientId(clientOption.clientId).clientSecret(clientOption.clientSecret).name(clientOption.name).scopes(clientOption.scopes).authorities(clientOption.authorities).resourceIds(clientOption.resourceIds).authorizedGrantTypes(clientOption.authorizedGrantTypes).redirectUriPatterns(clientOption.redirectUriPatterns).autoApproves(clientOption.autoApproves).tokenSalt(clientOption.tokenSalt).allowedProviders(clientOption.allowedProviders).accessTokenValidity(clientOption.accessTokenValidity).refreshTokenValidity(clientOption.refreshTokenValidity).build()).block();
@@ -170,7 +170,7 @@ public class ClientServiceV3 extends Common {
 
                 String key = keys.next();
                 Object value = param.get(key);
-                //LOGGER.info( "key : " + key + ", value : " + value);
+                ////LOGGER.info( "key : " + key + ", value : " + value);
 
                 // ID
                 if (key.equals("client_id")) {

@@ -90,7 +90,7 @@ public class SpaceControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("Get SpaceSummary Start : " + spaceid);
+        //LOGGER.info("Get SpaceSummary Start : " + spaceid);
         GetSpaceSummaryResponse respSapceSummary = spaceServiceV2.getSpaceSummary(spaceid, cloudFoundryClient(tokenProvider(token)));
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -155,7 +155,7 @@ public class SpaceControllerV2 extends Common {
         resultMap.put("apps", appsArray);
         resultMap.put("appsPer", appArray);
 
-        LOGGER.info("Get SpaceSummary End ");
+        //LOGGER.info("Get SpaceSummary End ");
 
         return resultMap;
     }
@@ -178,10 +178,10 @@ public class SpaceControllerV2 extends Common {
      */
     @PutMapping(Constants.V2_URL + "/spaces")
     public Map renameSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("renameSpace Start ");
+        //LOGGER.info("renameSpace Start ");
         Map resultMap = spaceServiceV2.renameSpace(space, token);
 
-        LOGGER.info("renameSpace End ");
+        //LOGGER.info("renameSpace End ");
         return resultMap;
     }
 
@@ -198,10 +198,10 @@ public class SpaceControllerV2 extends Common {
      */
     @DeleteMapping(Constants.V2_URL +  "/spaces/{guid}")
     public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteSpace Start ");
+        //LOGGER.info("deleteSpace Start ");
         Map resultMap = spaceServiceV2.deleteSpace(guid, recursive, token);
 
-        LOGGER.info("deleteSpace End ");
+        //LOGGER.info("deleteSpace End ");
         return resultMap;
     }
 
@@ -218,20 +218,20 @@ public class SpaceControllerV2 extends Common {
      */
     @PostMapping(Constants.V2_URL + "/spaces")
     public Map createSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("createSpace Start ");
+        //LOGGER.info("createSpace Start ");
         Map resultMap = spaceServiceV2.createSpace(space, token);
 
-        LOGGER.info("createSpace End ");
+        //LOGGER.info("createSpace End ");
         return resultMap;
     }
 
     @RequestMapping(value = {Constants.V2_URL + "/spaces/{guid}/services"}, method = RequestMethod.GET)
     public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("getSpaceServices Start : " + guid);
+        //LOGGER.info("getSpaceServices Start : " + guid);
 
         ListSpaceServicesResponse respSpaceServices = spaceServiceV2.getSpaceServices(guid);
 
-        LOGGER.info("getSpaceServices End ");
+        //LOGGER.info("getSpaceServices End ");
 
         return respSpaceServices;
     }

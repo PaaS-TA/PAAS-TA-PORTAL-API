@@ -61,7 +61,7 @@ public class ClientControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/clients"})
     public Map registerClient(@RequestBody Map<String, Object> param) throws Exception {
-        LOGGER.info("PARAM " + param.toString());
+        //LOGGER.info("PARAM " + param.toString());
 
         return clientServiceV3.registerClient(param);
     }

@@ -60,7 +60,7 @@ public class ClientServiceV2 extends Common {
         ClientServiceV2.ClientOption clientOption = new ClientServiceV2.ClientOption();
         clientOption = clientOption.setClientOptionByMap(param);
 
-        LOGGER.info(clientOption.toString());
+        //LOGGER.info(clientOption.toString());
 
         //Secret, Token Validity 는 생성 이후 수정 불가
         return uaaAdminClient(connectionContext(), adminUserName, adminPassword, uaaAdminClientId, uaaAdminClientSecret).clients().update(UpdateClientRequest.builder().clientId(clientOption.clientId)
@@ -131,7 +131,7 @@ public class ClientServiceV2 extends Common {
 
                 String key = keys.next();
                 Object value = param.get(key);
-                //LOGGER.info( "key : " + key + ", value : " + value);
+                ////LOGGER.info( "key : " + key + ", value : " + value);
 
                 // ID
                 if (key.equals("client_id")) {

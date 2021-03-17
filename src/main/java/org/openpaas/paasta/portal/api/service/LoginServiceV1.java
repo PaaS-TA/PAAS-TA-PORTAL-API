@@ -69,7 +69,7 @@ public class LoginServiceV1 extends Common {
             if (oAuthToken.getExpiration().getTime() - current <= 60_000L) {
                 OAuth2AccessToken newOAuthToken = refresh(oAuthToken);
                 tokenCaches.put(oldToken, newOAuthToken);
-                LOGGER.info("Refresh token : {} ----> {}", oAuthToken.getValue(), newOAuthToken.getValue());
+                //LOGGER.info("Refresh token : {} ----> {}", oAuthToken.getValue(), newOAuthToken.getValue());
             }
             return oAuthToken;
         } else {

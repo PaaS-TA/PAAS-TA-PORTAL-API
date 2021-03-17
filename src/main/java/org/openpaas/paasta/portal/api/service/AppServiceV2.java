@@ -78,7 +78,7 @@ public class AppServiceV2 extends Common {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             UpdateApplicationResponse response = cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getNewName()).build()).block();
 
-            LOGGER.info("Update app response :", response);
+            //LOGGER.info("Update app response :", response);
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");

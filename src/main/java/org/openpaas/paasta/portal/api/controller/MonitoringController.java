@@ -36,7 +36,7 @@ public class MonitoringController {
      */
     @GetMapping(value = {Constants.EXTERNAL_URL + "/{guid}/{idx}/cpuUsage"})
     public Map getCpuUsage(@PathVariable String guid, @PathVariable long idx, @RequestParam(value = "defaultTimeRange") String defaultTimeRange, @RequestParam(value = "groupBy") String groupBy, @RequestParam(value = "type") String type) {
-        LOGGER.info("### get guid ::: {}, idx :::{}, defaultTimeRange :::{}, groupBy :::{}", guid, idx, defaultTimeRange, groupBy);
+        //LOGGER.info("### get guid ::: {}, idx :::{}, defaultTimeRange :::{}, groupBy :::{}", guid, idx, defaultTimeRange, groupBy);
         return monitoringService.getCpuUsage(guid, idx, defaultTimeRange, groupBy, type);
     }
 

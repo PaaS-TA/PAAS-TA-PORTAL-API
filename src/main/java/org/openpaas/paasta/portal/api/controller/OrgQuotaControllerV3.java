@@ -36,7 +36,7 @@ public class OrgQuotaControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/quota-definitions")
     public ListOrganizationQuotaDefinitionsResponse getOrgQuotaDefinitions(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getOrgQuotaDefinitions Start : ");
+        //LOGGER.info("getOrgQuotaDefinitions Start : ");
         return orgQuotaServiceV3.getOrgQuotaDefinitionsList(token);
     }
 
@@ -49,7 +49,7 @@ public class OrgQuotaControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/quota-definitions/{quotaId}")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaDefinition(@PathVariable String quotaId,  @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getOrgQuotaDefinition Start : ");
+        //LOGGER.info("getOrgQuotaDefinition Start : ");
         return orgQuotaServiceV3.getOrgQuotaDefinitions(quotaId, token);
     }
 
@@ -61,7 +61,7 @@ public class OrgQuotaControllerV3 extends Common {
      */
     @PostMapping(Constants.V3_URL + "/orgs/quota-definitions")
     public CreateOrganizationQuotaDefinitionResponse createOrgQuotaDefinitions(@RequestBody Quota quota, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("createOrgQuotaDefinitions Start : ");
+        //LOGGER.info("createOrgQuotaDefinitions Start : ");
         return orgQuotaServiceV3.createOrgQuotaDefinitions(quota, token);
     }
 
@@ -75,7 +75,7 @@ public class OrgQuotaControllerV3 extends Common {
      */
     @PutMapping(Constants.V3_URL + "/orgs/quota-definitions/{quotaId}")
     public UpdateOrganizationQuotaDefinitionResponse updateOrgQuotaDefinitions(@PathVariable String quotaId, @RequestBody Quota quota, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("updateOrgQuotaDefinitions Start : ");
+        //LOGGER.info("updateOrgQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(quotaId));
         return orgQuotaServiceV3.updateOrgQuotaDefinitions(quota, token);
     }
@@ -89,7 +89,7 @@ public class OrgQuotaControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/orgs/quota-definitions/{quotaId}")
     public DeleteOrganizationQuotaDefinitionResponse deleteOrgQuotaDefinitions(@PathVariable String quotaId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteOrgQuotaDefinitions Start : ");
+        //LOGGER.info("deleteOrgQuotaDefinitions Start : ");
         return orgQuotaServiceV3.deleteOrgQuotaDefinitions(quotaId, token);
     }
 
@@ -103,7 +103,7 @@ public class OrgQuotaControllerV3 extends Common {
     @PutMapping(Constants.V3_URL + "/orgs/quota-definitions/associations")
     public boolean setOrgQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request) throws Exception {
         // Name : 사용자가 입력하는 값이기 떄문에 URL 값으로 받지 않음
-        LOGGER.info("setOrgQuotaDefinitions Start : ");
+        //LOGGER.info("setOrgQuotaDefinitions Start : ");
         orgQuotaServiceV3.setOrgQuotaDefinitions(quota);
         return true;
     }

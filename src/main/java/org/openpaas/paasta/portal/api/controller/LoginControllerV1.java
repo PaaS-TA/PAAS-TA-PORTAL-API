@@ -48,9 +48,9 @@ public class LoginControllerV1 extends Common {
         String id = (String) body.get("id");
         String password = (String) body.get("password");
 
-        LOGGER.info("> into login ...");
-        LOGGER.info("id: {}", id);
-        LOGGER.info("password: {}", password);
+        //LOGGER.info("> into login ...");
+        //LOGGER.info("id: {}", id);
+        //LOGGER.info("password: {}", password);
 
         Map<String, Object> result = new HashMap<>();
         OAuth2AccessToken token = loginServiceV1.login(id, password);
@@ -80,7 +80,7 @@ public class LoginControllerV1 extends Common {
         result.put("id", id);
         result.put("password", password);
         result.put("auth", auths);
-        LOGGER.info("Token :: " + token.getValue());
+        //LOGGER.info("Token :: " + token.getValue());
 
         return result;
     }

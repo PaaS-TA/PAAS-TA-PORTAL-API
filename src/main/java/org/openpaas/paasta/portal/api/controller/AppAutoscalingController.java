@@ -37,7 +37,7 @@ public class AppAutoscalingController {
      */
     @GetMapping(value = {Constants.EXTERNAL_URL + "/autoscaling/policy"})
     public Map getAutoscaling(@RequestParam(value = "appGuid") String appGuid) {
-        LOGGER.info("AppAutoscalingController Get Start");
+        //LOGGER.info("AppAutoscalingController Get Start");
 
         return appAutoscalingService.getAutoscaling(appGuid);
     }
@@ -51,7 +51,7 @@ public class AppAutoscalingController {
      */
     @PostMapping(value = {Constants.EXTERNAL_URL + "/autoscaling/policy"})
     public Map updateAutoscaling(@RequestBody Map body) throws Exception {
-        LOGGER.info("AppAutoscalingController Update Start");
+        //LOGGER.info("AppAutoscalingController Update Start");
 
         return appAutoscalingService.updateAutoscaling(body);
     }

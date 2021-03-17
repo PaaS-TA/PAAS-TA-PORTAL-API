@@ -73,7 +73,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}")
     public GetOrganizationResponse getOrg(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("get org start : " + orgId);
+        //LOGGER.info("get org start : " + orgId);
         return orgServiceV3.getOrg(orgId, token);
     }
 
@@ -86,7 +86,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/summary")
     public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("org summary : " + orgId);
+        //LOGGER.info("org summary : " + orgId);
         return orgServiceV3.getOrgSummaryMap(orgId, token);
     }
 
@@ -112,7 +112,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs")
     public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.debug("Org list by user");
+        //LOGGER.debug("Org list by user");
         return orgServiceV3.getAllOrgsForUser(token);
     }
 
@@ -123,7 +123,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs-admin")
     public ListOrganizationsResponse getOrgsForAdmin() {
-        LOGGER.debug("Org list for admin");
+        //LOGGER.debug("Org list for admin");
         return orgServiceV3.getOrgsForAdmin();
     }
 
@@ -134,7 +134,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs-admin/{number}")
     public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
-        LOGGER.debug("Org list for admin");
+        //LOGGER.debug("Org list for admin");
         return orgServiceV3.getOrgsForAdminAll(number);
     }
 
@@ -153,7 +153,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/spaces")
     public Map<?, ?> getSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.debug("Get Spaces " + orgId);
+        //LOGGER.debug("Get Spaces " + orgId);
         final Map<String, Object> result = new HashMap<>();
         result.put("spaceList", orgServiceV3.getOrgSpaces(orgId, token));
 
@@ -173,7 +173,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/spaces-admin")
     public Map<?, ?> getSpacesAdmin(@PathVariable String orgId) {
-        LOGGER.debug("Get Spaces " + orgId);
+        //LOGGER.debug("Get Spaces " + orgId);
         final Map<String, Object> result = new HashMap<>();
         result.put("spaceList", orgServiceV3.getOrgSpaces(orgId));
 
@@ -214,10 +214,10 @@ public class OrgControllerV3 extends Common {
      */
     @PutMapping(Constants.V3_URL + "/orgs")
     public Map renameOrg(@RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("renameOrg Start ");
+        //LOGGER.info("renameOrg Start ");
         Map resultMap = orgServiceV3.renameOrg(org, token);
 
-        LOGGER.info("renameOrg End ");
+        //LOGGER.info("renameOrg End ");
         return resultMap;
     }
 
@@ -232,10 +232,10 @@ public class OrgControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/orgs/{guid}")
     public Map deleteOrg(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteOrg Start ");
+        //LOGGER.info("deleteOrg Start ");
         Map resultMap = orgServiceV3.deleteOrg(guid, recursive, token);
 
-        LOGGER.info("deleteOrg End ");
+        //LOGGER.info("deleteOrg End ");
         return resultMap;
     }
 
@@ -251,7 +251,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/quota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("Get quota of org {}" + orgId);
+        //LOGGER.info("Get quota of org {}" + orgId);
         return orgServiceV3.getOrgQuota(orgId, token);
     }
 
@@ -264,7 +264,7 @@ public class OrgControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/orgs/{orgId}/quota-admin")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaAdmin(@PathVariable String orgId) {
-        LOGGER.info("Get quota of org {}" + orgId);
+        //LOGGER.info("Get quota of org {}" + orgId);
         return orgServiceV3.getOrgQuota(orgId);
     }
 
@@ -279,10 +279,10 @@ public class OrgControllerV3 extends Common {
      */
     @PutMapping(Constants.V3_URL + "/orgs/{orgId}/quota")
     public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("changeQuota Start ");
+        //LOGGER.info("changeQuota Start ");
         Map resultMap = orgServiceV3.updateOrgQuota(orgId, org, token);
 
-        LOGGER.info("changeQuota End ");
+        //LOGGER.info("changeQuota End ");
         return resultMap;
     }
 
@@ -318,7 +318,7 @@ public class OrgControllerV3 extends Common {
         final String userId = userServiceV3.getUserIdByUsername(userName);
         Objects.requireNonNull(userId, "Username cannot found");
 
-        LOGGER.info("getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}", orgName, userName, userId);
+        //LOGGER.info("getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}", orgName, userName, userId);
         OrganizationUsers users = orgServiceV3.getOrgUserRolesByOrgName(orgName, token);
         final boolean isManager = users.getManagers().stream().anyMatch(userName::equals);
         final boolean isBillingManager = users.getBillingManagers().stream().anyMatch(userName::equals);
@@ -330,7 +330,7 @@ public class OrgControllerV3 extends Common {
 
     @GetMapping(Constants.V3_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}/is-manager")
     public boolean isOrgManager(@PathVariable String orgName, @PathVariable String userName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("isOrgManager : Org name : {} / User name : {}", orgName, userName);
+        //LOGGER.info("isOrgManager : Org name : {} / User name : {}", orgName, userName);
         return orgServiceV3.getOrgUserRolesByOrgName(orgName, token).getManagers().stream().anyMatch(userName::equals);
     }
 
@@ -396,11 +396,11 @@ public class OrgControllerV3 extends Common {
 
     @GetMapping(Constants.V3_URL + "/orgList/{page}")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable int page) throws Exception {
-        LOGGER.info("orgList Start");
+        //LOGGER.info("orgList Start");
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
         ListOrganizationsResponse listOrganizationsResponse = orgServiceV3.getOrgsForUser(page, token);
-        LOGGER.info("OrgsForUser");
+        //LOGGER.info("OrgsForUser");
         listOrganizationsResponse.getResources().forEach(orgs -> {
             Map orgMap = new HashMap();
             try {
@@ -410,19 +410,19 @@ public class OrgControllerV3 extends Common {
                 e.printStackTrace();
             }
         });
-        LOGGER.info("listOrganizationsResponse");
+        //LOGGER.info("listOrganizationsResponse");
         resultMap.put("result", orgList);
-        LOGGER.debug("orgList End");
+        //LOGGER.debug("orgList End");
         return resultMap;
     }
 
     @GetMapping(Constants.V3_URL + "/orgDetail/{guid}")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
-        LOGGER.info("orgDetail Start");
+        //LOGGER.info("orgDetail Start");
         Map resultMap = new HashMap();
         Map orgMap = orgServiceV3.getOrgDetail(guid, token);
         resultMap.put("result", orgMap);
-        LOGGER.debug("orgDetail End");
+        //LOGGER.debug("orgDetail End");
         return resultMap;
     }
 

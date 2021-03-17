@@ -45,7 +45,7 @@ public class DomainServiceV2 extends Common {
      * @since 2018.4.30
      */
     public PaginatedResponse getDomains(String status) throws Exception {
-        LOGGER.debug("Start getDomains service. status : " + status);
+        //LOGGER.debug("Start getDomains service. status : " + status);
         if (!stringNullCheck(status)) {
             throw new CloudFoundryException(HttpStatus.BAD_REQUEST, "Bad Request", "Invalid status");
         }
@@ -130,16 +130,16 @@ public class DomainServiceV2 extends Common {
 
             if (isShared) {
                 final CreateSharedDomainResponse response = addSharedDomain(domainName);
-                LOGGER.debug("Response for adding shared domain is... {}", response);
+                //LOGGER.debug("Response for adding shared domain is... {}", response);
                 addedDomainName = response.getEntity().getName();
             } else {
                 final CreatePrivateDomainResponse response = addPrivateDomain(domainName, orgId);
-                LOGGER.debug("Response for adding private domain is... {}", response);
+                //LOGGER.debug("Response for adding private domain is... {}", response);
                 addedDomainName = response.getEntity().getName();
             }
 
             if (!addedDomainName.equals(domainName)) {
-                LOGGER.error("It can't add domain with given domain name : {}", domainName);
+                //LOGGER.error("It can't add domain with given domain name : {}", domainName);
 
                 resultMap.put("result", false);
             } else {
@@ -183,7 +183,7 @@ public class DomainServiceV2 extends Common {
 
             List<DomainResource> domains = getAllDomains().getResources().stream().filter(domain -> orgId.equals(domain.getEntity().getOwningOrganizationId())).filter(domain -> domainName.equals(domain.getEntity().getName())).collect(Collectors.toList());
 
-            LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
+            //LOGGER.debug("Counts of filter domains with domainName({}) : {}", domainName, domains.size());
             if (domains.size() > 0) {
                 final DomainResource domain = domains.get(0);
                 final boolean shared = domain.getEntity().getSharedOrganizations() != null && domain.getEntity().getSharedOrganizations().size() > 0;
@@ -204,7 +204,7 @@ public class DomainServiceV2 extends Common {
                     }
                 }
             } else {
-                LOGGER.warn("Cannot find to delete a domain! : {}", domainName);
+                //LOGGER.warn("Cannot find to delete a domain! : {}", domainName);
                 resultMap.put("result", true);
             }
         } catch (Exception e) {

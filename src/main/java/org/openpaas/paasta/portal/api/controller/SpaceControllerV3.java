@@ -87,7 +87,7 @@ public class SpaceControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/{spaceid}/summarylist")
     public Map getSpaceSummary2(@PathVariable String spaceid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("Get SpaceSummary Start : " + spaceid);
+        //LOGGER.info("Get SpaceSummary Start : " + spaceid);
         return spaceServiceV3.getSpaceSummary2(spaceid,token);
     }
 
@@ -104,10 +104,10 @@ public class SpaceControllerV3 extends Common {
      */
     @PutMapping(Constants.V3_URL + "/spaces")
     public Map renameSpace(@RequestBody Space space, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("renameSpace Start ");
+        //LOGGER.info("renameSpace Start ");
         Map resultMap = spaceServiceV3.renameSpace(space, token);
 
-        LOGGER.info("renameSpace End ");
+        //LOGGER.info("renameSpace End ");
         return resultMap;
     }
 
@@ -124,21 +124,21 @@ public class SpaceControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL +  "/spaces/{guid}")
     public Map deleteSpace(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteSpace Start ");
+        //LOGGER.info("deleteSpace Start ");
 
         Map resultMap = spaceServiceV3.deleteSpace(guid, recursive, token);
 
-        LOGGER.info("deleteSpace End ");
+        //LOGGER.info("deleteSpace End ");
         return resultMap;
     }
 
     @RequestMapping(value = {Constants.V3_URL + "/spaces/{guid}/services"}, method = RequestMethod.GET)
     public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
-        LOGGER.info("getSpaceServices Start : " + guid);
+        //LOGGER.info("getSpaceServices Start : " + guid);
 
         ListSpaceServicesResponse respSpaceServices = spaceServiceV3.getSpaceServices(guid);
 
-        LOGGER.info("getSpaceServices End ");
+        //LOGGER.info("getSpaceServices End ");
 
         return respSpaceServices;
     }

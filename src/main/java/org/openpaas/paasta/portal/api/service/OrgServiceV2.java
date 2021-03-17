@@ -142,8 +142,8 @@ public class OrgServiceV2 extends Common {
     }
 
     public Map getOrgSummaryMap(final String orgId, final ReactorCloudFoundryClient reactorClients) {
-        LOGGER.info(DateTime.now().toString());
-        LOGGER.info("===========================");
+        //LOGGER.info(DateTime.now().toString());
+        //LOGGER.info("===========================");
         Map map = new HashedMap();
         try {
             /*
@@ -178,8 +178,8 @@ public class OrgServiceV2 extends Common {
              * Org quota 정보 추출
              */
             GetOrganizationResponse getOrganizationResponse = getOrg(orgId, reactorClients);
-            LOGGER.info("Org name :: " + getOrganizationResponse.getEntity().getName());
-            LOGGER.info("Org Quotaid :: " + getOrganizationResponse.getEntity().getQuotaDefinitionId());
+            //LOGGER.info("Org name :: " + getOrganizationResponse.getEntity().getName());
+            //LOGGER.info("Org Quotaid :: " + getOrganizationResponse.getEntity().getQuotaDefinitionId());
             String quotaDefinitionId = getOrganizationResponse.getEntity().getQuotaDefinitionId();
 
             //GetOrganizationQuotaDefinitionResponse getOrganizationQuotaDefinitionResponse = orgQuotaService.getOrgQuotaDefinitions(quotaDefinitionId, token);
@@ -192,8 +192,8 @@ public class OrgServiceV2 extends Common {
             e.printStackTrace();
             map.clear();
         }
-        LOGGER.info("===========================");
-        LOGGER.info(DateTime.now().toString());
+        //LOGGER.info("===========================");
+        //LOGGER.info(DateTime.now().toString());
         return map;
     }
 
@@ -347,11 +347,11 @@ public class OrgServiceV2 extends Common {
             // 자신에게'만' OrgManager Role이 주어진게 맞는지 탐색
             final boolean existManagerRoleExactly = managerResponse.getResources().stream().filter(ur -> ur.getMetadata().getId().equals(user.getId())).count() == 1L;
 
-            LOGGER.debug("existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers);
+            //LOGGER.debug("existManagerRoleExactly : {} / countManagerUsers : {}", existManagerRoleExactly, countManagerUsers);
             if (countManagerUsers >= 1 && existManagerRoleExactly) {
                 // OrgManager 유저 수가 1명 이상이면서 본인이 OrgManager 일 때
-                LOGGER.debug("Though user isn't admin, user can delete organization if user's role is OrgManager.");
-                LOGGER.debug("User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId);
+                //LOGGER.debug("Though user isn't admin, user can delete organization if user's role is OrgManager.");
+                //LOGGER.debug("User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId);
                 DeleteOrganizationResponse eleteOrganizationResponse = cloudFoundryClient(connectionContext(), tokenProvider()).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(recursive).async(true).build()).block();
 
                 resultMap.put("result", true);
@@ -618,18 +618,18 @@ public class OrgServiceV2 extends Common {
     }
 
     private void removeOrgManager(String orgId, String userId) {
-        LOGGER.debug("---->> Remove OrgManager role of member({}) in org({}).", userId, orgId);
+        //LOGGER.debug("---->> Remove OrgManager role of member({}) in org({}).", userId, orgId);
         cloudFoundryClient().organizations().removeManager(RemoveOrganizationManagerRequest.builder().organizationId(orgId).managerId(userId).build()).block();
     }
 
 
     private void removeBillingManager(String orgId, String userId) {
-        LOGGER.debug("---->> Remove BillingManager role of member({}) in org({}).", userId, orgId);
+        //LOGGER.debug("---->> Remove BillingManager role of member({}) in org({}).", userId, orgId);
         cloudFoundryClient().organizations().removeBillingManager(RemoveOrganizationBillingManagerRequest.builder().organizationId(orgId).billingManagerId(userId).build()).block();
     }
 
     private void removeOrgAuditor(String orgId, String userId) {
-        LOGGER.debug("---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId);
+        //LOGGER.debug("---->> Remove OrgAuditor role of member({}) in org({}).", userId, orgId);
         cloudFoundryClient().organizations().removeAuditor(RemoveOrganizationAuditorRequest.builder().organizationId(orgId).auditorId(userId).build()).block();
     }
 
@@ -638,12 +638,12 @@ public class OrgServiceV2 extends Common {
         try {
             final Object lock = blockingQueue.take();
 
-            LOGGER.debug("--> Remove all member({})'s roles in org({}).", userId, orgId);
+            //LOGGER.debug("--> Remove all member({})'s roles in org({}).", userId, orgId);
             spaceServiceV2.removeAllSpaceUserRolesByOrgId(orgId, userId, targetSpaceRole(OrgRole.OrgManager));
             removeOrgManager(orgId, userId);
             removeBillingManager(orgId, userId);
             removeOrgAuditor(orgId, userId);
-            LOGGER.debug("--> Done to remove all member({})'s roles in org({}).", userId, orgId);
+            //LOGGER.debug("--> Done to remove all member({})'s roles in org({}).", userId, orgId);
 
             blockingQueue.put(lock);
         } catch (InterruptedException e) {
@@ -669,7 +669,7 @@ public class OrgServiceV2 extends Common {
             try {
                 roleEnum = OrgRole.valueOf(role);
             } catch (IllegalArgumentException e) {
-                LOGGER.error("This role is invalid : {}", role);
+                //LOGGER.error("This role is invalid : {}", role);
                 return;
             }
             switch (roleEnum) {
@@ -706,7 +706,7 @@ public class OrgServiceV2 extends Common {
     // TODO cancel member
     public boolean cancelOrganizationMember(String orgId, String userId, String token) {
         final boolean isManager = isOrgManager(orgId, userId);
-        LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
+        //LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
 
         try {
             removeAllRoles(orgId, userId);
@@ -714,7 +714,7 @@ public class OrgServiceV2 extends Common {
 
             return true;
         } catch (Exception ex) {
-            LOGGER.error("Fail to cancel organization member : org ID {} / user ID {}", orgId, userId);
+            //LOGGER.error("Fail to cancel organization member : org ID {} / user ID {}", orgId, userId);
             LOGGER.error("Occured a exception because of canceling organization member...", ex);
             return false;
         }
@@ -723,7 +723,7 @@ public class OrgServiceV2 extends Common {
     public boolean associateOrgUserRole2(Map body) {
         try {
             Map<String, Object> inviteAcceptMap = commonService.procCommonApiRestTemplate("/v2/email/inviteAccept", HttpMethod.POST, body, null);
-            LOGGER.info(inviteAcceptMap.toString());
+            //LOGGER.info(inviteAcceptMap.toString());
 
             if (inviteAcceptMap.get("result").toString().equals("false")) {
                 return false;
@@ -751,15 +751,15 @@ public class OrgServiceV2 extends Common {
                 cloudFoundryClient().organizations().associateUser(AssociateOrganizationUserRequest.builder().organizationId(orgGuid).userId(userId).build()).block();
 
                 if (orgObj.get("om").toString().equals("true")) {
-                    LOGGER.info("om");
+                    //LOGGER.info("om");
                     AssociateOrganizationManagerResponse associateOrganizationManagerResponse = cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateManager(AssociateOrganizationManagerRequest.builder().organizationId(orgGuid).managerId(userId).build()).block();
                 }
                 if (orgObj.get("bm").toString().equals("true")) {
-                    LOGGER.info("bm");
+                    //LOGGER.info("bm");
                     AssociateOrganizationBillingManagerResponse associateOrganizationBillingManagerResponse = cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateBillingManager(AssociateOrganizationBillingManagerRequest.builder().organizationId(orgGuid).billingManagerId(userId).build()).block();
                 }
                 if (orgObj.get("oa").toString().equals("true")) {
-                    LOGGER.info("oa");
+                    //LOGGER.info("oa");
                     AssociateOrganizationAuditorResponse associateOrganizationAuditorResponse = cloudFoundryClient(connectionContext(), tokenProvider()).organizations().associateAuditor(AssociateOrganizationAuditorRequest.builder().organizationId(orgGuid).auditorId(userId).build()).block();
                 }
             }
@@ -779,15 +779,15 @@ public class OrgServiceV2 extends Common {
                         JSONObject spaceObj2 = (JSONObject) spaceArray2.get(k);
 
                         if (spaceObj2.get("sm").toString().equals("true")) {
-                            LOGGER.info("sm");
+                            //LOGGER.info("sm");
                             AssociateSpaceManagerResponse associateSpaceManagerResponse = cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateManager(AssociateSpaceManagerRequest.builder().spaceId(keyname).managerId(userId).build()).block();
                         }
                         if (spaceObj2.get("sd").toString().equals("true")) {
-                            LOGGER.info("sd");
+                            //LOGGER.info("sd");
                             AssociateSpaceDeveloperResponse associateSpaceDeveloperResponse = cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateDeveloper(AssociateSpaceDeveloperRequest.builder().spaceId(keyname).developerId(userId).build()).block();
                         }
                         if (spaceObj2.get("sa").toString().equals("true")) {
-                            LOGGER.info("sa");
+                            //LOGGER.info("sa");
                             AssociateSpaceAuditorResponse associateSpaceAuditorResponse = cloudFoundryClient(connectionContext(), tokenProvider()).spaces().associateAuditor(AssociateSpaceAuditorRequest.builder().spaceId(keyname).auditorId(userId).build()).block();
                         }
                     }

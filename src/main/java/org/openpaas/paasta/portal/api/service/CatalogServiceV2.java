@@ -201,7 +201,7 @@ public class CatalogServiceV2 extends Common {
             Thread.sleep(500);
             reactorCloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
         } catch (Exception e) {
-            LOGGER.info(e.toString());
+            //LOGGER.info(e.toString());
         }
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -385,7 +385,7 @@ public class CatalogServiceV2 extends Common {
             reactorCloudFoundryClient.
                     applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
         } catch (Exception e) {
-            LOGGER.info(e.toString());
+            //LOGGER.info(e.toString());
         }
     }
 
@@ -411,7 +411,7 @@ public class CatalogServiceV2 extends Common {
             IOUtils.closeQuietly(out);
             return file;
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            //LOGGER.info(e.getMessage());
         }
         return null;
     }

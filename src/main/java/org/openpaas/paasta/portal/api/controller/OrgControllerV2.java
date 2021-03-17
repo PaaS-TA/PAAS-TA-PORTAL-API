@@ -74,7 +74,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/{orgId}")
     public GetOrganizationResponse getOrg(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("get org start : " + orgId);
+        //LOGGER.info("get org start : " + orgId);
         return orgServiceV2.getOrg(orgId, cloudFoundryClient(connectionContext(), tokenProvider(token)));
     }
 
@@ -87,7 +87,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/{orgId}/summary")
     public Map getOrgSummary(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("org summary : " + orgId);
+        //LOGGER.info("org summary : " + orgId);
         ReactorCloudFoundryClient reactorClients = cloudFoundryClient(connectionContext(), tokenProvider(token));
         return orgServiceV2.getOrgSummaryMap(orgId, reactorClients);
     }
@@ -115,7 +115,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs")
     public ListOrganizationsResponse getOrgsForUser(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.debug("Org list by user");
+        //LOGGER.debug("Org list by user");
         return orgServiceV2.getAllOrgsForUser(token);
     }
 
@@ -126,7 +126,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs-admin")
     public ListOrganizationsResponse getOrgsForAdmin() {
-        LOGGER.debug("Org list for admin");
+        //LOGGER.debug("Org list for admin");
         return orgServiceV2.getOrgsForAdmin();
     }
 
@@ -137,7 +137,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs-admin/{number}")
     public ListOrganizationsResponse getOrgsForAdmin2(@PathVariable int number) {
-        LOGGER.debug("Org list for admin");
+        //LOGGER.debug("Org list for admin");
         return orgServiceV2.getOrgsForAdminAll(number);
     }
 
@@ -156,7 +156,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/{orgId}/spaces")
     public Map<?, ?> getSpaces(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.debug("Get Spaces " + orgId);
+        //LOGGER.debug("Get Spaces " + orgId);
         final Map<String, Object> result = new HashMap<>();
         result.put("spaceList", orgServiceV2.getOrgSpaces(orgId, cloudFoundryClient(connectionContext(), tokenProvider(token))));
 
@@ -176,7 +176,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/{orgId}/spaces-admin")
     public Map<?, ?> getSpacesAdmin(@PathVariable String orgId) {
-        LOGGER.debug("Get Spaces " + orgId);
+        //LOGGER.debug("Get Spaces " + orgId);
         final Map<String, Object> result = new HashMap<>();
         result.put("spaceList", orgServiceV2.getOrgSpaces(orgId, cloudFoundryClient()));
 
@@ -217,10 +217,10 @@ public class OrgControllerV2 extends Common {
      */
     @PutMapping(Constants.V2_URL + "/orgs")
     public Map renameOrg(@RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("renameOrg Start ");
+        //LOGGER.info("renameOrg Start ");
         Map resultMap = orgServiceV2.renameOrg(org, token);
 
-        LOGGER.info("renameOrg End ");
+        //LOGGER.info("renameOrg End ");
         return resultMap;
     }
 
@@ -235,10 +235,10 @@ public class OrgControllerV2 extends Common {
      */
     @DeleteMapping(Constants.V2_URL + "/orgs/{guid}")
     public Map deleteOrg(@PathVariable String guid, @RequestParam boolean recursive, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteOrg Start ");
+        //LOGGER.info("deleteOrg Start ");
         Map resultMap = orgServiceV2.deleteOrg(guid, recursive, token);
 
-        LOGGER.info("deleteOrg End ");
+        //LOGGER.info("deleteOrg End ");
         return resultMap;
     }
 
@@ -254,7 +254,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/{orgId}/quota")
     public GetOrganizationQuotaDefinitionResponse getOrgQuota(@PathVariable String orgId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("Get quota of org {}" + orgId);
+        //LOGGER.info("Get quota of org {}" + orgId);
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         return orgServiceV2.getOrgQuota(orgId, reactorCloudFoundryClient);
     }
@@ -268,7 +268,7 @@ public class OrgControllerV2 extends Common {
      */
     @GetMapping(Constants.V2_URL + "/orgs/{orgId}/quota-admin")
     public GetOrganizationQuotaDefinitionResponse getOrgQuotaAdmin(@PathVariable String orgId) {
-        LOGGER.info("Get quota of org {}" + orgId);
+        //LOGGER.info("Get quota of org {}" + orgId);
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword));
         return orgServiceV2.getOrgQuota(orgId, reactorCloudFoundryClient);
     }
@@ -284,10 +284,10 @@ public class OrgControllerV2 extends Common {
      */
     @PutMapping(Constants.V2_URL + "/orgs/{orgId}/quota")
     public Map changeQuota(@PathVariable String orgId, @RequestBody Org org, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("changeQuota Start ");
+        //LOGGER.info("changeQuota Start ");
         Map resultMap = orgServiceV2.updateOrgQuota(orgId, org, token);
 
-        LOGGER.info("changeQuota End ");
+        //LOGGER.info("changeQuota End ");
         return resultMap;
     }
 
@@ -323,7 +323,7 @@ public class OrgControllerV2 extends Common {
         final String userId = userServiceV2.getUserIdByUsername(userName);
         Objects.requireNonNull(userId, "Username cannot found");
 
-        LOGGER.info("getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}", orgName, userName, userId);
+        //LOGGER.info("getOrgUserRoleByUsername : Org name : {} / User name : {} / User id : {}", orgName, userName, userId);
         OrganizationUsers users = orgServiceV2.getOrgUserRolesByOrgName(orgName, token);
         final boolean isManager = users.getManagers().stream().anyMatch(userName::equals);
         final boolean isBillingManager = users.getBillingManagers().stream().anyMatch(userName::equals);
@@ -335,7 +335,7 @@ public class OrgControllerV2 extends Common {
 
     @GetMapping(Constants.V2_URL + "/orgs/{orgName:.+}/user-roles/{userName:.+}/is-manager")
     public boolean isOrgManager(@PathVariable String orgName, @PathVariable String userName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) {
-        LOGGER.info("isOrgManager : Org name : {} / User name : {}", orgName, userName);
+        //LOGGER.info("isOrgManager : Org name : {} / User name : {}", orgName, userName);
         return orgServiceV2.getOrgUserRolesByOrgName(orgName, token).getManagers().stream().anyMatch(userName::equals);
     }
 
@@ -402,13 +402,13 @@ public class OrgControllerV2 extends Common {
 
     @GetMapping(Constants.V2_URL + "/orgList/{page}")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable int page) throws Exception {
-        LOGGER.info("orgList Start");
+        //LOGGER.info("orgList Start");
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
 
         ListOrganizationsResponse listOrganizationsResponse = orgServiceV2.getOrgsForUser(reactorCloudFoundryClient, page);
-        LOGGER.info("OrgsForUser");
+        //LOGGER.info("OrgsForUser");
         listOrganizationsResponse.getResources().forEach(orgs -> {
             Map orgMap = new HashMap();
 
@@ -429,16 +429,16 @@ public class OrgControllerV2 extends Common {
                 e.printStackTrace();
             }
         });
-        LOGGER.info("listOrganizationsResponse");
+        //LOGGER.info("listOrganizationsResponse");
         resultMap.put("result", orgList);
 
-        LOGGER.debug("orgList End");
+        //LOGGER.debug("orgList End");
         return resultMap;
     }
 
     @GetMapping(Constants.V2_URL + "/orgDetail/{guid}")
     public Map orgList(@RequestHeader(AUTHORIZATION_HEADER_KEY) String token, @PathVariable String guid) throws Exception {
-        LOGGER.info("orgDetail Start");
+        //LOGGER.info("orgDetail Start");
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
@@ -462,7 +462,7 @@ public class OrgControllerV2 extends Common {
 
         resultMap.put("result", orgMap);
 
-        LOGGER.debug("orgDetail End");
+        //LOGGER.debug("orgDetail End");
         return resultMap;
     }
 

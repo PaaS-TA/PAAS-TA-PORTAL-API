@@ -43,7 +43,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/quota-definitions")
     public ListSpaceQuotaDefinitionsResponse listSpaceQuotaDefinitions(HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("listSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("listSpaceQuotaDefinitions Start : ");
         return spaceQuotaServiceV3.getSpaceQuotaDefinitionsList(token);
     }
 
@@ -57,7 +57,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}")
     public GetSpaceQuotaDefinitionResponse getSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("getSpaceQuotaDefinitions Start : ");
         return spaceQuotaServiceV3.getSpaceQuotaDefinitions(spaceQuotaId, token);
     }
 
@@ -71,7 +71,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @PostMapping(Constants.V3_URL + "/spaces/quota-definitions")
     public CreateSpaceQuotaDefinitionResponse createSpaceQuotaDefinitions(@RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("summary Start : ");
+        //LOGGER.info("summary Start : ");
         return spaceQuotaServiceV3.createSpaceQuotaDefinitions(quota, token);
     }
 
@@ -85,7 +85,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/spaces/quota-definitions/{guid}")
     public DeleteSpaceQuotaDefinitionResponse deleteSpaceQuotaDefinitions(@PathVariable String guid, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("deleteSpaceQuotaDefinitions Start : ");
 
         return spaceQuotaServiceV3.deleteSpaceQuotaDefinitions(guid, token);
     }
@@ -103,7 +103,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @PutMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces/{spaceId}")
     public AssociateSpaceQuotaDefinitionResponse associateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId, @RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("associateSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("associateSpaceQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(spaceQuotaId));
         quota.setSpaceGuid(UUID.fromString(spaceId));
         return spaceQuotaServiceV3.associateSpaceQuotaDefinitions(quota, token);
@@ -119,7 +119,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @GetMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces")
     public ListSpaceQuotaDefinitionSpacesResponse getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
         return spaceQuotaServiceV3.getListSpaceUsedSpaceQuotaDefinitions(spaceQuotaId, token);
     }
 
@@ -135,7 +135,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}/spaces/{spaceId}")
     public boolean getListSpaceUsedSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @PathVariable String spaceId, @RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("getListSpaceUsedSpaceQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(spaceQuotaId));
         quota.setSpaceGuid(UUID.fromString(spaceId));
         return spaceQuotaServiceV3.removeSpaceQuotaDefinitionsFromSpace(quota, token);
@@ -152,7 +152,7 @@ public class SpaceQuotaControllerV3 extends Common {
      */
     @PutMapping(Constants.V3_URL + "/spaces/quota-definitions/{spaceQuotaId}")
     public UpdateSpaceQuotaDefinitionResponse updateSpaceQuotaDefinitions(@PathVariable String spaceQuotaId, @RequestBody Quota quota, HttpServletRequest request, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("updateSpaceQuotaDefinitions Start : ");
+        //LOGGER.info("updateSpaceQuotaDefinitions Start : ");
         quota.setGuid(UUID.fromString(spaceQuotaId));
         return spaceQuotaServiceV3.updateSpaceQuotaDefinitions(quota, token);
     }

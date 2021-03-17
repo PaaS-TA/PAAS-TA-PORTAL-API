@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import org.openpaas.paasta.portal.api.common.Constants;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,11 +68,11 @@ public class CommonService {
         String[] reqMessageArray = reqMessage.split(Constants.DUPLICATION_SEPARATOR);
 
         if (reqMessageArray.length > 1) {
-            res.sendError(httpStatus.value(), this.getCustomMessage(reqMessageArray[0])
-                    + " " + Constants.DUPLICATION_SEPARATOR + " " + reqMessageArray[1]);
+            res.sendError(httpStatus.value(), Encode.forHtml(this.getCustomMessage(reqMessageArray[0])
+                    + " " + Constants.DUPLICATION_SEPARATOR + " " + reqMessageArray[1]));
 
         } else {
-            res.sendError(httpStatus.value(), this.getCustomMessage(reqMessage));
+            res.sendError(httpStatus.value(), Encode.forHtml(this.getCustomMessage(reqMessage)));
         }
     }
 
@@ -108,12 +109,12 @@ public class CommonService {
         reqHeaders.add(AUTHORIZATION_HEADER_KEY, base64Authorization);
         if (null != reqToken && !"".equals(reqToken)) reqHeaders.add(CF_AUTHORIZATION_HEADER_KEY, reqToken);
 
-        LOGGER.info("CommonApiUrl::"+commonApiUrl + reqUrl);
+        //LOGGER.info("CommonApiUrl::"+commonApiUrl + reqUrl);
         HttpEntity<Object> reqEntity = new HttpEntity<>(obj, reqHeaders);
         ResponseEntity<Map> resEntity = restTemplate.exchange(commonApiUrl + reqUrl, httpMethod, reqEntity, Map.class);
         Map<String, Object> resultMap = resEntity.getBody();
 
-        LOGGER.info("procCommonApiRestTemplate reqUrl :: {} || resultMap :: {}", reqUrl, resultMap.toString());
+        //LOGGER.info("procCommonApiRestTemplate reqUrl :: {} || resultMap :: {}", reqUrl, resultMap.toString());
         return resultMap;
     }
 
@@ -142,8 +143,8 @@ public class CommonService {
         HttpEntity<Object> reqEntity = new HttpEntity<>(bodyObject, reqHeaders);
 
         ResponseEntity<T> resEntity = restTemplate.exchange(storageRequestURL, httpMethod, reqEntity, resClazz);
-        LOGGER.info("procRestStorageApiTemplate reqUrl :: {} || resultEntity type :: {}", storageRequestURL, resEntity.getHeaders().getContentType());
-        LOGGER.info("procRestStorageApiTemplate response Http status code :: {}", resEntity.getStatusCode());
+        //LOGGER.info("procRestStorageApiTemplate reqUrl :: {} || resultEntity type :: {}", storageRequestURL, resEntity.getHeaders().getContentType());
+        //LOGGER.info("procRestStorageApiTemplate response Http status code :: {}", resEntity.getStatusCode());
         return resEntity;
     }
 

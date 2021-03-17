@@ -361,26 +361,26 @@ public class SpaceServiceV2 extends Common {
 
 
     private void removeSpaceManager(String spaceId, String userId) {
-        LOGGER.debug("---->> Remove SpaceManager role of member({}) in space({}).", userId, spaceId);
+        //LOGGER.debug("---->> Remove SpaceManager role of member({}) in space({}).", userId, spaceId);
         cloudFoundryClient().spaces().removeManager(RemoveSpaceManagerRequest.builder().spaceId(spaceId).managerId(userId).build()).block();
     }
 
     private void removeSpaceDeveloper(String spaceId, String userId) {
-        LOGGER.debug("---->> Remove SpaceDeveloper role of member({}) in space({}).", userId, spaceId);
+        //LOGGER.debug("---->> Remove SpaceDeveloper role of member({}) in space({}).", userId, spaceId);
         cloudFoundryClient().spaces().removeDeveloper(RemoveSpaceDeveloperRequest.builder().spaceId(spaceId).developerId(userId).build()).block();
     }
 
     private void removeSpaceAuditor(String spaceId, String userId) {
-        LOGGER.debug("---->> Remove SpaceAuditor role of member({}) in space({}).", userId, spaceId);
+        //LOGGER.debug("---->> Remove SpaceAuditor role of member({}) in space({}).", userId, spaceId);
         cloudFoundryClient().spaces().removeAuditor(RemoveSpaceAuditorRequest.builder().spaceId(spaceId).auditorId(userId).build()).block();
     }
 
     private void removeAllRoles(String spaceId, String userId) {
-        LOGGER.debug("--> Remove all member({})'s roles in space({}).", userId, spaceId);
+        //LOGGER.debug("--> Remove all member({})'s roles in space({}).", userId, spaceId);
         removeSpaceManager(spaceId, userId);
         removeSpaceDeveloper(spaceId, userId);
         removeSpaceAuditor(spaceId, userId);
-        LOGGER.debug("--> Done to remove all member({})'s roles in space({}).", userId, spaceId);
+        //LOGGER.debug("--> Done to remove all member({})'s roles in space({}).", userId, spaceId);
     }
 
     /**
@@ -399,7 +399,7 @@ public class SpaceServiceV2 extends Common {
         try {
             roleEnum = SpaceRole.valueOf(role);
         } catch (IllegalArgumentException e) {
-            LOGGER.error("This role is invalid : {}", role);
+            //LOGGER.error("This role is invalid : {}", role);
             return;
         }
         switch (roleEnum) {

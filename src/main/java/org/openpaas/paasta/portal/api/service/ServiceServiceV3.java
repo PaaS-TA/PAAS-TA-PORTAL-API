@@ -90,9 +90,9 @@ public class ServiceServiceV3 extends Common {
 
             GetUserProvidedServiceInstanceResponse getUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().get(GetUserProvidedServiceInstanceRequest.builder().userProvidedServiceInstanceId(userProvidedServiceInstanceId).build()).block();
 
-            LOGGER.info("Created ::: " + getUserProvidedServiceInstanceResponse.getEntity().getName());
-            LOGGER.info("Credentials ::: " + getUserProvidedServiceInstanceResponse.getEntity().getCredentials().toString());
-            LOGGER.info("SyslogDrainUrl ::: " + getUserProvidedServiceInstanceResponse.getEntity().getSyslogDrainUrl());
+            //LOGGER.info("Created ::: " + getUserProvidedServiceInstanceResponse.getEntity().getName());
+            //LOGGER.info("Credentials ::: " + getUserProvidedServiceInstanceResponse.getEntity().getCredentials().toString());
+            //LOGGER.info("SyslogDrainUrl ::: " + getUserProvidedServiceInstanceResponse.getEntity().getSyslogDrainUrl());
 
             return getUserProvidedServiceInstanceResponse;
 
@@ -143,7 +143,7 @@ public class ServiceServiceV3 extends Common {
     public Map createUserProvided(String token, Service service) throws Exception {
         HashMap result = new HashMap();
         Map<String, Object> map = new HashMap<>();
-        LOGGER.info(service.getRouteServiceUrl());
+        //LOGGER.info(service.getRouteServiceUrl());
         try {
             //Todo credentialsStr parsing => map
 
@@ -170,7 +170,7 @@ public class ServiceServiceV3 extends Common {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.info("Error :::: " + e.getMessage());
+            //LOGGER.info("Error :::: " + e.getMessage());
             result.put("result", false);
             result.put("msg", e.getMessage());
         }

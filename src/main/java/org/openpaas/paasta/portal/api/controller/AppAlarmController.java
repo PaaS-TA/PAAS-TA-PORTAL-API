@@ -42,7 +42,7 @@ public class AppAlarmController {
     @GetMapping(Constants.EXTERNAL_URL + "/alarm/list")
     public Map getAlarmList(@RequestParam(value = "appGuid") String appGuid, @RequestParam(value = "pageItems") String pageItems, @RequestParam(value = "pageIndex") String pageIndex, @RequestParam(value = "resourceType") String resourceType, @RequestParam(value = "alarmLevel") String alarmLevel) {
 
-        LOGGER.info("AlarmController Start");
+        //LOGGER.info("AlarmController Start");
 
         return alarmService.getAlarmList(appGuid, pageItems, pageIndex, resourceType, alarmLevel);
     }
@@ -55,7 +55,7 @@ public class AppAlarmController {
      */
     @GetMapping(Constants.EXTERNAL_URL + "/alarm/policy")
     public Map getAlarm(@RequestParam(value = "appGuid") String appGuid) {
-        LOGGER.info("AlarmController Get Start");
+        //LOGGER.info("AlarmController Get Start");
 
         return alarmService.getAlarm(appGuid);
     }
@@ -69,7 +69,7 @@ public class AppAlarmController {
      */
     @PostMapping(Constants.EXTERNAL_URL + "/alarm/policy")
     public Map updateAlarm(@RequestBody Map body) throws Exception {
-        LOGGER.info("AlarmController Update Start");
+        //LOGGER.info("AlarmController Update Start");
 
         return alarmService.updateAlarm(body);
     }

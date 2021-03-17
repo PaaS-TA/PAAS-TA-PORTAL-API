@@ -103,7 +103,7 @@ public class DomainControllerV3 extends Common {
      */
     @PostMapping(Constants.V3_URL + "/domains")
     public Map addDomain(@RequestBody Map<String, String> body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("addDomain Start ");
+        //LOGGER.info("addDomain Start ");
         Map resultMap = null;
 
         if (body.containsKey("isShared")) {
@@ -113,7 +113,7 @@ public class DomainControllerV3 extends Common {
             resultMap = domainServiceV3.addDomain(token, body.get("domainName").toString(), body.get("orgId").toString());
         }
 
-        LOGGER.info("addDomain End ");
+        //LOGGER.info("addDomain End ");
         return resultMap;
     }
 
@@ -127,11 +127,11 @@ public class DomainControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/domains/{guid}")
     public Map deleteDomain(@PathVariable String guid, @RequestParam String domainName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteDomain Start ");
+        //LOGGER.info("deleteDomain Start ");
 
         Map resultMap = domainServiceV3.deleteDomain(guid, domainName);
 
-        LOGGER.info("deleteDomain End ");
+        //LOGGER.info("deleteDomain End ");
         return resultMap;
     }
 
@@ -145,11 +145,11 @@ public class DomainControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/domains-admin/{guid}")
     public Map deleteDomainAdmin(@PathVariable String guid, @RequestParam String domainName, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("deleteDomain Start ");
+        //LOGGER.info("deleteDomain Start ");
 
         Map resultMap = domainServiceV3.deleteDomain(guid, domainName);
 
-        LOGGER.info("deleteDomain End ");
+        //LOGGER.info("deleteDomain End ");
         return resultMap;
     }
 

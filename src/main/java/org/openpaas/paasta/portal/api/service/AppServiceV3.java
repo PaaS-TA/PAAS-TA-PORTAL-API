@@ -82,7 +82,7 @@ public class AppServiceV3 extends Common {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             org.cloudfoundry.client.v2.applications.UpdateApplicationResponse response = cloudFoundryClient.applicationsV2().update(org.cloudfoundry.client.v2.applications.UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getNewName()).build()).block();
 
-            LOGGER.info("Update app response :", response);
+            //LOGGER.info("Update app response :", response);
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -503,12 +503,12 @@ public class AppServiceV3 extends Common {
      * 권한 : 사용자 권한
      */
     public UpdateApplicationEnvironmentVariablesResponse setAppEnv(App app, String token) {
-        LOGGER.info("변경사항 있는 환경변수들 ::: " + app.getEnvironment().toString());
+        //LOGGER.info("변경사항 있는 환경변수들 ::: " + app.getEnvironment().toString());
 
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         UpdateApplicationEnvironmentVariablesResponse updatedAppEnvVar = reactorCloudFoundryClient.applicationsV3().updateEnvironmentVariables(UpdateApplicationEnvironmentVariablesRequest.builder().applicationId(app.getGuid().toString()).putAllVars(app.getEnvironment()).build()).block();
 
-        LOGGER.info("변경사항 있는 환경변수들은요~~~ ::: " + updatedAppEnvVar.toString());
+        //LOGGER.info("변경사항 있는 환경변수들은요~~~ ::: " + updatedAppEnvVar.toString());
         return updatedAppEnvVar;
     }
 

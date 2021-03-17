@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.exception;
 import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.identity.uaa.error.UaaException;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class GlobalControllerExceptionHandler {
         } else {
             msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, DEFAULT_LOCALE);
         }
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, Encode.forHtml(msg));
         return false;
     }
 
@@ -71,7 +72,7 @@ public class GlobalControllerExceptionHandler {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("Content-Type", "application/json;charset=utf-8");
         response.setContentType("application/json; charset=UTF-8");
-        response.getWriter().print(message);
+        response.getWriter().print(Encode.forHtml(message));
         response.flushBuffer();
     }
 
@@ -91,7 +92,7 @@ public class GlobalControllerExceptionHandler {
             msg = messageSource.getMessage(HttpStatus.BAD_REQUEST.toString(), null, DEFAULT_LOCALE);
         }
 
-        response.sendError(ex.getHttpStatus(), msg);
+        response.sendError(ex.getHttpStatus(), Encode.forHtml(msg));
         return false;
     }
 
@@ -123,13 +124,13 @@ public class GlobalControllerExceptionHandler {
 
     //common message
     private boolean errorResponse(Throwable throwable, HttpStatus status, HttpServletResponse response) throws IOException {
-        LOGGER.info(response.toString());
+        //LOGGER.info(response.toString());
         //response.sendError(status.value(), messageSource.getMessage(status.toString(), null, DEFAULT_LOCALE));
         final StringBuffer buffer = new StringBuffer();
         buffer.append("Response : ").append(response.toString()).append('\n').append("Occured an exception : ").append(throwable.getMessage()).append('\n').append("Caused by... ").append('\n').append(getStackTraceString(throwable));
 
 
-        response.sendError(status.value(), buffer.toString());
+        response.sendError(status.value(), Encode.forHtml(buffer.toString()));
         LOGGER.error("Http status : {}", status.value());
         LOGGER.error("Error message : {}", buffer.toString());
 

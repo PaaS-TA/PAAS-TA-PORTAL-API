@@ -185,7 +185,7 @@ public class Common {
         } else {
             proxyIP = proxyHost;
         }
-        LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
+        //LOGGER.info(" -> Proxy :: " + proxyIP + ":" + proxyPort);
 
         return ProxyConfiguration.builder().host(proxyIP).port(proxyPort).build();
 
@@ -207,7 +207,7 @@ public class Common {
         } else {
             if (paastaConnectionContext.getCreate_time() != null) {
                 if(ContextAndTokenTimeOut(paastaConnectionContext, 10)) {
-                    LOGGER.info("paastaConnectionContext reproduction");
+                    //LOGGER.info("paastaConnectionContext reproduction");
                     paastaConnectionContext.getConnectionContext().dispose();
                     paastaConnectionContext = null;
                     paastaConnectionContext = new PaastaConnectionContext(defaultConnectionContextBuild(apiTarget, cfskipSSLValidation), new Date());
@@ -257,7 +257,7 @@ public class Common {
         if (paastaTokenContext == null) {
             paastaTokenContext = new PaastaTokenContext(PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build(), new Date());
         } else if(paastaTokenContext.getCreate_time() != null && ContextAndTokenTimeOut(paastaTokenContext, 5)){
-            LOGGER.info("paastaTokenContext reproduction");
+            //LOGGER.info("paastaTokenContext reproduction");
             paastaTokenContext = new PaastaTokenContext(PasswordGrantTokenProvider.builder().password(adminPassword).username(adminUserName).build(), new Date());
         }
         return paastaTokenContext.tokenProvider();

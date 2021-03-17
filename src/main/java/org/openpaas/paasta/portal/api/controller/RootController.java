@@ -24,7 +24,7 @@ public class RootController extends Common {
     @RequestMapping(value = {"/", "/info", "/index"}, method = {RequestMethod.GET})
     @ResponseBody
     public Map index() throws Exception {
-        LOGGER.info("index()");
+        //LOGGER.info("index()");
         Map map = new HashMap();
         Map info = new HashMap();
 

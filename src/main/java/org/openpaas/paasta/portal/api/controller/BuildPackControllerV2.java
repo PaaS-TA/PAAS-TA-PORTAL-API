@@ -41,9 +41,9 @@ public class BuildPackControllerV2 extends Common {
     @GetMapping(value = {Constants.V2_URL + "/buildpacks"})
     public Map<String, Object> getBuildPacks() throws Exception {
 
-        LOGGER.info("getBuildPacks Start");
+        //LOGGER.info("getBuildPacks Start");
         Map<String, Object> buildPacks = buildPackServiceV2.getBuildPacks();
-        LOGGER.info("getBuildPacks End ");
+        //LOGGER.info("getBuildPacks End ");
 
         return buildPacks;
 
@@ -60,12 +60,12 @@ public class BuildPackControllerV2 extends Common {
     @PutMapping(value = {Constants.V2_URL + "/buildpacks/{guid}"})
     public Map<String, Object> updateBuildPack(@RequestBody BuildPack buildPack, @PathVariable String guid) throws Exception {
 
-        LOGGER.info("updateBuildPack Start : " + guid);
+        //LOGGER.info("updateBuildPack Start : " + guid);
         Map<String, Object> resultMap = new HashMap<>();
         buildPack.setGuid(UUID.fromString(guid));
         buildPackServiceV2.updateBuildPack(buildPack);
         resultMap.put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        LOGGER.info("updateBuildPack End ");
+        //LOGGER.info("updateBuildPack End ");
 
         return resultMap;
     }

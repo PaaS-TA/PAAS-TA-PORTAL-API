@@ -44,7 +44,7 @@ public class AppControllerV3 extends Common {
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/summary"})
     public SummaryApplicationResponse getAppSummary(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getAppSummary Start : " + guid);
+        //LOGGER.info("getAppSummary Start : " + guid);
 
         SummaryApplicationResponse respApp = appServiceV3.getAppSummary(guid, token);
 
@@ -74,10 +74,10 @@ public class AppControllerV3 extends Common {
      */
     @PutMapping(value = {Constants.V3_URL + "/apps/{guid}/rename"})
     public Map renameApp(@PathVariable String guid, @RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
+        //LOGGER.info("Rename App Start : " + guid + " : " + " : " + app.getName() + " : " + app.getNewName());
         //service call
         Map result = appServiceV3.renameApp(app, token);
-        LOGGER.info("Rename App End ");
+        //LOGGER.info("Rename App End ");
         return result;
     }
 
@@ -90,9 +90,9 @@ public class AppControllerV3 extends Common {
      */
     @DeleteMapping(value = {Constants.V3_URL + "/apps/{guid}"})
     public Map deleteApp(@PathVariable String guid) throws Exception {
-        LOGGER.info("delete App Start : " + guid);
+        //LOGGER.info("delete App Start : " + guid);
         Map result = appServiceV3.deleteApp(guid);
-        LOGGER.info("delete App End ");
+        //LOGGER.info("delete App End ");
         return result;
     }
 
@@ -106,11 +106,11 @@ public class AppControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/apps/restageApp"})
     public Map restageApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("restageApp Start ");
+        //LOGGER.info("restageApp Start ");
 
         Map resultMap = appServiceV3.restageApp(app, token);
 
-        LOGGER.info("restageApp End ");
+        //LOGGER.info("restageApp End ");
         return resultMap;
     }
 
@@ -125,11 +125,11 @@ public class AppControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/apps/updateApp"})
     public Map updateApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("updateApp Start ");
+        //LOGGER.info("updateApp Start ");
 
         Map resultMap = appServiceV3.updateApp(app, token);
 
-        LOGGER.info("updateApp End ");
+        //LOGGER.info("updateApp End ");
         return resultMap;
     }
 
@@ -143,11 +143,11 @@ public class AppControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/service-bindings"})
     public Map bindService(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("bindService Start ");
+        //LOGGER.info("bindService Start ");
 
         Map resultMap = appServiceV3.bindService(body, token);
 
-        LOGGER.info("bindService End ");
+        //LOGGER.info("bindService End ");
         return resultMap;
     }
 
@@ -161,11 +161,11 @@ public class AppControllerV3 extends Common {
      */
     @DeleteMapping(value = {Constants.V3_URL + "/service-bindings/{serviceInstanceId}/apps/{applicationId}"})
     public Map unbindService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("unbindService Start ");
+        //LOGGER.info("unbindService Start ");
 
         Map resultMap = appServiceV3.unbindService(serviceInstanceId, applicationId, token);
 
-        LOGGER.info("unbindService End ");
+        //LOGGER.info("unbindService End ");
         return resultMap;
     }
 
@@ -178,11 +178,11 @@ public class AppControllerV3 extends Common {
      */
     @DeleteMapping(Constants.V3_URL + "/user-provide-service-bindings/{serviceInstanceId}/apps/{applicationId}")
     public Map unbindUserProvideService(@PathVariable String serviceInstanceId, @PathVariable String applicationId, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("unbindService Start ");
+        //LOGGER.info("unbindService Start ");
 
         Map resultMap = appServiceV3.unbindUserProvideService(serviceInstanceId, applicationId, token);
 
-        LOGGER.info("unbindService End ");
+        //LOGGER.info("unbindService End ");
         return resultMap;
     }
 
@@ -197,11 +197,11 @@ public class AppControllerV3 extends Common {
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/app-usage-events/{guid}"})
     public ListEventsResponse getAppEvents(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getAppEvents Start : " + guid);
+        //LOGGER.info("getAppEvents Start : " + guid);
 
         ListEventsResponse respAppEvents = appServiceV3.getAppEvents(guid, token);
 
-        LOGGER.info("getAppEvents End ");
+        //LOGGER.info("getAppEvents End ");
 
         return respAppEvents;
     }
@@ -219,11 +219,11 @@ public class AppControllerV3 extends Common {
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/env"})
     public ApplicationEnvironmentResponse getApplicationEnv(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("getApplicationEnv Start : " + guid);
+        //LOGGER.info("getApplicationEnv Start : " + guid);
 
         ApplicationEnvironmentResponse respAppEvents = appServiceV3.getApplicationEnv(guid, token);
 
-        LOGGER.info("getApplicationEnv End ");
+        //LOGGER.info("getApplicationEnv End ");
 
         return respAppEvents;
     }
@@ -238,11 +238,11 @@ public class AppControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/routes"})
     public Map addApplicationRoute(@RequestBody Map body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("addApplicationRoute Start ");
+        //LOGGER.info("addApplicationRoute Start ");
 
         Map resultMap = appServiceV3.addApplicationRoute(body, token);
 
-        LOGGER.info("addApplicationRoute End ");
+        //LOGGER.info("addApplicationRoute End ");
         return resultMap;
     }
 
@@ -259,11 +259,11 @@ public class AppControllerV3 extends Common {
      */
     @DeleteMapping(value = {Constants.V3_URL + "/apps/{guid}/routes/{route_guid}"})
     public Map removeApplicationRoute(@PathVariable String guid, @PathVariable String route_guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("removeApplicationRoute Start ");
+        //LOGGER.info("removeApplicationRoute Start ");
 
         Map resultMap = appServiceV3.removeApplicationRoute(guid, route_guid, token);
 
-        LOGGER.info("removeApplicationRoute End ");
+        //LOGGER.info("removeApplicationRoute End ");
         return resultMap;
     }
 
@@ -277,11 +277,11 @@ public class AppControllerV3 extends Common {
      */
     @DeleteMapping(value = {Constants.V3_URL + "/apps/{guid}/instances/{index}"})
     public Map terminateInstance(@PathVariable String guid, @PathVariable String index, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("terminateInstance Start");
+        //LOGGER.info("terminateInstance Start");
 
         Map resultMap = appServiceV3.terminateInstance(guid, index, token);
 
-        LOGGER.info("terminateInstance End");
+        //LOGGER.info("terminateInstance End");
         return resultMap;
     }
 
@@ -297,19 +297,19 @@ public class AppControllerV3 extends Common {
     public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
 
 
-        LOGGER.info("getRecentLog Start : " + guid);
+        //LOGGER.info("getRecentLog Start : " + guid);
 
         Map mapLog = new HashMap();
         try {
             List<Envelope> respAppEvents = appServiceV3.getRecentLog(guid, token);
             mapLog.put("log", respAppEvents);
         } catch (Exception e) {
-            LOGGER.info("################ ");
+            //LOGGER.info("################ ");
             LOGGER.error(e.toString());
             mapLog.put("log", "");
         }
 
-        LOGGER.info("getRecentLog End");
+        //LOGGER.info("getRecentLog End");
 
         return mapLog;
     }
@@ -342,9 +342,9 @@ public class AppControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/apps/startApp"})
     public Map startApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("startApp Start ");
+        //LOGGER.info("startApp Start ");
         Map resultMap = appServiceV3.startApp(app.getGuid().toString(), token);
-        LOGGER.info("startApp End ");
+        //LOGGER.info("startApp End ");
         return resultMap;
     }
 
@@ -358,9 +358,9 @@ public class AppControllerV3 extends Common {
      */
     @PostMapping(value = {Constants.V3_URL + "/apps/stopApp"})
     public Map stopApp(@RequestBody App app, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("stopApp Start ");
+        //LOGGER.info("stopApp Start ");
         Map resultMap = appServiceV3.stopApp(app.getGuid().toString(), token);
-        LOGGER.info("stopApp End ");
+        //LOGGER.info("stopApp End ");
         return resultMap;
     }
 

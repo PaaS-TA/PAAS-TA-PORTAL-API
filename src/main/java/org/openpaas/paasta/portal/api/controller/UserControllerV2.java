@@ -44,7 +44,7 @@ public class UserControllerV2 extends Common {
      */
     @PutMapping(value = {Constants.V2_URL + "/users/{userId}/password/update"})
     public Map updateUserPassword(@PathVariable String userId, @RequestBody Map<String, Object> body, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        LOGGER.info("> into updateUserPassword");
+        //LOGGER.info("> into updateUserPassword");
         String oldPassword = (String) body.get("oldPassword");
         String newPassword = (String) body.get("password");
         String userGuid = (String) body.get("userGuid");
@@ -62,7 +62,7 @@ public class UserControllerV2 extends Common {
      */
     @PostMapping(value = {Constants.V2_URL + "/users/password/reset"})
     public Map resetPassword(@RequestBody Map<String, Object> body) throws Exception {
-        LOGGER.info("> into resetPassword");
+        //LOGGER.info("> into resetPassword");
         String newPassword = (String) body.get("password");
         String userId = (String) body.get("userId");
         Map<String, Object> result = userServiceV2.resetPassword(userId, newPassword);
@@ -79,7 +79,7 @@ public class UserControllerV2 extends Common {
      */
     @PutMapping(value = {Constants.V2_URL + "/users/{userGuid}/password/expired"})
     public Map expiredPassword(@PathVariable String userGuid) throws Exception {
-        LOGGER.info("> into expiredPassword");
+        //LOGGER.info("> into expiredPassword");
         Map<String, Object> result = userServiceV2.expiredPassword(userGuid);
         return result;
     }
@@ -94,7 +94,7 @@ public class UserControllerV2 extends Common {
      */
     @DeleteMapping(value = {Constants.V2_URL + "/users/{guid}"})
     public Map deleteUser(@PathVariable String guid) throws Exception {
-        LOGGER.info("> into deleteUser");
+        //LOGGER.info("> into deleteUser");
         Map result = userServiceV2.deleteUser(guid);
         return result;
     }

@@ -42,7 +42,7 @@ public class UserServiceV3 extends Common {
      * @return int int
      */
     public Map createUser(UserDetail userDetail) {
-        LOGGER.info("createUser ::: " + userDetail.getUserId());
+        //LOGGER.info("createUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = uaaClient();
@@ -69,7 +69,7 @@ public class UserServiceV3 extends Common {
      * @return int int
      */
     public int updateUser(UserDetail userDetail, String token) {
-        LOGGER.info("updateUser ::: " + userDetail.getUserId());
+        //LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = uaaClient();
@@ -98,9 +98,9 @@ public class UserServiceV3 extends Common {
      */
     public Map updateUserPassword(String userId, String userGuid, String oldPassword, String newPassword, String token) {
 
-        LOGGER.debug("updateUserPassword ::: " + userId);
-        LOGGER.debug("updateUserPassword ::: " + oldPassword);
-        LOGGER.debug("updateUserPassword ::: " + newPassword);
+        //LOGGER.debug("updateUserPassword ::: " + userId);
+        //LOGGER.debug("updateUserPassword ::: " + oldPassword);
+        //LOGGER.debug("updateUserPassword ::: " + newPassword);
         Map result = new HashMap();
         try {
             ReactorUaaClient reactorUaaClient = uaaClient(tokenProvider(userId, oldPassword));
@@ -123,8 +123,8 @@ public class UserServiceV3 extends Common {
      * 패스워드를 입력안할경우 임의 값으로 패스워드를 변경한다.
      */
     public Map resetPassword(String userId, String password) {
-        LOGGER.info("> resetPassword userId" + userId);
-        LOGGER.info("> resetPassword password" + password);
+        //LOGGER.info("> resetPassword userId" + userId);
+        //LOGGER.info("> resetPassword password" + password);
 
         Map result = new HashMap();
         try {
@@ -137,12 +137,12 @@ public class UserServiceV3 extends Common {
             headers.add("Authorization", getTokenByClientCredentialsResponse.getTokenType() + " " + getTokenByClientCredentialsResponse.getAccessToken());
             HttpEntity<Map> resetEntity = new HttpEntity(userId, headers);
             ResponseEntity<Map> responseEntity = restTemplate.exchange(uaaTarget + "/password_resets?client_id=" + uaaAdminClientId, HttpMethod.POST, resetEntity, Map.class);
-            LOGGER.debug(responseEntity.getBody().toString());
+            //LOGGER.debug(responseEntity.getBody().toString());
 
             String code = responseEntity.getBody().get("code").toString();
             String userGuid = responseEntity.getBody().get("user_id").toString();
-            LOGGER.debug("CODE ::: " + code);
-            LOGGER.debug("userGuid ::: " + userGuid);
+            //LOGGER.debug("CODE ::: " + code);
+            //LOGGER.debug("userGuid ::: " + userGuid);
 
             headers.add("Content-Type", "application/json");
             Map<String, Object> param = new HashMap<String, Object>();
@@ -150,7 +150,7 @@ public class UserServiceV3 extends Common {
             param.put("new_password", password);
             HttpEntity<Map> changeEntity = new HttpEntity<Map>(param, headers);
             ResponseEntity<Map> response = restTemplate.exchange(uaaTarget + "/password_change", HttpMethod.POST, changeEntity, Map.class);
-            LOGGER.debug(response.getBody().toString());
+            //LOGGER.debug(response.getBody().toString());
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -168,7 +168,7 @@ public class UserServiceV3 extends Common {
      * 패스워드를 사용자가 변경하게 수정한다.
      */
     public Map expiredPassword(String userGuid) {
-        LOGGER.info("resetPassword ::: " + userGuid);
+        //LOGGER.info("resetPassword ::: " + userGuid);
 
         Map result = new HashMap();
         try {
@@ -193,7 +193,7 @@ public class UserServiceV3 extends Common {
      * @return 삭제 정보
      */
     public Map deleteUser(String userId) {
-        LOGGER.info("deleteUser ::: " + userId);
+        //LOGGER.info("deleteUser ::: " + userId);
 
         Map result = new HashMap();
         try {
@@ -236,7 +236,7 @@ public class UserServiceV3 extends Common {
      */
     public GetUserResponse getUser(String userGuid, String token) throws MalformedURLException, URISyntaxException {
 
-        LOGGER.info("getUser ::: ");
+        //LOGGER.info("getUser ::: ");
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient();
         GetUserResponse getUserResponse = cloudFoundryClient.users().get(GetUserRequest.builder().userId(userGuid).build()).block();
         return getUserResponse;
@@ -251,7 +251,7 @@ public class UserServiceV3 extends Common {
     public List<User> allUsers() {
         List<User> users = new ArrayList<>();
         try {
-            LOGGER.info("allUsers ::: ");
+            //LOGGER.info("allUsers ::: ");
             ReactorUaaClient reactorUaaClient = uaaClient();
             ListUsersResponse listUsersResponse = reactorUaaClient.users().list(ListUsersRequest.builder().build().builder().build()).block();
             users = listUsersResponse.getResources();

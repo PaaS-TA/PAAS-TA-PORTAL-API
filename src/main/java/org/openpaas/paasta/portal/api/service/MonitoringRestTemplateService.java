@@ -24,11 +24,11 @@ public class MonitoringRestTemplateService extends Common {
         reqHeaders.add("Accept", "application/json");
         reqHeaders.add("Content-Type", "application/json; charset=utf-8");
         HttpEntity<Object> reqEntity = new HttpEntity<>(bodyObject, reqHeaders);
-//        LOGGER.info("####### monitoringApiTarget Url ::: " + monitoringApiTarget + reqUrl);
+//        //LOGGER.info("####### monitoringApiTarget Url ::: " + monitoringApiTarget + reqUrl);
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Map> resEntity = restTemplate.exchange(monitoringApiTarget + reqUrl, httpMethod , reqEntity, Map.class);
         Map body = resEntity.getBody();
-        LOGGER.info("Response Type: {}", resEntity.getBody().getClass());
+        //LOGGER.info("Response Type: {}", resEntity.getBody().getClass());
 
         return body;
     }

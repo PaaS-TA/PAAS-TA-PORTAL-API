@@ -13,6 +13,7 @@ buildscript {
 ext {
     springCloudVersion = 'Edgware.RELEASE'
 }
+//ext['tomcat.version'] = '8.5.61' //CCE check
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -70,6 +71,9 @@ dependencies {
     }
 
     compile ('org.flywaydb:flyway-core:4.0.3')
+    
+    //secure-coding
+    compile ('org.owasp.encoder:encoder:1.2')
 
     // testCompile
     testCompile ('org.cloudfoundry:cloudfoundry-client-reactor:3.17.1.RELEASE')
