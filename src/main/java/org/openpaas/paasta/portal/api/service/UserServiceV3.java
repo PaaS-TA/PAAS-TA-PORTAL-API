@@ -71,6 +71,7 @@ public class UserServiceV3 extends Common {
     public int updateUser(UserDetail userDetail, String token) {
         //LOGGER.info("updateUser ::: " + userDetail.getUserId());
         Map result = new HashMap();
+        LOGGER.info("result :", result);
         try {
             ReactorUaaClient reactorUaaClient = uaaClient();
             reactorUaaClient.users().update(UpdateUserRequest.builder().userName(userDetail.getUserId()).phoneNumber(PhoneNumber.builder().value(userDetail.getTellPhone()).build()).email(Email.builder().value(userDetail.getUserName()).build()).build()).block();
@@ -106,6 +107,7 @@ public class UserServiceV3 extends Common {
             ReactorUaaClient reactorUaaClient = uaaClient(tokenProvider(userId, oldPassword));
             reactorUaaClient.users().userInfo(UserInfoRequest.builder().build()).map(UserInfoResponse::toString).subscribe(System.out::println).dispose();
             ChangeUserPasswordResponse changeUserPasswordResponse = reactorUaaClient.users().changePassword(ChangeUserPasswordRequest.builder().userId(userGuid).oldPassword(oldPassword).password(newPassword).build()).block();
+            LOGGER.info("changeUserPasswordResponse :", changeUserPasswordResponse);
             result.put("result", true);
             result.put("token", loginServiceV1.login(userId, newPassword));
             result.put("msg", "You have successfully completed the task.");
@@ -137,10 +139,10 @@ public class UserServiceV3 extends Common {
             headers.add("Authorization", getTokenByClientCredentialsResponse.getTokenType() + " " + getTokenByClientCredentialsResponse.getAccessToken());
             HttpEntity<Map> resetEntity = new HttpEntity(userId, headers);
             ResponseEntity<Map> responseEntity = restTemplate.exchange(uaaTarget + "/password_resets?client_id=" + uaaAdminClientId, HttpMethod.POST, resetEntity, Map.class);
-            //LOGGER.debug(responseEntity.getBody().toString());
+            LOGGER.debug(responseEntity.getBody().toString());
 
             String code = responseEntity.getBody().get("code").toString();
-            String userGuid = responseEntity.getBody().get("user_id").toString();
+            //String userGuid = responseEntity.getBody().get("user_id").toString();
             //LOGGER.debug("CODE ::: " + code);
             //LOGGER.debug("userGuid ::: " + userGuid);
 
@@ -150,7 +152,7 @@ public class UserServiceV3 extends Common {
             param.put("new_password", password);
             HttpEntity<Map> changeEntity = new HttpEntity<Map>(param, headers);
             ResponseEntity<Map> response = restTemplate.exchange(uaaTarget + "/password_change", HttpMethod.POST, changeEntity, Map.class);
-            //LOGGER.debug(response.getBody().toString());
+            LOGGER.debug(response.getBody().toString());
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -199,6 +201,7 @@ public class UserServiceV3 extends Common {
         try {
             ReactorUaaClient reactorUaaClient = uaaClient();
             DeleteUserResponse deleteUserResponse = reactorUaaClient.users().delete(DeleteUserRequest.builder().userId(userId).build()).block();
+            LOGGER.info("deleteUserResponse :", deleteUserResponse);
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
 
@@ -250,6 +253,7 @@ public class UserServiceV3 extends Common {
      */
     public List<User> allUsers() {
         List<User> users = new ArrayList<>();
+        LOGGER.info("users :", users.size());
         try {
             //LOGGER.info("allUsers ::: ");
             ReactorUaaClient reactorUaaClient = uaaClient();
@@ -342,7 +346,7 @@ public class UserServiceV3 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    public UpdateUserResponse UpdateUserActive(String userGuid) throws Exception {
+    public UpdateUserResponse updateUserActive(String userGuid) throws Exception {
         ReactorUaaClient uaaClient = uaaClient();
         User user = getUserSummaryWithFilter(UaaUserLookupFilterType.Username, userGuid);
         if (user.getUserName().equals("admin")) {

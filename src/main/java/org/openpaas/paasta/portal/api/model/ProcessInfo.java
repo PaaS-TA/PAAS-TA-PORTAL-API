@@ -2,13 +2,11 @@ package org.openpaas.paasta.portal.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.cloudfoundry.client.v3.Link;
-import org.cloudfoundry.client.v3.ToOneRelationship;
 import org.cloudfoundry.client.v3.processes.HealthCheck;
 
 import java.util.Map;
-import java.util.UUID;
 
-public class Process extends org.cloudfoundry.client.v3.processes.Process {
+public class ProcessInfo extends org.cloudfoundry.client.v3.processes.Process {
 
     private String type;
     private String command;

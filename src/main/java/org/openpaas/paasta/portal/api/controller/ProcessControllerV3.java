@@ -4,7 +4,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v3.processes.*;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
-import org.openpaas.paasta.portal.api.model.Process;
+import org.openpaas.paasta.portal.api.model.ProcessInfo;
 import org.openpaas.paasta.portal.api.service.ProcessServiceV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -65,7 +65,7 @@ public class ProcessControllerV3 extends Common {
      * 권한 : 사용자권한
      */
     @PostMapping(Constants.V3_URL+"/processes")
-    public ScaleProcessResponse scaleProcess(@RequestBody Process process, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
+    public ScaleProcessResponse scaleProcess(@RequestBody ProcessInfo process, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token){
       return processServiceV3.scaleProcess(process, token);
     }
 

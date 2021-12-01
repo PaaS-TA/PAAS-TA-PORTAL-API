@@ -82,7 +82,7 @@ public class AppServiceV3 extends Common {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             org.cloudfoundry.client.v2.applications.UpdateApplicationResponse response = cloudFoundryClient.applicationsV2().update(org.cloudfoundry.client.v2.applications.UpdateApplicationRequest.builder().applicationId(app.getGuid().toString()).name(app.getNewName()).build()).block();
 
-            //LOGGER.info("Update app response :", response);
+            LOGGER.info("Update app response :", response);
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -245,6 +245,7 @@ public class AppServiceV3 extends Common {
             String instancesServiceBindingGuid = listServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
 
             DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2().delete(DeleteServiceBindingRequest.builder().serviceBindingId(instancesServiceBindingGuid).build()).block();
+            LOGGER.info("deleteServiceBindingResponse :", deleteServiceBindingResponse);
 
             resultMap.put("result", true);
 
@@ -273,6 +274,7 @@ public class AppServiceV3 extends Common {
             ListUserProvidedServiceInstanceServiceBindingsResponse listUserProvidedServiceInstanceServiceBindingsResponse = cloudFoundryClient.userProvidedServiceInstances().listServiceBindings(ListUserProvidedServiceInstanceServiceBindingsRequest.builder().applicationId(applicationId).userProvidedServiceInstanceId(serviceInstanceId).build()).block();
             String instancesUserProvidedServiceBindingGuid = listUserProvidedServiceInstanceServiceBindingsResponse.getResources().get(0).getMetadata().getId();
             DeleteServiceBindingResponse deleteServiceBindingResponse = cloudFoundryClient.serviceBindingsV2().delete(DeleteServiceBindingRequest.builder().serviceBindingId(instancesUserProvidedServiceBindingGuid).build()).block();
+            LOGGER.info("deleteServiceBindingResponse :", deleteServiceBindingResponse);
             resultMap.put("result", true);
 
         } catch (Exception e) {

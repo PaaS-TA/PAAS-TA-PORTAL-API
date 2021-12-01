@@ -126,7 +126,7 @@ public class ClientServiceV3 extends Common {
      * @version 1.0
      * @since 2018.6.7 최초작성
      */
-    private class ClientOption {
+    static private class ClientOption {
 
         private List<GrantType> authorizedGrantTypes;
         private List<String> authorities;
@@ -165,12 +165,15 @@ public class ClientServiceV3 extends Common {
             this.accessTokenValidity = 0;
             this.refreshTokenValidity = 0;
 
-            Iterator<String> keys = param.keySet().iterator();
-            while (keys.hasNext()) {
+            //Iterator<String> keys = param.keySet().iterator();
+            //while (keys.hasNext()) {
+            for (Map.Entry<String,Object> entry : param.entrySet()) {
 
-                String key = keys.next();
-                Object value = param.get(key);
-                ////LOGGER.info( "key : " + key + ", value : " + value);
+                //String key = keys.next();
+                //Object value = param.get(key);
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                LOGGER.info( "key : " + key + ", value : " + value);
 
                 // ID
                 if (key.equals("client_id")) {
@@ -238,13 +241,19 @@ public class ClientServiceV3 extends Common {
                             tokenSalt = (String) value;
                             break;
                         case "access_token_validity": // accessTokenValidity(unit: seconds)
-                            if (value != "" && value != null) {
-                                accessTokenValidity = Long.parseLong((String) value);
+                            if (value != null){
+                                String val=(String) value;
+                                if (!val.equals("") ){
+                                    accessTokenValidity = Long.parseLong((String) value);
+                                }
                             }
                             break;
                         case "refresh_token_validity": // refreshTokenValidity(unit: seconds)
-                            if (value != "" && value != null) {
-                                refreshTokenValidity = Long.parseLong((String) value);
+                            if (value != null) {
+                                String val=(String) value;
+                                if (!val.equals("") ){
+                                    refreshTokenValidity = Long.parseLong((String) value);
+                                }
                             }
                             break;
                         default:

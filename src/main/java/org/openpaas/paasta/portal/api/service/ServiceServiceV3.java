@@ -163,7 +163,7 @@ public class ServiceServiceV3 extends Common {
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             CreateUserProvidedServiceInstanceResponse createUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().create(CreateUserProvidedServiceInstanceRequest.builder().name(serviceInstanceName).spaceId(String.valueOf(service.getSpaceGuid())).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(routeServiceUrl).tags(tags).build()).block();
-
+            LOGGER.info("createUserProvidedServiceInstanceResponse :", createUserProvidedServiceInstanceResponse);
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -204,7 +204,7 @@ public class ServiceServiceV3 extends Common {
 
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
             UpdateUserProvidedServiceInstanceResponse updateUserProvidedServiceInstanceResponse = cloudFoundryClient.userProvidedServiceInstances().update(UpdateUserProvidedServiceInstanceRequest.builder().name(service.getServiceInstanceName()).userProvidedServiceInstanceId(guid).credentials(map).syslogDrainUrl(syslogDrainUrl).routeServiceUrl(service.getRouteServiceUrl()).tags(tags).build()).block();
-
+            LOGGER.info("updateUserProvidedServiceInstanceResponse :", updateUserProvidedServiceInstanceResponse);
 
             result.put("result", true);
             result.put("msg", "You have successfully completed the task.");
@@ -398,7 +398,7 @@ public class ServiceServiceV3 extends Common {
         }
     }
 
-    public void PurgeService(String guid) throws Exception {
+    public void purgeService(String guid) throws Exception {
         cloudFoundryClient().serviceBrokers().list(ListServiceBrokersRequest.builder().build()).block().getResources().forEach(resource -> {
             if(resource.getMetadata().getId().equals(guid)){
                cloudFoundryClient().services().delete(DeleteServiceRequest.builder().purge(true).serviceId(guid).build()).block();

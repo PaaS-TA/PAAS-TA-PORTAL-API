@@ -25,11 +25,15 @@ public class AlarmService {
         param.append("&pageItems="+pageItems);
         param.append("&pageIndex="+pageIndex);
 
-        if(resourceType != null && resourceType != "") {
-            param.append("&resourceType="+resourceType);
+        if(resourceType != null ) {
+            if(!resourceType.equals("")){
+                param.append("&resourceType="+resourceType);
+            }
         }
-        if(alarmLevel != null && alarmLevel != "") {
-            param.append("&alarmLevel="+alarmLevel);
+        if(alarmLevel != null){
+            if(!alarmLevel.equals("")){
+                param.append("&alarmLevel="+alarmLevel);
+            }
         }
         return monitoringRestTemplateService.send(url + "/list?"+param, HttpMethod.GET, null);
     }

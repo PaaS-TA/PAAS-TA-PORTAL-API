@@ -133,11 +133,11 @@ public class UserDetail {
     }
 
     public Date getAuthAccessTime() {
-        return authAccessTime;
+        return authAccessTime == null ? null : new Date(authAccessTime.getTime());
     }
 
     public void setAuthAccessTime(Date authAccessTime) {
-        this.authAccessTime = authAccessTime;
+        this.authAccessTime = authAccessTime == null ? null : new Date(authAccessTime.getTime());
     }
 
     public int getAuthAccessCnt() {

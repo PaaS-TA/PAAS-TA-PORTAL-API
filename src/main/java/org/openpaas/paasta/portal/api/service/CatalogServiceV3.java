@@ -201,7 +201,7 @@ public class CatalogServiceV3 extends Common {
             Thread.sleep(500);
             reactorCloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
         } catch (Exception e) {
-            //LOGGER.info(e.toString());
+            LOGGER.error(e.toString());
         }
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -248,7 +248,7 @@ public class CatalogServiceV3 extends Common {
             }};
         } finally {
             if (file != null) {
-                file.delete();
+                boolean fileDeleteResult = file.delete();
             }
         }
     }
@@ -318,7 +318,7 @@ public class CatalogServiceV3 extends Common {
             }};
         } finally {
             if (file != null) {
-                file.delete();
+                boolean fileDeleteResult = file.delete();
             }
         }
     }
@@ -427,7 +427,8 @@ public class CatalogServiceV3 extends Common {
     public Map procCatalogCreateServiceInstanceV2(boolean tmp, Catalog param, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> parameterMap = new HashMap<String, Object>();
-        //LOGGER.info(param.toString());
+        LOGGER.info(param.toString());
+        LOGGER.info(parameterMap.toString());
         try {
             parameterMap = mapper.readValue(param.getParameter(), new TypeReference<Map<String, Object>>() {});
             if(tmp){

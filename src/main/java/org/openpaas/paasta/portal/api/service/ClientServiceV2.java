@@ -87,7 +87,7 @@ public class ClientServiceV2 extends Common {
      * @version 1.0
      * @since 2018.6.7 최초작성
      */
-    private class ClientOption {
+    static private class ClientOption {
 
         private List<GrantType> authorizedGrantTypes;
         private List<String> authorities;
@@ -126,12 +126,22 @@ public class ClientServiceV2 extends Common {
             this.accessTokenValidity = 0;
             this.refreshTokenValidity = 0;
 
-            Iterator<String> keys = param.keySet().iterator();
-            while (keys.hasNext()) {
+            for (Map.Entry<String,Object> entry : param.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                System.out.println(key+"="+value);
+            }
 
-                String key = keys.next();
-                Object value = param.get(key);
-                ////LOGGER.info( "key : " + key + ", value : " + value);
+            //Iterator<String> keys = param.keySet().iterator();
+            //while (keys.hasNext()) {
+            for (Map.Entry<String,Object> entry : param.entrySet()) {
+
+                //String key = keys.next();
+                //Object value = param.get(key);
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                LOGGER.info( "key : " + key + ", value : " + value);
 
                 // ID
                 if (key.equals("client_id")) {

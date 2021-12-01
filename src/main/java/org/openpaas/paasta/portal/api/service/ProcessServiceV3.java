@@ -4,7 +4,7 @@ package org.openpaas.paasta.portal.api.service;
 import org.cloudfoundry.client.v3.processes.*;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.model.Process;
+import org.openpaas.paasta.portal.api.model.ProcessInfo;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +57,7 @@ public class ProcessServiceV3 extends Common {
      * @return GetProcessStatisticsResponse
      * 권한 : 사용자권한
      */
-    public ScaleProcessResponse scaleProcess(Process process, String token){
+    public ScaleProcessResponse scaleProcess(ProcessInfo process, String token){
         ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient();
         return reactorCloudFoundryClient.processes().scale(ScaleProcessRequest.builder().processId(process.getId()).diskInMb(process.getDiskInMb()).instances(process.getInstances()).memoryInMb(process.getMemoryInMb()).build()).block();
     }

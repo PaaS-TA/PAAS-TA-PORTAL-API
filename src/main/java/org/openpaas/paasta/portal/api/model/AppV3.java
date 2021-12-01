@@ -258,17 +258,17 @@ public class AppV3 {
         return serviceInstances;
     }
 
-    public void setResource(List<Resources> resources) {
+    /*public void setResource(List<Resources> resources) {
         this.resources = resources;
-    }
+    }*/
 
-    public void setEntity(Entity entity) {
+    /*public void setEntity(Entity entity) {
         this.entity = entity;
-    }
+    }*/
 
-    public void setMetadata(Metadata metadata) {
+    /*public void setMetadata(Metadata metadata) {
         this.metadata = metadata;
-    }
+    }*/
 
 
     public String toString() {
