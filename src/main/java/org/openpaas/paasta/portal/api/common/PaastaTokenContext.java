@@ -11,7 +11,7 @@ public class PaastaTokenContext extends PaastaContextInterface{
 
     public PaastaTokenContext(PasswordGrantTokenProvider tokenProvider, Date create_time){
         this.tokenProvider = tokenProvider;
-        this.create_time = create_time;
+        this.create_time = create_time == null ? null : new Date(create_time.getTime());
     }
 
     public PasswordGrantTokenProvider tokenProvider() {
@@ -20,6 +20,6 @@ public class PaastaTokenContext extends PaastaContextInterface{
 
     @Override
     public Date getCreate_time() {
-        return create_time;
+        return create_time == null ? null : new Date(create_time.getTime());
     }
 }

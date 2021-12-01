@@ -23,6 +23,7 @@ import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.Catalog;
+import org.owasp.esapi.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -201,7 +202,7 @@ public class CatalogServiceV2 extends Common {
             Thread.sleep(500);
             reactorCloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
         } catch (Exception e) {
-            //LOGGER.info(e.toString());
+            LOGGER.error(e.toString());
         }
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -217,6 +218,7 @@ public class CatalogServiceV2 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public Map<String, Object> createApp(Catalog param, String token, String token2, HttpServletResponse response) {
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         String applicationid = "applicationID";
@@ -248,7 +250,7 @@ public class CatalogServiceV2 extends Common {
             }};
         } finally {
             if (file != null) {
-                file.delete();
+                boolean fileDeleteResult = file.delete();
             }
         }
     }
@@ -263,6 +265,7 @@ public class CatalogServiceV2 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public Map<String, Object> createAppTemplate(Catalog param, String token, String token2, HttpServletResponse response) {
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         String applicationid = "applicationID";
@@ -318,7 +321,7 @@ public class CatalogServiceV2 extends Common {
             }};
         } finally {
             if (file != null) {
-                file.delete();
+                boolean fileDeleteResult = file.delete();
             }
         }
     }

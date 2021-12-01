@@ -110,7 +110,8 @@ public class OrgServiceV2 extends Common {
     }
 
     public GetOrganizationResponse getOrg(final String orgId) {
-        return getOrg(orgId, null);
+        ReactorCloudFoundryClient reactorCloudFoundryClient =  cloudFoundryClient();
+        return getOrg(orgId, reactorCloudFoundryClient);
     }
 
     /**
@@ -331,7 +332,7 @@ public class OrgServiceV2 extends Common {
                 // Admin 계정인 경우 강제적으로 Org 밑의 모든 리소스(spaces, buildpack, app...)를 recursive하게 제거한다.
                 LOGGER.warn("Org({}) exists user(s) included OrgManager role... but it deletes forced.", orgSummary.getName());
                 DeleteOrganizationResponse eleteOrganizationResponse = cloudFoundryClient(connectionContext(), tokenProvider(adminUserName, adminPassword)).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(true).async(true).build()).block();
-
+                LOGGER.info("eleteOrganizationResponse :", eleteOrganizationResponse);
                 resultMap.put("result", true);
                 return resultMap;
             }
@@ -353,7 +354,7 @@ public class OrgServiceV2 extends Common {
                 //LOGGER.debug("Though user isn't admin, user can delete organization if user's role is OrgManager.");
                 //LOGGER.debug("User : {}, To delete org : {} (GUID : {})", user.getId(), orgSummary.getName(), orgId);
                 DeleteOrganizationResponse eleteOrganizationResponse = cloudFoundryClient(connectionContext(), tokenProvider()).organizations().delete(DeleteOrganizationRequest.builder().organizationId(orgId).recursive(recursive).async(true).build()).block();
-
+                LOGGER.info("eleteOrganizationResponse :", eleteOrganizationResponse);
                 resultMap.put("result", true);
                 return resultMap;
 
@@ -364,7 +365,7 @@ public class OrgServiceV2 extends Common {
             } else {
                 // 해당 유저에게 OrgManager Role이 없는 경우 (403 : Forbidden)
                 DeleteOrganizationResponse eleteOrganizationResponse = DeleteOrganizationResponse.builder().entity(JobEntity.builder().error("You don't have a OrgManager role. To delete org, you have to get OrgManager role.").errorDetails(ErrorDetails.builder().code(403).build()).id("httpstatus-403").build()).build();
-
+                LOGGER.info("eleteOrganizationResponse :", eleteOrganizationResponse);
                 resultMap.put("result", false);
                 return resultMap;
             }
@@ -601,12 +602,15 @@ public class OrgServiceV2 extends Common {
         final Set<String> targetSpaceRole = new HashSet<>();
         switch (orgRole) {
             case OrgManager:
+                LOGGER.debug("case : OrgManager");
             case ORGMANAGER:
                 targetSpaceRole.add(SpaceRole.SpaceManager.name());
             case OrgAuditor:
+                LOGGER.debug("case : OrgAuditor");
             case ORGAUDITOR:
                 targetSpaceRole.add(SpaceRole.SpaceDeveloper.name());
             case BillingManager:
+                LOGGER.debug("case : BillingManager");
             case BILLINGMANAGER:
                 targetSpaceRole.add(SpaceRole.SpaceAuditor.name());
                 break;
@@ -706,7 +710,7 @@ public class OrgServiceV2 extends Common {
     // TODO cancel member
     public boolean cancelOrganizationMember(String orgId, String userId, String token) {
         final boolean isManager = isOrgManager(orgId, userId);
-        //LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
+        LOGGER.info("isOrgManager : {} / Org Guid : {} / User Guid : {}", isManager, orgId, userId);
 
         try {
             removeAllRoles(orgId, userId);
@@ -729,13 +733,15 @@ public class OrgServiceV2 extends Common {
                 return false;
             }
 
-            String id = inviteAcceptMap.get("id").toString();
+            //String id = inviteAcceptMap.get("id").toString();
             String orgGuid = inviteAcceptMap.get("orgGuid").toString();
             String userEmail = inviteAcceptMap.get("userId").toString();
             String userId = userServiceV2.getUserIdByUsername(userEmail);
 
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObj = null;
+            JSONArray orgArray = new JSONArray();
+            JSONArray spaceArray = new JSONArray();
 
             try {
                 jsonObj = (JSONObject) jsonParser.parse(inviteAcceptMap.get("role").toString());
@@ -743,7 +749,9 @@ public class OrgServiceV2 extends Common {
                 e.printStackTrace();
             }
 
-            JSONArray orgArray = (JSONArray) jsonObj.get("org");
+            if(jsonObj != null){
+                orgArray = (JSONArray) jsonObj.get("org");
+            }
 
             for (int i = 0; i < orgArray.size(); i++) {
                 JSONObject orgObj = (JSONObject) orgArray.get(i);
@@ -764,7 +772,9 @@ public class OrgServiceV2 extends Common {
                 }
             }
 
-            JSONArray spaceArray = (JSONArray) jsonObj.get("space");
+            if(jsonObj != null){
+                spaceArray = (JSONArray) jsonObj.get("space");
+            }
 
             for (int j = 0; j < spaceArray.size(); j++) {
                 JSONObject spaceObj = (JSONObject) spaceArray.get(j);

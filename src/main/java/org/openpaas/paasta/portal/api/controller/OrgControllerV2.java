@@ -442,6 +442,7 @@ public class OrgControllerV2 extends Common {
         ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(connectionContext(), tokenProvider(token));
         Map resultMap = new HashMap();
         List<Map> orgList = new ArrayList<Map>();
+        LOGGER.info("orgList :", orgList.size());
 
         Map orgMap = new HashMap();
 

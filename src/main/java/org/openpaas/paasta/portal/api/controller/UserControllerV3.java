@@ -110,7 +110,7 @@ public class UserControllerV3 extends Common {
     @GetMapping(value = {Constants.V3_URL + "/users"})
     public List<User> getAllUserName(HttpServletRequest request) throws Exception {
         List<User> userInfo = userServiceV3.allUsers();
-        Map<String, Object> resultMap = new HashMap();
+        //Map<String, Object> resultMap = new HashMap();
         return userInfo;
     }
 
@@ -194,7 +194,7 @@ public class UserControllerV3 extends Common {
      * @throws Exception Exception(자바클래스)
      */
     @PutMapping(Constants.V3_URL + "/user/{userid}/active")
-    public UpdateUserResponse UpdateUserActive(@PathVariable String userid) throws Exception {
-        return userServiceV3.UpdateUserActive(userid);
+    public UpdateUserResponse updateUserActive(@PathVariable String userid) throws Exception {
+        return userServiceV3.updateUserActive(userid);
     }
 }

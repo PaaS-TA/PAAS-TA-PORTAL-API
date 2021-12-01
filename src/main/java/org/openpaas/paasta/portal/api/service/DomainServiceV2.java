@@ -81,9 +81,9 @@ public class DomainServiceV2 extends Common {
         return cloudFoundryClient().domains().list(ListDomainsRequest.builder().build()).block();
     }
 
-    private ListDomainsResponse getAllDomains(final String names) {
+    /*private ListDomainsResponse getAllDomains(final String names) {
         return cloudFoundryClient().domains().list(ListDomainsRequest.builder().name(names).build()).block();
-    }
+    }*/
 
     private ListPrivateDomainsResponse getPrivateDomains() {
         return cloudFoundryClient().privateDomains().list(ListPrivateDomainsRequest.builder().build()).block();

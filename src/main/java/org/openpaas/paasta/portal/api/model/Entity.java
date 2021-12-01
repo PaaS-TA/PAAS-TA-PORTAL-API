@@ -73,14 +73,14 @@ public class Entity {
 
 		public Meta(UUID guid, Date created, Date updated) {
 			this.guid = guid;
-			this.created = created;
-			this.updated = updated;
+			this.created = created == null ? null : new Date(created.getTime());
+			this.updated = updated == null ? null : new Date(updated.getTime());
 		}
 
 		public Meta(UUID guid, Date created, Date updated, String url) {
 			this.guid = guid;
-			this.created = created;
-			this.updated = updated;
+			this.created = created == null ? null : new Date(created.getTime());
+			this.updated = updated == null ? null : new Date(updated.getTime());
 			this.url = url;
 		}
 
@@ -93,11 +93,11 @@ public class Entity {
 		}
 
 		public Date getCreated() {
-			return created;
+			return created == null ? null : new Date(created.getTime());
 		}
 
 		public Date getUpdated() {
-			return updated;
+			return updated == null ? null : new Date(updated.getTime());
 		}
 
 		public String getUrl() {

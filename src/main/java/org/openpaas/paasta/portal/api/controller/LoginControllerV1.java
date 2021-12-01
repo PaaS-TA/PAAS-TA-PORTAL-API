@@ -95,7 +95,7 @@ public class LoginControllerV1 extends Common {
      */
     @PostMapping("/token/refresh")
     public Map<String, Object> refresh(@RequestBody Map<String, Object> body) throws Exception {
-        String tokenStr = (String) body.get("token");
+        //String tokenStr = (String) body.get("token");
         String refreshTokenStr = (String) body.get("refresh_token");
 
         Map<String, Object> result = new HashMap<>();

@@ -12,7 +12,7 @@ public class PaastaConnectionContext extends PaastaContextInterface {
 
     public PaastaConnectionContext(DefaultConnectionContext connectionContext, Date create_time){
         this.connectionContext = connectionContext;
-        this.create_time = create_time;
+        this.create_time = create_time == null ? null : new Date(create_time.getTime());
     }
 
     public DefaultConnectionContext getConnectionContext() {
@@ -21,6 +21,6 @@ public class PaastaConnectionContext extends PaastaContextInterface {
 
     @Override
     public Date getCreate_time() {
-        return create_time;
+        return create_time == null ? null : new Date(create_time.getTime());
     }
 }

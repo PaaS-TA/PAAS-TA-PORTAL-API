@@ -236,23 +236,23 @@ public class Space {
     }
 
     public Date getCreated() {
-        return created;
+        return created == null ? null : new Date(created.getTime());
     }
 
     public void setCreated(Date created) {
-        this.created = created;
+        this.created = created == null ? null : new Date(created.getTime());
     }
 
     public Date getLastModified() {
-        return lastModified;
+        return lastModified == null ? null : new Date(lastModified.getTime());
     }
 
     public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
+        this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class Entity {
+    static public class Entity {
         @JsonProperty("space_quota_definition_guid")
         private String spaceQuotaDefinitionGuid;
 

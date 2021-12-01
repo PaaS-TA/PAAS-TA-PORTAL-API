@@ -4,10 +4,13 @@ import java.util.Date;
 
 public abstract class PaastaContextInterface {
 
-    Date create_time;
+    private Date create_time;
 
     public Date getCreate_time() {
-        return create_time;
+        return create_time == null ? null : new Date(create_time.getTime());
     }
 
+    public void setCreate_time(Date create_time) {
+        this.create_time = create_time == null ? null : new Date(create_time.getTime());
+    }
 }
