@@ -1,4 +1,3 @@
----
 applications:
   - name: portal-api
     memory: 2G
@@ -22,32 +21,32 @@ applications:
       management_health_ldap_enabled: false
 
       ### paasta info
-      cloudfoundry_cc_api_url: https://api.<DOMAIN>
-      cloudfoundry_cc_api_uaaUrl: https://uaa.<DOMAIN>
+      cloudfoundry_cc_api_url: https://api.10.0.1.221.nip.io
+      cloudfoundry_cc_api_uaaUrl: https://uaa.10.0.1.221.nip.io
       cloudfoundry_cc_api_sslSkipValidation: true
-      cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>                    # (e.g. admin)
-      cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>                    # (e.g. admin)
-      cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ID>                         # (e.g. admin)
-      cloudfoundry_user_uaaClient_clientSecret: <UAA_CLIENT_SECRET>                 # (e.g. admin-secret)
-      cloudfoundry_user_uaaClient_adminClientId: <UAA_ADMIN_CLIENT_ID>              # (e.g. admin)
-      cloudfoundry_user_uaaClient_adminClientSecret: <UAA_ADMIN_CLIENT_SECRET>      # (e.g. admin-secret)
-      cloudfoundry_user_uaaClient_loginClientId: <UAA_LOGIN_CLIENT_ID>              # (e.g. admin)
-      cloudfoundry_user_uaaClient_loginClientSecret: <UAA_LOGIN_CLIENT_SECRET>      # (e.g. admin-secret)
+      cloudfoundry_user_admin_username: admin                    # (e.g. admin)
+      cloudfoundry_user_admin_password: admin                    # (e.g. admin)
+      cloudfoundry_user_uaaClient_clientId: admin                         # (e.g. admin)
+      cloudfoundry_user_uaaClient_clientSecret: admin-secret                 # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_adminClientId: admin              # (e.g. admin)
+      cloudfoundry_user_uaaClient_adminClientSecret: admin-secret      # (e.g. admin-secret)
+      cloudfoundry_user_uaaClient_loginClientId: admin              # (e.g. admin)
+      cloudfoundry_user_uaaClient_loginClientSecret: admin-secret      # (e.g. admin-secret)
       cloudfoundry_user_uaaClient_skipSSLValidation: true
       cloudfoundry_authorization: cf-Authorization
 
       paasta_portal_api_authorization_base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
-      paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.<DOMAIN>/portalapi
-      paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.<DOMAIN>/commonapi
-      paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.<DOMAIN>/storageapi
+      paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.10.0.1.221.nip.io/portalapi
+      paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.10.0.1.221.nip.io/commonapi
+      paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.10.0.1.221.nip.io/storageapi
       paasta_portal_storageapi_type: swift
 
-      eureka.client.serviceUrl.defaultZone: http://portal-registration.<DOMAIN>/eureka/
+      eureka.client.serviceUrl.defaultZone: http://portal-registration.10.0.1.221.nip.io/eureka/
       eureka.instance.hostname: ${vcap.application.uris[0]}
       eureka.instance.nonSecurePort: 80
 
       ### abacus
-      abacus_url: http://<ABACUS_URL>
+      abacus_url: http://
 
       ## monitoring
-      monitoring_api_url: http://<MONITORING_API_URL>
+      monitoring_api_url: http://61.252.53.241:8080
