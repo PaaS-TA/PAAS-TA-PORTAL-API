@@ -2,7 +2,10 @@ package org.openpaas.paasta.portal.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.cloudfoundry.client.v3.Link;
+import org.cloudfoundry.client.v3.Metadata;
 import org.cloudfoundry.client.v3.processes.HealthCheck;
+import org.cloudfoundry.client.v3.processes.ProcessRelationships;
+
 
 import java.util.Map;
 
@@ -79,6 +82,17 @@ public class ProcessInfo extends org.cloudfoundry.client.v3.processes.Process {
     public String getUpdatedAt() {
         return updateed_at;
     }
+
+    @Override
+    public Metadata getMetadata() {
+        return null;
+    }
+
+    @Override
+    public ProcessRelationships getRelationships() {
+        return null;
+    }
+
 
     public void setType(String type) {
         this.type = type;

@@ -5,10 +5,13 @@ applications:
     disk: 2G
     instances: 1
     buildpacks:
-    - java_buildpack
+    - paketo-buildpacks/java
     path: build/libs/paas-ta-portal-api.jar
     env:
-      server_port: 80
+      server_port: 8080
+
+      BP_JVM_VERSION: 8
+      BP_SPRING_CLOUD_BINDINGS_DISABLED: true
 
       JBP_CONFIG_CONTAINER_SECURITY_PROVIDER: '{key_manager_enabled: false, trust_manager_enabled: false}'
       spring_application_name: PortalApi
@@ -37,12 +40,12 @@ applications:
       cloudfoundry_authorization: cf-Authorization
 
       paasta_portal_api_authorization_base64: Basic YWRtaW46b3BlbnBhYXN0YQ==
-      paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.<DOMAIN>/portalapi
-      paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.<DOMAIN>/commonapi
-      paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.<DOMAIN>/storageapi
+      paasta_portal_api_zuulUrl_cfapi: http://portal-gateway.<APP_DOMAIN>/portalapi
+      paasta_portal_api_zuulUrl_commonapi: http://portal-gateway.<APP_DOMAIN>/commonapi
+      paasta_portal_api_zuulUrl_storageapi: http://portal-gateway.<APP_DOMAIN>/storageapi
       paasta_portal_storageapi_type: swift
 
-      eureka.client.serviceUrl.defaultZone: http://portal-registration.<DOMAIN>/eureka/
+      eureka.client.serviceUrl.defaultZone: http://portal-registration.<APP_DOMAIN>/eureka/
       eureka.instance.hostname: ${vcap.application.uris[0]}
       eureka.instance.nonSecurePort: 80
 
