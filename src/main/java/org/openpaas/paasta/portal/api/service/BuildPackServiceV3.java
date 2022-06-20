@@ -47,8 +47,8 @@ public class BuildPackServiceV3 extends Common {
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
         cloudFoundryClient(connectionContext(), tokenProvider())
-                .buildpacks()
-                .update(UpdateBuildpackRequest.builder()
+                .buildpacksV3()
+                .update(org.cloudfoundry.client.v3.buildpacks.UpdateBuildpackRequest.builder()
                         .buildpackId(buildPack.getGuid().toString())
                         .position(buildPack.getPosition())
                         .enabled(buildPack.getEnable())
