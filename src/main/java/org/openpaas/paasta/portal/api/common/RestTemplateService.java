@@ -14,8 +14,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
-/*import paasta.delivery.pipeline.ui.exception.CustomException;
-import paasta.delivery.pipeline.ui.job.Job;*/
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
