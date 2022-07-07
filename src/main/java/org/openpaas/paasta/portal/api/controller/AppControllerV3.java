@@ -9,6 +9,7 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.AppV3;
+import org.openpaas.paasta.portal.api.model.Batch;
 import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -295,22 +296,14 @@ public class AppControllerV3 extends Common {
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/recentlogs"})
     public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-
-
-        //LOGGER.info("getRecentLog Start : " + guid);
-
         Map mapLog = new HashMap();
         try {
-            List<Envelope> respAppEvents = appServiceV3.getRecentLog(guid, token);
+            Batch respAppEvents = appServiceV3.getRecentLog(guid, token);
             mapLog.put("log", respAppEvents);
         } catch (Exception e) {
-            //LOGGER.info("################ ");
             LOGGER.error(e.toString());
             mapLog.put("log", "");
         }
-
-        //LOGGER.info("getRecentLog End");
-
         return mapLog;
     }
 

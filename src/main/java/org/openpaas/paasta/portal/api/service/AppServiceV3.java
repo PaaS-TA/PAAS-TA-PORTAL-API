@@ -1,10 +1,10 @@
 package org.openpaas.paasta.portal.api.service;
 
+
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
 import org.cloudfoundry.client.v2.applications.*;
-import org.cloudfoundry.client.v2.applications.DeleteApplicationRequest;
 import org.cloudfoundry.client.v2.applications.TerminateApplicationInstanceRequest;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.events.ListEventsRequest;
@@ -20,33 +20,34 @@ import org.cloudfoundry.client.v2.servicebindings.DeleteServiceBindingResponse;
 import org.cloudfoundry.client.v2.servicebindings.ServiceBindingResource;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstanceServiceBindingsResponse;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsResponse;
 import org.cloudfoundry.client.v3.applications.*;
-import org.cloudfoundry.doppler.Envelope;
-import org.cloudfoundry.doppler.RecentLogsRequest;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.RestTemplateService;
 import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.model.AppV3;
+import org.openpaas.paasta.portal.api.model.Batch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class AppServiceV3 extends Common {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
+
+    private final RestTemplateService restTemplateService;
+
+    public AppServiceV3(RestTemplateService restTemplateService) {
+        this.restTemplateService = restTemplateService;
+    }
 
     public SummaryApplicationResponse getAppSummary(String guid, String token) {
         SummaryApplicationResponse summaryApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
@@ -413,15 +414,14 @@ public class AppServiceV3 extends Common {
         return resultMap;
     }
 
-    public List<Envelope> getRecentLog(String guid, String token) {
+    public Batch getRecentLog(String guid, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
-        ReactorDopplerClient reactorDopplerClient = dopplerClient(connectionContext(), tokenProvider);
+        String reqUrl = logCacheTarget + "/api/v1/read/" + guid  + "?descending=true&envelope_types=LOG&limit=100&start_time=-6795364578871345152";
+        Map logmap = restTemplateService.cfSend(token, reqUrl, HttpMethod.GET, null, Map.class);
 
-        RecentLogsRequest.Builder requestBuilder = RecentLogsRequest.builder();
-        requestBuilder.applicationId(guid);
-
-        List<Envelope> getRecentLog = reactorDopplerClient.recentLogs(requestBuilder.build()).collectList().block();
-        return getRecentLog;
+        ObjectMapper mapper = new ObjectMapper();
+        Batch batch = mapper.convertValue(logmap.get("envelopes"), Batch.class);
+        return batch;
     }
 
 
