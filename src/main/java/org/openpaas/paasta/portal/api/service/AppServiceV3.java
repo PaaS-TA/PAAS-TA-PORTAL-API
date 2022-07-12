@@ -414,9 +414,11 @@ public class AppServiceV3 extends Common {
         return resultMap;
     }
 
-    public Batch getRecentLog(String guid, String token) {
+
+    public Batch getLog(String guid, String time, int limit, boolean isDescending, String envelope_types, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
-        String reqUrl = logCacheTarget + "/api/v1/read/" + guid  + "?descending=true&envelope_types=LOG&limit=100&start_time=-6795364578871345152";
+        
+        String reqUrl = logCacheTarget + "/api/v1/read/" + guid  + "?" + (isDescending ? "descending=true&" : "") + "envelope_types=" + envelope_types + (limit == 0  ? "" : "&limit=" + limit) +"&start_time=" + time;
         Map logmap = restTemplateService.cfSend(token, reqUrl, HttpMethod.GET, null, Map.class);
 
         ObjectMapper mapper = new ObjectMapper();
