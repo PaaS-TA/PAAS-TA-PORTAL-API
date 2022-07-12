@@ -27,6 +27,7 @@ applications:
       ### paasta info
       cloudfoundry_cc_api_url: https://api.<DOMAIN>
       cloudfoundry_cc_api_uaaUrl: https://uaa.<DOMAIN>
+      cloudfoundry_cc_api_logCacheUrl: https://log-cache.<DOMAIN>
       cloudfoundry_cc_api_sslSkipValidation: true
       cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>                    # (e.g. admin)
       cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>                    # (e.g. admin)
