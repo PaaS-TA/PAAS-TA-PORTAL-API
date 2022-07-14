@@ -60,7 +60,6 @@ dependencies {
     compile ('org.cloudfoundry:cloudfoundry-client:3.20.0.RELEASE')
     compile ('org.cloudfoundry:cloudfoundry-util:3.20.0.RELEASE')
 
-
     compile ('io.projectreactor:reactor-core:3.3.0.RELEASE')
     compile ('io.projectreactor.ipc:reactor-netty:0.7.15.RELEASE')
 
@@ -71,6 +70,8 @@ dependencies {
     compile ('org.cloudfoundry.identity:cloudfoundry-identity-scim:2.7.4'){
         exclude group: 'org.slf4j'
     }
+    // https://mvnrepository.com/artifact/org.immutables/value
+    compileOnly group: 'org.immutables', name: 'value', version: '2.8.8'
 
     compile ('org.flywaydb:flyway-core:4.0.3')
     
