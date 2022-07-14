@@ -4,11 +4,10 @@ import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
-import org.cloudfoundry.doppler.Envelope;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.model.AppV3;
+import org.openpaas.paasta.portal.api.model.Batch;
 import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -295,22 +293,55 @@ public class AppControllerV3 extends Common {
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/recentlogs"})
     public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-
-
-        //LOGGER.info("getRecentLog Start : " + guid);
-
         Map mapLog = new HashMap();
         try {
-            List<Envelope> respAppEvents = appServiceV3.getRecentLog(guid, token);
-            mapLog.put("log", respAppEvents);
+            Batch respAppLogs = appServiceV3.getLog(guid, "-6795364578871345152", 100, true, "LOG", token);
+            mapLog.put("log", respAppLogs);
         } catch (Exception e) {
-            //LOGGER.info("################ ");
             LOGGER.error(e.toString());
             mapLog.put("log", "");
         }
+        return mapLog;
+    }
 
-        //LOGGER.info("getRecentLog End");
+    /**
+     * 앱 최신 로그
+     *
+     * @param guid
+     * @return Space respSpace
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/taillogs/recent"})
+    public Map getTailLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        Map mapLog = new HashMap();
+        try {
+            Batch respAppLogs = appServiceV3.getLog(guid, "-6795364578871345152", 1, true, "LOG", token);
+            mapLog.put("log", respAppLogs);
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            mapLog.put("log", "");
+        }
+        return mapLog;
+    }
 
+
+    /**
+     * 앱 실시간 로그
+     *
+     * @param guid
+     * @return Space respSpace
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/taillogs/{time}"})
+    public Map getTailLog(@PathVariable String guid, @PathVariable String time, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        Map mapLog = new HashMap();
+        try {
+            Batch respAppLogs = appServiceV3.getLog(guid, time,0, false, "LOG", token);
+            mapLog.put("log", respAppLogs);
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            mapLog.put("log", "");
+        }
         return mapLog;
     }
 

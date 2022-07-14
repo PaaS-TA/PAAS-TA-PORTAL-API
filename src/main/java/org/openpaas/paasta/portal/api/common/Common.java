@@ -35,9 +35,11 @@ public class Common {
     @Value("${cloudfoundry.cc.api.url}")
     public String apiTarget;
 
-
     @Value("${cloudfoundry.cc.api.uaaUrl}")
     public String uaaTarget;
+
+    @Value("${cloudfoundry.cc.api.logCacheUrl}")
+    public String logCacheTarget;
 
     @Value("${cloudfoundry.cc.api.sslSkipValidation}")
     public boolean cfskipSSLValidation;
