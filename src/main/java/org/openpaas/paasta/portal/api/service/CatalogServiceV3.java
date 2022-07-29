@@ -19,6 +19,22 @@ import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibil
 import org.cloudfoundry.client.v2.services.ListServicesRequest;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
+import org.cloudfoundry.client.v3.Relationship;
+import org.cloudfoundry.client.v3.ToOneRelationship;
+import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
+import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletRequest;
+import org.cloudfoundry.client.v3.applications.StartApplicationRequest;
+import org.cloudfoundry.client.v3.applications.UpdateApplicationRequest;
+import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
+import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
+import org.cloudfoundry.client.v3.builds.GetBuildRequest;
+import org.cloudfoundry.client.v3.droplets.GetDropletRequest;
+import org.cloudfoundry.client.v3.packages.CreatePackageRequest;
+import org.cloudfoundry.client.v3.packages.GetPackageRequest;
+import org.cloudfoundry.client.v3.packages.PackageRelationships;
+import org.cloudfoundry.client.v3.packages.PackageState;
+import org.cloudfoundry.client.v3.packages.PackageType;
+import org.cloudfoundry.client.v3.packages.UploadPackageRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -198,8 +214,8 @@ public class CatalogServiceV3 extends Common {
      */
     private Map<String, Object> procCatalogStartApplication(String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
-            Thread.sleep(500);
-            reactorCloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
+            // 시작
+            reactorCloudFoundryClient.applicationsV3().start(StartApplicationRequest.builder().applicationId(applicationid).build()).block();
         } catch (Exception e) {
             LOGGER.error(e.toString());
         }
@@ -207,6 +223,43 @@ public class CatalogServiceV3 extends Common {
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
         }};
     }
+
+/**
+     * 빌드를 생성한다.
+     *
+     * @param applicationid             applicationid
+     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private Map<String, Object> createBuild(String applicationid, String packageId, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+        try {
+            // 빌드 생성
+            CreateBuildResponse buildResponse = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(relationship).build()).block();
+            // 빌드 확인 중 = STAGED
+            while(true){
+                if(
+                    reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getState().getValue().equals("STAGED")
+                )
+                    break;
+                Thread.sleep(1000);
+            }
+        
+            // 드롭릿 세팅
+            //reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(relationship).build()).block();
+            //Relationship relationship2;
+            //relationship2 = Relationship.builder().id(reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getDroplet().getId()).build();
+            
+            reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(Relationship.builder().id(reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getDroplet().getId()).build()).build()).block();
+
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+        }
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
+    }
+    
 
     /**
      * 카탈로그 앱을 생성한다.
@@ -227,10 +280,28 @@ public class CatalogServiceV3 extends Common {
             applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
             routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
-            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
-            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
-            }
+            String packageId = fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
+            final String APPLICATION_ID = applicationid;
+            // 스레드 처리1
+             //앱 실행버튼이 on일때
+                Thread th = new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
+                                    procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
+                                }
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            } 
+                        }
+                    }
+                );
+                th.start();
+                //procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
             commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -380,13 +451,70 @@ public class CatalogServiceV3 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private void fileUpload(File file, String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+    private String fileUpload(File file, String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
-            reactorCloudFoundryClient.
-                    applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
+            // reactorCloudFoundryClient.
+            //         applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
+            
+            // package 생성
+            String packageId = reactorCloudFoundryClient.
+                                packages().create(CreatePackageRequest.builder().type(PackageType.BITS).relationships(PackageRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(applicationid).build()).build()).build()).build()).block().getId();
+//            reactorCloudFoundryClient.
+//                    packages().upload(UploadPackageRequest.builder()
+//                    .packageId(
+//                        reactorCloudFoundryClient.
+//                    packages().create(CreatePackageRequest.builder().type(PackageType.BITS).relationships(PackageRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(applicationid).build()).build()).build()).build()).block().getId()
+//                    )
+//                    .bits(file.toPath()).build()).block();
+            // package 업로드
+                reactorCloudFoundryClient.
+                    packages().upload(UploadPackageRequest.builder()
+                    .packageId(packageId)
+                    .bits(file.toPath()).build()).block();
+                
+            // package 업로드 확인
+            while(true){
+                if(reactorCloudFoundryClient.
+                packages().get(GetPackageRequest.builder()
+                .packageId(packageId).build()).block().getState().getValue().equals("READY"))
+                    break;
+                Thread.sleep(1000);
+            }
+
+            //Relationship relationship;
+            //relationship = reactorCloudFoundryClient.packages().get(GetPackageRequest.builder().packageId(packageId).build()).block().getData();
+            //relationship = Relationship.builder().id(packageId).build();
+            return packageId;
+            //relationship = reactorCloudFoundryClient.applicationsV3().get(GetApplicationRequest.builder().applicationId(applicationid).build()).block().getRelationships().getSpace().getData();
+            
+            
+            
+            //String buildId;
+            //LOGGER.info("create build");
+            // Thread.sleep(5000);
+            //build
+            //reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(relationship).build()).block();
+            //Thread.sleep(5000);
+            //reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(relationship).build()).block();
+            //buildId = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(relationship).build()).block().getId();
+
+            // LOGGER.info("get build");
+            // while(true){
+            //     if(
+            //     reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildId).build()).block().getState().equals("STAGED")
+            //     )
+            //         break;
+            //     Thread.sleep(1000);
+            // }
+
+
+
+                    
         } catch (Exception e) {
             //LOGGER.info(e.toString());
+            return null;
         }
+        
     }
 
     /**
