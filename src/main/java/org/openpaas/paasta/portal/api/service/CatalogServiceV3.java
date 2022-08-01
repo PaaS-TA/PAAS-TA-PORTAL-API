@@ -235,7 +235,7 @@ public class CatalogServiceV3 extends Common {
     private Map<String, Object> createBuild(String applicationid, String packageId, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
             // 빌드 생성
-            CreateBuildResponse buildResponse = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(relationship).build()).block();
+            CreateBuildResponse buildResponse = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(Relationship.builder().id(packageId).build()).build()).block();
             // 빌드 확인 중 = STAGED
             while(true){
                 if(
@@ -345,10 +345,31 @@ public class CatalogServiceV3 extends Common {
             applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
             routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
-            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
+            String packageId = fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
+            final String APPLICATION_ID = applicationid;
+            // 스레드 처리1
+            //앱 실행버튼이 on일때
+            Thread th = new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
+                                    procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
+                                }
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            );
+            th.start();
+/*            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
             if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
                 procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
-            }
+            }*/
             appcreated = true;
             String appid = applicationid;
             if (param.getServicePlanList() != null) {
