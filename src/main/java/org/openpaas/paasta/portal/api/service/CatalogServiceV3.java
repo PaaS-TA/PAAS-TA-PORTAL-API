@@ -11,7 +11,6 @@ import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
 import org.cloudfoundry.client.v2.serviceinstances.*;
-import org.cloudfoundry.client.v2.serviceplans.GetServicePlanRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesRequest;
@@ -21,18 +20,14 @@ import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.ToOneRelationship;
-import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletRequest;
 import org.cloudfoundry.client.v3.applications.StartApplicationRequest;
-import org.cloudfoundry.client.v3.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
 import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
 import org.cloudfoundry.client.v3.builds.GetBuildRequest;
-import org.cloudfoundry.client.v3.droplets.GetDropletRequest;
 import org.cloudfoundry.client.v3.packages.CreatePackageRequest;
 import org.cloudfoundry.client.v3.packages.GetPackageRequest;
 import org.cloudfoundry.client.v3.packages.PackageRelationships;
-import org.cloudfoundry.client.v3.packages.PackageState;
 import org.cloudfoundry.client.v3.packages.PackageType;
 import org.cloudfoundry.client.v3.packages.UploadPackageRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
@@ -224,10 +219,11 @@ public class CatalogServiceV3 extends Common {
         }};
     }
 
-/**
+    /**
      * 빌드를 생성한다.
      *
-     * @param applicationid             applicationid
+     * @param applicationid             String
+     * @param packageId                 String
      * @param reactorCloudFoundryClient ReactorCloudFoundryClient
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
@@ -246,10 +242,6 @@ public class CatalogServiceV3 extends Common {
             }
         
             // 드롭릿 세팅
-            //reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(relationship).build()).block();
-            //Relationship relationship2;
-            //relationship2 = Relationship.builder().id(reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getDroplet().getId()).build();
-            
             reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(Relationship.builder().id(reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getDroplet().getId()).build()).build()).block();
 
         } catch (Exception e) {
@@ -282,26 +274,26 @@ public class CatalogServiceV3 extends Common {
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
             String packageId = fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
             final String APPLICATION_ID = applicationid;
-            // 스레드 처리1
-             //앱 실행버튼이 on일때
-                Thread th = new Thread(
+
+            //Build와 Start 병렬실행
+            Thread th = new Thread(
                     new Runnable() {
                         @Override
                         public void run() {
                             try {
                                 createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                //앱 실행버튼이 on일때
                                 if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
                                     procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
                                 }
                             } catch (Exception e) {
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();
-                            } 
+                            }
                         }
                     }
-                );
-                th.start();
-                //procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
+                    );
+            th.start();
             commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -347,14 +339,14 @@ public class CatalogServiceV3 extends Common {
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
             String packageId = fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
             final String APPLICATION_ID = applicationid;
-            // 스레드 처리1
-            //앱 실행버튼이 on일때
+            //Build와 Start 병렬실행
             Thread th = new Thread(
                     new Runnable() {
                         @Override
                         public void run() {
                             try {
                                 createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                //앱 실행버튼이 on일때
                                 if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
                                     procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
                                 }
@@ -364,12 +356,8 @@ public class CatalogServiceV3 extends Common {
                             }
                         }
                     }
-            );
+                    );
             th.start();
-/*            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
-            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
-            }*/
             appcreated = true;
             String appid = applicationid;
             if (param.getServicePlanList() != null) {
@@ -474,19 +462,9 @@ public class CatalogServiceV3 extends Common {
      */
     private String fileUpload(File file, String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
-            // reactorCloudFoundryClient.
-            //         applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
-            
             // package 생성
             String packageId = reactorCloudFoundryClient.
                                 packages().create(CreatePackageRequest.builder().type(PackageType.BITS).relationships(PackageRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(applicationid).build()).build()).build()).build()).block().getId();
-//            reactorCloudFoundryClient.
-//                    packages().upload(UploadPackageRequest.builder()
-//                    .packageId(
-//                        reactorCloudFoundryClient.
-//                    packages().create(CreatePackageRequest.builder().type(PackageType.BITS).relationships(PackageRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(applicationid).build()).build()).build()).build()).block().getId()
-//                    )
-//                    .bits(file.toPath()).build()).block();
             // package 업로드
                 reactorCloudFoundryClient.
                     packages().upload(UploadPackageRequest.builder()
@@ -501,38 +479,8 @@ public class CatalogServiceV3 extends Common {
                     break;
                 Thread.sleep(1000);
             }
-
-            //Relationship relationship;
-            //relationship = reactorCloudFoundryClient.packages().get(GetPackageRequest.builder().packageId(packageId).build()).block().getData();
-            //relationship = Relationship.builder().id(packageId).build();
             return packageId;
-            //relationship = reactorCloudFoundryClient.applicationsV3().get(GetApplicationRequest.builder().applicationId(applicationid).build()).block().getRelationships().getSpace().getData();
-            
-            
-            
-            //String buildId;
-            //LOGGER.info("create build");
-            // Thread.sleep(5000);
-            //build
-            //reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(relationship).build()).block();
-            //Thread.sleep(5000);
-            //reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(relationship).build()).block();
-            //buildId = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(relationship).build()).block().getId();
-
-            // LOGGER.info("get build");
-            // while(true){
-            //     if(
-            //     reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildId).build()).block().getState().equals("STAGED")
-            //     )
-            //         break;
-            //     Thread.sleep(1000);
-            // }
-
-
-
-                    
         } catch (Exception e) {
-            //LOGGER.info(e.toString());
             return null;
         }
         

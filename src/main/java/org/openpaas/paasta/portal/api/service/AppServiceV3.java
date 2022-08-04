@@ -24,10 +24,18 @@ import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedSe
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsResponse;
+import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.applications.*;
+import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
+import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
+import org.cloudfoundry.client.v3.builds.GetBuildRequest;
+import org.cloudfoundry.client.v3.packages.ListPackagesRequest;
+import org.cloudfoundry.client.v3.packages.ListPackagesResponse;
+import org.cloudfoundry.client.v3.packages.PackageState;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
+import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.RestTemplateService;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Batch;
@@ -142,11 +150,30 @@ public class AppServiceV3 extends Common {
      */
     public Map restageApp(App app, String token) {
         Map resultMap = new HashMap();
+        String applicationid = app.getGuid().toString();
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
-            cloudFoundryClient.applicationsV2().restage(RestageApplicationRequest.builder().applicationId(app.getGuid().toString()).build()).block();
+            //state가 READY인 가장 최근의 package ID 조회
+            ListPackagesResponse listPackagesResponse = cloudFoundryClient.packages().list(ListPackagesRequest.builder().applicationId(app.getGuid().toString()).orderBy("-created_at").state(PackageState.READY).build()).block();
+            String recentPackageId = listPackagesResponse.getResources().get(0).getId();
+
+            Thread th = new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                createBuild(applicationid, recentPackageId, cloudFoundryClient);
+                                startApp(applicationid, token);
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    );
+            th.start();
 
             resultMap.put("result", true);
         } catch (Exception e) {
@@ -156,6 +183,41 @@ public class AppServiceV3 extends Common {
         }
 
         return resultMap;
+    }
+
+
+
+    /**
+     * 빌드를 생성한다.
+     *
+     * @param applicationid             String
+     * @param packageId                 String
+     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
+     * @return Map(자바클래스)
+     * @throws Exception Exception(자바클래스)
+     */
+    private Map<String, Object> createBuild(String applicationid, String packageId, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+        try {
+            // 빌드 생성
+            CreateBuildResponse buildResponse = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(Relationship.builder().id(packageId).build()).build()).block();
+            // 빌드 확인 중 = STAGED
+            while(true){
+                if(
+                        reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getState().getValue().equals("STAGED")
+                )
+                    break;
+                Thread.sleep(1000);
+            }
+
+            // 드롭릿 세팅
+            reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(Relationship.builder().id(reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getDroplet().getId()).build()).build()).block();
+
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+        }
+        return new HashMap<String, Object>() {{
+            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
+        }};
     }
 
     /**
