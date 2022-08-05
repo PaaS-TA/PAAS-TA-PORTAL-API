@@ -1,9 +1,9 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
-import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
+import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
@@ -57,9 +57,9 @@ public class AppControllerV3 extends Common {
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/stats"})
-    public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public GetApplicationProcessStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         //service call
-        ApplicationStatisticsResponse applicationStatisticsResponse = appServiceV3.getAppStats(guid, token);
+        GetApplicationProcessStatisticsResponse applicationStatisticsResponse = appServiceV3.getAppStats(guid, token);
         return applicationStatisticsResponse;
     }
 

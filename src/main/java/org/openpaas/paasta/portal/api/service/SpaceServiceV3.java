@@ -1,11 +1,13 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
 import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.ToOneRelationship;
+import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsResponse;
+import org.cloudfoundry.client.v3.applications.ListApplicationProcessesResponse;
+import org.cloudfoundry.client.v3.processes.ProcessState;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentRequest;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentResponse;
 import org.cloudfoundry.client.v3.spaces.SpaceRelationships;
@@ -280,20 +282,19 @@ public class SpaceServiceV3 extends Common {
 
             try {
                 if (sapceApplicationSummary.getState().equals("STARTED")) {
-//                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), token);
-                    ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), cloudFoundryClient);
-
+                    GetApplicationProcessStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), cloudFoundryClient);
+                    ListApplicationProcessesResponse getListApplicationProcess = this.appServiceV3.getListApplicationProcess(sapceApplicationSummary.getId(), cloudFoundryClient);
                     Double cpu = 0.0;
                     Double mem = 0.0;
                     Double disk = 0.0;
                     int cnt = 0;
-                    for (int i = 0; i < applicationStatisticsResponse.getInstances().size(); i++) {
-                        if (applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getState().equals("RUNNING")) {
-                            Double instanceCpu = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getCpu();
-                            Long instanceMem = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getMemory();
-                            Long instanceMemQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getMemoryQuota();
-                            Long instanceDisk = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getDisk();
-                            Long instanceDiskQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getDiskQuota();
+                    for (int i = 0; i < applicationStatisticsResponse.getResources().size(); i++) {
+                        if (applicationStatisticsResponse.getResources().get(i).getState().equals(ProcessState.RUNNING)) {
+                            Double instanceCpu = applicationStatisticsResponse.getResources().get(i).getUsage().getCpu();
+                            Integer instanceMem = applicationStatisticsResponse.getResources().get(i).getUsage().getMemory();
+                            Long instanceMemQuota = getListApplicationProcess.getResources().get(0).getMemoryInMb().longValue() * 1024 * 1024;
+                            Integer instanceDisk = applicationStatisticsResponse.getResources().get(i).getUsage().getDisk();
+                            Long instanceDiskQuota = getListApplicationProcess.getResources().get(0).getDiskInMb().longValue() * 1024 * 1024;
 
                             if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
                             if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;

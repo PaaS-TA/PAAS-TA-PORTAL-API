@@ -70,10 +70,11 @@ public class AppServiceV3 extends Common {
      * @param token the client
      * @return the app stats
      */
-    public ApplicationStatisticsResponse getAppStats(String guid, String token) {
+    public GetApplicationProcessStatisticsResponse getAppStats(String guid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
 
-        ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(guid).build()).block();
+        GetApplicationProcessStatisticsResponse applicationStatisticsResponse =
+                cloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(guid).type("web").build()).block();
 
         return applicationStatisticsResponse;
     }
@@ -523,7 +524,7 @@ public class AppServiceV3 extends Common {
 
         try {
             ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-            cloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(appGuid).state("STARTED").build()).block();
+            cloudFoundryClient.applicationsV3().start(StartApplicationRequest.builder().applicationId(appGuid).build()).block();
             resultMap.put("result", true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -585,11 +586,25 @@ public class AppServiceV3 extends Common {
      * @param cloudFoundryClient the ReactorCloudFoundryClient
      * @return the app stats
      */
-    public ApplicationStatisticsResponse getAppStats(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
+    public GetApplicationProcessStatisticsResponse getAppStats(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
 
-        ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(guid).build()).block();
+        GetApplicationProcessStatisticsResponse applicationStatisticsResponse =
+                cloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(guid).type("web").build()).block();
 
         return applicationStatisticsResponse;
+    }
+
+    /**
+     * 앱 프로세스 리스트를 조회한다.
+     *
+     * @param guid  the app guid
+     * @param cloudFoundryClient the ReactorCloudFoundryClient
+     * @return the app stats
+     */
+    public ListApplicationProcessesResponse getListApplicationProcess(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
+        ListApplicationProcessesResponse applicationProcessesResponse =
+                cloudFoundryClient.applicationsV3().listProcesses(ListApplicationProcessesRequest.builder().applicationId(guid).build()).block();
+        return applicationProcessesResponse;
     }
 
 
