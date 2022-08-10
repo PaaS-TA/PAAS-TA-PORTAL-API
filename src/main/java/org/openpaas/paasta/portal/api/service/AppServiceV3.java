@@ -24,8 +24,11 @@ import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedSe
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.GetUserProvidedServiceInstanceResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.ListUserProvidedServiceInstanceServiceBindingsResponse;
+import org.cloudfoundry.client.v3.LifecycleData;
 import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.applications.*;
+import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
+import org.cloudfoundry.client.v3.applications.GetApplicationResponse;
 import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
 import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
 import org.cloudfoundry.client.v3.builds.GetBuildRequest;
@@ -62,6 +65,19 @@ public class AppServiceV3 extends Common {
         return summaryApplicationResponse;
     }
 
+    /**
+     * 앱 빌드팩을 조회한다.
+     *
+     * @param guid  the app guid
+     * @param token the client
+     * @return the app lifecycle
+     */
+    public LifecycleData getAppBuildpack(String guid, String token) {
+        GetApplicationResponse getApplicationResponse = cloudFoundryClient(tokenProvider(token)).applicationsV3().get(GetApplicationRequest.builder().applicationId(guid).build()).block();
+        getApplicationResponse.getLifecycle().getData();
+
+        return getApplicationResponse.getLifecycle().getData();
+    }
 
     /**
      * 앱 실시간 상태를 조회한다.

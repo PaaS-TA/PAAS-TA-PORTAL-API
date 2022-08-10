@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
+import org.cloudfoundry.client.v3.LifecycleData;
 import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -45,8 +46,19 @@ public class AppControllerV3 extends Common {
         //LOGGER.info("getAppSummary Start : " + guid);
 
         SummaryApplicationResponse respApp = appServiceV3.getAppSummary(guid, token);
-
         return respApp;
+    }
+
+    /**
+     * 앱 빌드팩을 조회한다.
+     *
+     * @param guid
+     * @return LifecycleData
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/buildpack"})
+    public LifecycleData getAppBuildpack(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return appServiceV3.getAppBuildpack(guid,token);
     }
 
     /**
