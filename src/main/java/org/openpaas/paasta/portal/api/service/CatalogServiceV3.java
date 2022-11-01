@@ -59,17 +59,19 @@ public class CatalogServiceV3 extends Common {
     private final SpaceServiceV2 spaceServiceV2;
     private final DomainServiceV2 domainServiceV2;
     private final AppServiceV2 appServiceV2;
+    private final AppServiceV3 appServiceV3;
 
     @Value("${cloudfoundry.authorization}")
     private String cfAuthorizationHeaderKey;
 
     @Autowired
-    public CatalogServiceV3(SpaceServiceV2 spaceServiceV2, DomainServiceV2 domainServiceV2, AppServiceV2 appServiceV2, CommonService commonService) throws Exception {
+    public CatalogServiceV3(SpaceServiceV2 spaceServiceV2, DomainServiceV2 domainServiceV2, AppServiceV2 appServiceV2, CommonService commonService, AppServiceV3 appServiceV3) throws Exception {
 
         this.spaceServiceV2 = spaceServiceV2;
         this.domainServiceV2 = domainServiceV2;
         this.appServiceV2 = appServiceV2;
         this.commonService = commonService;
+        this.appServiceV3 = appServiceV3;
     }
 
     /**
@@ -220,40 +222,6 @@ public class CatalogServiceV3 extends Common {
     }
 
     /**
-     * 빌드를 생성한다.
-     *
-     * @param applicationid             String
-     * @param packageId                 String
-     * @param reactorCloudFoundryClient ReactorCloudFoundryClient
-     * @return Map(자바클래스)
-     * @throws Exception Exception(자바클래스)
-     */
-    private Map<String, Object> createBuild(String applicationid, String packageId, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
-        try {
-            // 빌드 생성
-            CreateBuildResponse buildResponse = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(Relationship.builder().id(packageId).build()).build()).block();
-            // 빌드 확인 중 = STAGED
-            while(true){
-                if(
-                    reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getState().getValue().equals("STAGED")
-                )
-                    break;
-                Thread.sleep(1000);
-            }
-        
-            // 드롭릿 세팅
-            reactorCloudFoundryClient.applicationsV3().setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(applicationid).data(Relationship.builder().id(reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getDroplet().getId()).build()).build()).block();
-
-        } catch (Exception e) {
-            LOGGER.error(e.toString());
-        }
-        return new HashMap<String, Object>() {{
-            put("RESULT", Constants.RESULT_STATUS_SUCCESS);
-        }};
-    }
-    
-
-    /**
      * 카탈로그 앱을 생성한다.
      *
      * @param param  Catalog
@@ -281,7 +249,7 @@ public class CatalogServiceV3 extends Common {
                         @Override
                         public void run() {
                             try {
-                                createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                appServiceV3.createBuild(APPLICATION_ID,packageId,reactorCloudFoundryClient);
                                 //앱 실행버튼이 on일때
                                 if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
                                     procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
@@ -345,7 +313,7 @@ public class CatalogServiceV3 extends Common {
                         @Override
                         public void run() {
                             try {
-                                createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                appServiceV3.createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
                                 //앱 실행버튼이 on일때
                                 if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
                                     procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작

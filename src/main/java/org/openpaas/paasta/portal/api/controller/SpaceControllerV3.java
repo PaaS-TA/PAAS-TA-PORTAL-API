@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v3.spaces.*;
+import org.openpaas.paasta.portal.api.model.ServiceV3;
 import org.openpaas.paasta.portal.api.model.Space;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -77,6 +78,7 @@ public class SpaceControllerV3 extends Common {
     }
 
 
+
     /**
      * 공간 요약 정보를 조회한다. (관리자)
      *
@@ -133,11 +135,9 @@ public class SpaceControllerV3 extends Common {
     }
 
     @RequestMapping(value = {Constants.V3_URL + "/spaces/{guid}/services"}, method = RequestMethod.GET)
-    public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public List<ServiceV3> getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
         //LOGGER.info("getSpaceServices Start : " + guid);
-
-        ListSpaceServicesResponse respSpaceServices = spaceServiceV3.getSpaceServices(guid);
-
+        List<ServiceV3> respSpaceServices = spaceServiceV3.getSpaceServices(guid);
         //LOGGER.info("getSpaceServices End ");
 
         return respSpaceServices;

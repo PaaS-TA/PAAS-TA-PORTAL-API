@@ -57,12 +57,12 @@ import org.cloudfoundry.client.v3.jobs.JobsV3;
 import org.cloudfoundry.client.v3.organizations.OrganizationsV3;
 import org.cloudfoundry.client.v3.packages.Packages;
 import org.cloudfoundry.client.v3.processes.Processes;
-import org.cloudfoundry.client.v3.serviceInstances.ServiceInstancesV3;
 import org.cloudfoundry.client.v3.servicebindings.ServiceBindingsV3;
+import org.cloudfoundry.client.v3.serviceinstances.ServiceInstancesV3;
+import org.cloudfoundry.client.v3.serviceofferings.ServiceOfferingsV3;
 import org.cloudfoundry.client.v3.spaces.SpacesV3;
 import org.cloudfoundry.client.v3.tasks.Tasks;
 import org.cloudfoundry.client.v3.buildpacks.BuildpacksV3;
-import org.cloudfoundry.client.v3.builds.Builds;
 import org.cloudfoundry.reactor.client.v3.builpacks.ReactorBuildpacksV3;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -108,12 +108,17 @@ import org.cloudfoundry.reactor.client.v3.packages.ReactorPackages;
 import org.cloudfoundry.reactor.client.v3.processes.ReactorProcesses;
 import org.cloudfoundry.reactor.client.v3.servicebindings.ReactorServiceBindingsV3;
 import org.cloudfoundry.reactor.client.v3.serviceinstances.ReactorServiceInstancesV3;
+import org.cloudfoundry.reactor.client.v3.serviceofferings.ReactorServiceOfferingsV3;
 import org.cloudfoundry.reactor.client.v3.spaces.ReactorSpacesV3;
 import org.cloudfoundry.reactor.client.v3.tasks.ReactorTasks;
+import org.cloudfoundry.reactor.client.v3.serviceplans.ReactorServicePlansV3;
+import org.cloudfoundry.client.v3.serviceplans.ServicePlansV3;
 import org.immutables.value.Value;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * The Reactor-based implementation of {@link CloudFoundryClient}
@@ -313,7 +318,6 @@ abstract class _ReactorCloudFoundryClient implements CloudFoundryClient {
     }
 
     @Override
-    @Value.Derived
     public ServiceInstancesV3 serviceInstancesV3() {
         return new ReactorServiceInstancesV3(getConnectionContext(), getRootV3(), getTokenProvider());
     }
@@ -415,5 +419,21 @@ abstract class _ReactorCloudFoundryClient implements CloudFoundryClient {
      * The token provider
      */
     abstract TokenProvider getTokenProvider();
+
+    @Override
+    @Value.Derived
+    public ServiceOfferingsV3 serviceOfferingsV3() {
+        return new ReactorServiceOfferingsV3(getConnectionContext(), getRootV3(), getTokenProvider());
+    }
+    @Value.Default
+    Map<String, String> getRequestTags() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    @Value.Derived
+    public ServicePlansV3 servicePlansV3() {
+        return new ReactorServicePlansV3(getConnectionContext(), getRootV3(), getTokenProvider());
+    }
 
 }

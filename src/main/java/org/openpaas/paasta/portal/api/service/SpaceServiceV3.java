@@ -1,22 +1,28 @@
 package org.openpaas.paasta.portal.api.service;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v2.users.UserResource;
+import org.cloudfoundry.client.v3.Link;
+import org.cloudfoundry.client.v3.Metadata;
 import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.ToOneRelationship;
-import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsResponse;
-import org.cloudfoundry.client.v3.applications.ListApplicationProcessesResponse;
-import org.cloudfoundry.client.v3.processes.ProcessState;
+import org.cloudfoundry.client.v3.applications.*;
+import org.cloudfoundry.client.v3.processes.*;
+import org.cloudfoundry.client.v3.servicebindings.ListServiceBindingsRequest;
+import org.cloudfoundry.client.v3.servicebindings.ListServiceBindingsResponse;
+import org.cloudfoundry.client.v3.serviceinstances.*;
+import org.cloudfoundry.client.v3.serviceplans.GetServicePlanRequest;
+import org.cloudfoundry.client.v3.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentRequest;
 import org.cloudfoundry.client.v3.spaces.AssignSpaceIsolationSegmentResponse;
 import org.cloudfoundry.client.v3.spaces.SpaceRelationships;
+import org.cloudfoundry.client.v3.serviceofferings.*;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
-import org.openpaas.paasta.portal.api.model.Org;
-import org.openpaas.paasta.portal.api.model.Space;
-import org.openpaas.paasta.portal.api.model.UserRole;
+import org.openpaas.paasta.portal.api.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -258,100 +264,308 @@ public class SpaceServiceV3 extends Common {
      */
     public GetSpaceSummaryResponse getSpaceSummary(String spaceId, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-
         GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceId).build()).block();
         return respSapceSummary;
     }
 
-    public Map getSpaceSummary2(String spaceid, String token) {
+    public Map getSpaceSummary2(String spaceid, String token) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-        GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceid).build()).block();
-
         Map<String, Object> resultMap = new HashMap<>();
-        List<SpaceApplicationSummary> appsArray = new ArrayList<>();
         List<Map<String, Object>> appArray = new ArrayList<>();
 
-        //TODO
-        resultMap.put("apps", respSapceSummary.getApplications());
-        resultMap.put("guid", respSapceSummary.getId());
-        resultMap.put("name", respSapceSummary.getName());
-        resultMap.put("services", respSapceSummary.getServices());
+        if(apiType.equalsIgnoreCase("ap")){
+            // apiType is ap
+            GetSpaceSummaryResponse respSapceSummary = cloudFoundryClient.spaces().getSummary(GetSpaceSummaryRequest.builder().spaceId(spaceid).build()).block();
 
-        for (SpaceApplicationSummary sapceApplicationSummary : respSapceSummary.getApplications()) {
-            Map<String, Object> resultMap2 = new HashMap<>();
+            List<SpaceApplicationSummary> appsArray = new ArrayList<>();
 
-            try {
-                if (sapceApplicationSummary.getState().equals("STARTED")) {
-                    GetApplicationProcessStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), cloudFoundryClient);
-                    ListApplicationProcessesResponse getListApplicationProcess = this.appServiceV3.getListApplicationProcess(sapceApplicationSummary.getId(), cloudFoundryClient);
-                    Double cpu = 0.0;
-                    Double mem = 0.0;
-                    Double disk = 0.0;
-                    int cnt = 0;
-                    for (int i = 0; i < applicationStatisticsResponse.getResources().size(); i++) {
-                        if (applicationStatisticsResponse.getResources().get(i).getState().equals(ProcessState.RUNNING)) {
-                            Double instanceCpu = applicationStatisticsResponse.getResources().get(i).getUsage().getCpu();
-                            Integer instanceMem = applicationStatisticsResponse.getResources().get(i).getUsage().getMemory();
-                            Long instanceMemQuota = getListApplicationProcess.getResources().get(0).getMemoryInMb().longValue() * 1024 * 1024;
-                            Integer instanceDisk = applicationStatisticsResponse.getResources().get(i).getUsage().getDisk();
-                            Long instanceDiskQuota = getListApplicationProcess.getResources().get(0).getDiskInMb().longValue() * 1024 * 1024;
+            //TODO
+            resultMap.put("apps", respSapceSummary.getApplications());
+            resultMap.put("guid", respSapceSummary.getId());
+            resultMap.put("name", respSapceSummary.getName());
+            resultMap.put("services", respSapceSummary.getServices());
 
-                            if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
-                            if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;
-                            if (instanceDisk != null)
-                                disk = disk + (double) instanceDisk / (double) instanceDiskQuota * 100;
+            for (SpaceApplicationSummary sapceApplicationSummary : respSapceSummary.getApplications()) {
+                Map<String, Object> resultMap2 = new HashMap<>();
 
-                            cnt++;
+                try {
+                    if (sapceApplicationSummary.getState().equals("STARTED")) {
+                        ApplicationStatisticsResponse applicationStatisticsResponse = this.appServiceV3.getAppStats(sapceApplicationSummary.getId(), cloudFoundryClient);
+
+                        Double cpu = 0.0;
+                        Double mem = 0.0;
+                        Double disk = 0.0;
+                        int cnt = 0;
+                        for (int i = 0; i < applicationStatisticsResponse.getInstances().size(); i++) {
+                            if (applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getState().equals("RUNNING")) {
+                                Double instanceCpu = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getCpu();
+                                Long instanceMem = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getMemory();
+                                Long instanceMemQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getMemoryQuota();
+                                Long instanceDisk = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getUsage().getDisk();
+                                Long instanceDiskQuota = applicationStatisticsResponse.getInstances().get(Integer.toString(i)).getStatistics().getDiskQuota();
+
+                                if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
+                                if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;
+                                if (instanceDisk != null)
+                                    disk = disk + (double) instanceDisk / (double) instanceDiskQuota * 100;
+
+                                cnt++;
+                            }
                         }
+
+                        cpu = cpu / cnt;
+                        mem = mem / cnt;
+                        disk = disk / cnt;
+
+                        resultMap2.put("guid", sapceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
+                        resultMap2.put("memPer", Math.round(mem));
+                        resultMap2.put("diskPer", Math.round(disk));
+                    } else {
+                        resultMap2.put("guid", sapceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", 0);
+                        resultMap2.put("memPer", 0);
+                        resultMap2.put("diskPer", 0);
                     }
 
-                    cpu = cpu / cnt;
-                    mem = mem / cnt;
-                    disk = disk / cnt;
-
-                    resultMap2.put("guid", sapceApplicationSummary.getId());
-                    resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
-                    resultMap2.put("memPer", Math.round(mem));
-                    resultMap2.put("diskPer", Math.round(disk));
-                } else {
-                    resultMap2.put("guid", sapceApplicationSummary.getId());
-                    resultMap2.put("cpuPer", 0);
-                    resultMap2.put("memPer", 0);
-                    resultMap2.put("diskPer", 0);
+                    appsArray.add(sapceApplicationSummary);
+                    appArray.add(resultMap2);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                appsArray.add(sapceApplicationSummary);
-                appArray.add(resultMap2);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
+            resultMap.put("apps", appsArray);
+            resultMap.put("appsPer", appArray);
+
+            resultMap.put("apiType", apiType);
+            return resultMap;
         }
 
-        resultMap.put("apps", appsArray);
-        resultMap.put("appsPer", appArray);
+        else if (apiType.equalsIgnoreCase("sidecar")) {
+            // apiType is sidecar
+            List<ApplicationResource> appsArray = new ArrayList<>();
+            List<List<ProcessResource>> applicationListApplicationProcessArray = new ArrayList<>();
 
-        //LOGGER.info("Get SpaceSummary End ");
+            //application in space
+            ListApplicationsResponse listApplicationsResponse =  cloudFoundryClient.applicationsV3().list(ListApplicationsRequest.builder().spaceId(spaceid).build()).block();
 
-        return resultMap;
+            //apps 만들기
+            int size = 0;
+
+            resultMap.put("apps", listApplicationsResponse.getResources());
+
+
+
+            GetApplicationProcessStatisticsResponse applicationStatisticsResponse;
+            ListApplicationProcessesResponse getListApplicationProcess;
+            size = listApplicationsResponse.getResources().size();
+            for (int i=0; i < size; i++) {
+                ApplicationResource spaceApplicationSummary = listApplicationsResponse.getResources().get(i);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                try {
+                    if (spaceApplicationSummary.getState().equals(ApplicationState.STARTED)) {
+                        applicationStatisticsResponse = this.appServiceV3.getAppStatsV3(spaceApplicationSummary.getId(), cloudFoundryClient);
+                        getListApplicationProcess = this.appServiceV3.getListApplicationProcess(spaceApplicationSummary.getId(), cloudFoundryClient);
+                        Double cpu = 0.0;
+                        Double mem = 0.0;
+                        Double disk = 0.0;
+                        int cnt = 0;
+                        for (int j = 0; j < applicationStatisticsResponse.getResources().size(); j++) {
+                            if (applicationStatisticsResponse.getResources().get(j).getState().equals(ProcessState.RUNNING)) {
+                                Double instanceCpu = applicationStatisticsResponse.getResources().get(j).getUsage().getCpu();
+                                Integer instanceMem = applicationStatisticsResponse.getResources().get(j).getUsage().getMemory();
+                                Long instanceMemQuota = getListApplicationProcess.getResources().get(0).getMemoryInMb().longValue() * 1024 * 1024;
+                                Integer instanceDisk = applicationStatisticsResponse.getResources().get(j).getUsage().getDisk();
+                                Long instanceDiskQuota = getListApplicationProcess.getResources().get(0).getDiskInMb().longValue() * 1024 * 1024;
+
+                                if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
+                                if (instanceMem != null) mem = mem + (double) instanceMem / (double) instanceMemQuota * 100;
+                                if (instanceDisk != null)
+                                    disk = disk + (double) instanceDisk / (double) instanceDiskQuota * 100;
+
+                                cnt++;
+                            }
+                        }
+
+                        cpu = cpu / cnt;
+                        mem = mem / cnt;
+                        disk = disk / cnt;
+
+                        resultMap2.put("guid", spaceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", Double.parseDouble(String.format("%.2f%n", cpu)));
+                        resultMap2.put("memPer", Math.round(mem));
+                        resultMap2.put("diskPer", Math.round(disk));
+                        applicationListApplicationProcessArray.add(getListApplicationProcess.getResources());
+
+                    } else {
+                        resultMap2.put("guid", spaceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", 0);
+                        resultMap2.put("memPer", 0);
+                        resultMap2.put("diskPer", 0);
+
+                        List<ProcessResource> tmplist = new ArrayList<>();
+                        tmplist.add(ProcessResource.builder().command("").diskInMb(0).healthCheck(HealthCheck.builder().type(HealthCheckType.NONE).build()).instances(0).memoryInMb(0).metadata(Metadata.builder().build()).relationships(ProcessRelationships.builder().build()).type("").createdAt("").id("").link("", Link.builder().href("").build()).build());
+                        applicationListApplicationProcessArray.add(tmplist);
+
+                    }
+                    appsArray.add(spaceApplicationSummary);
+                    appArray.add(resultMap2);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (spaceApplicationSummary != null){
+                        appsArray.add(spaceApplicationSummary);
+
+                        resultMap2.put("guid", spaceApplicationSummary.getId());
+                        resultMap2.put("cpuPer", 0);
+                        resultMap2.put("memPer", 0);
+                        resultMap2.put("diskPer", 0);
+
+                        List<ProcessResource> tmplist = new ArrayList<>();
+                        tmplist.add(ProcessResource.builder().command("").diskInMb(0).healthCheck(HealthCheck.builder().type(HealthCheckType.NONE).build()).instances(0).memoryInMb(0).metadata(Metadata.builder().build()).relationships(ProcessRelationships.builder().build()).type("").createdAt("").id("").link("", Link.builder().href("").build()).build());
+                        applicationListApplicationProcessArray.add(tmplist);
+                        appArray.add(resultMap2);
+                    }
+                }
+            }
+            size = listApplicationsResponse.getResources().size();
+            List<App> apps = new ArrayList<>();
+            for(int i=0; i < size; i++){
+                App app = new App();
+                // app guid
+                app.setGuid(UUID.fromString(listApplicationsResponse.getResources().get(i).getId()));
+                // app lifecycle
+                app.setBuildPacks(appsArray.get(i).getLifecycle());
+                appsArray.get(i).getLifecycle().getData();
+                // app disk quota
+                app.setDiskQuota(applicationListApplicationProcessArray.get(i).get(0).getDiskInMb());
+                // app instances
+                app.setInstances(applicationListApplicationProcessArray.get(i).get(0).getInstances());
+                // app memory
+                app.setMemory(applicationListApplicationProcessArray.get(i).get(0).getMemoryInMb());
+                // app name
+                app.setName(listApplicationsResponse.getResources().get(i).getName());
+                // app state
+                app.setState(listApplicationsResponse.getResources().get(i).getState().toString());
+
+                apps.add(app);
+            }
+
+            resultMap.put("apps", apps);
+            resultMap.put("appsPer", appArray);
+            resultMap.put("appProcessList", applicationListApplicationProcessArray);
+
+
+
+            List<ServiceV3> services;
+
+            services = getSpaceServices(spaceid, apps);
+            resultMap.put("services", services);
+
+            resultMap.put("apiType", apiType);
+            return resultMap;
+
+
+        }
+        else {
+            try {
+                throw new Exception();
+            } catch(Exception e) {
+                LOGGER.info("cloudfoundry.cc.api.type value check!!");
+            }
+            return null;
+        }
     }
 
 
+
     /**
-     * 공간에 생성되어 있는 서비스를 조회한다.
+     * 공간에 생성되어 있는 서비스를 조회한다. (List<App>을 추가할 경우 binding된 APP 정보까지 조회)
      *
-     * @param spaceId
+     * @param spaceId, apps
      * @return
      * @throws Exception
-     * @author 박철한
-     * @version 2.0
-     * @since 2018.4.30
+     * @author 남동윤
+     * @version 3.0
+     * @since 2022.11.01
      */
-    public ListSpaceServicesResponse getSpaceServices(String spaceId) throws Exception {
+
+    public List<ServiceV3> getSpaceServices(String spaceId) throws Exception {
+        return getSpaceServices(spaceId, null);
+    }
+    public List<ServiceV3> getSpaceServices(String spaceId, List<App> apps) throws Exception {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient();
+        ListServiceInstancesResponse listServiceResponse = cloudFoundryClient.serviceInstancesV3().list(ListServiceInstancesRequest.builder().spaceId(spaceId).build()).block();
 
-        ListSpaceServicesResponse respSpaceServices = cloudFoundryClient.spaces().listServices(ListSpaceServicesRequest.builder().spaceId(spaceId).build()).block();
 
-        return respSpaceServices;
+        String service_guid = null;
+        String service_plan_guid = null;
+        String service_offering_id = null;
+        String service_offering_name = null;
+        GetServiceInstanceResponse getServiceInstanceResponse = null;
+        GetServicePlanResponse getServicePlanResponse = null;
+        ServiceV3 service = null;
+
+        List<ServiceInstanceResource> serviceInstanceResources = new ArrayList<>();
+
+        List<ServiceV3> services = new ArrayList<>();
+
+        for (int i=0; i<listServiceResponse.getResources().size(); i++) {
+
+            service = new ServiceV3();
+            // service guid
+            service_guid = listServiceResponse.getResources().get(i).getId();
+            // service_plan_guid
+            getServiceInstanceResponse = cloudFoundryClient.serviceInstancesV3().get(GetServiceInstanceRequest.builder().serviceInstanceId(service_guid).build()).block();
+            service_plan_guid = getServiceInstanceResponse.getRelationships().getServicePlan().getData().getId();
+
+
+            // service_offering_id
+            getServicePlanResponse = cloudFoundryClient.servicePlansV3().get(GetServicePlanRequest.builder().servicePlanId(service_plan_guid).build()).block();
+            service_offering_id = getServicePlanResponse.getRelationships().getServiceOffering().getData().getId();
+            // service_offering_name
+            service_offering_name = cloudFoundryClient.serviceOfferingsV3().get(GetServiceOfferingRequest.builder().serviceOfferingId(service_offering_id).build()).block().getName();
+
+            service.setName(getServiceInstanceResponse.getName());
+            service.setGuid(UUID.fromString(service_guid));
+
+            serviceInstanceResources.add(ServiceInstanceResource.builder().from(listServiceResponse.getResources().get(i)).serviceOfferingName(service_offering_name).build());
+
+            List<String> bindingAppNames = new ArrayList<>();
+
+            ListServiceBindingsResponse listServiceBindingsResponse = cloudFoundryClient.serviceBindingsV3().list(ListServiceBindingsRequest.builder().serviceInstanceId("").build()).block();
+
+            if (apps != null) {
+                for (int j = 0; j < listServiceBindingsResponse.getResources().size(); j++) {
+                    if (listServiceBindingsResponse.getResources().get(j).getRelationships().getServiceInstance().getData().getId().equals(service_guid) == true) {
+                        for (int k = 0; k < apps.size(); k++) {
+                            if (apps.get(k).getGuid().toString().equals(listServiceBindingsResponse.getResources().get(j).getRelationships().getApplication().getData().getId()) == true) {
+                                bindingAppNames.add(apps.get(k).getName());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            // bound_app_count
+            service.setBinding_app_names(bindingAppNames);
+            // dashboard_url
+            service.setDashboard_url(listServiceResponse.getResources().get(i).getDashboardUrl());
+            // guid
+            service.setGuid(UUID.fromString(listServiceResponse.getResources().get(i).getId()));
+            // last_operation
+            service.setLast_operation(listServiceResponse.getResources().get(i).getLastOperation());
+            // name
+            service.setName(listServiceResponse.getResources().get(i).getName());
+            service.setService_plan(new ServiceV3.ServicePlan(getServicePlanResponse.getName(), new ServiceV3.ServicePlan.ServiceInfo(service_offering_name)));
+
+            services.add(service);
+        }
+
+        return services;
     }
 
     // TODO spaces role
@@ -653,6 +867,4 @@ public class SpaceServiceV3 extends Common {
     public AssignSpaceIsolationSegmentResponse resetSpaceDefaultIsolationSegments(String spaceId) throws Exception {
         return cloudFoundryClient().spacesV3().assignIsolationSegment(AssignSpaceIsolationSegmentRequest.builder().spaceId(spaceId).build()).block();
     }
-
-
 }

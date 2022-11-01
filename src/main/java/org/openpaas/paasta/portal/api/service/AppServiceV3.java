@@ -35,6 +35,12 @@ import org.cloudfoundry.client.v3.builds.GetBuildRequest;
 import org.cloudfoundry.client.v3.packages.ListPackagesRequest;
 import org.cloudfoundry.client.v3.packages.ListPackagesResponse;
 import org.cloudfoundry.client.v3.packages.PackageState;
+import org.cloudfoundry.client.v3.servicebindings.ListServiceBindingsRequest;
+import org.cloudfoundry.client.v3.servicebindings.ListServiceBindingsResponse;
+import org.cloudfoundry.client.v3.serviceinstances.*;
+import org.cloudfoundry.client.v3.serviceofferings.GetServiceOfferingRequest;
+import org.cloudfoundry.client.v3.serviceplans.GetServicePlanRequest;
+import org.cloudfoundry.client.v3.serviceplans.GetServicePlanResponse;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
@@ -42,6 +48,7 @@ import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.common.RestTemplateService;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Batch;
+import org.openpaas.paasta.portal.api.model.ServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -55,6 +62,8 @@ public class AppServiceV3 extends Common {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppServiceV3.class);
 
     private final RestTemplateService restTemplateService;
+
+    private final long BUILD_INTERVAL_SECOND = 300;
 
     public AppServiceV3(RestTemplateService restTemplateService) {
         this.restTemplateService = restTemplateService;
@@ -213,16 +222,25 @@ public class AppServiceV3 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private Map<String, Object> createBuild(String applicationid, String packageId, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+    public Map<String, Object> createBuild(String applicationid, String packageId, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
             // 빌드 생성
             CreateBuildResponse buildResponse = reactorCloudFoundryClient.builds().create(CreateBuildRequest.builder().getPackage(Relationship.builder().id(packageId).build()).build()).block();
+
+            //현재 시각
+            long start = System.currentTimeMillis();
+
+            //종료 시각
+            long end = start + BUILD_INTERVAL_SECOND *1000;
+
             // 빌드 확인 중 = STAGED
             while(true){
-                if(
-                        reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getState().getValue().equals("STAGED")
-                )
+                if( reactorCloudFoundryClient.builds().get(GetBuildRequest.builder().buildId(buildResponse.getId()).build()).block().getState().getValue().equals("STAGED") ) {
                     break;
+                }
+                if ( System.currentTimeMillis() > end ){
+                    throw new Exception("App Build Time Over");
+                }
                 Thread.sleep(1000);
             }
 
@@ -231,6 +249,7 @@ public class AppServiceV3 extends Common {
 
         } catch (Exception e) {
             LOGGER.error(e.toString());
+            throw new Exception("App Build Time Over");
         }
         return new HashMap<String, Object>() {{
             put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -602,7 +621,21 @@ public class AppServiceV3 extends Common {
      * @param cloudFoundryClient the ReactorCloudFoundryClient
      * @return the app stats
      */
-    public GetApplicationProcessStatisticsResponse getAppStats(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
+    public ApplicationStatisticsResponse getAppStats(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
+
+        ApplicationStatisticsResponse applicationStatisticsResponse = cloudFoundryClient.applicationsV2().statistics(ApplicationStatisticsRequest.builder().applicationId(guid).build()).block();
+
+        return applicationStatisticsResponse;
+    }
+
+    /**
+     * 앱 실시간 상태를 조회한다.
+     *
+     * @param guid  the app guid
+     * @param cloudFoundryClient the ReactorCloudFoundryClient
+     * @return the app stats
+     */
+    public GetApplicationProcessStatisticsResponse getAppStatsV3(String guid, ReactorCloudFoundryClient cloudFoundryClient) {
 
         GetApplicationProcessStatisticsResponse applicationStatisticsResponse =
                 cloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(guid).type("web").build()).block();
@@ -623,27 +656,36 @@ public class AppServiceV3 extends Common {
         return applicationProcessesResponse;
     }
 
+    public List<ServiceV3> getServiceList(String appGuid, String token) {
+        ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
+        ListServiceBindingsResponse listServiceBindingsResponse = cloudFoundryClient.serviceBindingsV3().list(ListServiceBindingsRequest.builder().applicationId(appGuid).build()).block();
+        String service_guid = null;
+        String service_plan_guid = null;
+        String service_offering_id = null;
+        String service_offering_name = null;
+        ServiceV3 service = null;
+        List<ServiceV3> serviceArray = new ArrayList<>();
 
-//    public void getSummary(String token, String guid) {
-//
-//        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-//        org.cloudfoundry.client.v3.applications.GetApplicationResponse getApplicationResponse = reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
-//        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
-//        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().applicationId(guid).build()).block();
-//        GetApplicationProcessStatisticsResponse processStatisticsResponse = reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(guid).build()).block();
-//
-//
-//    }
 
-//    public AppV3 getAppSummary(String guid, String token) {
-//        ReactorCloudFoundryClient reactorCloudFoundryClient = cloudFoundryClient(tokenProvider(token));
-//        SummaryApplicationResponse summaryApplicationResponse = reactorCloudFoundryClient.applicationsV2().summary(SummaryApplicationRequest.builder().applicationId(guid).build()).block();
-//        org.cloudfoundry.client.v3.applications.GetApplicationResponse getApplicationResponse = reactorCloudFoundryClient.applicationsV3().get(org.cloudfoundry.client.v3.applications.GetApplicationRequest.builder().applicationId(guid).build()).block();
-//        GetApplicationCurrentDropletResponse getApplicationCurrentDropletResponse = reactorCloudFoundryClient.applicationsV3().getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(guid).build()).block();
-//        GetApplicationProcessResponse getApplicationProcessResponse = reactorCloudFoundryClient.applicationsV3().getProcess(GetApplicationProcessRequest.builder().type("web").applicationId(guid).build()).block();
-//        GetApplicationProcessStatisticsResponse processStatisticsResponse = reactorCloudFoundryClient.applicationsV3().getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().type("web").applicationId(guid).build()).block();
-//        GetApplicationEnvironmentResponse getApplicationEnvironmentResponse = reactorCloudFoundryClient.applicationsV3().getEnvironment(GetApplicationEnvironmentRequest.builder().applicationId(guid).build()).block();
-//        AppV3 app = AppV3.builder().applicationResponse(getApplicationResponse).applicationEnvironmentResponse(getApplicationEnvironmentResponse).applicationProcessResponse(getApplicationProcessResponse).applicationCurrentDropletResponse(getApplicationCurrentDropletResponse).applicationProcessStatisticsResponse(processStatisticsResponse).summaryApplicationResponse(summaryApplicationResponse).build();
-//        return app;
-//    }
+        for (int i=0; i<listServiceBindingsResponse.getResources().size(); i++){
+
+            service = new ServiceV3();
+            //service guid
+            service_guid = listServiceBindingsResponse.getResources().get(i).getRelationships().getServiceInstance().getData().getId();
+            //service_plan_guid
+            service_plan_guid = cloudFoundryClient.serviceInstancesV3().get(GetServiceInstanceRequest.builder().serviceInstanceId(service_guid).build()).block().getRelationships().getServicePlan().getData().getId();
+            //service_offering_id
+            service_offering_id = cloudFoundryClient.servicePlansV3().get(GetServicePlanRequest.builder().servicePlanId(service_plan_guid).build()).block().getRelationships().getServiceOffering().getData().getId();
+            //service_offering_name
+            service_offering_name = cloudFoundryClient.serviceOfferingsV3().get(GetServiceOfferingRequest.builder().serviceOfferingId(service_offering_id).build()).block().getName();
+
+            service.setName(cloudFoundryClient.serviceInstancesV3().get(GetServiceInstanceRequest.builder().serviceInstanceId(service_guid).build()).block().getName());
+            service.setGuid(UUID.fromString(service_guid));
+            GetServicePlanResponse getServicePlanResponse = cloudFoundryClient.servicePlansV3().get(GetServicePlanRequest.builder().servicePlanId(service_plan_guid).build()).block();
+            service.setService_plan(new ServiceV3.ServicePlan(getServicePlanResponse.getName(), new ServiceV3.ServicePlan.ServiceInfo(service_offering_name)));
+            serviceArray.add(service);
+        }
+
+        return serviceArray;
+    }
 }

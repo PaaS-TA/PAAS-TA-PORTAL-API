@@ -56,11 +56,14 @@ import org.cloudfoundry.client.v3.jobs.JobsV3;
 import org.cloudfoundry.client.v3.organizations.OrganizationsV3;
 import org.cloudfoundry.client.v3.packages.Packages;
 import org.cloudfoundry.client.v3.processes.Processes;
-import org.cloudfoundry.client.v3.serviceInstances.ServiceInstancesV3;
 import org.cloudfoundry.client.v3.servicebindings.ServiceBindingsV3;
+import org.cloudfoundry.client.v3.serviceinstances.ServiceInstancesV3;
+import org.cloudfoundry.client.v3.serviceofferings.ServiceOfferingsV3;
 import org.cloudfoundry.client.v3.spaces.SpacesV3;
 import org.cloudfoundry.client.v3.buildpacks.BuildpacksV3;
 import org.cloudfoundry.client.v3.tasks.Tasks;
+import org.cloudfoundry.client.v3.serviceplans.ServicePlansV3;
+
 
 /**
  * Main entry point to the Cloud Foundry Client API
@@ -296,5 +299,12 @@ public interface CloudFoundryClient {
      * Main entry point to the Cloud Foundry Users Client API
      */
     Users users();
+
+    ServiceOfferingsV3 serviceOfferingsV3();
+
+    /**
+     * Main entry point to the Cloud Foundry Service Plans V3 Client API
+     */
+    ServicePlansV3 servicePlansV3();
 
 }

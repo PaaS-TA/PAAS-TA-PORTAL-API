@@ -70,6 +70,9 @@ public class Common {
     @Value("${monitoring.api.url}")
     public String monitoringApiTarget;
 
+    @Value("${cloudfoundry.cc.api.type}")
+    public String apiType;
+
     private Long currentTimeMiils = System.currentTimeMillis();
 
 

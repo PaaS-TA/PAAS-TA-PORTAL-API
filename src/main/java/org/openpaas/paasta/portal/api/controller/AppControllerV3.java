@@ -9,6 +9,7 @@ import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
 import org.openpaas.paasta.portal.api.model.Batch;
+import org.openpaas.paasta.portal.api.model.ServiceV3;
 import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -420,6 +422,13 @@ public class AppControllerV3 extends Common {
 //        AppV3 appV3 = appServiceV3.getAppSummary(guid, token);
 //        return appV3;
 //    }
+
+
+    @GetMapping(Constants.V3_URL + "/apps/{appguid}/services")
+    public List<ServiceV3> getServiceList(@PathVariable String appguid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        List<ServiceV3> services = appServiceV3.getServiceList(appguid, token);
+        return services;
+    }
 
 }
 
