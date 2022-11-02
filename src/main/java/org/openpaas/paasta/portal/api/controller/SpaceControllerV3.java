@@ -78,7 +78,6 @@ public class SpaceControllerV3 extends Common {
     }
 
 
-
     /**
      * 공간 요약 정보를 조회한다. (관리자)
      *
@@ -134,6 +133,16 @@ public class SpaceControllerV3 extends Common {
         return resultMap;
     }
 
+    /**
+     * 공간의 서비스를 조회한다.
+     *
+     * @param guid  the space
+     * @param token the request
+     * @return List<ServiceV3>
+     * @version 2.0
+     * @author 남동윤
+     * @since 2022.11.01
+     */
     @RequestMapping(value = {Constants.V3_URL + "/spaces/{guid}/services"}, method = RequestMethod.GET)
     public List<ServiceV3> getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
         //LOGGER.info("getSpaceServices Start : " + guid);

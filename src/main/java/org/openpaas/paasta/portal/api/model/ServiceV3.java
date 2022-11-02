@@ -79,66 +79,6 @@ public class ServiceV3 {
         this.service_plan = service_plan;
     }
 
-    /*    private String servicePlanName;
-
-    private String serviceLabel;
-
-    private String serviceName;*/
-
-
-
-
- /*   public LastOperation getLastOperation() {
-        return last_operation;
-    }
-
-    public void setLastOperation(LastOperation lastOperation) {
-        this.last_operation = lastOperation;
-    }
-
-
-
-    public List<String> getBinding_app_names() {
-        return binding_app_names;
-    }
-
-    public void setBinding_app_names(List<String> binding_app_names) {
-        this.binding_app_names = binding_app_names;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public ServicePlan getServicePlan() {
-        return service_plan;
-    }
-
-    public void setServicePlan(ServicePlan servicePlan) {
-        this.service_plan = servicePlan;
-    }
-
-    public UUID getGuid() {
-        return guid;
-    }
-
-    public void setGuid(UUID guid) {
-        this.guid = guid;
-    }
-
-    public String getDashboardUrl() {
-        return dashboardUrl;
-    }
-
-    public void setDashboardUrl(String dashboardUrl) {
-        this.dashboardUrl = dashboardUrl;
-    }*/
-
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ServicePlan {
 

@@ -48,6 +48,7 @@ public class AppControllerV3 extends Common {
         //LOGGER.info("getAppSummary Start : " + guid);
 
         SummaryApplicationResponse respApp = appServiceV3.getAppSummary(guid, token);
+
         return respApp;
     }
 
@@ -301,8 +302,8 @@ public class AppControllerV3 extends Common {
     /**
      * 앱 최근 로그
      *
-     * @param guid
-     * @return Space respSpace
+     * @param app guid
+     * @return Map map
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/recentlogs"})
@@ -321,8 +322,8 @@ public class AppControllerV3 extends Common {
     /**
      * 앱 최신 로그
      *
-     * @param guid
-     * @return Space respSpace
+     * @param app guid
+     * @return Map map
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/taillogs/recent"})
@@ -423,10 +424,16 @@ public class AppControllerV3 extends Common {
 //        return appV3;
 //    }
 
-
-    @GetMapping(Constants.V3_URL + "/apps/{appguid}/services")
-    public List<ServiceV3> getServiceList(@PathVariable String appguid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-        List<ServiceV3> services = appServiceV3.getServiceList(appguid, token);
+    /**
+     * 앱의 서비스를 조회한다.
+     *
+     * @param guid(app)
+     * @return List<ServiceV3>
+     * @throws Exception the exception
+     */
+    @GetMapping(Constants.V3_URL + "/apps/{guid}/services")
+    public List<ServiceV3> getServiceList(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        List<ServiceV3> services = appServiceV3.getServiceList(guid, token);
         return services;
     }
 

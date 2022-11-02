@@ -1,6 +1,5 @@
 package org.openpaas.paasta.portal.api.service;
 
-
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.OrderDirection;
@@ -63,6 +62,7 @@ public class AppServiceV3 extends Common {
 
     private final RestTemplateService restTemplateService;
 
+    // build process interval time (sec)
     private final long BUILD_INTERVAL_SECOND = 300;
 
     public AppServiceV3(RestTemplateService restTemplateService) {
@@ -512,7 +512,18 @@ public class AppServiceV3 extends Common {
         return resultMap;
     }
 
-
+    /**
+     * App 로그를 확인한다. (REST API 사용)
+     *
+     * @param guid
+     * @param time
+     * @param limit
+     * @param isDescending
+     * @param envelope_types
+     * @param token
+     * @return Batch
+     * @the exception
+     */
     public Batch getLog(String guid, String time, int limit, boolean isDescending, String envelope_types, String token) {
         TokenProvider tokenProvider = tokenProvider(token);
         
@@ -656,6 +667,13 @@ public class AppServiceV3 extends Common {
         return applicationProcessesResponse;
     }
 
+    /**
+     * 앱 서비스 리스트를 조회한다
+     *
+     * @param guid  the app guid
+     * @param cloudFoundryClient the ReactorCloudFoundryClient
+     * @return List<ServiceV3>
+     */
     public List<ServiceV3> getServiceList(String appGuid, String token) {
         ReactorCloudFoundryClient cloudFoundryClient = cloudFoundryClient(tokenProvider(token));
         ListServiceBindingsResponse listServiceBindingsResponse = cloudFoundryClient.serviceBindingsV3().list(ListServiceBindingsRequest.builder().applicationId(appGuid).build()).block();

@@ -20,11 +20,7 @@ import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.cloudfoundry.client.v3.Relationship;
 import org.cloudfoundry.client.v3.ToOneRelationship;
-import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletRequest;
 import org.cloudfoundry.client.v3.applications.StartApplicationRequest;
-import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
-import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
-import org.cloudfoundry.client.v3.builds.GetBuildRequest;
 import org.cloudfoundry.client.v3.packages.CreatePackageRequest;
 import org.cloudfoundry.client.v3.packages.GetPackageRequest;
 import org.cloudfoundry.client.v3.packages.PackageRelationships;
@@ -60,6 +56,9 @@ public class CatalogServiceV3 extends Common {
     private final DomainServiceV2 domainServiceV2;
     private final AppServiceV2 appServiceV2;
     private final AppServiceV3 appServiceV3;
+
+    // package process interval time (sec)
+    private final long PACKAGE_INTERVAL_SECOND = 300;
 
     @Value("${cloudfoundry.authorization}")
     private String cfAuthorizationHeaderKey;
@@ -434,17 +433,26 @@ public class CatalogServiceV3 extends Common {
             String packageId = reactorCloudFoundryClient.
                                 packages().create(CreatePackageRequest.builder().type(PackageType.BITS).relationships(PackageRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(applicationid).build()).build()).build()).build()).block().getId();
             // package 업로드
-                reactorCloudFoundryClient.
-                    packages().upload(UploadPackageRequest.builder()
-                    .packageId(packageId)
-                    .bits(file.toPath()).build()).block();
-                
+            reactorCloudFoundryClient.
+                packages().upload(UploadPackageRequest.builder()
+                .packageId(packageId)
+                .bits(file.toPath()).build()).block();
+            //현재 시각
+            long start = System.currentTimeMillis();
+
+            //종료 시각
+            long end = start + PACKAGE_INTERVAL_SECOND *1000;
+
+
             // package 업로드 확인
             while(true){
                 if(reactorCloudFoundryClient.
                 packages().get(GetPackageRequest.builder()
                 .packageId(packageId).build()).block().getState().getValue().equals("READY"))
                     break;
+                if ( System.currentTimeMillis() > end ){
+                    throw new Exception("Package Upload Time Over");
+                }
                 Thread.sleep(1000);
             }
             return packageId;

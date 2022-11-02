@@ -28,12 +28,6 @@ public class BuildPackServiceV3 extends Common {
                         .list(org.cloudfoundry.client.v3.buildpacks.ListBuildpacksRequest.builder().build())
                         .block();
 
-        /*ListBuildpacksResponse listBuildpacksResponse =
-        cloudFoundryClient()
-                .buildpacks()
-                .list(ListBuildpacksRequest.builder().build())
-                .block();*/
-
         return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
 
