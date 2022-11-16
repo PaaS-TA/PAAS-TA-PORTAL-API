@@ -5,11 +5,11 @@ applications:
     disk: 2G
     instances: 1
     buildpacks:
-    - paketo-buildpacks/java
-    #path: build/libs/paas-ta-portal-api.jar
+    - java_buildpack
+    path: build/libs/paas-ta-portal-api.jar
     env:
       server_port: 8080
-
+      
       BP_JVM_VERSION: 8
       BP_SPRING_CLOUD_BINDINGS_DISABLED: true
 
@@ -25,9 +25,9 @@ applications:
       management_health_ldap_enabled: false
 
       ### paasta info
-      cloudfoundry_cc_api_url: https://api.<DOMAIN>
-      cloudfoundry_cc_api_uaaUrl: https://uaa.<DOMAIN>
-      cloudfoundry_cc_api_logCacheUrl: https://log-cache.<DOMAIN>
+      cloudfoundry_cc_api_url: https://api.<SYSTEM_DOMAIN>
+      cloudfoundry_cc_api_uaaUrl: https://uaa.<SYSTEM_DOMAIN>
+      cloudfoundry_cc_api_logCacheUrl: https://log-cache.<SYSTEM_DOMAIN>
       cloudfoundry_cc_api_sslSkipValidation: true
       cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>                    # (e.g. admin)
       cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>                    # (e.g. admin)
