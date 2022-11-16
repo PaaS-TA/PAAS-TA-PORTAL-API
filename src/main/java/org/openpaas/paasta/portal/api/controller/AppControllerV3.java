@@ -1,14 +1,15 @@
 package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.applications.ApplicationEnvironmentResponse;
-import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.client.v2.events.ListEventsResponse;
-import org.cloudfoundry.doppler.Envelope;
+import org.cloudfoundry.client.v3.LifecycleData;
+import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsResponse;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
 import org.openpaas.paasta.portal.api.model.App;
-import org.openpaas.paasta.portal.api.model.AppV3;
+import org.openpaas.paasta.portal.api.model.Batch;
+import org.openpaas.paasta.portal.api.model.ServiceV3;
 import org.openpaas.paasta.portal.api.service.AppServiceV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,18 @@ public class AppControllerV3 extends Common {
     }
 
     /**
+     * 앱 빌드팩을 조회한다.
+     *
+     * @param guid
+     * @return LifecycleData
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/buildpack"})
+    public LifecycleData getAppBuildpack(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        return appServiceV3.getAppBuildpack(guid,token);
+    }
+
+    /**
      * 앱 실시간 상태를 조회한다.
      *
      * @param guid the app guid
@@ -59,9 +72,9 @@ public class AppControllerV3 extends Common {
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/stats"})
-    public ApplicationStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+    public GetApplicationProcessStatisticsResponse getAppStats(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
         //service call
-        ApplicationStatisticsResponse applicationStatisticsResponse = appServiceV3.getAppStats(guid, token);
+        GetApplicationProcessStatisticsResponse applicationStatisticsResponse = appServiceV3.getAppStats(guid, token);
         return applicationStatisticsResponse;
     }
 
@@ -289,28 +302,61 @@ public class AppControllerV3 extends Common {
     /**
      * 앱 최근 로그
      *
-     * @param guid
-     * @return Space respSpace
+     * @param app guid
+     * @return Map map
      * @throws Exception the exception
      */
     @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/recentlogs"})
     public Map getRecentLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
-
-
-        //LOGGER.info("getRecentLog Start : " + guid);
-
         Map mapLog = new HashMap();
         try {
-            List<Envelope> respAppEvents = appServiceV3.getRecentLog(guid, token);
-            mapLog.put("log", respAppEvents);
+            Batch respAppLogs = appServiceV3.getLog(guid, "-6795364578871345152", 100, true, "LOG", token);
+            mapLog.put("log", respAppLogs);
         } catch (Exception e) {
-            //LOGGER.info("################ ");
             LOGGER.error(e.toString());
             mapLog.put("log", "");
         }
+        return mapLog;
+    }
 
-        //LOGGER.info("getRecentLog End");
+    /**
+     * 앱 최신 로그
+     *
+     * @param app guid
+     * @return Map map
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/taillogs/recent"})
+    public Map getTailLog(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        Map mapLog = new HashMap();
+        try {
+            Batch respAppLogs = appServiceV3.getLog(guid, "-6795364578871345152", 1, true, "LOG", token);
+            mapLog.put("log", respAppLogs);
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            mapLog.put("log", "");
+        }
+        return mapLog;
+    }
 
+
+    /**
+     * 앱 실시간 로그
+     *
+     * @param guid
+     * @return Space respSpace
+     * @throws Exception the exception
+     */
+    @GetMapping(value = {Constants.V3_URL + "/apps/{guid}/taillogs/{time}"})
+    public Map getTailLog(@PathVariable String guid, @PathVariable String time, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        Map mapLog = new HashMap();
+        try {
+            Batch respAppLogs = appServiceV3.getLog(guid, time,0, false, "LOG", token);
+            mapLog.put("log", respAppLogs);
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            mapLog.put("log", "");
+        }
         return mapLog;
     }
 
@@ -377,6 +423,19 @@ public class AppControllerV3 extends Common {
 //        AppV3 appV3 = appServiceV3.getAppSummary(guid, token);
 //        return appV3;
 //    }
+
+    /**
+     * 앱의 서비스를 조회한다.
+     *
+     * @param guid(app)
+     * @return List<ServiceV3>
+     * @throws Exception the exception
+     */
+    @GetMapping(Constants.V3_URL + "/apps/{guid}/services")
+    public List<ServiceV3> getServiceList(@PathVariable String guid, @RequestHeader(AUTHORIZATION_HEADER_KEY) String token) throws Exception {
+        List<ServiceV3> services = appServiceV3.getServiceList(guid, token);
+        return services;
+    }
 
 }
 

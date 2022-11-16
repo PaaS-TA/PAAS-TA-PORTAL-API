@@ -25,7 +25,9 @@ cloudfoundry:
     api:
       url: https://api.<DOMAIN>
       uaaUrl: https://uaa.<DOMAIN>
+      logCacheUrl : https://log-cache.<DOMAIN>
       sslSkipValidation: true
+      type: ap                                          # (ap or sidecar)
   # CloudFoundry Login information
   user:
     admin:

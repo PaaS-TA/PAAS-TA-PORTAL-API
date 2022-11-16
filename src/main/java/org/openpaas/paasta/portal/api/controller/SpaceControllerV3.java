@@ -3,6 +3,7 @@ package org.openpaas.paasta.portal.api.controller;
 
 import org.cloudfoundry.client.v2.spaces.*;
 import org.cloudfoundry.client.v3.spaces.*;
+import org.openpaas.paasta.portal.api.model.ServiceV3;
 import org.openpaas.paasta.portal.api.model.Space;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -132,12 +133,20 @@ public class SpaceControllerV3 extends Common {
         return resultMap;
     }
 
+    /**
+     * 공간의 서비스를 조회한다.
+     *
+     * @param guid  the space
+     * @param token the request
+     * @return List<ServiceV3>
+     * @version 2.0
+     * @author 남동윤
+     * @since 2022.11.01
+     */
     @RequestMapping(value = {Constants.V3_URL + "/spaces/{guid}/services"}, method = RequestMethod.GET)
-    public ListSpaceServicesResponse getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
+    public List<ServiceV3> getSpaceServices(@PathVariable String guid, HttpServletRequest request) throws Exception {
         //LOGGER.info("getSpaceServices Start : " + guid);
-
-        ListSpaceServicesResponse respSpaceServices = spaceServiceV3.getSpaceServices(guid);
-
+        List<ServiceV3> respSpaceServices = spaceServiceV3.getSpaceServices(guid);
         //LOGGER.info("getSpaceServices End ");
 
         return respSpaceServices;
