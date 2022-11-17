@@ -29,6 +29,7 @@ applications:
       cloudfoundry_cc_api_uaaUrl: https://uaa.<SYSTEM_DOMAIN>
       cloudfoundry_cc_api_logCacheUrl: https://log-cache.<SYSTEM_DOMAIN>
       cloudfoundry_cc_api_sslSkipValidation: true
+      cloudfoundry_cc_api_type: <API_TYPE>                                          # (e.g. ap or sidecar)
       cloudfoundry_user_admin_username: <CF_USER_ADMIN_USERNAME>                    # (e.g. admin)
       cloudfoundry_user_admin_password: <CF_USER_ADMIN_PASSWORD>                    # (e.g. admin)
       cloudfoundry_user_uaaClient_clientId: <UAA_CLIENT_ID>                         # (e.g. admin)
