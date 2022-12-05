@@ -375,9 +375,9 @@ public class SpaceServiceV3 extends Common {
                         for (int j = 0; j < applicationStatisticsResponse.getResources().size(); j++) {
                             if (applicationStatisticsResponse.getResources().get(j).getState().equals(ProcessState.RUNNING)) {
                                 Double instanceCpu = applicationStatisticsResponse.getResources().get(j).getUsage().getCpu();
-                                Integer instanceMem = applicationStatisticsResponse.getResources().get(j).getUsage().getMemory();
+                                Long instanceMem = applicationStatisticsResponse.getResources().get(j).getUsage().getMemory();
                                 Long instanceMemQuota = getListApplicationProcess.getResources().get(0).getMemoryInMb().longValue() * 1024 * 1024;
-                                Integer instanceDisk = applicationStatisticsResponse.getResources().get(j).getUsage().getDisk();
+                                Long instanceDisk = applicationStatisticsResponse.getResources().get(j).getUsage().getDisk();
                                 Long instanceDiskQuota = getListApplicationProcess.getResources().get(0).getDiskInMb().longValue() * 1024 * 1024;
 
                                 if (instanceCpu != null) cpu = cpu + instanceCpu * 100;
