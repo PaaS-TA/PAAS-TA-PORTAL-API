@@ -1,5 +1,7 @@
 package org.openpaas.paasta.portal.api.model;
 
+import org.cloudfoundry.client.v3.LastOperation;
+import org.cloudfoundry.client.v3.Lifecycle;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -31,10 +33,20 @@ public class App {
     private String updatedAt;
     private int totalUserCount;
     private String buildPack;
+    private Lifecycle buildPacks;
     private String stackName;
     private Staging staging;
     private String host;
     private String domainName;
+
+
+    public void setBuildPacks(Lifecycle buildPacks) {
+        this.buildPacks = buildPacks;
+    }
+
+    public Lifecycle getBuildPacks() {
+        return buildPacks;
+    }
 
     public int getAppInstanceIndex() {
         return appInstanceIndex;

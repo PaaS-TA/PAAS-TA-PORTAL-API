@@ -22,11 +22,11 @@ public class BuildPackServiceV3 extends Common {
      * @throws Exception the exception
      */
     public Map<String, Object> getBuildPacks() throws Exception {
-        ListBuildpacksResponse listBuildpacksResponse =
-        cloudFoundryClient()
-                .buildpacks()
-                .list(ListBuildpacksRequest.builder().build())
-                .block();
+        org.cloudfoundry.client.v3.buildpacks.ListBuildpacksResponse listBuildpacksResponse =
+                cloudFoundryClient()
+                        .buildpacksV3()
+                        .list(org.cloudfoundry.client.v3.buildpacks.ListBuildpacksRequest.builder().build())
+                        .block();
 
         return objectMapper.convertValue(listBuildpacksResponse, Map.class);
     }
@@ -41,8 +41,8 @@ public class BuildPackServiceV3 extends Common {
     public boolean updateBuildPack(BuildPack buildPack) throws Exception {
 
         cloudFoundryClient(connectionContext(), tokenProvider())
-                .buildpacks()
-                .update(UpdateBuildpackRequest.builder()
+                .buildpacksV3()
+                .update(org.cloudfoundry.client.v3.buildpacks.UpdateBuildpackRequest.builder()
                         .buildpackId(buildPack.getGuid().toString())
                         .position(buildPack.getPosition())
                         .enabled(buildPack.getEnable())

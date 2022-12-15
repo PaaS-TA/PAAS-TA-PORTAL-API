@@ -11,7 +11,6 @@ import org.cloudfoundry.client.v2.routes.DeleteRouteRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingRequest;
 import org.cloudfoundry.client.v2.servicebindings.CreateServiceBindingResponse;
 import org.cloudfoundry.client.v2.serviceinstances.*;
-import org.cloudfoundry.client.v2.serviceplans.GetServicePlanRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansRequest;
 import org.cloudfoundry.client.v2.serviceplans.ListServicePlansResponse;
 import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibilitiesRequest;
@@ -19,6 +18,14 @@ import org.cloudfoundry.client.v2.serviceplanvisibilities.ListServicePlanVisibil
 import org.cloudfoundry.client.v2.services.ListServicesRequest;
 import org.cloudfoundry.client.v2.services.ListServicesResponse;
 import org.cloudfoundry.client.v2.services.ServiceResource;
+import org.cloudfoundry.client.v3.Relationship;
+import org.cloudfoundry.client.v3.ToOneRelationship;
+import org.cloudfoundry.client.v3.applications.StartApplicationRequest;
+import org.cloudfoundry.client.v3.packages.CreatePackageRequest;
+import org.cloudfoundry.client.v3.packages.GetPackageRequest;
+import org.cloudfoundry.client.v3.packages.PackageRelationships;
+import org.cloudfoundry.client.v3.packages.PackageType;
+import org.cloudfoundry.client.v3.packages.UploadPackageRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.openpaas.paasta.portal.api.common.Common;
 import org.openpaas.paasta.portal.api.common.Constants;
@@ -48,17 +55,22 @@ public class CatalogServiceV3 extends Common {
     private final SpaceServiceV2 spaceServiceV2;
     private final DomainServiceV2 domainServiceV2;
     private final AppServiceV2 appServiceV2;
+    private final AppServiceV3 appServiceV3;
+
+    // package process interval time (sec)
+    private final long PACKAGE_INTERVAL_SECOND = 300;
 
     @Value("${cloudfoundry.authorization}")
     private String cfAuthorizationHeaderKey;
 
     @Autowired
-    public CatalogServiceV3(SpaceServiceV2 spaceServiceV2, DomainServiceV2 domainServiceV2, AppServiceV2 appServiceV2, CommonService commonService) throws Exception {
+    public CatalogServiceV3(SpaceServiceV2 spaceServiceV2, DomainServiceV2 domainServiceV2, AppServiceV2 appServiceV2, CommonService commonService, AppServiceV3 appServiceV3) throws Exception {
 
         this.spaceServiceV2 = spaceServiceV2;
         this.domainServiceV2 = domainServiceV2;
         this.appServiceV2 = appServiceV2;
         this.commonService = commonService;
+        this.appServiceV3 = appServiceV3;
     }
 
     /**
@@ -198,8 +210,8 @@ public class CatalogServiceV3 extends Common {
      */
     private Map<String, Object> procCatalogStartApplication(String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
-            Thread.sleep(500);
-            reactorCloudFoundryClient.applicationsV2().update(UpdateApplicationRequest.builder().applicationId(applicationid).state("STARTED").build()).block();
+            // 시작
+            reactorCloudFoundryClient.applicationsV3().start(StartApplicationRequest.builder().applicationId(applicationid).build()).block();
         } catch (Exception e) {
             LOGGER.error(e.toString());
         }
@@ -227,10 +239,28 @@ public class CatalogServiceV3 extends Common {
             applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
             routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
-            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
-            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
-            }
+            String packageId = fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
+            final String APPLICATION_ID = applicationid;
+
+            //Build와 Start 병렬실행
+            Thread th = new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                appServiceV3.createBuild(APPLICATION_ID,packageId,reactorCloudFoundryClient);
+                                //앱 실행버튼이 on일때
+                                if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
+                                    procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
+                                }
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    );
+            th.start();
             commonService.procCommonApiRestTemplate("/v2/history", HttpMethod.POST, param, null);
             return new HashMap<String, Object>() {{
                 put("RESULT", Constants.RESULT_STATUS_SUCCESS);
@@ -274,10 +304,27 @@ public class CatalogServiceV3 extends Common {
             applicationid = createApplication(param, reactorCloudFoundryClient); // App을 만들고 guid를 return 합니다.
             routeid = createRoute(param, reactorCloudFoundryClient); //route를 생성후 guid를 return 합니다.
             routeMapping(applicationid, routeid, reactorCloudFoundryClient); // app와 route를 mapping합니다.
-            fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
-            if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) { //앱 실행버튼이 on일때
-                procCatalogStartApplication(applicationid, reactorCloudFoundryClient); //앱 시작
-            }
+            String packageId = fileUpload(file, applicationid, reactorCloudFoundryClient); // app에 파일 업로드 작업을 합니다.
+            final String APPLICATION_ID = applicationid;
+            //Build와 Start 병렬실행
+            Thread th = new Thread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                appServiceV3.createBuild(APPLICATION_ID, packageId, reactorCloudFoundryClient);
+                                //앱 실행버튼이 on일때
+                                if (Constants.USE_YN_Y.equals(param.getAppSampleStartYn())) {
+                                    procCatalogStartApplication(APPLICATION_ID, reactorCloudFoundryClient); //앱 시작
+                                }
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    );
+            th.start();
             appcreated = true;
             String appid = applicationid;
             if (param.getServicePlanList() != null) {
@@ -380,13 +427,39 @@ public class CatalogServiceV3 extends Common {
      * @return Map(자바클래스)
      * @throws Exception Exception(자바클래스)
      */
-    private void fileUpload(File file, String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
+    private String fileUpload(File file, String applicationid, ReactorCloudFoundryClient reactorCloudFoundryClient) throws Exception {
         try {
+            // package 생성
+            String packageId = reactorCloudFoundryClient.
+                                packages().create(CreatePackageRequest.builder().type(PackageType.BITS).relationships(PackageRelationships.builder().application(ToOneRelationship.builder().data(Relationship.builder().id(applicationid).build()).build()).build()).build()).block().getId();
+            // package 업로드
             reactorCloudFoundryClient.
-                    applicationsV2().upload(UploadApplicationRequest.builder().applicationId(applicationid).application(file.toPath()).build()).block();
+                packages().upload(UploadPackageRequest.builder()
+                .packageId(packageId)
+                .bits(file.toPath()).build()).block();
+            //현재 시각
+            long start = System.currentTimeMillis();
+
+            //종료 시각
+            long end = start + PACKAGE_INTERVAL_SECOND *1000;
+
+
+            // package 업로드 확인
+            while(true){
+                if(reactorCloudFoundryClient.
+                packages().get(GetPackageRequest.builder()
+                .packageId(packageId).build()).block().getState().getValue().equals("READY"))
+                    break;
+                if ( System.currentTimeMillis() > end ){
+                    throw new Exception("Package Upload Time Over");
+                }
+                Thread.sleep(1000);
+            }
+            return packageId;
         } catch (Exception e) {
-            //LOGGER.info(e.toString());
+            return null;
         }
+        
     }
 
     /**
