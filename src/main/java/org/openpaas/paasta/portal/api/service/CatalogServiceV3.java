@@ -473,10 +473,16 @@ public class CatalogServiceV3 extends Common {
     private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
         try {
-            response.setContentType("application/octet-stream");
-            String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
-            File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
+            //response.setContentType("application/octet-stream");  // unused
+            //String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2)); // unused
+            //response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser); // unused
+
+            String substringFileName = param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4);
+            if (substringFileName.length() < 3){
+                substringFileName = substringFileName + substringFileName;
+            }
+
+            File file = File.createTempFile(substringFileName, param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
             InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
             OutputStream out = new FileOutputStream(file);
             IOUtils.copy(is, out);
