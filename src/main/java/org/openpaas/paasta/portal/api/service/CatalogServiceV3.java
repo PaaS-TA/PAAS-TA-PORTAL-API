@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
@@ -479,7 +480,7 @@ public class CatalogServiceV3 extends Common {
 
             String substringFileName = param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4);
             if (substringFileName.length() < 3){
-                substringFileName = substringFileName + substringFileName;
+                substringFileName = StringUtils.leftPad(substringFileName, 4, substringFileName);
             }
 
             File file = File.createTempFile(substringFileName, param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
