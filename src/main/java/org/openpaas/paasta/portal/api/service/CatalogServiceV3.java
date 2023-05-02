@@ -2,6 +2,7 @@ package org.openpaas.paasta.portal.api.service;
 
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.map.ObjectMapper;
 import org.cloudfoundry.client.lib.org.codehaus.jackson.type.TypeReference;
 import org.cloudfoundry.client.v2.applications.*;
@@ -473,10 +474,16 @@ public class CatalogServiceV3 extends Common {
     private File createTempFile(Catalog param, String token2, HttpServletResponse response) throws Exception {
 
         try {
-            response.setContentType("application/octet-stream");
-            String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2));
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser);
-            File file = File.createTempFile(param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4), param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
+            //response.setContentType("application/octet-stream");  // unused
+            //String fileNameForBrowser = getDisposition(param.getAppSampleFileName(), getBrowser(token2)); // unused
+            //response.setHeader("Content-Disposition", "attachment; filename=" + fileNameForBrowser); // unused
+
+            String substringFileName = param.getAppSampleFileName().substring(0, param.getAppSampleFileName().length() - 4);
+            if (substringFileName.length() < 3){
+                substringFileName = StringUtils.leftPad(substringFileName, 4, substringFileName);
+            }
+
+            File file = File.createTempFile(substringFileName, param.getAppSampleFileName().substring(param.getAppSampleFileName().length() - 4));
             InputStream is = (new URL(param.getAppSampleFilePath()).openConnection()).getInputStream();
             OutputStream out = new FileOutputStream(file);
             IOUtils.copy(is, out);

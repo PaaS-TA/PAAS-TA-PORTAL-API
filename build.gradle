@@ -60,8 +60,8 @@ dependencies {
     compile ('org.cloudfoundry:cloudfoundry-client:3.20.0.RELEASE')
     compile ('org.cloudfoundry:cloudfoundry-util:3.20.0.RELEASE')
 
-    compile ('io.projectreactor:reactor-core:3.3.0.RELEASE')
-    compile ('io.projectreactor.ipc:reactor-netty:0.7.15.RELEASE')
+    compile ('io.projectreactor:reactor-core:3.3.4.RELEASE')
+    compile ('io.projectreactor.netty:reactor-netty:0.8.14.RELEASE')
 
     compile ('com.googlecode.json-simple:json-simple:1.1.1')
 
@@ -86,8 +86,8 @@ dependencies {
     testCompile ('org.cloudfoundry:cloudfoundry-client:3.20.0.RELEASE')
     testCompile ('org.cloudfoundry:cloudfoundry-util:3.20.0.RELEASE')
 
-    testCompile ('io.projectreactor:reactor-core:3.3.0.RELEASE')
-    testCompile ('io.projectreactor.ipc:reactor-netty:0.7.15.RELEASE')
+    testCompile ('io.projectreactor:reactor-core:3.3.4.RELEASE')
+    testCompile ('io.projectreactor.netty:reactor-netty:0.8.14.RELEASE')
 
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
